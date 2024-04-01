@@ -1,0 +1,18 @@
+[package]
+name = "prag-portal"
+version = "0.1.0"
+authors = ["KyleUltimate <shiue.kyle@gmail.com>"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+
+dioxus = { git = "https://github.com/DioxusLabs/dioxus", features = ["desktop", "router"] }
+
+# Debug
+log = "0.4.19"
+dioxus-logger = "0.4.1"
+dioxus-tailwindcss = "0.5.0"
+manganis = "0.2.2"
+tokio = { version = "1.37.0", features = ["time", "rt"] }
