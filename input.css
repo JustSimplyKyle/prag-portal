@@ -2,6 +2,45 @@
 @tailwind components;
 @tailwind utilities;
 
+body {
+  scroll-behavior: smooth;
+}
+
+@layer base {
+  html {
+    font-family: "GenSenRounded TW";
+  }
+
+  @font-face {
+    font-family: 'GenSenRounded TW';
+    font-style: normal;
+    font-weight: 400;
+    src: url(/public/fonts/Geo-Regular.ttf);
+  }
+
+  @font-face {
+    font-family: 'GenSenRounded TW';
+    font-style: normal;
+    font-weight: 500;
+    src: url(/public/fonts/GenSenRounded-M.ttc);
+  }
+
+
+  @font-face {
+    font-family: 'GenSenRounded TW';
+    font-style: normal;
+    font-weight: 700;
+    src: url(/public/fonts/GenSenRounded-B.ttc);
+  }
+
+  @font-face {
+    font-family: 'GenSenRounded TW';
+    font-style: normal;
+    font-weight: 800;
+    src: url(/public/fonts/GenSenRounded-H.ttc);
+  }
+}
+
 @keyframes moveRight {
   from {
     transform: translateX(0%);

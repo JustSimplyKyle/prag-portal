@@ -9,6 +9,9 @@ module.exports = {
     },
   ],
   theme: {
+    fontFamily: {
+      'display': ['GenSenRounded TW'],
+    },
     extend: {
       colors: {
         'white': '#FFFFFF',
@@ -24,8 +27,74 @@ module.exports = {
         'purple': '9747FF',
       },
       animation: {
-        moveRight: 'moveRight 2s ease-out',
-        moveLeft: 'moveLeft 2s ease-out'
+        slideRight: 'slideRight 700ms',
+        slideLeft: 'slideLeft 700ms',
+        slideDown: 'slideDown 700ms',
+        slideOutDown: 'slideOutDown 700ms',
+        slideUp: 'slideUp 700ms',
+        slideOutUp: 'slideOutUp 700ms',
+      },
+      keyframes: {
+        slideRight: {
+          '0%': {
+            transform: 'translateX(-100dvw)',
+            'animation-timing-function': 'cubic-bezier(0.47,0.0,0.23,1.1)',
+          },
+          '100%': {
+            transform: 'translateX(0%)',
+            'animation-timing-function': 'cubic-bezier(0.47,0.0,0.23,1.3)',
+          },
+        },
+        slideLeft: {
+          '0%': {
+            transform: 'translateX(100dvw)',
+            'animation-timing-function': 'cubic-bezier(0.47,0.0,0.23,1.1)',
+          },
+          '100%': {
+            transform: 'translateX(0%)',
+            'animation-timing-function': 'cubic-bezier(0.47,0.0,0.23,1.3)',
+          },
+        },
+        slideDown: {
+          '0%': {
+            transform: 'translateY(-100dvh)',
+            'animation-timing-function': 'cubic-bezier(0.47,0.0,0.23,1.1)',
+          },
+          '100%': {
+            transform: 'translateY(0%)',
+            'animation-timing-function': 'cubic-bezier(0.47,0.0,0.23,1.3)',
+          },
+        },
+        slideOutDown: {
+          '0%': {
+            transform: 'translateY(0%)',
+            'animation-timing-function': 'cubic-bezier(0.47,0.0,0.23,1.1)',
+          },
+          '100%': {
+            transform: 'translateY(100dvh)',
+            'animation-timing-function': 'cubic-bezier(0.47,0.0,0.23,1.3)',
+          },
+        },
+        slideOutUp: {
+          '0%': {
+            transform: 'translateY(0%)',
+            'animation-timing-function': 'cubic-bezier(0.47,0.0,0.23,1.1)',
+          },
+          '100%': {
+            transform: 'translateY(-100dvh)',
+            'animation-timing-function': 'cubic-bezier(0.47,0.0,0.23,1.3)',
+          },
+        },
+        slideUp: {
+          '0%': {
+            transform: 'translateY(100dvh)',
+            'animation-timing-function': 'cubic-bezier(0.47,0.0,0.23,1.1)',
+          },
+          '100%': {
+            transform: 'translateY(0%)',
+            'animation-timing-function': 'cubic-bezier(0.47,0.0,0.23,1.3)',
+          },
+        },
       },
     },
   },
