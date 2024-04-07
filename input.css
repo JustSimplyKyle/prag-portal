@@ -8,7 +8,7 @@ body {
 
 @layer base {
   html {
-    font-family: "GenSenRounded TW";
+    font-family: 'GenSenRounded TW';
   }
 
   @font-face {
@@ -38,25 +38,5 @@ body {
     font-style: normal;
     font-weight: 800;
     src: url(/public/fonts/GenSenRounded-H.ttc);
-  }
-}
-
-@keyframes moveRight {
-  from {
-    transform: translateX(0%);
-  }
-
-  to {
-    transform: translateX(100%);
-  }
-}
-
-@keyframes moveLeft {
-  from {
-    transform: translateX(100%);
-  }
-
-  to {
-    transform: translateX(0%);
   }
 }

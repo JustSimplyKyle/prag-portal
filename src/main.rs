@@ -16,18 +16,41 @@ static ACTIVE: GlobalSignal<(String, Option<String>)> =
 
 fn main() {
     dioxus_logger::init(LevelFilter::Info).expect("failed to init logger");
+
     let cfg = dioxus::desktop::Config::new()
         .with_custom_head(r#"<link rel="stylesheet" href="public/tailwind.css">"#.to_string())
         .with_menu(None);
+    // let cfg = dioxus::web::Config::new();
     LaunchBuilder::desktop().with_cfg(cfg).launch(App);
+    // LaunchBuilder::new().with_cfg(cfg).launch(App);
 }
 #[component]
 fn App() -> Element {
     rsx! {
+        // link { rel: "stylesheet", href: "public/tailwind.css" }
         div { class: "bg-deep-background min-h-screen min-w-full",
-            div { Router::<Route> {} }
+            div { class: "[&_*]:transform-gpu", Router::<Route> {} }
         }
     }
+}
+
+#[component]
+fn Collections() -> Element {
+    rsx! {
+        div { class: "bg-background min-h-screen rounded-xl p-8 w-full",
+            div {
+                FatButton {
+                    roundness: Roundness::Top,
+                    string_placements: vec![
+                        ContentType::text("Collections!").align_left(),
+                        ContentType::text("bruh").align_right(),
+                    ],
+                    extended_css_class: "bg-deep-background"
+                }
+            }
+        }
+    }
+    
 }
 
 #[component]
@@ -66,31 +89,6 @@ fn DownloadProgress() -> Element {
     }
 }
 
-/// # Examples
-/// animator("main-page", "slideDown", "explore, "slideOutUp");
-///
-/// the first two arguments show what and when(`self` being the selected) to do the slide in animation
-/// and the second two arguments show what and when(`tarrget`(here explore) being the selected) to do the slide out animation
-fn animator<M>(
-    self_class: impl AsRef<str>,
-    self_animation: impl AsRef<str>,
-    out_class: impl SuperInto<Option<String>, M>,
-    out_animation: impl SuperInto<Option<String>, M>,
-) -> String {
-    let (self_class, self_animation, out_class, out_animation) = (
-        self_class.as_ref(),
-        self_animation.as_ref(),
-        out_class.super_into(),
-        out_animation.super_into(),
-    );
-    let slide_out = if let (Some(out_class), Some(out_animation)) = (out_class, out_animation) {
-        format!("group-data-[selected={out_class}]:animate-{out_animation}")
-    } else {
-        String::new()
-    };
-    format!("absolute inset-0 z-0 invisible group-data-[prev={self_class}]:visible group-data-[selected={self_class}]:visible group-data-[prev={self_class}]:z-30 group-data-[selected={self_class}]:z-50 group-data-[selected={self_class}]:animate-{self_animation} {}", slide_out)
-}
-
 #[component]
 fn Layout() -> Element {
     let selected = ACTIVE().0;
@@ -105,13 +103,19 @@ fn Layout() -> Element {
                 "data-prev": prev.unwrap_or_else(String::new),
                 SideBar {}
                 div { class: "w-dvw min-h-screen relative *:overflow-scroll",
-                    div { class: "absolute inset-0 z-0 invisible group-data-[prev=main-page]:visible group-data-[selected=main-page]:visible group-data-[prev=main-page]:z-30 group-data-[selected=main-page]:z-50 group-data-[selected=main-page]:animate-slideDown group-data-[selected=explore]:animate-slideOutUp min-h-full",
+                    div { class: "absolute inset-0 z-0 min-h-full animation-[main-page^slideDown^explore^slideOutUp] animation-[main-page^slideDown^collections^slideOutUp]",
                         MainPage {}
                     }
-                    div { class: "absolute inset-0 z-0 invisible group-data-[prev=explore]:visible group-data-[selected=explore]:visible group-data-[prev=explore]:z-30 group-data-[selected=explore]:z-50 group-data-[selected=explore]:animate-slideUp group-data-[selected=main-page]:animate-slideOutDown min-h-full",
+                    div { class: "absolute inset-0 z-0 min-h-full animation-[explore^slideUp^main-page^slideOutDown] animation-[explore^slideDown^collections^slideOutUp]",
                         Explore {}
                     }
-                    div { class: "absolute inset-0 z-0 invisible group-data-[prev=progress]:visible group-data-[selected=progress]:visible group-data-[prev=progress]:z-30 group-data-[selected=progress]:z-50 group-data-[selected=progress]:animate-slideLeft min-h-full",
+                    div { class: "absolute inset-0 z-0 min-h-full animation-[collections^slideUp^explore^slideOutDown] animation-[collections^slideUp^main-page^slideOutDown]",
+                        Collections {}
+                    }
+                    // div { class: "absolute inset-0 z-0 min-h-full min-w-full animation-[progress^slideLeft] group-data-[prev=progress]:start-[100dvw] group-data-[prev=progress]:z-[100] group-data-[prev=progress]:animate-slideRight",
+                    //     DownloadProgress {}
+                    // }
+                    div { class: "absolute inset-0 z-0 min-h-full min-w-full flyinout-[progress]",
                         DownloadProgress {}
                     }
                 }
@@ -121,7 +125,7 @@ fn Layout() -> Element {
 }
 #[component]
 fn SideBar() -> Element {
-    let active_signal = use_signal(|| 0);
+    let mut active_signal = use_signal(|| 0);
     let mut expanded = use_signal(|| false);
     let delayed_expanded = use_resource(move || async move {
         tokio::time::sleep(Duration::from_millis(170)).await;
@@ -131,7 +135,7 @@ fn SideBar() -> Element {
     const EXPLORE: &str = manganis::mg!(file("./public/explore.svg"));
     const COLLECTIONS: &str = manganis::mg!(file("./public/collections.svg"));
     const SIM_CARD: &str = manganis::mg!(file("./public/sim_card_download.svg"));
-    let fat_button = |roundness, svg, string: &str, active_signal, num, onclick| {
+    let fat_button = |roundness, svg, string: &str, active, onclick: Option<EventHandler>| {
         rsx! {
             div {
                 FatButton {
@@ -140,20 +144,16 @@ fn SideBar() -> Element {
                         ContentType::svg(svg).align_left(),
                         ContentType::text(string).css("group-aria-busy:hidden").align_right(),
                     ],
-                    signal: (active_signal, num),
+                    signal: (active),
                     onclick,
                     extended_css_class: "group-aria-expanded:pr-5"
                 }
             }
         }
     };
-    let onclick = move |_| expanded.toggle();
-    let p = move |x| {
-        move |_| {
-            let prev = ACTIVE().0;
-            ACTIVE.write().0 = String::from(x);
-            ACTIVE.write().1 = Some(prev);
-        }
+    let onclick = move |_| {
+        switch_active("collections".into())(());
+        expanded.toggle()
     };
     rsx! {
         div { class: "flex flex-col place-content-start mx-5",
@@ -162,12 +162,38 @@ fn SideBar() -> Element {
                 aria_expanded: !expanded(),
                 aria_busy: !delayed_expanded().unwrap_or(false),
                 div { class: "flex flex-col space-y-1",
-                    {fat_button(Roundness::Top, HOME, "首頁", active_signal, 0, Some(p("main-page").into()))},
-                    {fat_button(Roundness::None, EXPLORE, "探索", active_signal, 1, Some(p("explore").into()))},
-                    {fat_button(Roundness::Bottom, COLLECTIONS, "收藏庫", active_signal, 2, Some(onclick.into()))}
+                    {fat_button(Roundness::Top, HOME, "首頁", "main-page", None)},
+                    {fat_button(Roundness::None, EXPLORE, "探索", "explore", None)},
+                    {fat_button(Roundness::Bottom, COLLECTIONS, "收藏庫", "collections", Some(onclick.into()))}
                 }
                 div { class: "flex flex-col space-y-1",
-                    {fat_button(Roundness::Top, SIM_CARD, "無下載佇列", active_signal, 3, Some(p("progress").into()))}
+                    FatButton {
+                        roundness: Roundness::Top,
+                        string_placements: vec![
+                            ContentType::svg(SIM_CARD).align_left(),
+                            ContentType::text("返回")
+                                .align_right()
+                                .css(
+                                    "hidden group-aria-[busy=false]:group-aria-selected/active:block group-aria-busy:hidden",
+                                ),
+                            ContentType::text("無下載佇列")
+                                .align_right()
+                                .css("group-aria-selected/active:hidden group-aria-busy:hidden text-hint"),
+                        ],
+                        signal: "progress",
+                        extended_css_class: "group/active items-center",
+                        onclick: move |_| {
+                            let prev = ACTIVE().1;
+                            if ACTIVE().0 == "progress" {
+                                if let Some(prev) = prev {
+                                    switch_active(prev)(());
+                                    ACTIVE.write().1 = Some("progress".into());
+                                }
+                            } else {
+                                switch_active("progress".into())(());
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -190,17 +216,20 @@ pub fn CollectionsPage() -> Element {
     const STAR: &str = manganis::mg!(file("./public/award_star.svg"));
     const ARROW_LEFT: &str = manganis::mg!(file("./public/keyboard_arrow_left.svg"));
     const ARROW_RIGHT: &str = manganis::mg!(file("./public/keyboard_arrow_right.svg"));
-    const COLLECTION_PIC: ImageAsset = manganis::mg!(image("./public/pic1.png").format(ImageType::Avif));
-    let picture_builder = |main: &str,hint: &str,pic| rsx! {
-        div { class: "relative",
-            img {
-                class: "min-h-full min-w-full object-cover rounded-[5px]",
-                src: pic
-            }
-            div { class: "absolute inset-0 bg-gradient-to-t from-deep-background to-23%" }
-            div { class: "absolute inset-0 px-5 pt-5 pb-0 flex flex-col justify-end items-start",
-                div { class: "p-0 m-0 text-3xl font-bold", {main} }
-                div { class: "p-0 m-0 text-[15px] text-white text-opacity-50", {hint} }
+    const COLLECTION_PIC: ImageAsset =
+        manganis::mg!(image("./public/pic1.png").format(ImageType::Avif));
+    let picture_builder = |main: &str, hint: &str, pic| {
+        rsx! {
+            div { class: "relative",
+                img {
+                    class: "min-h-full min-w-full object-cover rounded-[5px]",
+                    src: pic
+                }
+                div { class: "absolute inset-0 bg-gradient-to-t from-deep-background to-23%" }
+                div { class: "absolute inset-0 px-5 pt-5 pb-0 flex flex-col justify-end items-start",
+                    div { class: "p-0 m-0 text-3xl font-bold", {main} }
+                    div { class: "p-0 m-0 text-[15px] text-white text-opacity-50", {hint} }
+                }
             }
         }
     };
@@ -345,8 +374,8 @@ pub fn SuggestionPage() -> Element {
         }
         div { class: "flex space-x-0 lg:space-x-[20px] justify-center",
             div { class: "relative hidden shrink-0 lg:block shrink-0 h-[450px] w-[450px] shadow rounded",
-                img { class: "absolute inset-0 rounded-[20px]", src: IMG }
-                div { class: "absolute inset-0 flex justify-center items-center bg-gradient-to-t from-deep-background to-deep-background min-h-full max-h-full rounded-[20px]",
+                img { class: "absolute inset-0 z-0 rounded-[20px]", src: IMG }
+                div { class: "absolute inset-0 z-50 flex justify-center items-center bg-gradient-to-t from-deep-background to-deep-background min-h-full max-h-full rounded-[20px]",
                     div {
                         span { class: "text-lime-300 text-6xl font-bold font-['GenSenRounded TW'] leading-[78px] tracking-[6px]",
                             "探索  創造"
@@ -359,7 +388,7 @@ pub fn SuggestionPage() -> Element {
                         }
                     }
                 }
-                div { class: "absolute inset-0 self-stretch inline-flex justify-center items-center",
+                div { class: "absolute inset-0 z-20 self-stretch inline-flex justify-center items-center",
                     object { r#type: "image/svg+xml", data: ICON }
                 }
             }
@@ -387,7 +416,7 @@ pub fn SuggestionPage() -> Element {
 pub struct FatButtonProps {
     roundness: Roundness,
     string_placements: Vec<Contents>,
-    signal: Option<(Signal<usize>, usize)>,
+    signal: Option<(String)>,
     #[props(default = String::new())]
     extended_css_class: String,
     #[props(default = true)]
@@ -399,13 +428,24 @@ pub struct FatButtonProps {
 
 #[derive(TwClass, Clone, Copy)]
 #[tw(
-    class = "transition-all ease-in-out drop-shadow-lg delay-75 duration-300 aria-selected:bg-white aria-selected:text-black text-white min-w-full bg-background text-2xl p-5 font-bold"
+    class = "transition-all ease-in-out drop-shadow-lg duration-300 aria-selected:bg-white aria-selected:text-black text-white min-w-full bg-background text-2xl p-5 font-bold"
 )]
 pub struct ButtonClass {
     pub roundness: Roundness,
 }
 
+fn switch_active(x: String) -> impl FnMut(()) -> () {
+    move |_| {
+        let prev = ACTIVE().0;
+        if &prev != &x {
+            ACTIVE.write().1 = Some(prev);
+        }
+        ACTIVE.write().0 = x.clone();
+    }
+}
+
 #[component]
+/// onclick and signal will both run if both given.
 pub fn FatButton(props: FatButtonProps) -> Element {
     let FatButtonProps {
         roundness,
@@ -430,18 +470,17 @@ pub fn FatButton(props: FatButtonProps) -> Element {
     ];
     let extended_css_class = tw_merge!(added.join(" "), extended_css_class);
     let class = ButtonClass { roundness }.with_class(extended_css_class);
-    let aria_selected = signal.is_some_and(|(x, y)| x() == y);
+    let aria_selected = Some(ACTIVE().0) == signal;
     rsx! {
         div {
             class,
             role: if is_button { "button" } else { "" },
             aria_selected,
             onclick: move |_| {
-                if let Some((mut active_signal, num)) = signal {
-                    *active_signal.write() = num;
-                }
                 if let Some(x) = onclick {
                     x(());
+                } else if let Some(x) = &signal {
+                    switch_active(x.clone())(());
                 }
             },
             ..attributes,

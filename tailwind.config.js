@@ -1,4 +1,31 @@
 /** @type {import('tailwindcss').Config} */
+const plugin = require('tailwindcss/plugin')
+
+const animationPlugin = plugin(function({ matchComponents, theme, e }) {
+
+  /// the first two arguments is, when it being selected, and its animation
+  /// the last two argument is, when it selects the target, and its animation
+    matchComponents({
+        flyinout: (value) => {
+          return {
+            [`@apply animation-[${value}^slideLeft] transform-all group-data-[prev=${value}]:start-[100dvw] group-data-[prev=${value}]:z-[100] group-data-[prev=${value}]:animate-slideRight`]: {},
+          }
+        },
+        animation: (value) => {
+            const [primaryValue, primaryAnimation, secondaryValue, secondaryAnimation] = value.split('^');
+            if (secondaryValue == null) {
+              return {
+                  [`@apply hidden group-data-[prev=${primaryValue}]:block group-data-[selected=${primaryValue}]:block group-data-[selected=${primaryValue}]:z-50 group-data-[selected=${primaryValue}]:animate-${primaryAnimation}`]: {},
+              };
+            } else {
+              return {
+                  [`@apply hidden group-data-[prev=${primaryValue}]:block group-data-[selected=${primaryValue}]:block group-data-[selected=${primaryValue}]:z-50 group-data-[prev=${secondaryValue}]:group-data-[selected=${primaryValue}]:animate-${primaryAnimation} group-data-[selected=${secondaryValue}]:animate-${secondaryAnimation}`]: {},
+              };
+            }
+        },
+    });
+});
+
 module.exports = {
   mode: "all",
   content: ["./src/**/*.{rs,html,css}", "./dist/**/*.html"],
@@ -27,12 +54,14 @@ module.exports = {
         'purple': '9747FF',
       },
       animation: {
-        slideRight: 'slideRight 700ms',
-        slideLeft: 'slideLeft 700ms',
-        slideDown: 'slideDown 700ms',
-        slideOutDown: 'slideOutDown 700ms',
-        slideUp: 'slideUp 700ms',
-        slideOutUp: 'slideOutUp 700ms',
+        slideRight: 'slideRight 500ms',
+        slideOutRight: 'slideOutRight 500ms',
+        slideLeft: 'slideLeft 500ms',
+        slideOutLeft: 'slideOutLeft 500ms',
+        slideDown: 'slideDown 500ms',
+        slideOutDown: 'slideOutDown 500ms',
+        slideUp: 'slideUp 500ms',
+        slideOutUp: 'slideOutUp 500ms',
       },
       keyframes: {
         slideRight: {
@@ -42,6 +71,16 @@ module.exports = {
           },
           '100%': {
             transform: 'translateX(0%)',
+            'animation-timing-function': 'cubic-bezier(0.47,0.0,0.23,1.3)',
+          },
+        },
+        slideOutRight: {
+          '0%': {
+            transform: 'translateX(0%)',
+            'animation-timing-function': 'cubic-bezier(0.47,0.0,0.23,1.1)',
+          },
+          '100%': {
+            transform: 'translateX(100%)',
             'animation-timing-function': 'cubic-bezier(0.47,0.0,0.23,1.3)',
           },
         },
@@ -98,5 +137,8 @@ module.exports = {
       },
     },
   },
-  plugins: [require("daisyui")],
+  plugins: [
+    require("daisyui"),
+    animationPlugin 
+  ],
 };
