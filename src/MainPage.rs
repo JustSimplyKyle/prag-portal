@@ -1,5 +1,4 @@
 use dioxus::prelude::*;
-use dioxus::web::WebEventExt;
 
 use manganis::ImageAsset;
 use tailwind_fuse::*;
@@ -7,15 +6,24 @@ use tailwind_fuse::*;
 use crate::BaseComponents::{
     Alignment, Button, ButtonClass, ContentType, Contents, FillMode, Roundness, Size,
 };
+
 pub const COLLECTION_PIC: ImageAsset =
     manganis::mg!(image("./public/pic1.png").format(ImageType::Avif));
+pub const BLOCK: &str = manganis::mg!(file("./public/block.svg"));
+pub const EXPAND_CONTENT: &str = manganis::mg!(file("./public/expand_content.svg"));
+pub const ICON: &str = manganis::mg!(file("./public/icon.svg"));
+pub const IMG: ImageAsset = manganis::mg!(image("./public/project.png"));
+pub const STAR: &str = manganis::mg!(file("./public/award_star.svg"));
+pub const ARROW_LEFT: &str = manganis::mg!(file("./public/keyboard_arrow_left.svg"));
+pub const ARROW_RIGHT: &str = manganis::mg!(file("./public/keyboard_arrow_right.svg"));
+
 #[component]
 pub fn MainPage() -> Element {
     rsx! {
-        div { class: "bg-background min-h-screen rounded-xl p-8 w-full",
+        div { class: "bg-background min-h-screen rounded-xl p-8 min-w-full",
             div { class: "flex flex-col space-y-[20px] transition-all xl:items-center xl:*:justify-center xl:*:max-w-[1180px] xl:*:w-full",
                 SuggestionPage {}
-                div { CollectionsPage {} }
+                CollectionsPage {}
             }
         }
     }
@@ -47,10 +55,6 @@ pub fn CollectionBlock(
 
 #[component]
 fn SuggestionPage() -> Element {
-    const BLOCK: &str = manganis::mg!(file("./public/block.svg"));
-    const EXPAND_CONTENT: &str = manganis::mg!(file("./public/expand_content.svg"));
-    const ICON: &str = manganis::mg!(file("./public/icon.svg"));
-    const IMG: ImageAsset = manganis::mg!(image("./public/project.png"));
 
     let right_css =
         "bg-background px-[25px] min-h-[52px] drop-shadow-lg rounded-full inline-flex items-center";
@@ -217,9 +221,6 @@ fn SuggestionPage() -> Element {
 
 #[component]
 fn CollectionsPage() -> Element {
-    const STAR: &str = manganis::mg!(file("./public/award_star.svg"));
-    const ARROW_LEFT: &str = manganis::mg!(file("./public/keyboard_arrow_left.svg"));
-    const ARROW_RIGHT: &str = manganis::mg!(file("./public/keyboard_arrow_right.svg"));
     rsx! {
         div { class: "flex flex-col space-x-0",
             Button {

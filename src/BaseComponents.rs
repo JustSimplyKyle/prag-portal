@@ -10,7 +10,7 @@ pub struct ButtonProps {
     #[props(into)]
     pub string_placements: StringPlacements,
     pub signal: Option<Pages>,
-    #[props(default = String::new())]
+    #[props(default)]
     pub extended_css_class: String,
     #[props(default = true)]
     pub is_button: bool,
@@ -35,7 +35,7 @@ pub struct ButtonClass {
 }
 
 impl ButtonClass {
-    fn setup(&self) -> &str {
+    const fn setup(&self) -> &str {
         match self.items_count {
             ItemsCount::One => "",
             ItemsCount::AboveOne => match self.roundness {
@@ -48,9 +48,11 @@ impl ButtonClass {
             },
         }
     }
+    #[must_use]
     pub fn to_class(&self) -> String {
         tw_merge!(IntoTailwindClass::to_class(self), self.setup())
     }
+    #[must_use]
     pub fn with_class(&self, string: impl AsRef<str>) -> String {
         let class = IntoTailwindClass::with_class(self, string);
         tw_merge!(class, self.setup())
@@ -114,10 +116,11 @@ pub fn Button(props: ButtonProps) -> Element {
         extended_css_class,
         is_button,
         onclick,
-        attributes,
+        mut attributes,
         size,
         fill_mode,
     } = props;
+    attributes.retain(|x| x.name != "class");
     let class = ButtonClass {
         roundness,
         items_count: string_placements.len().into(),
@@ -125,29 +128,29 @@ pub fn Button(props: ButtonProps) -> Element {
         fill_mode,
     }
     .with_class(extended_css_class);
-    let aria_selected = Some(ACTIVE().0) == signal;
-    let s = match string_placements {
-        StringPlacements::Designed(s) => rsx! {
-            for x in s {
-                { x.get_element() }
-            }
-        },
-        StringPlacements::Custom(x) => x,
-    };
     rsx! {
         div {
             class,
             role: if is_button { "button" } else { "" },
-            aria_selected,
+            aria_selected: Some(ACTIVE().0) == signal,
             onclick: move |_| {
                 if let Some(x) = onclick {
                     x(());
                 } else if let Some(x) = &signal {
-                    switch_active(x.clone());
+                    switch_active(*x);
                 }
             },
             ..attributes,
-            {s}
+            {
+                match string_placements {
+                    StringPlacements::Designed(s) => rsx! {
+                        for x in s {
+                            { x.get_element() }
+                        }
+                    },
+                    StringPlacements::Custom(x) => x,
+                }
+            }
         }
     }
 }
@@ -160,9 +163,15 @@ pub enum StringPlacements {
 
 impl StringPlacements {
     pub fn len(&self) -> usize {
-        match self {
-            StringPlacements::Designed(x) => x.len(),
-            StringPlacements::Custom(x) => x.as_ref().map(|x| x.dynamic_nodes.len()).unwrap_or(0),
+        match &self {
+            Self::Designed(x) => x.len(),
+            Self::Custom(x) => x.as_ref().map_or(0, |x| x.dynamic_nodes.len()),
+        }
+    }
+    pub fn is_empty(&self) -> bool {
+        match &self {
+            Self::Designed(x) => x.is_empty(),
+            Self::Custom(x) => x.as_ref().map_or(true, |x| x.dynamic_nodes.is_empty())
         }
     }
 }
@@ -271,7 +280,7 @@ impl Content {
             ContentType::Svg(x) => {
                 rsx! {
                     div { class: self.css,
-                        object { r#type: "image/svg+xml", data: "{x}" }
+                        object { r#type: "image/svg+xml", data: x }
                     }
                 }
             }
@@ -383,7 +392,7 @@ impl ContentType {
     ///
     /// [`Svg`]: ContentType::Svg
     #[must_use]
-    pub fn is_svg(&self) -> bool {
+    pub const fn is_svg(&self) -> bool {
         matches!(self, Self::Svg(..))
     }
 
@@ -391,7 +400,7 @@ impl ContentType {
     ///
     /// [`Text`]: ContentType::Text
     #[must_use]
-    pub fn is_text(&self) -> bool {
+    pub const fn is_text(&self) -> bool {
         matches!(self, Self::Text(..))
     }
 
@@ -399,7 +408,7 @@ impl ContentType {
     ///
     /// [`Hint`]: ContentType::Hint
     #[must_use]
-    pub fn is_hint(&self) -> bool {
+    pub const fn is_hint(&self) -> bool {
         matches!(self, Self::Hint(..))
     }
 }
@@ -415,10 +424,10 @@ pub enum Alignment {
 impl Alignment {
     pub fn get_alignment_class(&self) -> String {
         match self {
-            Alignment::Left => "text-left",
-            Alignment::Center => "text-center",
-            Alignment::Right => "text-right flex justify-end items-center",
-            Alignment::Custom(ref class) => class,
+            Self::Left => "text-left",
+            Self::Center => "text-center",
+            Self::Right => "text-right flex justify-end items-center",
+            Self::Custom(ref class) => class,
         }
         .into()
     }

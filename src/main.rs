@@ -7,15 +7,16 @@ use tailwind_fuse::*;
 
 use dioxus::prelude::*;
 use log::LevelFilter;
-use manganis::ImageAsset;
 
 use crate::BaseComponents::{Alignment, Button, ContentType, FillMode, Roundness, Size};
 use crate::MainPage::{CollectionBlock, MainPage, COLLECTION_PIC};
-#[derive(Clone, Routable, Debug, PartialEq)]
-enum Route {
-    #[route("/")]
-    Layout {},
-}
+
+pub const HOME: &str = manganis::mg!(file("./public/home.svg"));
+pub const EXPLORE: &str = manganis::mg!(file("./public/explore.svg"));
+pub const COLLECTIONS: &str = manganis::mg!(file("./public/collections.svg"));
+pub const ARROW_RIGHT: &str = manganis::mg!(file("./public/keyboard_arrow_right.svg"));
+pub const SIM_CARD: &str = manganis::mg!(file("./public/sim_card_download.svg"));
+
 
 static ACTIVE: GlobalSignal<(Pages, Option<Pages>)> = GlobalSignal::new(|| (Pages::MainPage, None));
 
@@ -40,19 +41,19 @@ pub enum Pages {
 
 pub fn switch_active(x: Pages) {
     let prev = ACTIVE().0;
-    if &prev != &x {
+    if prev != x {
         ACTIVE.write().1 = Some(prev);
     }
-    ACTIVE.write().0 = x.clone();
+    ACTIVE.write().0 = x;
 }
 
 impl ToString for Pages {
     fn to_string(&self) -> String {
         match self {
-            Pages::MainPage => "main-page",
-            Pages::Explore => "explore",
-            Pages::Collections => "collections",
-            Pages::DownloadProgress => "progress",
+            Self::MainPage => "main-page",
+            Self::Explore => "explore",
+            Self::Collections => "collections",
+            Self::DownloadProgress => "progress",
         }
         .into()
     }
@@ -191,28 +192,24 @@ fn DownloadProgress() -> Element {
 fn Layout() -> Element {
     let selected = ACTIVE().0;
     let prev = ACTIVE().1;
-    dbg!(&prev);
     rsx! {
-        div { class: "flex flex-col gap-[20px]",
-            div {}
-            div {
-                class: "group flex overflow-hidden",
-                "data-selected": selected.to_string(),
-                "data-prev": prev.map(|x| x.to_string()).unwrap_or_else(String::new),
-                SideBar {}
-                div { class: "w-dvw min-h-screen relative *:overflow-scroll",
-                    div { class: "absolute inset-0 z-0 min-h-full animation-[main-page^slideDown^explore^slideOutUp] animation-[main-page^slideDown^collections^slideOutUp]",
-                        MainPage {}
-                    }
-                    div { class: "absolute inset-0 z-0 min-h-full animation-[explore^slideUp^main-page^slideOutDown] animation-[explore^slideDown^collections^slideOutUp]",
-                        Explore {}
-                    }
-                    div { class: "absolute inset-0 z-0 min-h-full animation-[collections^slideUp^explore^slideOutDown] animation-[collections^slideUp^main-page^slideOutDown]",
-                        Collections {}
-                    }
-                    div { class: "absolute inset-0 z-0 min-h-full min-w-full flyinout-[progress]",
-                        DownloadProgress {}
-                    }
+        div {
+            class: "w-screen inline-flex self-stretch mt-[20px] group flex overflow-hidden",
+            "data-selected": selected.to_string(),
+            "data-prev": prev.map_or_else(String::new, |x| x.to_string()),
+            SideBar {}
+            div { class: "w-full min-h-screen relative *:overflow-scroll",
+                div { class: "absolute inset-0 z-0 min-h-full animation-[main-page^slideDown^explore^slideOutUp] animation-[main-page^slideDown^collections^slideOutUp]",
+                    MainPage {}
+                }
+                div { class: "absolute inset-0 z-0 min-h-full animation-[explore^slideUp^main-page^slideOutDown] animation-[explore^slideDown^collections^slideOutUp]",
+                    Explore {}
+                }
+                div { class: "absolute inset-0 z-0 min-h-full animation-[collections^slideUp^explore^slideOutDown] animation-[collections^slideUp^main-page^slideOutDown]",
+                    Collections {}
+                }
+                div { class: "absolute inset-0 z-0 min-h-full min-w-full flyinout-[progress]",
+                    DownloadProgress {}
                 }
             }
         }
@@ -229,13 +226,6 @@ fn SideBar() -> Element {
         }
         expanded()
     });
-    const HOME: &str = manganis::mg!(file("./public/home.svg"));
-    const EXPLORE: &str = manganis::mg!(file("./public/explore.svg"));
-    const COLLECTIONS: &str = manganis::mg!(file("./public/collections.svg"));
-    const COLLECTION_PIC: ImageAsset =
-        manganis::mg!(image("./public/pic1.png").format(ImageType::Avif));
-    const ARROW_RIGHT: &str = manganis::mg!(file("./public/keyboard_arrow_right.svg"));
-    const SIM_CARD: &str = manganis::mg!(file("./public/sim_card_download.svg"));
     let fat_button = |roundness, svg, string: &str, active, onclick: Option<EventHandler>| {
         rsx! {
             div {
@@ -252,9 +242,9 @@ fn SideBar() -> Element {
             }
         }
     };
-    let onclick = move |_| {
+    let onclick = move |()| {
         switch_active(Pages::Collections);
-        expanded.toggle()
+        expanded.toggle();
     };
     let p = rsx! {
         div { class: "transition-all",
@@ -326,7 +316,7 @@ fn SideBar() -> Element {
                         ],
                         signal: Pages::DownloadProgress,
                         extended_css_class: "group/active items-center",
-                        onclick: move |_| {
+                        onclick: move |()| {
                             let prev = ACTIVE().1;
                             if ACTIVE().0 == Pages::DownloadProgress {
                                 if let Some(prev) = prev {
