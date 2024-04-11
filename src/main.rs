@@ -9,9 +9,7 @@ use dioxus::prelude::*;
 use log::LevelFilter;
 use manganis::ImageAsset;
 
-use crate::BaseComponents::{
-    Alignment, ContentType, Button, FillMode, Roundness, Size
-};
+use crate::BaseComponents::{Alignment, Button, ContentType, FillMode, Roundness, Size};
 use crate::MainPage::{CollectionBlock, MainPage, COLLECTION_PIC};
 #[derive(Clone, Routable, Debug, PartialEq)]
 enum Route {
@@ -48,7 +46,6 @@ pub fn switch_active(x: Pages) {
     ACTIVE.write().0 = x.clone();
 }
 
-
 impl ToString for Pages {
     fn to_string(&self) -> String {
         match self {
@@ -62,7 +59,7 @@ impl ToString for Pages {
 }
 
 #[component]
- fn App() -> Element {
+fn App() -> Element {
     rsx! {
         // link { rel: "stylesheet", href: "public/tailwind.css" }
         div { class: "bg-deep-background min-h-screen min-w-full",
@@ -70,7 +67,6 @@ impl ToString for Pages {
         }
     }
 }
-
 
 #[component]
 pub fn Collections() -> Element {
@@ -112,11 +108,11 @@ pub fn Collections() -> Element {
                         }
                     }
                 }
-                div { class: "grid grid-flow-row grid-cols-[repeat(auto-fill,280px)] gap-[20px]",
+                div { class: "grid grid-flow-row grid-cols-[repeat(auto-fill,280px)] shrink-0 gap-[20px]",
                     CollectionBlock {
                         class: "[&_*]:rounded-[20px]",
-                        main_text: "text",
-                        hint: "arst",
+                        main_text: "創世幻想",
+                        hint: "不久前開啟•由我建立",
                         picture: COLLECTION_PIC
                     }
                     CollectionBlock {
@@ -154,7 +150,6 @@ pub fn Collections() -> Element {
         }
     }
 }
-
 
 #[component]
 fn Explore() -> Element {
@@ -348,4 +343,3 @@ fn SideBar() -> Element {
         }
     }
 }
-

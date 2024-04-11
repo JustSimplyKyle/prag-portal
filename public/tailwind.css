@@ -1467,10 +1467,6 @@ html {
   z-index: 50;
 }
 
-.m-0 {
-  margin: 0px;
-}
-
 .mx-5 {
   margin-left: 1.25rem;
   margin-right: 1.25rem;
@@ -1556,6 +1552,10 @@ html {
   width: 25px;
 }
 
+.w-\[280px\] {
+  width: 280px;
+}
+
 .w-\[300px\] {
   width: 300px;
 }
@@ -1576,10 +1576,6 @@ html {
   width: 100%;
 }
 
-.min-w-\[280px\] {
-  min-width: 280px;
-}
-
 .min-w-fit {
   min-width: -moz-fit-content;
   min-width: fit-content;
@@ -1587,10 +1583,6 @@ html {
 
 .min-w-full {
   min-width: 100%;
-}
-
-.max-w-\[280px\] {
-  max-width: 280px;
 }
 
 .max-w-fit {
@@ -1800,10 +1792,6 @@ html {
   padding: 2rem;
 }
 
-.p-\[5px\] {
-  padding: 5px;
-}
-
 .px-0 {
   padding-left: 0px;
   padding-right: 0px;
@@ -1846,6 +1834,10 @@ html {
 
 .pb-0 {
   padding-bottom: 0px;
+}
+
+.pb-\[25px\] {
+  padding-bottom: 25px;
 }
 
 .pl-\[20px\] {
@@ -2071,8 +2063,16 @@ body {
     align-items: center;
   }
 
-  .xl\:\*\:w-\[1180px\] > * {
-    width: 1180px;
+  .xl\:\*\:w-full > * {
+    width: 100%;
+  }
+
+  .xl\:\*\:max-w-\[1180px\] > * {
+    max-width: 1180px;
+  }
+
+  .xl\:\*\:justify-center > * {
+    justify-content: center;
   }
 }
 

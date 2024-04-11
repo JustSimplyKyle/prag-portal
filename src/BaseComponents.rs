@@ -38,19 +38,13 @@ impl ButtonClass {
     fn setup(&self) -> &str {
         match self.items_count {
             ItemsCount::One => "",
-            ItemsCount::AboveOne => {
-                match self.roundness {
-                    Roundness::Top | Roundness::None | Roundness::Bottom => {
-                        "pr-8"
-                    },
-                    Roundness::Pill => {
-                        match self.size {
-                            Size::Fat => "",
-                            Size::Medium => "pr-[25px]",
-                            Size::Small => "pr-[5px]",
-                        }
-                    },
-                }
+            ItemsCount::AboveOne => match self.roundness {
+                Roundness::Top | Roundness::None | Roundness::Bottom => "pr-8",
+                Roundness::Pill => match self.size {
+                    Size::Fat => "",
+                    Size::Medium => "pr-[25px]",
+                    Size::Small => "pr-[5px]",
+                },
             },
         }
     }
@@ -76,9 +70,9 @@ pub enum Size {
     #[tw(default, class = "text-2xl p-5 font-bold")]
     Fat,
     #[tw(class = "pl-[20px] py-[12px] text-lg")]
-    Medium, 
+    Medium,
     #[tw(class = "py-[5px] px-[20px] text-[17px]")]
-    Small
+    Small,
 }
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, TwVariant)]
@@ -108,7 +102,7 @@ pub enum Roundness {
     #[tw(class = "rounded-b-3xl")]
     Bottom,
     #[tw(class = "rounded-full bg-deep-background")]
-    Pill
+    Pill,
 }
 
 #[component]
@@ -168,9 +162,7 @@ impl StringPlacements {
     pub fn len(&self) -> usize {
         match self {
             StringPlacements::Designed(x) => x.len(),
-            StringPlacements::Custom(x) => {
-                x.as_ref().map(|x| x.dynamic_nodes.len()).unwrap_or(0)
-            }
+            StringPlacements::Custom(x) => x.as_ref().map(|x| x.dynamic_nodes.len()).unwrap_or(0),
         }
     }
 }

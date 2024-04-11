@@ -1,16 +1,19 @@
 use dioxus::prelude::*;
+use dioxus::web::WebEventExt;
 
-use tailwind_fuse::*;
 use manganis::ImageAsset;
+use tailwind_fuse::*;
 
-use crate::BaseComponents::{Alignment, ButtonClass, ContentType, Contents, Button, FillMode, Roundness, Size};
+use crate::BaseComponents::{
+    Alignment, Button, ButtonClass, ContentType, Contents, FillMode, Roundness, Size,
+};
 pub const COLLECTION_PIC: ImageAsset =
     manganis::mg!(image("./public/pic1.png").format(ImageType::Avif));
 #[component]
 pub fn MainPage() -> Element {
     rsx! {
         div { class: "bg-background min-h-screen rounded-xl p-8 w-full",
-            div { class: "flex flex-col space-y-[20px] transition-all xl:items-center xl:*:w-[1180px]",
+            div { class: "flex flex-col space-y-[20px] transition-all xl:items-center xl:*:justify-center xl:*:max-w-[1180px] xl:*:w-full",
                 SuggestionPage {}
                 div { CollectionsPage {} }
             }
@@ -18,100 +21,24 @@ pub fn MainPage() -> Element {
     }
 }
 
-
 #[component]
-pub fn CollectionBlock(#[props(into)] main_text: String, #[props(into)] hint: String, picture: ImageAsset, #[props(extends=GlobalAttributes)] attributes: Vec<Attribute>) -> Element {
+pub fn CollectionBlock(
+    #[props(into)] main_text: String,
+    #[props(into)] hint: String,
+    picture: ImageAsset,
+    #[props(extends=GlobalAttributes)] attributes: Vec<Attribute>,
+) -> Element {
     rsx! {
         div { ..attributes,
-            div { class: "relative h-[280px] min-w-[280px] max-w-[280px]",
+            div { class: "relative h-[280px] w-[280px]",
                 img {
                     class: "min-h-full min-w-full object-cover rounded-[5px]",
                     src: picture
                 }
                 div { class: "absolute inset-0 bg-gradient-to-t from-deep-background to-23%" }
-                div { class: "absolute inset-0 px-5 pt-5 pb-0 flex flex-col justify-end items-start",
-                    div { class: "p-0 m-0 text-3xl text-white font-bold", {main_text} }
-                    div { class: "p-0 m-0 text-[15px] text-white text-opacity-50", {hint} }
-                }
-            }
-        }
-    }
-}
-
-
-#[component]
-fn CollectionsPage() -> Element {
-    const STAR: &str = manganis::mg!(file("./public/award_star.svg"));
-    const ARROW_LEFT: &str = manganis::mg!(file("./public/keyboard_arrow_left.svg"));
-    const ARROW_RIGHT: &str = manganis::mg!(file("./public/keyboard_arrow_right.svg"));
-    rsx! {
-        div { class: "flex flex-col space-x-0",
-            Button {
-                roundness: Roundness::Top,
-                string_placements: vec![
-                    Contents::new(
-                        vec![
-                            ContentType::text("我的錦集").css("text-3xl"),
-                            ContentType::hint("你最愛的收藏都在這裡"),
-                        ],
-                        Alignment::Left,
-                    ),
-                    Contents::new(
-                        vec![
-                            ContentType::svg(ARROW_LEFT),
-                            ContentType::svg(STAR),
-                            ContentType::svg(ARROW_RIGHT),
-                        ],
-                        Alignment::Right,
-                    ),
-                ],
-                extended_css_class: "bg-deep-background px-[30px] pt-[30px] pb-0 mb-0",
-                is_button: false
-            }
-            div { class: ButtonClass::builder()
-                    .roundness(Roundness::Bottom)
-                    .with_class("bg-deep-background min-w-screen px-0"),
-                div { class: "flex space-x-[3px] overflow-scroll",
-                    CollectionBlock {
-                        main_text: "創世幻想",
-                        hint: "不久前開啟•由我建立",
-                        picture: COLLECTION_PIC
-                    }
-                    CollectionBlock {
-                        main_text: "創世幻想",
-                        hint: "不久前開啟•由我建立",
-                        picture: COLLECTION_PIC
-                    }
-                    CollectionBlock {
-                        main_text: "創世幻想",
-                        hint: "不久前開啟•由我建立",
-                        picture: COLLECTION_PIC
-                    }
-                    CollectionBlock {
-                        main_text: "創世幻想",
-                        hint: "不久前開啟•由我建立",
-                        picture: COLLECTION_PIC
-                    }
-                    CollectionBlock {
-                        main_text: "創世幻想",
-                        hint: "不久前開啟•由我建立",
-                        picture: COLLECTION_PIC
-                    }
-                    CollectionBlock {
-                        main_text: "創世幻想",
-                        hint: "不久前開啟•由我建立",
-                        picture: COLLECTION_PIC
-                    }
-                    CollectionBlock {
-                        main_text: "創世幻想",
-                        hint: "不久前開啟•由我建立",
-                        picture: COLLECTION_PIC
-                    }
-                    CollectionBlock {
-                        main_text: "創世幻想",
-                        hint: "不久前開啟•由我建立",
-                        picture: COLLECTION_PIC
-                    }
+                div { class: "absolute inset-0 px-5 pt-5 pb-[25px] flex flex-col justify-end items-start",
+                    div { class: "text-3xl text-white font-bold", {main_text} }
+                    div { class: "text-[15px] text-white text-opacity-50", {hint} }
                 }
             }
         }
@@ -281,6 +208,85 @@ fn SuggestionPage() -> Element {
                         string_placements: x,
                         extended_css_class: "bg-deep-background text-3xl min-w-full px-[30px] py-[25px]",
                         is_button: false
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[component]
+fn CollectionsPage() -> Element {
+    const STAR: &str = manganis::mg!(file("./public/award_star.svg"));
+    const ARROW_LEFT: &str = manganis::mg!(file("./public/keyboard_arrow_left.svg"));
+    const ARROW_RIGHT: &str = manganis::mg!(file("./public/keyboard_arrow_right.svg"));
+    rsx! {
+        div { class: "flex flex-col space-x-0",
+            Button {
+                roundness: Roundness::Top,
+                string_placements: vec![
+                    Contents::new(
+                        vec![
+                            ContentType::text("我的錦集").css("text-3xl"),
+                            ContentType::hint("你最愛的收藏都在這裡"),
+                        ],
+                        Alignment::Left,
+                    ),
+                    Contents::new(
+                        vec![
+                            ContentType::svg(ARROW_LEFT),
+                            ContentType::svg(STAR),
+                            ContentType::svg(ARROW_RIGHT),
+                        ],
+                        Alignment::Right,
+                    ),
+                ],
+                extended_css_class: "bg-deep-background px-[30px] pt-[30px] pb-0 mb-0",
+                is_button: false
+            }
+            div { class: ButtonClass::builder()
+                    .roundness(Roundness::Bottom)
+                    .with_class("bg-deep-background min-w-screen px-0 pb-0"),
+                div { class: "flex space-x-[3px] overflow-scroll",
+                    CollectionBlock {
+                        main_text: "創世幻想",
+                        hint: "不久前開啟•由我建立",
+                        picture: COLLECTION_PIC
+                    }
+                    CollectionBlock {
+                        main_text: "創世幻想",
+                        hint: "不久前開啟•由我建立",
+                        picture: COLLECTION_PIC
+                    }
+                    CollectionBlock {
+                        main_text: "創世幻想",
+                        hint: "不久前開啟•由我建立",
+                        picture: COLLECTION_PIC
+                    }
+                    CollectionBlock {
+                        main_text: "創世幻想",
+                        hint: "不久前開啟•由我建立",
+                        picture: COLLECTION_PIC
+                    }
+                    CollectionBlock {
+                        main_text: "創世幻想",
+                        hint: "不久前開啟•由我建立",
+                        picture: COLLECTION_PIC
+                    }
+                    CollectionBlock {
+                        main_text: "創世幻想",
+                        hint: "不久前開啟•由我建立",
+                        picture: COLLECTION_PIC
+                    }
+                    CollectionBlock {
+                        main_text: "創世幻想",
+                        hint: "不久前開啟•由我建立",
+                        picture: COLLECTION_PIC
+                    }
+                    CollectionBlock {
+                        main_text: "創世幻想",
+                        hint: "不久前開啟•由我建立",
+                        picture: COLLECTION_PIC
                     }
                 }
             }
