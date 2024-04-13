@@ -7,6 +7,7 @@ use tailwind_fuse::*;
 
 use dioxus::prelude::*;
 use log::LevelFilter;
+use BaseComponents::Contents;
 
 use crate::BaseComponents::{Alignment, Button, ContentType, FillMode, Roundness, Size};
 use crate::MainPage::{CollectionBlock, MainPage, COLLECTION_PIC};
@@ -72,81 +73,98 @@ fn App() -> Element {
 #[component]
 pub fn Collections() -> Element {
     rsx! {
-        div { class: "bg-background min-h-screen rounded-xl p-8 w-full",
-            div {
-                div { class: "mb-[10px]",
-                    div { class: "flex space-x-[10px]",
-                        Button {
-                            roundness: Roundness::Pill,
-                            fill_mode: FillMode::Fit,
-                            size: Size::Medium,
-                            string_placements: vec![ContentType::text("H").align_left(), ContentType::text("全部").align_right()],
-                            extended_css_class: "bg-deep-background pl-[20px] pr-[25px] py-[12px]"
-                        }
-                        Button {
-                            roundness: Roundness::Pill,
-                            fill_mode: FillMode::Fit,
-                            size: Size::Medium,
-                            string_placements: vec![ContentType::text("H").align_center()],
-                            extended_css_class: "bg-deep-background px-[20px] py-[12px]"
-                        }
-                        Button {
-                            roundness: Roundness::Pill,
-                            fill_mode: FillMode::Fit,
-                            size: Size::Medium,
-                            string_placements: vec![
-                                ContentType::text("H").align_left(),
-                                ContentType::text("分類夾").align_right(),
+        div { class: "flex flex-col space-y-[10px]",
+            div { class: "flex space-x-[10px]",
+                Button {
+                    roundness: Roundness::Pill,
+                    fill_mode: FillMode::Fit,
+                    size: Size::Medium,
+                    string_placements: vec![ContentType::text("H").align_left(), ContentType::text("全部").align_right()],
+                    extended_css_class: "pl-[20px] pr-[25px] py-[12px]"
+                }
+                Button {
+                    roundness: Roundness::Pill,
+                    fill_mode: FillMode::Fit,
+                    size: Size::Medium,
+                    string_placements: vec![ContentType::text("H").align_center()],
+                    extended_css_class: "px-[20px] py-[12px]"
+                }
+                Button {
+                    roundness: Roundness::Pill,
+                    fill_mode: FillMode::Fit,
+                    size: Size::Medium,
+                    string_placements: vec![
+                        ContentType::text("H").align_left(),
+                        ContentType::text("分類夾").align_right(),
+                    ],
+                    extended_css_class: "pl-[20px] pr-[25px] py-[12px]"
+                }
+                Button {
+                    roundness: Roundness::Pill,
+                    fill_mode: FillMode::Fit,
+                    size: Size::Medium,
+                    string_placements: vec![ContentType::text("H").align_center()],
+                    extended_css_class: "px-[20px] py-[12px]"
+                }
+            }
+            div { class: "grid grid-flow-row grid-cols-[repeat(auto-fill,280px)] shrink-0 gap-[20px]",
+                CollectionBlock {
+                    extended_class: "rounded-[20px]",
+                    main_text: "創世幻想",
+                    hint: "不久前開啟•由我建立",
+                    picture: COLLECTION_PIC
+                }
+                CollectionBlock {
+                    extended_class: "rounded-[20px]",
+                    main_text: "text",
+                    hint: "arst",
+                    picture: COLLECTION_PIC
+                }
+                CollectionBlock {
+                    extended_class: "rounded-[20px]",
+                    main_text: "text",
+                    hint: "arst",
+                    picture: COLLECTION_PIC
+                }
+                CollectionBlock {
+                    extended_class: "rounded-[20px]",
+                    main_text: "text",
+                    hint: "arst",
+                    picture: COLLECTION_PIC
+                }
+                CollectionBlock {
+                    extended_class: "rounded-[20px]",
+                    main_text: "text",
+                    hint: "arst",
+                    picture: COLLECTION_PIC
+                }
+                CollectionBlock {
+                    extended_class: "rounded-[20px]",
+                    main_text: "text",
+                    hint: "arst",
+                    picture: COLLECTION_PIC
+                }
+            }
+        }
+        div {
+            Button {
+                roundness: Roundness::None,
+                string_placements: vec![
+                    Contents::new(
+                            [
+                                ContentType::text("新增更多收藏").css("text-[35px]"),
+                                ContentType::hint(
+                                    "透過探索功能下載社群收藏或是由你開始建立",
+                                ),
                             ],
-                            extended_css_class: "bg-deep-background pl-[20px] pr-[25px] py-[12px]"
-                        }
-                        Button {
-                            roundness: Roundness::Pill,
-                            fill_mode: FillMode::Fit,
-                            size: Size::Medium,
-                            string_placements: vec![ContentType::text("H").align_center()],
-                            extended_css_class: "bg-deep-background px-[20px] py-[12px]"
-                        }
-                    }
-                }
-                div { class: "grid grid-flow-row grid-cols-[repeat(auto-fill,280px)] shrink-0 gap-[20px]",
-                    CollectionBlock {
-                        class: "[&_*]:rounded-[20px]",
-                        main_text: "創世幻想",
-                        hint: "不久前開啟•由我建立",
-                        picture: COLLECTION_PIC
-                    }
-                    CollectionBlock {
-                        class: "[&_*]:rounded-[20px]",
-                        main_text: "text",
-                        hint: "arst",
-                        picture: COLLECTION_PIC
-                    }
-                    CollectionBlock {
-                        class: "[&_*]:rounded-[20px]",
-                        main_text: "text",
-                        hint: "arst",
-                        picture: COLLECTION_PIC
-                    }
-                    CollectionBlock {
-                        class: "[&_*]:rounded-[20px]",
-                        main_text: "text",
-                        hint: "arst",
-                        picture: COLLECTION_PIC
-                    }
-                    CollectionBlock {
-                        class: "[&_*]:rounded-[20px]",
-                        main_text: "text",
-                        hint: "arst",
-                        picture: COLLECTION_PIC
-                    }
-                    CollectionBlock {
-                        class: "[&_*]:rounded-[20px]",
-                        main_text: "text",
-                        hint: "arst",
-                        picture: COLLECTION_PIC
-                    }
-                }
+                            Alignment::Left,
+                        )
+                        .css("flex flex-col gap-[15px]"),
+                    ContentType::text("F").align_right(),
+                ],
+                extended_css_class: "rounded-[20px] px-[40px] py-[50px]",
+                size: Size::Fat,
+                is_button: false
             }
         }
     }
@@ -155,16 +173,13 @@ pub fn Collections() -> Element {
 #[component]
 fn Explore() -> Element {
     rsx! {
-        div { class: "bg-background min-h-screen rounded-xl p-8 w-full",
-            div {
-                Button {
-                    roundness: Roundness::Top,
-                    string_placements: vec![
-                        ContentType::text("Explore").align_left(),
-                        ContentType::text("thumbsup").align_right(),
-                    ],
-                    extended_css_class: "bg-deep-background"
-                }
+        div {
+            Button {
+                roundness: Roundness::Top,
+                string_placements: vec![
+                    ContentType::text("Explore").align_left(),
+                    ContentType::text("thumbsup").align_right(),
+                ]
             }
         }
     }
@@ -173,17 +188,12 @@ fn Explore() -> Element {
 #[component]
 fn DownloadProgress() -> Element {
     rsx! {
-        div { class: "bg-background min-h-screen rounded-xl p-8 w-full",
-            div {
-                Button {
-                    roundness: Roundness::Top,
-                    string_placements: vec![
-                        ContentType::text("Progress").align_left(),
-                        ContentType::text("stop").align_right(),
-                    ],
-                    extended_css_class: "bg-deep-background"
-                }
-            }
+        Button {
+            roundness: Roundness::Top,
+            string_placements: vec![
+                ContentType::text("Progress").align_left(),
+                ContentType::text("stop").align_right(),
+            ]
         }
     }
 }
@@ -200,21 +210,36 @@ fn Layout() -> Element {
             SideBar {}
             div { class: "w-full min-h-screen relative *:overflow-scroll",
                 div { class: "absolute inset-0 z-0 min-h-full animation-[main-page^slideDown^explore^slideOutUp] animation-[main-page^slideDown^collections^slideOutUp]",
-                    MainPage {}
+                    LayoutContainer { MainPage {} }
                 }
                 div { class: "absolute inset-0 z-0 min-h-full animation-[explore^slideUp^main-page^slideOutDown] animation-[explore^slideDown^collections^slideOutUp]",
-                    Explore {}
+                    LayoutContainer { Explore {} }
                 }
                 div { class: "absolute inset-0 z-0 min-h-full animation-[collections^slideUp^explore^slideOutDown] animation-[collections^slideUp^main-page^slideOutDown]",
-                    Collections {}
+                    LayoutContainer { Collections {} }
                 }
                 div { class: "absolute inset-0 z-0 min-h-full min-w-full flyinout-[progress]",
-                    DownloadProgress {}
+                    LayoutContainer { DownloadProgress {} }
                 }
             }
         }
     }
 }
+
+/// Does dynmaic rendering
+/// do not wrap the children in another div
+#[component]
+fn LayoutContainer(children: Element) -> Element {
+    rsx! {
+        div { class: "bg-background min-h-screen rounded-xl p-8 min-w-full",
+            div { class: "flex flex-col space-y-[20px] transition-all xl:items-center xl:*:justify-center xl:*:max-w-[1180px] xl:*:w-full",
+                {children}
+            }
+        }
+    }
+}
+
+
 #[component]
 fn SideBar() -> Element {
     let mut expanded = use_signal(|| false);
@@ -237,7 +262,7 @@ fn SideBar() -> Element {
                     ],
                     signal: active,
                     onclick,
-                    extended_css_class: "group-aria-expanded:pr-5"
+                    extended_css_class: "bg-background group-aria-expanded:pr-5"
                 }
             }
         }
@@ -285,7 +310,7 @@ fn SideBar() -> Element {
                 }
                 // middle
                 div { class: "flex flex-col space-y-1",
-                    Button { roundness: Roundness::Top, string_placements: p }
+                    Button { roundness: Roundness::Top, string_placements: p, extended_css_class: "bg-background" }
                     Button {
                         roundness: Roundness::None,
                         string_placements: vec![
@@ -296,7 +321,7 @@ fn SideBar() -> Element {
                                 .align_left(),
                             ContentType::text("新的收藏").align_right().css("group-aria-busy:hidden"),
                         ],
-                        extended_css_class: "transition-all delay-[25ms] group-aria-expanded:w-20 group-aria-expanded:min-h-20 group-aria-expanded:p-0"
+                        extended_css_class: "bg-background transition-all delay-[25ms] group-aria-expanded:w-20 group-aria-expanded:min-h-20 group-aria-expanded:p-0"
                     }
                 }
                 // bottom
@@ -315,7 +340,7 @@ fn SideBar() -> Element {
                                 .css("group-aria-selected/active:hidden group-aria-busy:hidden text-hint"),
                         ],
                         signal: Pages::DownloadProgress,
-                        extended_css_class: "group/active items-center",
+                        extended_css_class: "bg-background group/active items-center",
                         onclick: move |()| {
                             let prev = ACTIVE().1;
                             if ACTIVE().0 == Pages::DownloadProgress {

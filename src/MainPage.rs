@@ -20,12 +20,8 @@ pub const ARROW_RIGHT: &str = manganis::mg!(file("./public/keyboard_arrow_right.
 #[component]
 pub fn MainPage() -> Element {
     rsx! {
-        div { class: "bg-background min-h-screen rounded-xl p-8 min-w-full",
-            div { class: "flex flex-col space-y-[20px] transition-all xl:items-center xl:*:justify-center xl:*:max-w-[1180px] xl:*:w-full",
-                SuggestionPage {}
-                CollectionsPage {}
-            }
-        }
+        SuggestionPage {}
+        CollectionsPage {}
     }
 }
 
@@ -35,10 +31,12 @@ pub fn CollectionBlock(
     #[props(into)] hint: String,
     picture: ImageAsset,
     #[props(extends=GlobalAttributes)] attributes: Vec<Attribute>,
+    #[props(default)]
+    extended_class: String,
 ) -> Element {
     rsx! {
-        div { ..attributes,
-            div { class: "relative h-[280px] w-[280px]",
+        div {
+            div { class: tw_merge!("relative h-[280px] w-[280px]", extended_class), ..attributes,
                 img {
                     class: "min-h-full min-w-full object-cover rounded-[5px]",
                     src: picture
@@ -57,17 +55,17 @@ pub fn CollectionBlock(
 fn SuggestionPage() -> Element {
 
     let right_css =
-        "bg-background px-[25px] min-h-[52px] drop-shadow-lg rounded-full inline-flex items-center";
+        "bg-zinc-800 h-[52px] px-[25px] drop-shadow-lg rounded-full inline-flex items-center";
 
     let suggested_moves_placementss = [
         vec![
             Contents::new(
                 [
-                    ContentType::text("建議動作"),
+                    ContentType::text("建議動作").css("text-3xl leading-[22px]"),
                     ContentType::hint("你還沒完成快速設定，我們建議你盡快完成"),
                 ],
                 Alignment::Left,
-            ),
+            ).css("flex flex-col gap-[15px]"),
             ContentType::svg(EXPAND_CONTENT)
                 .css(right_css)
                 .align_right(),
@@ -75,11 +73,11 @@ fn SuggestionPage() -> Element {
         vec![
             Contents::new(
                 [
-                    ContentType::text("需要幫助？"),
+                    ContentType::text("需要幫助？").css("text-3xl leading-[22px]"),
                     ContentType::hint("查看使用手冊與教學"),
                 ],
                 Alignment::Left,
-            ),
+            ).css("flex flex-col gap-[15px]"),
             ContentType::svg(EXPAND_CONTENT)
                 .css(right_css)
                 .align_right(),
@@ -87,41 +85,41 @@ fn SuggestionPage() -> Element {
         vec![
             Contents::new(
                 [
-                    ContentType::text("探索內容"),
+                    ContentType::text("探索內容").css("text-3xl leading-[22px]"),
                     ContentType::hint("開始探索 Minecraft 的第三方社群內容"),
                 ],
                 Alignment::Left,
-            ),
+            ).css("flex flex-col gap-[15px]"),
             ContentType::text("F").align_right(),
         ],
         vec![
             Contents::new(
                 [
-                    ContentType::text("創造中心"),
+                    ContentType::text("創造中心").css("text-3xl leading-[22px]"),
                     ContentType::hint("建立你的個人化收藏"),
                 ],
                 Alignment::Left,
-            ),
+            ).css("flex flex-col gap-[15px]"),
             ContentType::text("F").align_right(),
         ],
         vec![
             Contents::new(
                 [
-                    ContentType::text("打造個人化收藏"),
+                    ContentType::text("打造個人化收藏").css("text-3xl leading-[22px]"),
                     ContentType::hint("你可以透過風格化功能來裝飾你的收藏"),
                 ],
                 Alignment::Left,
-            ),
+            ).css("flex flex-col gap-[15px]"),
             ContentType::text("F").align_right(),
         ],
         vec![
             Contents::new(
                 [
-                    ContentType::text("建議動作"),
+                    ContentType::text("建議動作").css("text-3xl leading-[22px]"),
                     ContentType::hint("啟動器更新已經準備就緒"),
                 ],
                 Alignment::Left,
-            ),
+            ).css("flex flex-col gap-[15px]"),
             ContentType::text("F").align_right(),
         ],
     ];
@@ -210,7 +208,7 @@ fn SuggestionPage() -> Element {
                             Roundness::None
                         },
                         string_placements: x,
-                        extended_css_class: "bg-deep-background text-3xl min-w-full px-[30px] py-[25px]",
+                        extended_css_class: "bg-deep-background min-w-full px-[30px] py-[35px]",
                         is_button: false
                     }
                 }
@@ -227,12 +225,13 @@ fn CollectionsPage() -> Element {
                 roundness: Roundness::Top,
                 string_placements: vec![
                     Contents::new(
-                        vec![
-                            ContentType::text("我的錦集").css("text-3xl"),
-                            ContentType::hint("你最愛的收藏都在這裡"),
-                        ],
-                        Alignment::Left,
-                    ),
+                            vec![
+                                ContentType::text("我的錦集").css("text-[35px] leading-[26px]"),
+                                ContentType::hint("你最愛的收藏都在這裡"),
+                            ],
+                            Alignment::Left,
+                        )
+                        .css("flex flex-col gap-[20px]"),
                     Contents::new(
                         vec![
                             ContentType::svg(ARROW_LEFT),
@@ -242,12 +241,10 @@ fn CollectionsPage() -> Element {
                         Alignment::Right,
                     ),
                 ],
-                extended_css_class: "bg-deep-background px-[30px] pt-[30px] pb-0 mb-0",
+                extended_css_class: "p-[30px] mb-0",
                 is_button: false
             }
-            div { class: ButtonClass::builder()
-                    .roundness(Roundness::Bottom)
-                    .with_class("bg-deep-background min-w-screen px-0 pb-0"),
+            div { class: ButtonClass::builder().roundness(Roundness::Bottom).with_class("min-w-screen p-0"),
                 div { class: "flex space-x-[3px] overflow-scroll",
                     CollectionBlock {
                         main_text: "創世幻想",

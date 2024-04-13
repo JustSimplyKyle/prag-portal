@@ -1435,10 +1435,6 @@ html {
   position: static;
 }
 
-.fixed {
-  position: fixed;
-}
-
 .absolute {
   position: absolute;
 }
@@ -1447,16 +1443,8 @@ html {
   position: relative;
 }
 
-.sticky {
-  position: sticky;
-}
-
 .inset-0 {
   inset: 0px;
-}
-
-.top-0 {
-  top: 0px;
 }
 
 .z-0 {
@@ -1486,10 +1474,6 @@ html {
 
 .mb-0 {
   margin-bottom: 0px;
-}
-
-.mb-\[10px\] {
-  margin-bottom: 10px;
 }
 
 .mt-\[20px\] {
@@ -1540,16 +1524,16 @@ html {
   height: 50px;
 }
 
+.h-\[52px\] {
+  height: 52px;
+}
+
 .max-h-\[450px\] {
   max-height: 450px;
 }
 
 .max-h-full {
   max-height: 100%;
-}
-
-.min-h-\[52px\] {
-  min-height: 52px;
 }
 
 .min-h-full {
@@ -1584,30 +1568,12 @@ html {
   width: 50px;
 }
 
-.w-dvw {
-  width: 100dvw;
-}
-
 .w-full {
   width: 100%;
 }
 
 .w-screen {
   width: 100vw;
-}
-
-.w-\[95dvw\] {
-  width: 95dvw;
-}
-
-.w-fit {
-  width: -moz-fit-content;
-  width: fit-content;
-}
-
-.w-min {
-  width: -moz-min-content;
-  width: min-content;
 }
 
 .min-w-fit {
@@ -1624,26 +1590,8 @@ html {
   max-width: fit-content;
 }
 
-.max-w-min {
-  max-width: -moz-min-content;
-  max-width: min-content;
-}
-
-.max-w-max {
-  max-width: -moz-max-content;
-  max-width: max-content;
-}
-
-.max-w-full {
-  max-width: 100%;
-}
-
 .shrink-0 {
   flex-shrink: 0;
-}
-
-.shrink {
-  flex-shrink: 1;
 }
 
 .grid-flow-row {
@@ -1688,6 +1636,10 @@ html {
 
 .justify-stretch {
   justify-content: stretch;
+}
+
+.gap-\[15px\] {
+  gap: 15px;
 }
 
 .gap-\[20px\] {
@@ -1742,10 +1694,22 @@ html {
   margin-bottom: calc(1.25rem * var(--tw-space-y-reverse));
 }
 
+.space-y-\[10px\] > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-y-reverse: 0;
+  margin-top: calc(10px * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(10px * var(--tw-space-y-reverse));
+}
+
 .space-y-\[20px\] > :not([hidden]) ~ :not([hidden]) {
   --tw-space-y-reverse: 0;
   margin-top: calc(20px * calc(1 - var(--tw-space-y-reverse)));
   margin-bottom: calc(20px * var(--tw-space-y-reverse));
+}
+
+.space-x-\[20px\] > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 0;
+  margin-right: calc(20px * var(--tw-space-x-reverse));
+  margin-left: calc(20px * calc(1 - var(--tw-space-x-reverse)));
 }
 
 .self-stretch {
@@ -1758,10 +1722,6 @@ html {
 
 .overflow-scroll {
   overflow: scroll;
-}
-
-.overflow-y-scroll {
-  overflow-y: scroll;
 }
 
 .rounded {
@@ -1817,6 +1777,21 @@ html {
   background-color: rgb(14 14 14 / var(--tw-bg-opacity));
 }
 
+.bg-zinc-300 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(212 212 216 / var(--tw-bg-opacity));
+}
+
+.bg-zinc-800 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(39 39 42 / var(--tw-bg-opacity));
+}
+
+.bg-white {
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 255 255 / var(--tw-bg-opacity));
+}
+
 .bg-gradient-to-t {
   background-image: linear-gradient(to top, var(--tw-gradient-stops));
 }
@@ -1848,6 +1823,10 @@ html {
   padding: 2rem;
 }
 
+.p-\[30px\] {
+  padding: 30px;
+}
+
 .px-0 {
   padding-left: 0px;
   padding-right: 0px;
@@ -1873,14 +1852,24 @@ html {
   padding-right: 30px;
 }
 
+.px-\[40px\] {
+  padding-left: 40px;
+  padding-right: 40px;
+}
+
 .py-\[12px\] {
   padding-top: 12px;
   padding-bottom: 12px;
 }
 
-.py-\[25px\] {
-  padding-top: 25px;
-  padding-bottom: 25px;
+.py-\[35px\] {
+  padding-top: 35px;
+  padding-bottom: 35px;
+}
+
+.py-\[50px\] {
+  padding-top: 50px;
+  padding-bottom: 50px;
 }
 
 .py-\[5px\] {
@@ -1955,6 +1944,10 @@ html {
   font-size: 17px;
 }
 
+.text-\[35px\] {
+  font-size: 35px;
+}
+
 .text-lg {
   font-size: 1.125rem;
   line-height: 1.75rem;
@@ -1968,8 +1961,28 @@ html {
   font-weight: 400;
 }
 
+.leading-3 {
+  line-height: .75rem;
+}
+
+.leading-\[22px\] {
+  line-height: 22px;
+}
+
 .leading-\[78px\] {
   line-height: 78px;
+}
+
+.leading-normal {
+  line-height: 1.5;
+}
+
+.leading-none {
+  line-height: 1;
+}
+
+.leading-\[26px\] {
+  line-height: 26px;
 }
 
 .tracking-\[6px\] {
@@ -2134,8 +2147,4 @@ body {
 
 .\[\&_\*\]\:transform-gpu * {
   transform: translate3d(var(--tw-translate-x), var(--tw-translate-y), 0) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
-}
-
-.\[\&_\*\]\:rounded-\[20px\] * {
-  border-radius: 20px;
 }

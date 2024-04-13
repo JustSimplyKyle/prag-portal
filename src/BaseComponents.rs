@@ -25,7 +25,7 @@ pub struct ButtonProps {
 
 #[derive(TwClass, Clone, Copy)]
 #[tw(
-    class = "transition-all ease-in-out drop-shadow-lg duration-300 aria-selected:bg-white aria-selected:text-black text-white bg-background items-center"
+    class = "transition-all ease-in-out drop-shadow-lg duration-300 aria-selected:bg-white aria-selected:text-black text-white bg-deep-background items-center"
 )]
 pub struct ButtonClass {
     pub roundness: Roundness,
@@ -103,7 +103,7 @@ pub enum Roundness {
     None,
     #[tw(class = "rounded-b-3xl")]
     Bottom,
-    #[tw(class = "rounded-full bg-deep-background")]
+    #[tw(class = "rounded-full")]
     Pill,
 }
 
@@ -382,7 +382,7 @@ impl ContentType {
     #[must_use]
     pub fn hint(string: impl Into<String>) -> Content {
         let content_type = Self::Hint(string.into());
-        let css = String::from("text-[17px] text-hint p-0");
+        let css = String::from("text-[17px] text-hint leading-3");
         Content {
             content: content_type,
             css,
