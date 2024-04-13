@@ -1,31 +1,36 @@
 #![allow(non_snake_case)]
 pub mod BaseComponents;
 pub mod MainPage;
+pub mod Collections;
 
 use std::time::Duration;
 use tailwind_fuse::*;
 
 use dioxus::prelude::*;
 use log::LevelFilter;
-use BaseComponents::Contents;
 
-use crate::BaseComponents::{Alignment, Button, ContentType, FillMode, Roundness, Size};
-use crate::MainPage::{CollectionBlock, MainPage, COLLECTION_PIC};
+use crate::BaseComponents::{Alignment, Button, ContentType, Roundness};
+use crate::MainPage::{MainPage, COLLECTION_PIC};
+use crate::Collections::Collections;
 
 pub const HOME: &str = manganis::mg!(file("./public/home.svg"));
 pub const EXPLORE: &str = manganis::mg!(file("./public/explore.svg"));
-pub const COLLECTIONS: &str = manganis::mg!(file("./public/collections.svg"));
+pub const SIDEBAR_COLLECTION: &str = manganis::mg!(file("./public/collections.svg"));
 pub const ARROW_RIGHT: &str = manganis::mg!(file("./public/keyboard_arrow_right.svg"));
 pub const SIM_CARD: &str = manganis::mg!(file("./public/sim_card_download.svg"));
+pub const TAILWIND_STR_: &str = manganis::mg!(file("./public/tailwind.css"));
 
 
+
+/// `(Pages)`: Current active page
+/// `Option<Pages>`: Previous page
 static ACTIVE: GlobalSignal<(Pages, Option<Pages>)> = GlobalSignal::new(|| (Pages::MainPage, None));
 
 fn main() {
     dioxus_logger::init(LevelFilter::Info).expect("failed to init logger");
 
     let cfg = dioxus::desktop::Config::new()
-        .with_custom_head(r#"<link rel="stylesheet" href="public/tailwind.css">"#.to_string())
+        // .with_custom_head(r#"<link rel="stylesheet" href="public/tailwind.css">"#.to_string())
         .with_menu(None);
     // let cfg = dioxus::web::Config::new();
     LaunchBuilder::desktop().with_cfg(cfg).launch(App);
@@ -70,133 +75,6 @@ fn App() -> Element {
     }
 }
 
-#[component]
-pub fn Collections() -> Element {
-    rsx! {
-        div { class: "flex flex-col space-y-[10px]",
-            div { class: "flex space-x-[10px]",
-                Button {
-                    roundness: Roundness::Pill,
-                    fill_mode: FillMode::Fit,
-                    size: Size::Medium,
-                    string_placements: vec![ContentType::text("H").align_left(), ContentType::text("全部").align_right()],
-                    extended_css_class: "pl-[20px] pr-[25px] py-[12px]"
-                }
-                Button {
-                    roundness: Roundness::Pill,
-                    fill_mode: FillMode::Fit,
-                    size: Size::Medium,
-                    string_placements: vec![ContentType::text("H").align_center()],
-                    extended_css_class: "px-[20px] py-[12px]"
-                }
-                Button {
-                    roundness: Roundness::Pill,
-                    fill_mode: FillMode::Fit,
-                    size: Size::Medium,
-                    string_placements: vec![
-                        ContentType::text("H").align_left(),
-                        ContentType::text("分類夾").align_right(),
-                    ],
-                    extended_css_class: "pl-[20px] pr-[25px] py-[12px]"
-                }
-                Button {
-                    roundness: Roundness::Pill,
-                    fill_mode: FillMode::Fit,
-                    size: Size::Medium,
-                    string_placements: vec![ContentType::text("H").align_center()],
-                    extended_css_class: "px-[20px] py-[12px]"
-                }
-            }
-            div { class: "grid grid-flow-row grid-cols-[repeat(auto-fill,280px)] shrink-0 gap-[20px]",
-                CollectionBlock {
-                    extended_class: "rounded-[20px]",
-                    main_text: "創世幻想",
-                    hint: "不久前開啟•由我建立",
-                    picture: COLLECTION_PIC
-                }
-                CollectionBlock {
-                    extended_class: "rounded-[20px]",
-                    main_text: "text",
-                    hint: "arst",
-                    picture: COLLECTION_PIC
-                }
-                CollectionBlock {
-                    extended_class: "rounded-[20px]",
-                    main_text: "text",
-                    hint: "arst",
-                    picture: COLLECTION_PIC
-                }
-                CollectionBlock {
-                    extended_class: "rounded-[20px]",
-                    main_text: "text",
-                    hint: "arst",
-                    picture: COLLECTION_PIC
-                }
-                CollectionBlock {
-                    extended_class: "rounded-[20px]",
-                    main_text: "text",
-                    hint: "arst",
-                    picture: COLLECTION_PIC
-                }
-                CollectionBlock {
-                    extended_class: "rounded-[20px]",
-                    main_text: "text",
-                    hint: "arst",
-                    picture: COLLECTION_PIC
-                }
-            }
-        }
-        div {
-            Button {
-                roundness: Roundness::None,
-                string_placements: vec![
-                    Contents::new(
-                            [
-                                ContentType::text("新增更多收藏").css("text-[35px]"),
-                                ContentType::hint(
-                                    "透過探索功能下載社群收藏或是由你開始建立",
-                                ),
-                            ],
-                            Alignment::Left,
-                        )
-                        .css("flex flex-col gap-[15px]"),
-                    ContentType::text("F").align_right(),
-                ],
-                extended_css_class: "rounded-[20px] px-[40px] py-[50px]",
-                size: Size::Fat,
-                is_button: false
-            }
-        }
-    }
-}
-
-#[component]
-fn Explore() -> Element {
-    rsx! {
-        div {
-            Button {
-                roundness: Roundness::Top,
-                string_placements: vec![
-                    ContentType::text("Explore").align_left(),
-                    ContentType::text("thumbsup").align_right(),
-                ]
-            }
-        }
-    }
-}
-
-#[component]
-fn DownloadProgress() -> Element {
-    rsx! {
-        Button {
-            roundness: Roundness::Top,
-            string_placements: vec![
-                ContentType::text("Progress").align_left(),
-                ContentType::text("stop").align_right(),
-            ]
-        }
-    }
-}
 
 #[component]
 fn Layout() -> Element {
@@ -238,6 +116,35 @@ fn LayoutContainer(children: Element) -> Element {
         }
     }
 }
+
+#[component]
+fn Explore() -> Element {
+    rsx! {
+        div {
+            Button {
+                roundness: Roundness::Top,
+                string_placements: vec![
+                    ContentType::text("Explore").align_left(),
+                    ContentType::text("thumbsup").align_right(),
+                ]
+            }
+        }
+    }
+}
+
+#[component]
+fn DownloadProgress() -> Element {
+    rsx! {
+        Button {
+            roundness: Roundness::Top,
+            string_placements: vec![
+                ContentType::text("Progress").align_left(),
+                ContentType::text("stop").align_right(),
+            ]
+        }
+    }
+}
+
 
 
 #[component]
@@ -306,7 +213,7 @@ fn SideBar() -> Element {
                 div { class: "flex flex-col space-y-1",
                     {fat_button(Roundness::Top, HOME, "首頁", Pages::MainPage, None)},
                     {fat_button(Roundness::None, EXPLORE, "探索", Pages::Explore, None)},
-                    {fat_button(Roundness::Bottom, COLLECTIONS, "收藏庫", Pages::Collections, Some(onclick.into()))}
+                    {fat_button(Roundness::Bottom, SIDEBAR_COLLECTION, "收藏庫", Pages::Collections, Some(onclick.into()))}
                 }
                 // middle
                 div { class: "flex flex-col space-y-1",
