@@ -171,7 +171,7 @@ impl StringPlacements {
     pub fn is_empty(&self) -> bool {
         match &self {
             Self::Designed(x) => x.is_empty(),
-            Self::Custom(x) => x.as_ref().map_or(true, |x| x.dynamic_nodes.is_empty())
+            Self::Custom(x) => x.as_ref().map_or(true, |x| x.dynamic_nodes.is_empty()),
         }
     }
 }

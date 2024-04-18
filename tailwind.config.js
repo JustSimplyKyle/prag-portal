@@ -28,11 +28,9 @@ const animationPlugin = plugin(function({ matchComponents, theme, e }) {
 module.exports = {
   mode: "all",
   content: ["./src/**/*.{rs,html,css}", "./dist/**/*.html"],
-  safelift: [
-    {
-      pattern: /./,
-      variants: ['hover'],
-    },
+  safelist: [
+    'animate-slideLeft',
+    'animate-slideRight',
   ],
   theme: {
     fontFamily: {

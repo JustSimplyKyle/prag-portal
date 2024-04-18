@@ -31,8 +31,7 @@ pub fn CollectionBlock(
     #[props(into)] hint: String,
     picture: ImageAsset,
     #[props(extends=GlobalAttributes)] attributes: Vec<Attribute>,
-    #[props(default)]
-    extended_class: String,
+    #[props(default)] extended_class: String,
 ) -> Element {
     rsx! {
         div {
@@ -53,7 +52,6 @@ pub fn CollectionBlock(
 
 #[component]
 fn SuggestionPage() -> Element {
-
     let right_css =
         "bg-zinc-800 h-[52px] px-[25px] drop-shadow-lg rounded-full inline-flex items-center";
 
@@ -65,7 +63,8 @@ fn SuggestionPage() -> Element {
                     ContentType::hint("你還沒完成快速設定，我們建議你盡快完成"),
                 ],
                 Alignment::Left,
-            ).css("flex flex-col gap-[15px]"),
+            )
+            .css("flex flex-col gap-[15px]"),
             ContentType::svg(EXPAND_CONTENT)
                 .css(right_css)
                 .align_right(),
@@ -77,7 +76,8 @@ fn SuggestionPage() -> Element {
                     ContentType::hint("查看使用手冊與教學"),
                 ],
                 Alignment::Left,
-            ).css("flex flex-col gap-[15px]"),
+            )
+            .css("flex flex-col gap-[15px]"),
             ContentType::svg(EXPAND_CONTENT)
                 .css(right_css)
                 .align_right(),
@@ -89,7 +89,8 @@ fn SuggestionPage() -> Element {
                     ContentType::hint("開始探索 Minecraft 的第三方社群內容"),
                 ],
                 Alignment::Left,
-            ).css("flex flex-col gap-[15px]"),
+            )
+            .css("flex flex-col gap-[15px]"),
             ContentType::text("F").align_right(),
         ],
         vec![
@@ -99,7 +100,8 @@ fn SuggestionPage() -> Element {
                     ContentType::hint("建立你的個人化收藏"),
                 ],
                 Alignment::Left,
-            ).css("flex flex-col gap-[15px]"),
+            )
+            .css("flex flex-col gap-[15px]"),
             ContentType::text("F").align_right(),
         ],
         vec![
@@ -109,7 +111,8 @@ fn SuggestionPage() -> Element {
                     ContentType::hint("你可以透過風格化功能來裝飾你的收藏"),
                 ],
                 Alignment::Left,
-            ).css("flex flex-col gap-[15px]"),
+            )
+            .css("flex flex-col gap-[15px]"),
             ContentType::text("F").align_right(),
         ],
         vec![
@@ -119,7 +122,8 @@ fn SuggestionPage() -> Element {
                     ContentType::hint("啟動器更新已經準備就緒"),
                 ],
                 Alignment::Left,
-            ).css("flex flex-col gap-[15px]"),
+            )
+            .css("flex flex-col gap-[15px]"),
             ContentType::text("F").align_right(),
         ],
     ];

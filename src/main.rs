@@ -1,7 +1,7 @@
 #![allow(non_snake_case)]
 pub mod BaseComponents;
-pub mod MainPage;
 pub mod Collections;
+pub mod MainPage;
 
 use std::time::Duration;
 use tailwind_fuse::*;
@@ -10,8 +10,8 @@ use dioxus::prelude::*;
 use log::LevelFilter;
 
 use crate::BaseComponents::{Alignment, Button, ContentType, Roundness};
-use crate::MainPage::{MainPage, COLLECTION_PIC};
 use crate::Collections::Collections;
+use crate::MainPage::{MainPage, COLLECTION_PIC};
 
 pub const HOME: &str = manganis::mg!(file("./public/home.svg"));
 pub const EXPLORE: &str = manganis::mg!(file("./public/explore.svg"));
@@ -19,8 +19,6 @@ pub const SIDEBAR_COLLECTION: &str = manganis::mg!(file("./public/collections.sv
 pub const ARROW_RIGHT: &str = manganis::mg!(file("./public/keyboard_arrow_right.svg"));
 pub const SIM_CARD: &str = manganis::mg!(file("./public/sim_card_download.svg"));
 pub const TAILWIND_STR_: &str = manganis::mg!(file("./public/tailwind.css"));
-
-
 
 /// `(Pages)`: Current active page
 /// `Option<Pages>`: Previous page
@@ -43,6 +41,47 @@ pub enum Pages {
     Explore,
     Collections,
     DownloadProgress,
+    CollectionPage,
+}
+
+impl Pages {
+    pub fn slide_in_class(&self) -> String {
+        format!("flyinout-{}", self.to_string())
+    }
+    pub fn apply_slide_in(&self) {
+        eval(
+            r#"
+                function applyStyles(dataValue) {
+                    const groups = document.querySelectorAll('.group');            
+                    groups.forEach(group => {
+                        const prev = group.getAttribute('data-prev') === dataValue;
+                        const selected = group.getAttribute('data-selected') === dataValue;
+                        const target = group.querySelector('#flyinout-' + dataValue);
+
+                        // Reset styles first
+                        target.style.insetInlineStart = '';
+                        target.style.zIndex = '0';
+                        target.style.display = 'none';
+                        target.style.animation = '';
+
+                        if (prev) {
+                            target.style.insetInlineStart = '100dvw';
+                            target.style.zIndex = '100';
+                            target.style.display = 'block';                        
+                            target.style.animation = 'slideRight 500ms';
+                        } else if (selected) {
+                            target.style.zIndex = '50';
+                            target.style.display = 'block';                        
+                            target.style.animation = 'slideLeft 500ms';
+                        }
+                    });
+                }
+                applyStyles(await dioxus.recv());
+            "#,
+        )
+        .send(self.to_string().into())
+        .unwrap();
+    }
 }
 
 pub fn switch_active(x: Pages) {
@@ -60,6 +99,7 @@ impl ToString for Pages {
             Self::Explore => "explore",
             Self::Collections => "collections",
             Self::DownloadProgress => "progress",
+            Self::CollectionPage => "collection-page",
         }
         .into()
     }
@@ -75,11 +115,12 @@ fn App() -> Element {
     }
 }
 
-
 #[component]
 fn Layout() -> Element {
     let selected = ACTIVE().0;
     let prev = ACTIVE().1;
+    Pages::CollectionPage.apply_slide_in();
+    Pages::DownloadProgress.apply_slide_in();
     rsx! {
         div {
             class: "w-screen inline-flex self-stretch mt-[20px] group flex overflow-hidden",
@@ -96,9 +137,8 @@ fn Layout() -> Element {
                 div { class: "absolute inset-0 z-0 min-h-full animation-[collections^slideUp^explore^slideOutDown] animation-[collections^slideUp^main-page^slideOutDown]",
                     LayoutContainer { Collections {} }
                 }
-                div { class: "absolute inset-0 z-0 min-h-full min-w-full flyinout-[progress]",
-                    LayoutContainer { DownloadProgress {} }
-                }
+                div { class: "absolute inset-0 z-0 min-h-full min-w-full", id: Pages::DownloadProgress.slide_in_class(), LayoutContainer { DownloadProgress {} } }
+                div { class: "absolute inset-0 z-0 min-h-full min-w-full", id: Pages::CollectionPage.slide_in_class(), LayoutContainer { CollectionPage {} } }
             }
         }
     }
@@ -112,6 +152,18 @@ fn LayoutContainer(children: Element) -> Element {
         div { class: "bg-background min-h-screen rounded-xl p-8 min-w-full",
             div { class: "flex flex-col space-y-[20px] transition-all xl:items-center xl:*:justify-center xl:*:max-w-[1180px] xl:*:w-full",
                 {children}
+            }
+        }
+    }
+}
+
+#[component]
+fn CollectionPage() -> Element {
+    rsx! {
+        div {
+            Button {
+                roundness: Roundness::Top,
+                string_placements: vec![ContentType::text("Ctr").align_left(), ContentType::text("no").align_right()]
             }
         }
     }
@@ -145,8 +197,6 @@ fn DownloadProgress() -> Element {
     }
 }
 
-
-
 #[component]
 fn SideBar() -> Element {
     let mut expanded = use_signal(|| false);
@@ -178,7 +228,7 @@ fn SideBar() -> Element {
         switch_active(Pages::Collections);
         expanded.toggle();
     };
-    let p = rsx! {
+    let folded_images = rsx! {
         div { class: "transition-all",
             {ContentType::svg(HOME).css("hidden group-aria-expanded:block").get_element()},
             div { class: "flex items-center space-x-0",
@@ -217,7 +267,7 @@ fn SideBar() -> Element {
                 }
                 // middle
                 div { class: "flex flex-col space-y-1",
-                    Button { roundness: Roundness::Top, string_placements: p, extended_css_class: "bg-background" }
+                    Button { roundness: Roundness::Top, string_placements: folded_images, extended_css_class: "bg-background" }
                     Button {
                         roundness: Roundness::None,
                         string_placements: vec![
@@ -228,6 +278,18 @@ fn SideBar() -> Element {
                                 .align_left(),
                             ContentType::text("新的收藏").align_right().css("group-aria-busy:hidden"),
                         ],
+                        signal: Pages::CollectionPage,
+                        onclick: move |()| {
+                            let prev = ACTIVE().1;
+                            if ACTIVE().0 == Pages::CollectionPage {
+                                if let Some(prev) = prev {
+                                    switch_active(prev);
+                                    ACTIVE.write().1 = Some(Pages::CollectionPage);
+                                }
+                            } else {
+                                switch_active(Pages::CollectionPage);
+                            }
+                        },
                         extended_css_class: "bg-background transition-all delay-[25ms] group-aria-expanded:w-20 group-aria-expanded:min-h-20 group-aria-expanded:p-0"
                     }
                 }

@@ -1,6 +1,9 @@
 use dioxus::prelude::*;
 
-use crate::{BaseComponents::{Alignment, Button, ContentType, Contents, FillMode, Roundness, Size}, MainPage::{CollectionBlock, COLLECTION_PIC}};
+use crate::{
+    BaseComponents::{Alignment, Button, ContentType, Contents, FillMode, Roundness, Size},
+    MainPage::{CollectionBlock, COLLECTION_PIC},
+};
 
 #[component]
 pub fn Collections() -> Element {
@@ -39,7 +42,7 @@ pub fn Collections() -> Element {
                     extended_css_class: "px-[20px] py-[12px]"
                 }
             }
-            div { class: "grid grid-flow-row grid-cols-[repeat(auto-fill,280px)] shrink-0 gap-[20px]",
+            div { class: "grid grid-flow-row grid-cols-[repeat(auto-fill,280px)] gap-[20px]",
                 CollectionBlock {
                     extended_class: "rounded-[20px]",
                     main_text: "創世幻想",
