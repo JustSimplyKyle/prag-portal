@@ -45,9 +45,55 @@ pub enum Pages {
 }
 
 impl Pages {
-    pub fn slide_in_class(&self) -> String {
+    pub fn slide_in_id(&self) -> String {
         format!("flyinout-{}", self.to_string())
     }
+
+    /// Applies slide-in animations to HTML elements based on data attributes.
+    ///
+    /// This function dynamically applies CSS animations to elements within a webpage
+    /// using Tailwind CSS-defined animations. It targets elements with a specific class ('.group')
+    /// and adjusts their styles according to their data attributes.
+    ///
+    /// ## Attributes
+    /// The function expects HTML elements to have certain attributes and structure:
+    /// * Top level element should have the class `group`.
+    /// * Each `group` element should contain at least one child element with an `id` that is acquired by `self.slide_in_id()`
+    ///
+    /// ## Data Attributes
+    /// * `data-prev`: This attribute specifies whether the element was the previous element in a
+    ///   sequence. If `true`, the `slideRight` animation is applied.
+    /// * `data-selected`: This attribute indicates if the element is the currently selected one.
+    ///   If `true`, the `slideLeft` animation is applied.
+    ///
+    /// ## Usage
+    /// To use this function, ensure that your HTML elements are set up correctly with the
+    /// required `id` and data attributes. Additionally, for most use cases involving animations or transitions,
+    /// it's essential to manage the positioning context correctly:
+    ///
+    /// - The parent container should have a **relative** positioning to serve as the positioning context for its children.
+    /// - Child elements, which are the targets of the animations, should be styled with **absolute** positioning to overlay
+    ///   within the relative container seamlessly.
+    ///
+    /// It is crucial to call this function at the start of each component's lifecycle to properly initialize
+    /// the animations.
+    ///
+    /// Here is an example element setup:
+    ///
+    /// ```rust
+    /// fn Component() {
+    ///     Pages::DownloadProgress.apply_slide_in();
+    ///     rsx! {
+    ///         div {
+    ///             "data-selected": selected.to_string(),
+    ///             "data-prev": prev.map_or_else(String::new, |x| x.to_string()),
+    ///             div { class: "w-full min-h-screen relative",
+    ///                 div { class: "absolute inset-0 z-0 min-h-full min-w-full", id: Pages::DownloadProgress.slide_in_id(), LayoutContainer { DownloadProgress {} } }
+    ///             }
+    ///         }
+    ///     }
+    /// }
+    /// ```
     pub fn apply_slide_in(&self) {
         eval(
             r#"
@@ -137,8 +183,8 @@ fn Layout() -> Element {
                 div { class: "absolute inset-0 z-0 min-h-full animation-[collections^slideUp^explore^slideOutDown] animation-[collections^slideUp^main-page^slideOutDown]",
                     LayoutContainer { Collections {} }
                 }
-                div { class: "absolute inset-0 z-0 min-h-full min-w-full", id: Pages::DownloadProgress.slide_in_class(), LayoutContainer { DownloadProgress {} } }
-                div { class: "absolute inset-0 z-0 min-h-full min-w-full", id: Pages::CollectionPage.slide_in_class(), LayoutContainer { CollectionPage {} } }
+                div { class: "absolute inset-0 z-0 min-h-full min-w-full", id: Pages::DownloadProgress.slide_in_id(), LayoutContainer { DownloadProgress {} } }
+                div { class: "absolute inset-0 z-0 min-h-full min-w-full", id: Pages::CollectionPage.slide_in_id(), LayoutContainer { CollectionPage {} } }
             }
         }
     }
@@ -187,12 +233,14 @@ fn Explore() -> Element {
 #[component]
 fn DownloadProgress() -> Element {
     rsx! {
-        Button {
-            roundness: Roundness::Top,
-            string_placements: vec![
-                ContentType::text("Progress").align_left(),
-                ContentType::text("stop").align_right(),
-            ]
+        div {
+            Button {
+                roundness: Roundness::Top,
+                string_placements: vec![
+                    ContentType::text("Progress").align_left(),
+                    ContentType::text("stop").align_right(),
+                ]
+            }
         }
     }
 }
