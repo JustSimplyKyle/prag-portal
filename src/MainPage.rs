@@ -35,11 +35,13 @@ pub fn CollectionBlock(
     #[props(extends=GlobalAttributes)] attributes: Vec<Attribute>,
     #[props(default)] extended_class: String,
 ) -> Element {
-    let (roundness, extended_class): (Vec<_>, Vec<_>) = extended_class.split(" ").partition(|x| x.contains("rounded"));
+    let (roundness, extended_class): (Vec<_>, Vec<_>) = extended_class
+        .split(" ")
+        .partition(|x| x.contains("rounded"));
     let extended_class = extended_class.join(" ");
     let mut img_class = String::from("h-full w-full object-cover rounded-[5px]");
     for x in roundness {
-        img_class = tw_merge!(img_class,x)
+        img_class = tw_merge!(img_class, x)
     }
     rsx! {
         div {
@@ -48,17 +50,17 @@ pub fn CollectionBlock(
                 if gradient {
                     div { class: "absolute inset-0 bg-gradient-to-t from-deep-background to-23%" }
                 }
-                div { class: "absolute inset-0 px-5 pt-5 pb-[25px] flex flex-col gap-[15px] text-ellipsis overflow-hidden justify-end items-start",
+                div { class: "absolute inset-0 px-5 pt-5 pb-[25px] flex flex-col gap-[15px] *:text-ellipsis overflow-hidden justify-end items-start",
                     {
                         if let Some(x) = main_text {
-                            rsx! { div { class: "font-display text-3xl leading-normal capsize text-white font-bold", {x} } }
+                            rsx! { div { class: "text-3xl leading-normal capsize text-white font-bold", {x} } }
                         } else {
                             None
                         }
                     },
                     {
                         if let Some(x) = hint {
-                            rsx! { div { class: "font-display text-[15px] leading-normal capsize text-white text-opacity-50", {x} } }
+                            rsx! { div { class: "text-[15px] leading-normal capsize text-white text-opacity-50", {x} } }
                         } else {
                             None
                         }
@@ -250,7 +252,8 @@ fn CollectionsPage() -> Element {
                     Contents::new(
                             vec![
                                 ContentType::text("我的錦集").css("text-[35px]"),
-                                ContentType::hint("你最愛的收藏都在這裡"),
+                                ContentType::hint("你最愛的收藏都在這裡")
+                                    .css("text-[18px]"),
                             ],
                             Alignment::Left,
                         )
@@ -275,7 +278,7 @@ fn CollectionsPage() -> Element {
                         picture: COLLECTION_PIC
                     }
                     CollectionBlock {
-                        main_text: "創世幻想",
+                        main_text: "創世幻想arstarstat",
                         hint: "不久前開啟•由我建立",
                         picture: COLLECTION_PIC
                     }

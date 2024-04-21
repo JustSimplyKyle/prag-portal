@@ -3,12 +3,12 @@ pub mod BaseComponents;
 pub mod Collections;
 pub mod MainPage;
 
+use dioxus::desktop::tao::dpi::PhysicalSize;
+use dioxus::desktop::WindowBuilder;
 use std::hash::{DefaultHasher, Hash, Hasher};
 use std::rc::Rc;
 use std::sync::Arc;
 use std::time::Duration;
-use dioxus::desktop::tao::dpi::PhysicalSize;
-use dioxus::desktop::WindowBuilder;
 use tailwind_fuse::*;
 
 use dioxus::prelude::*;
@@ -28,7 +28,8 @@ pub const TAILWIND_STR_: &str = manganis::mg!(file("./public/tailwind.css"));
 
 /// `(Pages)`: Current active page
 /// `Option<Pages>`: Previous page
-static ACTIVE_PAGE: GlobalSignal<(Pages, Option<Pages>)> = GlobalSignal::new(|| (Pages::MainPage, None));
+static ACTIVE_PAGE: GlobalSignal<(Pages, Option<Pages>)> =
+    GlobalSignal::new(|| (Pages::MainPage, None));
 
 fn main() {
     dioxus_logger::init(LevelFilter::Info).expect("failed to init logger");
@@ -37,7 +38,7 @@ fn main() {
         .with_window(
             WindowBuilder::new()
                 .with_decorations(true)
-                .with_inner_size(PhysicalSize::new(1600, 920))
+                .with_inner_size(PhysicalSize::new(1600, 920)),
         )
         .with_menu(None);
     LaunchBuilder::desktop().with_cfg(cfg).launch(App);
@@ -164,7 +165,6 @@ impl Pages {
     }
 }
 
-
 impl ToString for Pages {
     fn to_string(&self) -> String {
         match self {
@@ -172,7 +172,12 @@ impl ToString for Pages {
             Self::Explore => "explore".into(),
             Self::Collections => "collections".into(),
             Self::DownloadProgress => "progress".into(),
-            _ => dbg!(format!("collection-page-{}", self.hashed_value())),
+            Self::CollectionPage(x) => dbg!({
+                let mut hasher = DefaultHasher::new();
+                x.hash(&mut hasher);
+                let hash = hasher.finish();
+                format!("collection-page-{}", hash)
+            }),
         }
     }
 }
@@ -180,8 +185,7 @@ impl ToString for Pages {
 #[component]
 fn App() -> Element {
     rsx! {
-        // link { rel: "stylesheet", href: "public/tailwind.css" }
-        div { class: "bg-deep-background min-h-screen min-w-full",
+        div { class: "bg-deep-background min-h-screen min-w-full font-display leading-normal",
             div { class: "[&_*]:transform-gpu", Layout {} }
         }
     }
@@ -231,7 +235,6 @@ fn LayoutContainer(children: Element, #[props(default)] extended_class: String) 
     }
 }
 
-
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
 pub enum CollectionPageTopSelection {
     Mods,
@@ -240,8 +243,10 @@ pub enum CollectionPageTopSelection {
     ShaderPacks,
 }
 
-const A: GlobalSignal<(CollectionPageTopSelection, Option<CollectionPageTopSelection>)> = GlobalSignal::new(|| (CollectionPageTopSelection::Mods, None));
-
+const A: GlobalSignal<(
+    CollectionPageTopSelection,
+    Option<CollectionPageTopSelection>,
+)> = GlobalSignal::new(|| (CollectionPageTopSelection::Mods, None));
 
 impl ActiveCompare for CollectionPageTopSelection {
     fn hashed_value(&self) -> u64 {
@@ -269,7 +274,9 @@ fn CollectionPage() -> Element {
         div { class: "flex flex-col",
             div { class: "sticky top-0 p-[50px] rounded-2xl bg-slate-800 grid grid-flow-col items-stretch",
                 div { class: "flex flex-col space-y-[35px]",
-                    div { class: "text-white font-black text-[80px] leading-none", "新的收藏" }
+                    div { class: "text-white font-black text-[80px] leading-normal capsize",
+                        "新的收藏"
+                    }
                     Button {
                         roundness: Roundness::Pill,
                         string_placements: vec![ContentType::text("F").css("w-[30px] h-[30px]").align_center()],

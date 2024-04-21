@@ -1842,6 +1842,10 @@ html {
   margin-bottom: calc(3px * var(--tw-space-y-reverse));
 }
 
+.self-center {
+  align-self: center;
+}
+
 .self-stretch {
   align-self: stretch;
 }
@@ -2193,6 +2197,11 @@ html {
   font-size: 17px;
 }
 
+.text-\[18px\] {
+  --font-size-px: 18;
+  font-size: 18px;
+}
+
 .text-\[1em\] {
   --font-size-px: 1;
   font-size: 1em;
@@ -2218,11 +2227,6 @@ html {
 .leading-\[78px\] {
   --line-height-offset: calc((((var(--line-height-scale) * var(--font-size-px)) - 78) / 2) / var(--font-size-px));
   line-height: 78px;
-}
-
-.leading-none {
-  --line-height-offset: calc((((var(--line-height-scale) * var(--font-size-px)) - calc(1 * var(--font-size-px))) / 2) / var(--font-size-px));
-  line-height: 1;
 }
 
 .leading-normal {
@@ -2256,6 +2260,10 @@ body {
 
 .\*\:overflow-scroll > * {
   overflow: scroll;
+}
+
+.\*\:text-ellipsis > * {
+  text-overflow: ellipsis;
 }
 
 .aria-expanded\:w-\[80px\][aria-expanded="true"] {

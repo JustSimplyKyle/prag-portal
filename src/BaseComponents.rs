@@ -93,9 +93,9 @@ pub enum Size {
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, TwVariant)]
 pub enum ItemsCount {
-    #[tw(class = "flex justify-center")]
+    #[tw(class = "flex justify-center items-center")]
     One,
-    #[tw(default, class = "grid grid-flow-col justify-stretch")]
+    #[tw(default, class = "grid grid-flow-col justify-stretch items-center")]
     AboveOne,
 }
 
@@ -143,7 +143,7 @@ pub fn Button(props: ButtonProps) -> Element {
         mut attributes,
         size,
         fill_mode,
-        focus_color_change
+        focus_color_change,
     } = props;
     attributes.retain(|x| x.name != "class");
     let class = ButtonClass {
@@ -152,13 +152,11 @@ pub fn Button(props: ButtonProps) -> Element {
         size,
         fill_mode,
     }
-    .with_class(
-        if focus_color_change {
-            "aria-selected:bg-white aria-selected:text-black"
-        } else {
-            ""
-        }
-    );
+    .with_class(if focus_color_change {
+        "aria-selected:bg-white aria-selected:text-black"
+    } else {
+        ""
+    });
     let class = tw_merge!(class, extended_css_class);
     rsx! {
         div {
@@ -390,7 +388,7 @@ impl ContentType {
     #[must_use]
     pub fn text(string: impl Into<String>) -> Content {
         let content_type = Self::Text(string.into());
-        let css = String::from("font-display text-[1em] leading-normal capsize");
+        let css = String::from("text-[1em] leading-normal capsize");
         Content {
             content: content_type,
             css,
@@ -414,7 +412,7 @@ impl ContentType {
     #[must_use]
     pub fn hint(string: impl Into<String>) -> Content {
         let content_type = Self::Hint(string.into());
-        let css = String::from("font-display text-[17px] text-hint leading-normal capsize");
+        let css = String::from("text-[17px] text-hint leading-normal capsize");
         Content {
             content: content_type,
             css,

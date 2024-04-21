@@ -3,6 +3,7 @@ use dioxus::prelude::*;
 use crate::{
     BaseComponents::{Alignment, Button, ContentType, Contents, FillMode, Roundness, Size},
     MainPage::{CollectionBlock, COLLECTION_PIC},
+    EXPLORE,
 };
 
 #[component]
@@ -14,7 +15,12 @@ pub fn Collections() -> Element {
                     roundness: Roundness::Pill,
                     fill_mode: FillMode::Fit,
                     size: Size::Medium,
-                    string_placements: vec![ContentType::text("H").align_left(), ContentType::text("全部").align_right()],
+                    string_placements: vec![
+                        ContentType::svg(EXPLORE)
+                            .css("flex items-center justify-center w-[30px] h-[30px]")
+                            .align_left(),
+                        ContentType::text("全部").align_right(),
+                    ],
                     extended_css_class: "pl-[20px] pr-[25px] py-[12px]"
                 }
                 Button {
