@@ -1,17 +1,18 @@
+use std::rc::Rc;
+
 use dioxus::prelude::*;
 
 use tailwind_fuse::*;
-
-use crate::{switch_active, Pages, ACTIVE};
 
 #[derive(Clone, Props, PartialEq)]
 pub struct ButtonProps {
     pub roundness: Roundness,
     #[props(into)]
     pub string_placements: StringPlacements,
-    pub signal: Option<Pages>,
     #[props(default)]
     pub extended_css_class: String,
+    #[props(into)]
+    pub signal: Option<Rc<dyn ActiveCompare>>,
     #[props(default = true)]
     pub is_button: bool,
     pub onclick: Option<EventHandler>,
@@ -21,11 +22,24 @@ pub struct ButtonProps {
     pub size: Size,
     #[props(default)]
     pub fill_mode: FillMode,
+    #[props(default = true)]
+    pub focus_color_change: bool,
 }
 
+pub trait ActiveCompare {
+    fn compare(&self) -> bool;
+    fn switch_active(&self);
+    fn hashed_value(&self) -> u64;
+}
+
+impl<'a, 'b> PartialEq<dyn ActiveCompare + 'b> for dyn ActiveCompare + 'a {
+    fn eq(&self, other: &(dyn ActiveCompare + 'b)) -> bool {
+        self.hashed_value() == other.hashed_value()
+    }
+}
 #[derive(TwClass, Clone, Copy)]
 #[tw(
-    class = "transition-all ease-in-out drop-shadow-lg duration-300 aria-selected:bg-white aria-selected:text-black text-white bg-deep-background items-center"
+    class = "transition-all ease-in-out drop-shadow-lg duration-300 text-white bg-deep-background items-center"
 )]
 pub struct ButtonClass {
     pub roundness: Roundness,
@@ -107,6 +121,16 @@ pub enum Roundness {
     Pill,
 }
 
+/// # Props
+/// - roundness: `Roundness`
+/// - string_placements: `StringPlacements`,
+/// - signal: `Option<Pages>`,
+/// - extended_css_class: `String`, // optional
+/// - is_button: `bool`, // default = true
+/// - onclick: `Option<EventHandler>`,
+/// - attributes: `Vec<Attribute>`,
+/// - size: `Size`, // optional, default = Size::Fat
+/// - fill_mode: `FillMode`, // optional default = FillMode::Fill
 #[component]
 pub fn Button(props: ButtonProps) -> Element {
     let ButtonProps {
@@ -119,6 +143,7 @@ pub fn Button(props: ButtonProps) -> Element {
         mut attributes,
         size,
         fill_mode,
+        focus_color_change
     } = props;
     attributes.retain(|x| x.name != "class");
     let class = ButtonClass {
@@ -127,17 +152,24 @@ pub fn Button(props: ButtonProps) -> Element {
         size,
         fill_mode,
     }
-    .with_class(extended_css_class);
+    .with_class(
+        if focus_color_change {
+            "aria-selected:bg-white aria-selected:text-black"
+        } else {
+            ""
+        }
+    );
+    let class = tw_merge!(class, extended_css_class);
     rsx! {
         div {
             class,
             role: if is_button { "button" } else { "" },
-            aria_selected: Some(ACTIVE().0) == signal,
+            aria_selected: signal.as_ref().map(|x| x.compare()).unwrap_or(false),
             onclick: move |_| {
                 if let Some(x) = onclick {
                     x(());
                 } else if let Some(x) = &signal {
-                    switch_active(*x);
+                    x.switch_active();
                 }
             },
             ..attributes,
@@ -358,7 +390,7 @@ impl ContentType {
     #[must_use]
     pub fn text(string: impl Into<String>) -> Content {
         let content_type = Self::Text(string.into());
-        let css = String::new();
+        let css = String::from("font-display text-[1em] leading-normal capsize");
         Content {
             content: content_type,
             css,
@@ -382,7 +414,7 @@ impl ContentType {
     #[must_use]
     pub fn hint(string: impl Into<String>) -> Content {
         let content_type = Self::Hint(string.into());
-        let css = String::from("text-[17px] text-hint leading-3");
+        let css = String::from("font-display text-[17px] text-hint leading-normal capsize");
         Content {
             content: content_type,
             css,
@@ -425,7 +457,7 @@ impl Alignment {
     pub fn get_alignment_class(&self) -> String {
         match self {
             Self::Left => "text-left",
-            Self::Center => "text-center",
+            Self::Center => "text-center flex justify-center items-center",
             Self::Right => "text-right flex justify-end items-center",
             Self::Custom(ref class) => class,
         }

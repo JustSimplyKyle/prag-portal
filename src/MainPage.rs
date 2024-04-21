@@ -25,25 +25,44 @@ pub fn MainPage() -> Element {
     }
 }
 
+/// Creates a Collection Block with a `280px` square, with a default roundness of `5px`
 #[component]
 pub fn CollectionBlock(
-    #[props(into)] main_text: String,
-    #[props(into)] hint: String,
+    #[props(into)] main_text: Option<String>,
+    #[props(into)] hint: Option<String>,
     picture: ImageAsset,
+    #[props(default = true)] gradient: bool,
     #[props(extends=GlobalAttributes)] attributes: Vec<Attribute>,
     #[props(default)] extended_class: String,
 ) -> Element {
+    let (roundness, extended_class): (Vec<_>, Vec<_>) = extended_class.split(" ").partition(|x| x.contains("rounded"));
+    let extended_class = extended_class.join(" ");
+    let mut img_class = String::from("h-full w-full object-cover rounded-[5px]");
+    for x in roundness {
+        img_class = tw_merge!(img_class,x)
+    }
     rsx! {
         div {
             div { class: tw_merge!("relative h-[280px] w-[280px]", extended_class), ..attributes,
-                img {
-                    class: "min-h-full min-w-full object-cover rounded-[5px]",
-                    src: picture
+                img { class: img_class, src: picture }
+                if gradient {
+                    div { class: "absolute inset-0 bg-gradient-to-t from-deep-background to-23%" }
                 }
-                div { class: "absolute inset-0 bg-gradient-to-t from-deep-background to-23%" }
-                div { class: "absolute inset-0 px-5 pt-5 pb-[25px] flex flex-col justify-end items-start",
-                    div { class: "text-3xl text-white font-bold", {main_text} }
-                    div { class: "text-[15px] text-white text-opacity-50", {hint} }
+                div { class: "absolute inset-0 px-5 pt-5 pb-[25px] flex flex-col gap-[15px] text-ellipsis overflow-hidden justify-end items-start",
+                    {
+                        if let Some(x) = main_text {
+                            rsx! { div { class: "font-display text-3xl leading-normal capsize text-white font-bold", {x} } }
+                        } else {
+                            None
+                        }
+                    },
+                    {
+                        if let Some(x) = hint {
+                            rsx! { div { class: "font-display text-[15px] leading-normal capsize text-white text-opacity-50", {x} } }
+                        } else {
+                            None
+                        }
+                    }
                 }
             }
         }
@@ -59,7 +78,7 @@ fn SuggestionPage() -> Element {
         vec![
             Contents::new(
                 [
-                    ContentType::text("建議動作").css("text-3xl leading-[22px]"),
+                    ContentType::text("建議動作").css("text-3xl"),
                     ContentType::hint("你還沒完成快速設定，我們建議你盡快完成"),
                 ],
                 Alignment::Left,
@@ -72,7 +91,7 @@ fn SuggestionPage() -> Element {
         vec![
             Contents::new(
                 [
-                    ContentType::text("需要幫助？").css("text-3xl leading-[22px]"),
+                    ContentType::text("需要幫助？").css("text-3xl"),
                     ContentType::hint("查看使用手冊與教學"),
                 ],
                 Alignment::Left,
@@ -85,7 +104,7 @@ fn SuggestionPage() -> Element {
         vec![
             Contents::new(
                 [
-                    ContentType::text("探索內容").css("text-3xl leading-[22px]"),
+                    ContentType::text("探索內容").css("text-3xl"),
                     ContentType::hint("開始探索 Minecraft 的第三方社群內容"),
                 ],
                 Alignment::Left,
@@ -96,7 +115,7 @@ fn SuggestionPage() -> Element {
         vec![
             Contents::new(
                 [
-                    ContentType::text("創造中心").css("text-3xl leading-[22px]"),
+                    ContentType::text("創造中心").css("text-3xl"),
                     ContentType::hint("建立你的個人化收藏"),
                 ],
                 Alignment::Left,
@@ -107,7 +126,7 @@ fn SuggestionPage() -> Element {
         vec![
             Contents::new(
                 [
-                    ContentType::text("打造個人化收藏").css("text-3xl leading-[22px]"),
+                    ContentType::text("打造個人化收藏").css("text-3xl"),
                     ContentType::hint("你可以透過風格化功能來裝飾你的收藏"),
                 ],
                 Alignment::Left,
@@ -118,7 +137,7 @@ fn SuggestionPage() -> Element {
         vec![
             Contents::new(
                 [
-                    ContentType::text("建議動作").css("text-3xl leading-[22px]"),
+                    ContentType::text("建議動作").css("text-3xl"),
                     ContentType::hint("啟動器更新已經準備就緒"),
                 ],
                 Alignment::Left,
@@ -230,7 +249,7 @@ fn CollectionsPage() -> Element {
                 string_placements: vec![
                     Contents::new(
                             vec![
-                                ContentType::text("我的錦集").css("text-[35px] leading-[26px]"),
+                                ContentType::text("我的錦集").css("text-[35px]"),
                                 ContentType::hint("你最愛的收藏都在這裡"),
                             ],
                             Alignment::Left,

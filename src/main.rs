@@ -3,15 +3,21 @@ pub mod BaseComponents;
 pub mod Collections;
 pub mod MainPage;
 
+use std::hash::{DefaultHasher, Hash, Hasher};
+use std::rc::Rc;
+use std::sync::Arc;
 use std::time::Duration;
+use dioxus::desktop::tao::dpi::PhysicalSize;
+use dioxus::desktop::WindowBuilder;
 use tailwind_fuse::*;
 
 use dioxus::prelude::*;
 use log::LevelFilter;
+use BaseComponents::ActiveCompare;
 
-use crate::BaseComponents::{Alignment, Button, ContentType, Roundness};
+use crate::BaseComponents::{Alignment, Button, ContentType, FillMode, Roundness};
 use crate::Collections::Collections;
-use crate::MainPage::{MainPage, COLLECTION_PIC};
+use crate::MainPage::{CollectionBlock, MainPage, COLLECTION_PIC};
 
 pub const HOME: &str = manganis::mg!(file("./public/home.svg"));
 pub const EXPLORE: &str = manganis::mg!(file("./public/explore.svg"));
@@ -22,26 +28,54 @@ pub const TAILWIND_STR_: &str = manganis::mg!(file("./public/tailwind.css"));
 
 /// `(Pages)`: Current active page
 /// `Option<Pages>`: Previous page
-static ACTIVE: GlobalSignal<(Pages, Option<Pages>)> = GlobalSignal::new(|| (Pages::MainPage, None));
+static ACTIVE_PAGE: GlobalSignal<(Pages, Option<Pages>)> = GlobalSignal::new(|| (Pages::MainPage, None));
 
 fn main() {
     dioxus_logger::init(LevelFilter::Info).expect("failed to init logger");
 
     let cfg = dioxus::desktop::Config::new()
-        // .with_custom_head(r#"<link rel="stylesheet" href="public/tailwind.css">"#.to_string())
+        .with_window(
+            WindowBuilder::new()
+                .with_decorations(true)
+                .with_inner_size(PhysicalSize::new(1600, 920))
+        )
         .with_menu(None);
-    // let cfg = dioxus::web::Config::new();
     LaunchBuilder::desktop().with_cfg(cfg).launch(App);
-    // LaunchBuilder::new().with_cfg(cfg).launch(App);
 }
 
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Hash)]
 pub enum Pages {
     MainPage,
     Explore,
     Collections,
     DownloadProgress,
-    CollectionPage,
+    CollectionPage(Arc<str>),
+}
+
+impl Pages {
+    fn new_collection_page(s: impl Into<Arc<str>>) -> Pages {
+        Pages::CollectionPage(s.into())
+    }
+}
+
+impl ActiveCompare for Pages {
+    fn hashed_value(&self) -> u64 {
+        let mut hasher = DefaultHasher::new();
+        self.hash(&mut hasher);
+        hasher.finish()
+    }
+
+    fn compare(&self) -> bool {
+        &ACTIVE_PAGE().0 == self
+    }
+
+    fn switch_active(&self) {
+        let prev = ACTIVE_PAGE().0;
+        if &prev != self {
+            ACTIVE_PAGE.write().1 = Some(prev);
+        }
+        ACTIVE_PAGE.write().0 = self.clone();
+    }
 }
 
 impl Pages {
@@ -130,24 +164,16 @@ impl Pages {
     }
 }
 
-pub fn switch_active(x: Pages) {
-    let prev = ACTIVE().0;
-    if prev != x {
-        ACTIVE.write().1 = Some(prev);
-    }
-    ACTIVE.write().0 = x;
-}
 
 impl ToString for Pages {
     fn to_string(&self) -> String {
         match self {
-            Self::MainPage => "main-page",
-            Self::Explore => "explore",
-            Self::Collections => "collections",
-            Self::DownloadProgress => "progress",
-            Self::CollectionPage => "collection-page",
+            Self::MainPage => "main-page".into(),
+            Self::Explore => "explore".into(),
+            Self::Collections => "collections".into(),
+            Self::DownloadProgress => "progress".into(),
+            _ => dbg!(format!("collection-page-{}", self.hashed_value())),
         }
-        .into()
     }
 }
 
@@ -163,13 +189,13 @@ fn App() -> Element {
 
 #[component]
 fn Layout() -> Element {
-    let selected = ACTIVE().0;
-    let prev = ACTIVE().1;
-    Pages::CollectionPage.apply_slide_in();
+    let selected = ACTIVE_PAGE().0;
+    let prev = ACTIVE_PAGE().1;
+    Pages::new_collection_page("新的收藏").apply_slide_in();
     Pages::DownloadProgress.apply_slide_in();
     rsx! {
         div {
-            class: "w-screen inline-flex self-stretch mt-[20px] group flex overflow-hidden",
+            class: "w-screen inline-flex self-stretch group flex overflow-hidden",
             "data-selected": selected.to_string(),
             "data-prev": prev.map_or_else(String::new, |x| x.to_string()),
             SideBar {}
@@ -184,7 +210,9 @@ fn Layout() -> Element {
                     LayoutContainer { Collections {} }
                 }
                 div { class: "absolute inset-0 z-0 min-h-full min-w-full", id: Pages::DownloadProgress.slide_in_id(), LayoutContainer { DownloadProgress {} } }
-                div { class: "absolute inset-0 z-0 min-h-full min-w-full", id: Pages::CollectionPage.slide_in_id(), LayoutContainer { CollectionPage {} } }
+                div { class: "absolute inset-0 z-0 min-h-full min-w-full", id: Pages::new_collection_page("新的收藏").slide_in_id(),
+                    LayoutContainer { extended_class: "p-0", CollectionPage {} }
+                }
             }
         }
     }
@@ -193,9 +221,9 @@ fn Layout() -> Element {
 /// Does dynmaic rendering
 /// do not wrap the children in another div
 #[component]
-fn LayoutContainer(children: Element) -> Element {
+fn LayoutContainer(children: Element, #[props(default)] extended_class: String) -> Element {
     rsx! {
-        div { class: "bg-background min-h-screen rounded-xl p-8 min-w-full",
+        div { class: tw_merge!("bg-background min-h-screen rounded-xl p-8 min-w-full", extended_class),
             div { class: "flex flex-col space-y-[20px] transition-all xl:items-center xl:*:justify-center xl:*:max-w-[1180px] xl:*:w-full",
                 {children}
             }
@@ -203,13 +231,132 @@ fn LayoutContainer(children: Element) -> Element {
     }
 }
 
+
+#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
+pub enum CollectionPageTopSelection {
+    Mods,
+    World,
+    ResourcePack,
+    ShaderPacks,
+}
+
+const A: GlobalSignal<(CollectionPageTopSelection, Option<CollectionPageTopSelection>)> = GlobalSignal::new(|| (CollectionPageTopSelection::Mods, None));
+
+
+impl ActiveCompare for CollectionPageTopSelection {
+    fn hashed_value(&self) -> u64 {
+        let mut hasher = DefaultHasher::new();
+        self.hash(&mut hasher);
+        hasher.finish()
+    }
+
+    fn compare(&self) -> bool {
+        &A().0 == self
+    }
+
+    fn switch_active(&self) {
+        let prev = A().0;
+        if &prev != self {
+            A.write().1 = Some(prev);
+        }
+        A.write().0 = *self;
+    }
+}
+
 #[component]
 fn CollectionPage() -> Element {
     rsx! {
-        div {
-            Button {
-                roundness: Roundness::Top,
-                string_placements: vec![ContentType::text("Ctr").align_left(), ContentType::text("no").align_right()]
+        div { class: "flex flex-col",
+            div { class: "sticky top-0 p-[50px] rounded-2xl bg-slate-800 grid grid-flow-col items-stretch",
+                div { class: "flex flex-col space-y-[35px]",
+                    div { class: "text-white font-black text-[80px] leading-none", "新的收藏" }
+                    Button {
+                        roundness: Roundness::Pill,
+                        string_placements: vec![ContentType::text("F").css("w-[30px] h-[30px]").align_center()],
+                        fill_mode: FillMode::Fit,
+                        extended_css_class: "w-fit shadow p-[13px]"
+                    }
+                }
+                div { class: "flex justify-end",
+                    div { class: "flex flex-col space-y-[3px] w-full max-w-[250px]",
+                        CollectionBlock {
+                            extended_class: "rounded-[20px] w-full h-[250px]",
+                            picture: COLLECTION_PIC,
+                            gradient: false
+                        }
+                        div { class: "flex space-x-[3px] min-w-full",
+                            Button {
+                                roundness: Roundness::None,
+                                string_placements: vec![ContentType::text("s").align_center()],
+                                fill_mode: FillMode::Fill,
+                                extended_css_class: "rounded-[5px] rounded-bl-[20px] flex-1 min-w-0 bg-lime-300"
+                            }
+                            Button {
+                                roundness: Roundness::None,
+                                string_placements: vec![ContentType::text("...").align_center()],
+                                fill_mode: FillMode::Fit,
+                                extended_css_class: "rounded-[5px] rounded-br-[20px] bg-white/10 backdrop-blur-[100px] flex-none"
+                            }
+                        }
+                    }
+                }
+            }
+            div { class: "px-[30px] bg-background rounded-2xl min-h-dvh scroll-smooth",
+                div { class: "bg-background flex justify-center items-center min-h-full py-[30px]",
+                    {ContentType::svg(manganis::mg!(file("public/Line 155.svg"))).get_element()}
+                }
+                div { class: "grid grid-flow-col items-stretch",
+                    div { class: "bg-deep-background rounded-full flex justify-start w-fit",
+                        Button {
+                            roundness: Roundness::Pill,
+                            fill_mode: FillMode::Fit,
+                            signal: Rc::new(CollectionPageTopSelection::Mods) as Rc<dyn ActiveCompare>,
+                            string_placements: vec![ContentType::text("A").align_left(), ContentType::text("模組").align_right()]
+                        }
+                        Button {
+                            roundness: Roundness::Pill,
+                            fill_mode: FillMode::Fit,
+                            signal: Rc::new(CollectionPageTopSelection::World) as Rc<dyn ActiveCompare>,
+                            string_placements: vec![ContentType::text("B").align_left(), ContentType::text("世界").align_right()]
+                        }
+                        Button {
+                            roundness: Roundness::Pill,
+                            fill_mode: FillMode::Fit,
+                            signal: Rc::new(CollectionPageTopSelection::ResourcePack) as Rc<dyn ActiveCompare>,
+                            string_placements: vec![
+                                ContentType::text("C").align_left(),
+                                ContentType::text("資源包").align_right(),
+                            ]
+                        }
+                        Button {
+                            roundness: Roundness::Pill,
+                            fill_mode: FillMode::Fit,
+                            signal: Rc::new(CollectionPageTopSelection::ShaderPacks) as Rc<dyn ActiveCompare>,
+                            string_placements: vec![
+                                ContentType::text("D").align_left(),
+                                ContentType::text("光影包").align_right(),
+                            ]
+                        }
+                    }
+                    div { class: "flex space-x-[7px] justify-end",
+                        Button {
+                            roundness: Roundness::Pill,
+                            string_placements: vec![
+                                ContentType::svg(EXPLORE)
+                                    .css("flex justify-center items-center w-[25px] h-[25px] overflow-none")
+                                    .align_center(),
+                            ],
+                            fill_mode: FillMode::Fit,
+                            extended_css_class: "px-[25px]"
+                        }
+                        Button {
+                            roundness: Roundness::Pill,
+                            string_placements: vec![ContentType::text("F").css("w-[25px] h-[25px]").align_center()],
+                            fill_mode: FillMode::Fit,
+                            extended_css_class: "px-[25px]"
+                        }
+                    }
+                }
             }
         }
     }
@@ -245,36 +392,25 @@ fn DownloadProgress() -> Element {
     }
 }
 
+pub static EXPANDED: GlobalSignal<bool> = GlobalSignal::new(|| false);
+
 #[component]
 fn SideBar() -> Element {
-    let mut expanded = use_signal(|| false);
     let delayed_expanded = use_resource(move || async move {
-        if expanded() {
+        if EXPANDED() {
             tokio::time::sleep(Duration::from_millis(100)).await;
         } else {
             // tokio::time::sleep(Duration::from_millis(100)).await;
         }
-        expanded()
+        EXPANDED()
     });
-    let fat_button = |roundness, svg, string: &str, active, onclick: Option<EventHandler>| {
-        rsx! {
-            div {
-                Button {
-                    roundness,
-                    string_placements: vec![
-                        ContentType::svg(svg).align_left(),
-                        ContentType::text(string).css("group-aria-busy:hidden").align_right(),
-                    ],
-                    signal: active,
-                    onclick,
-                    extended_css_class: "bg-background group-aria-expanded:pr-5"
-                }
-            }
-        }
-    };
     let onclick = move |()| {
-        switch_active(Pages::Collections);
-        expanded.toggle();
+        Pages::Collections.switch_active();
+        if EXPANDED() {
+            *EXPANDED.write() = false;
+        } else {
+            *EXPANDED.write() = true;
+        }
     };
     let folded_images = rsx! {
         div { class: "transition-all",
@@ -305,13 +441,38 @@ fn SideBar() -> Element {
         div { class: "flex flex-col place-content-start mx-5",
             div {
                 class: "w-[300px] space-y-5 transition-all ease-linear duration-500 aria-expanded:w-[80px] group",
-                aria_expanded: !expanded(),
+                aria_expanded: !EXPANDED(),
                 aria_busy: !delayed_expanded().unwrap_or(false),
                 // top
                 div { class: "flex flex-col space-y-1",
-                    {fat_button(Roundness::Top, HOME, "首頁", Pages::MainPage, None)},
-                    {fat_button(Roundness::None, EXPLORE, "探索", Pages::Explore, None)},
-                    {fat_button(Roundness::Bottom, SIDEBAR_COLLECTION, "收藏庫", Pages::Collections, Some(onclick.into()))}
+                    Button {
+                        roundness: Roundness::Top,
+                        string_placements: vec![
+                            ContentType::svg(HOME).align_left(),
+                            ContentType::text("首頁").css("group-aria-busy:hidden").align_right(),
+                        ],
+                        signal: Rc::new(Pages::MainPage) as Rc<dyn ActiveCompare>,
+                        extended_css_class: "bg-background group-aria-expanded:pr-5"
+                    }
+                    Button {
+                        roundness: Roundness::None,
+                        string_placements: vec![
+                            ContentType::svg(EXPLORE).align_left(),
+                            ContentType::text("探索").css("group-aria-busy:hidden").align_right(),
+                        ],
+                        signal: Rc::new(Pages::Explore) as Rc<dyn ActiveCompare>,
+                        extended_css_class: "bg-background group-aria-expanded:pr-5"
+                    }
+                    Button {
+                        roundness: Roundness::Bottom,
+                        string_placements: vec![
+                            ContentType::svg(SIDEBAR_COLLECTION).align_left(),
+                            ContentType::text("收藏庫").css("group-aria-busy:hidden").align_right(),
+                        ],
+                        signal: Rc::new(Pages::Collections) as Rc<dyn ActiveCompare>,
+                        onclick,
+                        extended_css_class: "bg-background group-aria-expanded:pr-5"
+                    }
                 }
                 // middle
                 div { class: "flex flex-col space-y-1",
@@ -326,18 +487,8 @@ fn SideBar() -> Element {
                                 .align_left(),
                             ContentType::text("新的收藏").align_right().css("group-aria-busy:hidden"),
                         ],
-                        signal: Pages::CollectionPage,
-                        onclick: move |()| {
-                            let prev = ACTIVE().1;
-                            if ACTIVE().0 == Pages::CollectionPage {
-                                if let Some(prev) = prev {
-                                    switch_active(prev);
-                                    ACTIVE.write().1 = Some(Pages::CollectionPage);
-                                }
-                            } else {
-                                switch_active(Pages::CollectionPage);
-                            }
-                        },
+                        signal: Rc::new(Pages::new_collection_page("新的收藏")) as Rc<dyn ActiveCompare>,
+                        focus_color_change: false,
                         extended_css_class: "bg-background transition-all delay-[25ms] group-aria-expanded:w-20 group-aria-expanded:min-h-20 group-aria-expanded:p-0"
                     }
                 }
@@ -356,17 +507,17 @@ fn SideBar() -> Element {
                                 .align_right()
                                 .css("group-aria-selected/active:hidden group-aria-busy:hidden text-hint"),
                         ],
-                        signal: Pages::DownloadProgress,
+                        signal: Rc::new(Pages::DownloadProgress) as Rc<dyn ActiveCompare>,
                         extended_css_class: "bg-background group/active items-center",
                         onclick: move |()| {
-                            let prev = ACTIVE().1;
-                            if ACTIVE().0 == Pages::DownloadProgress {
+                            let prev = ACTIVE_PAGE().1;
+                            if ACTIVE_PAGE().0 == Pages::DownloadProgress {
                                 if let Some(prev) = prev {
-                                    switch_active(prev);
-                                    ACTIVE.write().1 = Some(Pages::DownloadProgress);
+                                    prev.switch_active();
+                                    ACTIVE_PAGE.write().1 = Some(Pages::DownloadProgress);
                                 }
                             } else {
-                                switch_active(Pages::DownloadProgress);
+                                Pages::DownloadProgress.switch_active();
                             }
                         }
                     }

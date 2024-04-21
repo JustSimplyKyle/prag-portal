@@ -5,11 +5,6 @@ const animationPlugin = plugin(function({ matchComponents, theme, e }) {
   /// the first two arguments is, when it being selected, and its animation
   /// the last two argument is, when it selects the target, and its animation
     matchComponents({
-        flyinout: (value) => {
-          return {
-            [`@apply animation-[${value}^slideLeft] group-data-[prev=${value}]:start-[100dvw] group-data-[prev=${value}]:z-[100] group-data-[prev=${value}]:animate-slideRight`]: {},
-          }
-        },
         animation: (value) => {
             const [primaryValue, primaryAnimation, secondaryValue, secondaryAnimation] = value.split('^');
             if (secondaryValue == null) {
@@ -35,6 +30,15 @@ module.exports = {
   theme: {
     fontFamily: {
       'display': ['GenSenRounded TW'],
+    },
+    fontMetrics: {
+      'display': {
+        capHeight: 733,
+        ascent: 880,
+        lineGap: 0,
+        descent: -120,
+        unitsPerEm: 1000,
+      }
     },
     animationTiming: {
       'bounce': 'cubic-bezier(.08,.06,0,1.28)',
@@ -132,6 +136,7 @@ module.exports = {
   },
   plugins: [
     require("daisyui"),
+    require("tailwindcss-capsize"),
     animationPlugin 
   ],
 };
