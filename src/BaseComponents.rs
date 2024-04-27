@@ -27,8 +27,11 @@ pub struct ButtonProps {
 }
 
 pub trait ActiveCompare {
+    // Compare with the Global Signal
     fn compare(&self) -> bool;
+    // Changes the current Global Signal to this
     fn switch_active(&self);
+    // Hashed value to use for partial eq implementation
     fn hashed_value(&self) -> u64;
 }
 
