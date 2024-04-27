@@ -4,6 +4,35 @@ use dioxus::prelude::*;
 
 use tailwind_fuse::*;
 
+use crate::TOP_LEVEL_COMPONENT;
+
+pub type ComponentPointer = (String, subModalProps, fn(subModalProps) -> Element);
+
+#[component]
+pub fn Modal(children: Element, active: Signal<bool>, name: String) -> Element {
+    let props = subModalProps::builder()
+        .children(children)
+        .active(active)
+        .build();
+    if TOP_LEVEL_COMPONENT().iter().all(|x| x.0 != name) {
+        #[allow(deprecated)]
+        TOP_LEVEL_COMPONENT.write().push((name, props, subModal));
+    }
+    None
+}
+
+#[component]
+#[deprecated]
+pub fn subModal(children: Element, active: Signal<bool>) -> Element {
+    rsx! {
+        div {
+            class: "inline-block z-[200] aria-[selected=false]:hidden aria-[selected=false]:z-0 absolute left-0 top-0 w-screen h-screen flex justify-center items-center bg-white/30 backdrop-filter backdrop-brightness-[.1] backdrop-blur-[100px]",
+            "aria-selected": active(),
+            {children}
+        }
+    }
+}
+
 #[derive(Clone, Props, PartialEq)]
 pub struct ButtonProps {
     pub roundness: Roundness,

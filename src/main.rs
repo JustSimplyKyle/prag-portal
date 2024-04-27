@@ -6,7 +6,6 @@ pub mod MainPage;
 use dioxus::desktop::tao::dpi::PhysicalSize;
 use dioxus::desktop::WindowBuilder;
 use std::hash::{DefaultHasher, Hash, Hasher};
-use std::ops::Deref;
 use std::rc::Rc;
 use std::sync::Arc;
 use std::time::Duration;
@@ -14,7 +13,7 @@ use tailwind_fuse::*;
 
 use dioxus::prelude::*;
 use log::LevelFilter;
-use BaseComponents::ActiveCompare;
+use BaseComponents::{ActiveCompare, ComponentPointer};
 
 use crate::BaseComponents::{Alignment, Button, ContentType, FillMode, Roundness};
 use crate::Collections::Collections;
@@ -31,6 +30,8 @@ pub const TAILWIND_STR_: &str = manganis::mg!(file("./public/tailwind.css"));
 /// `Option<Pages>`: Previous page
 static ACTIVE_PAGE: GlobalSignal<(Pages, Option<Pages>)> =
     GlobalSignal::new(|| (Pages::MainPage, None));
+
+pub static TOP_LEVEL_COMPONENT: GlobalSignal<Vec<ComponentPointer>> = GlobalSignal::new(Vec::new);
 
 fn main() {
     dioxus_logger::init(LevelFilter::Info).expect("failed to init logger");
@@ -199,6 +200,9 @@ fn Layout() -> Element {
     Pages::new_collection_page("新的收藏").apply_slide_in();
     Pages::DownloadProgress.apply_slide_in();
     rsx! {
+        {
+            TOP_LEVEL_COMPONENT().into_iter().map(|(_, args, func)| func(args))
+        }
         div {
             class: "w-screen inline-flex self-stretch group flex overflow-hidden",
             "data-selected": selected.to_string(),
