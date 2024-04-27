@@ -6,6 +6,7 @@ pub mod MainPage;
 use dioxus::desktop::tao::dpi::PhysicalSize;
 use dioxus::desktop::WindowBuilder;
 use std::hash::{DefaultHasher, Hash, Hasher};
+use std::ops::Deref;
 use std::rc::Rc;
 use std::sync::Arc;
 use std::time::Duration;
@@ -172,12 +173,12 @@ impl ToString for Pages {
             Self::Explore => "explore".into(),
             Self::Collections => "collections".into(),
             Self::DownloadProgress => "progress".into(),
-            Self::CollectionPage(x) => dbg!({
+            Self::CollectionPage(x) => {
                 let mut hasher = DefaultHasher::new();
                 x.hash(&mut hasher);
                 let hash = hasher.finish();
                 format!("collection-page-{}", hash)
-            }),
+            }
         }
     }
 }
@@ -213,8 +214,14 @@ fn Layout() -> Element {
                 div { class: "absolute inset-0 z-0 min-h-full animation-[collections^slideUp^explore^slideOutDown] animation-[collections^slideUp^main-page^slideOutDown]",
                     LayoutContainer { Collections {} }
                 }
-                div { class: "absolute inset-0 z-0 min-h-full min-w-full", id: Pages::DownloadProgress.slide_in_id(), LayoutContainer { DownloadProgress {} } }
-                div { class: "absolute inset-0 z-0 min-h-full min-w-full", id: Pages::new_collection_page("新的收藏").slide_in_id(),
+                div {
+                    class: "absolute inset-0 z-0 min-h-full min-w-full",
+                    id: Pages::DownloadProgress.slide_in_id(),
+                    LayoutContainer { DownloadProgress {} }
+                }
+                div {
+                    class: "absolute inset-0 z-0 min-h-full min-w-full",
+                    id: Pages::new_collection_page("新的收藏").slide_in_id(),
                     LayoutContainer { extended_class: "p-0", CollectionPage {} }
                 }
             }
@@ -442,7 +449,9 @@ fn SideBar() -> Element {
                 }
             }
         }
-        div { class: tw_merge!(Alignment::Right.get_alignment_class(), "group-aria-busy:hidden"), {ContentType::text("我的錦集").css("text-lime-300").get_element()} }
+        div { class: tw_merge!(Alignment::Right.get_alignment_class(), "group-aria-busy:hidden"),
+            {ContentType::text("我的錦集").css("text-lime-300").get_element()}
+        }
     };
     rsx! {
         div { class: "flex flex-col place-content-start mx-5",
