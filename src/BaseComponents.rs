@@ -22,7 +22,7 @@ pub fn Modal(children: Element, active: Signal<bool>, name: String) -> Element {
 }
 
 #[component]
-#[deprecated]
+#[deprecated = "DO NOT USE. Use `Modal` instead, this should be private, but Dioxus does not allow it."]
 pub fn subModal(children: Element, active: Signal<bool>) -> Element {
     rsx! {
         div {
@@ -81,6 +81,7 @@ pub struct ButtonClass {
 }
 
 impl ButtonClass {
+    // automatically roundness correction
     const fn setup(&self) -> &str {
         match self.items_count {
             ItemsCount::One => "",
