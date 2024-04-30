@@ -1903,6 +1903,12 @@ html {
   margin-bottom: calc(0.25rem * var(--tw-space-y-reverse));
 }
 
+.space-y-3 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-y-reverse: 0;
+  margin-top: calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(0.75rem * var(--tw-space-y-reverse));
+}
+
 .space-y-5 > :not([hidden]) ~ :not([hidden]) {
   --tw-space-y-reverse: 0;
   margin-top: calc(1.25rem * calc(1 - var(--tw-space-y-reverse)));
@@ -2197,6 +2203,11 @@ html {
   color: rgb(255 255 255 / var(--tw-text-opacity));
 }
 
+.text-red {
+  --tw-text-opacity: 1;
+  color: rgb(201 43 69 / var(--tw-text-opacity));
+}
+
 .text-opacity-50 {
   --tw-text-opacity: 0.5;
 }
@@ -2320,6 +2331,18 @@ html {
   font-size: 1.125rem;
   --line-height-offset: calc((((var(--line-height-scale) * var(--font-size-px)) - 28) / 2) / var(--font-size-px));
   line-height: 1.75rem;
+}
+
+.text-4xl {
+  --font-size-px: 36;
+  font-size: 2.25rem;
+  --line-height-offset: calc((((var(--line-height-scale) * var(--font-size-px)) - 40) / 2) / var(--font-size-px));
+  line-height: 2.5rem;
+}
+
+.text-\[13px\] {
+  --font-size-px: 13;
+  font-size: 13px;
 }
 
 .leading-\[78px\] {

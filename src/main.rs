@@ -15,7 +15,7 @@ use dioxus::prelude::*;
 use log::LevelFilter;
 use BaseComponents::{ActiveCompare, ComponentPointer};
 
-use crate::BaseComponents::{Alignment, Button, ContentType, FillMode, Roundness};
+use crate::BaseComponents::{Alignment, Button, ContentType, FillMode, Modal, Roundness};
 use crate::Collections::Collections;
 use crate::MainPage::{CollectionBlock, MainPage, COLLECTION_PIC};
 
@@ -185,9 +185,38 @@ impl ToString for Pages {
 
 #[component]
 fn App() -> Element {
+    let error_active = use_signal(|| true);
     rsx! {
         div { class: "bg-deep-background min-h-screen min-w-full font-display leading-normal",
-            div { class: "[&_*]:transform-gpu", Layout {} }
+            {
+                TOP_LEVEL_COMPONENT().into_iter().map(|(_, args, func)| func(args))
+            }
+            ErrorBoundary {
+                handle_error: move |error| {
+                    rsx! {
+                        Modal {
+                            active: error_active,
+                            name: "error_modal",
+                            div {
+                                div {
+                                    class: "flex flex-col space-y-3",
+                                    div {
+                                        class: "text-red text-3xl font-bold",
+                                        "Hmm, something went wrong. Please copy the following error to the developer."
+                                    }
+                                    Button {
+                                        roundness: Roundness::Pill,
+                                        extended_css_class: "text-[13px] font-normal",
+                                        string_placements: rsx!{"{error} "},
+                                        fill_mode: FillMode::Fit,
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                div { class: "[&_*]:transform-gpu", Layout {} }
+            }
         }
     }
 }
@@ -201,9 +230,6 @@ fn Layout() -> Element {
         .throw()?;
     Pages::DownloadProgress.apply_slide_in().throw()?;
     rsx! {
-        {
-            TOP_LEVEL_COMPONENT().into_iter().map(|(_, args, func)| func(args))
-        },
         div {
             class: "w-screen inline-flex self-stretch group flex overflow-hidden",
             "data-selected": selected.to_string(),
@@ -494,7 +520,9 @@ fn SideBar() -> Element {
                 // middle
                 div { class: "flex flex-col space-y-1",
                     Button { roundness: Roundness::Top, string_placements: folded_images, extended_css_class: "bg-background" }
-                    SidebarCollectionBlock { string: "新的收藏" }
+                    SidebarCollectionBlock {
+                        string: "新的收藏"
+                    }
                 }
                 // bottom
                 div { class: "flex flex-col space-y-1",
