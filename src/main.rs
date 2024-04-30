@@ -30,7 +30,6 @@ pub const TAILWIND_STR_: &str = manganis::mg!(file("./public/tailwind.css"));
 /// `Option<Pages>`: Previous page
 static ACTIVE_PAGE: GlobalSignal<(Pages, Option<Pages>)> =
     GlobalSignal::new(|| (Pages::MainPage, None));
-
 pub static TOP_LEVEL_COMPONENT: GlobalSignal<Vec<ComponentPointer>> = GlobalSignal::new(Vec::new);
 
 fn main() {
@@ -56,8 +55,8 @@ pub enum Pages {
 }
 
 impl Pages {
-    fn new_collection_page(s: impl Into<Arc<str>>) -> Pages {
-        Pages::CollectionPage(s.into())
+    fn new_collection_page(s: impl Into<Arc<str>>) -> Self {
+        Self::CollectionPage(s.into())
     }
 }
 
@@ -72,7 +71,7 @@ impl ActiveCompare for Pages {
         &ACTIVE_PAGE().0 == self
     }
 
-    fn switch_active(&self) {
+    fn switch_active_to_self(&self) {
         let prev = ACTIVE_PAGE().0;
         if &prev != self {
             ACTIVE_PAGE.write().1 = Some(prev);
@@ -131,7 +130,7 @@ impl Pages {
     ///     }
     /// }
     /// ```
-    pub fn apply_slide_in(&self) {
+    pub fn apply_slide_in(&self) -> anyhow::Result<()> {
         eval(
             r#"
                 function applyStyles(dataValue) {
@@ -163,7 +162,7 @@ impl Pages {
             "#,
         )
         .send(self.to_string().into())
-        .unwrap();
+        .map_err(|x| anyhow::anyhow!("{x:?}"))
     }
 }
 
@@ -178,7 +177,7 @@ impl ToString for Pages {
                 let mut hasher = DefaultHasher::new();
                 x.hash(&mut hasher);
                 let hash = hasher.finish();
-                format!("collection-page-{}", hash)
+                format!("collection-page-{hash}")
             }
         }
     }
@@ -197,12 +196,14 @@ fn App() -> Element {
 fn Layout() -> Element {
     let selected = ACTIVE_PAGE().0;
     let prev = ACTIVE_PAGE().1;
-    Pages::new_collection_page("新的收藏").apply_slide_in();
-    Pages::DownloadProgress.apply_slide_in();
+    Pages::new_collection_page("新的收藏")
+        .apply_slide_in()
+        .throw()?;
+    Pages::DownloadProgress.apply_slide_in().throw()?;
     rsx! {
         {
             TOP_LEVEL_COMPONENT().into_iter().map(|(_, args, func)| func(args))
-        }
+        },
         div {
             class: "w-screen inline-flex self-stretch group flex overflow-hidden",
             "data-selected": selected.to_string(),
@@ -270,7 +271,7 @@ impl ActiveCompare for CollectionPageTopSelection {
         &A().0 == self
     }
 
-    fn switch_active(&self) {
+    fn switch_active_to_self(&self) {
         let prev = A().0;
         if &prev != self {
             A.write().1 = Some(prev);
@@ -423,12 +424,8 @@ fn SideBar() -> Element {
         EXPANDED()
     });
     let onclick = move |()| {
-        Pages::Collections.switch_active();
-        if EXPANDED() {
-            *EXPANDED.write() = false;
-        } else {
-            *EXPANDED.write() = true;
-        }
+        Pages::Collections.switch_active_to_self();
+        *EXPANDED.write() = !EXPANDED();
     };
     let folded_images = rsx! {
         div { class: "transition-all",
@@ -497,20 +494,7 @@ fn SideBar() -> Element {
                 // middle
                 div { class: "flex flex-col space-y-1",
                     Button { roundness: Roundness::Top, string_placements: folded_images, extended_css_class: "bg-background" }
-                    Button {
-                        roundness: Roundness::None,
-                        string_placements: vec![
-                            ContentType::image(COLLECTION_PIC.to_string())
-                                .css(
-                                    "transition-all w-[50px] h-[50px] object-cover inline-flex items-center rounded-[15px] border-2 border-zinc-900 group-aria-expanded:w-20 group-aria-expanded:h-20",
-                                )
-                                .align_left(),
-                            ContentType::text("新的收藏").align_right().css("group-aria-busy:hidden"),
-                        ],
-                        signal: Rc::new(Pages::new_collection_page("新的收藏")) as Rc<dyn ActiveCompare>,
-                        focus_color_change: false,
-                        extended_css_class: "bg-background transition-all delay-[25ms] group-aria-expanded:w-20 group-aria-expanded:min-h-20 group-aria-expanded:p-0"
-                    }
+                    SidebarCollectionBlock { string: "新的收藏" }
                 }
                 // bottom
                 div { class: "flex flex-col space-y-1",
@@ -533,16 +517,35 @@ fn SideBar() -> Element {
                             let prev = ACTIVE_PAGE().1;
                             if ACTIVE_PAGE().0 == Pages::DownloadProgress {
                                 if let Some(prev) = prev {
-                                    prev.switch_active();
-                                    ACTIVE_PAGE.write().1 = Some(Pages::DownloadProgress);
+                                    prev.switch_active_to_self();
                                 }
                             } else {
-                                Pages::DownloadProgress.switch_active();
+                                Pages::DownloadProgress.switch_active_to_self();
                             }
                         }
                     }
                 }
             }
+        }
+    }
+}
+
+#[component]
+fn SidebarCollectionBlock(string: ReadOnlySignal<String>) -> Element {
+    rsx! {
+        Button {
+            roundness: Roundness::None,
+            string_placements: vec![
+                ContentType::image(COLLECTION_PIC.to_string())
+                    .css(
+                        "transition-all w-[50px] h-[50px] object-cover inline-flex items-center rounded-[15px] border-2 border-zinc-900 group-aria-expanded:w-20 group-aria-expanded:h-20",
+                    )
+                    .align_left(),
+                ContentType::text(string()).align_right().css("group-aria-busy:hidden"),
+            ],
+            signal: Rc::new(Pages::new_collection_page(string())) as Rc<dyn ActiveCompare>,
+            focus_color_change: false,
+            extended_css_class: "bg-background transition-all delay-[25ms] group-aria-expanded:w-20 group-aria-expanded:min-h-20 group-aria-expanded:p-0"
         }
     }
 }

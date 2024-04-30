@@ -36,34 +36,30 @@ pub fn CollectionBlock(
     #[props(default)] extended_class: String,
 ) -> Element {
     let (roundness, extended_class): (Vec<_>, Vec<_>) = extended_class
-        .split(" ")
+        .split(' ')
         .partition(|x| x.contains("rounded"));
     let extended_class = extended_class.join(" ");
     let mut img_class = String::from("h-full w-full object-cover rounded-[5px]");
     for x in roundness {
-        img_class = tw_merge!(img_class, x)
+        img_class = tw_merge!(img_class, x);
     }
     rsx! {
         div {
-            div { class: tw_merge!("relative h-[280px] w-[280px]", extended_class), ..attributes,
+            div {
+                class: tw_merge!("relative h-[280px] w-[280px]", extended_class),
+                ..attributes,
                 img { class: img_class, src: picture }
                 if gradient {
                     div { class: "absolute inset-0 bg-gradient-to-t from-deep-background to-23%" }
                 }
                 div { class: "absolute inset-0 px-5 pt-5 pb-[25px] flex flex-col gap-[15px] *:text-ellipsis overflow-hidden justify-end items-start",
-                    {
-                        if let Some(x) = main_text {
-                            rsx! { div { class: "text-3xl leading-normal capsize text-white font-bold", {x} } }
-                        } else {
-                            None
-                        }
-                    },
-                    {
-                        if let Some(x) = hint {
-                            rsx! { div { class: "text-[15px] leading-normal capsize text-white text-opacity-50", {x} } }
-                        } else {
-                            None
-                        }
+                    div {
+                        class: "text-3xl leading-normal capsize text-white font-bold",
+                        {main_text}
+                    }
+                    div {
+                        class: "text-[15px] leading-normal capsize text-white text-opacity-50",
+                        {hint}
                     }
                 }
             }

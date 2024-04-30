@@ -17,3 +17,4 @@ dioxus-tailwindcss = "0.5.0"
 manganis = "0.2.2"
 tokio = { version = "1.37.0", features = ["time", "rt"] }
 tailwind_fuse = { version = "0.2.0", features = ["variant"] }
+anyhow = "1.0.82"

@@ -59,7 +59,7 @@ pub trait ActiveCompare {
     // Compare with the Global Signal
     fn compare(&self) -> bool;
     // Changes the current Global Signal to this
-    fn switch_active(&self);
+    fn switch_active_to_self(&self);
     // Hashed value to use for partial eq implementation
     fn hashed_value(&self) -> u64;
 }
@@ -195,12 +195,12 @@ pub fn Button(props: ButtonProps) -> Element {
         div {
             class,
             role: if is_button { "button" } else { "" },
-            aria_selected: signal.as_ref().map(|x| x.compare()).unwrap_or(false),
+            aria_selected: signal.as_ref().is_some_and(|x| x.compare()),
             onclick: move |_| {
                 if let Some(x) = onclick {
                     x(());
                 } else if let Some(x) = &signal {
-                    x.switch_active();
+                    x.switch_active_to_self();
                 }
             },
             ..attributes,
