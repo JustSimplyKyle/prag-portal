@@ -105,7 +105,7 @@ pub fn Collections() -> Element {
                 ],
                 extended_css_class: "rounded-[20px] px-[40px] py-[50px]",
                 size: Size::Fat,
-                is_button: false
+                clickable: false
             }
         }
     }

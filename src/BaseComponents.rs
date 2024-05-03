@@ -6,29 +6,68 @@ use tailwind_fuse::*;
 
 use crate::TOP_LEVEL_COMPONENT;
 
-pub type ComponentPointer = (String, subModalProps, fn(subModalProps) -> Element);
+#[derive(Clone)]
+pub struct ComponentPointer<P: Properties> {
+    pub name: String,
+    pub props: P,
+    pub pointer: Component<P>,
+}
 
 #[component]
-pub fn Modal(children: Element, active: Signal<bool>, name: String) -> Element {
+pub fn Modal(
+    children: Element,
+    name: String,
+    active: Signal<bool>,
+    #[props(default = true)] close_on_outer_click: bool,
+) -> Element {
     let props = subModalProps::builder()
         .children(children)
         .active(active)
+        .close_on_outer_click(close_on_outer_click)
         .build();
-    if TOP_LEVEL_COMPONENT().iter().all(|x| x.0 != name) {
+    if TOP_LEVEL_COMPONENT().into_iter().all(|x| &x.name != &name) {
         #[allow(deprecated)]
-        TOP_LEVEL_COMPONENT.write().push((name, props, subModal));
+        let pointer = ComponentPointer {
+            name,
+            props,
+            pointer: subModal,
+        };
+        TOP_LEVEL_COMPONENT.write().push(pointer);
     }
     None
 }
 
 #[component]
 #[deprecated = "DO NOT USE. Use `Modal` instead, this should be private, but Dioxus does not allow it."]
-pub fn subModal(children: Element, active: Signal<bool>) -> Element {
+pub fn subModal(
+    children: Element,
+    mut active: Signal<bool>,
+    close_on_outer_click: bool,
+) -> Element {
+    let mut modal_hover = use_signal(|| false);
     rsx! {
         div {
-            class: "inline-block z-[200] aria-[selected=false]:hidden aria-[selected=false]:z-0 absolute left-0 top-0 w-screen h-screen flex justify-center items-center bg-white/30 backdrop-filter backdrop-brightness-[.1] backdrop-blur-[100px]",
+            class: "inline-block z-[200] aria-[selected=false]:hidden aria-[selected=false]:z-0 flex justify-center items-center absolute left-0 top-0 w-screen h-screen bg-white/30",
             "aria-selected": active(),
-            {children}
+            onclick: move |_| {
+                if !modal_hover() && close_on_outer_click {
+                    *active.write() = false;
+                }
+            },
+            div {
+                class: "w-fit h-fit",
+                onmouseenter: move |_| {
+                    if close_on_outer_click {
+                        *modal_hover.write() = true;
+                    }
+                },
+                onmouseleave: move |_| {
+                    if close_on_outer_click {
+                        *modal_hover.write() = false;
+                    }
+                },
+                {children}
+            }
         }
     }
 }
@@ -43,7 +82,7 @@ pub struct ButtonProps {
     #[props(into)]
     pub signal: Option<Rc<dyn ActiveCompare>>,
     #[props(default = true)]
-    pub is_button: bool,
+    pub clickable: bool,
     pub onclick: Option<EventHandler>,
     #[props(extends = GlobalAttributes)]
     pub attributes: Vec<Attribute>,
@@ -171,7 +210,7 @@ pub fn Button(props: ButtonProps) -> Element {
         string_placements,
         signal,
         extended_css_class,
-        is_button,
+        clickable,
         onclick,
         mut attributes,
         size,
@@ -194,7 +233,7 @@ pub fn Button(props: ButtonProps) -> Element {
     rsx! {
         div {
             class,
-            role: if is_button { "button" } else { "" },
+            role: if clickable { "button" } else { "" },
             aria_selected: signal.as_ref().is_some_and(|x| x.compare()),
             onclick: move |_| {
                 if let Some(x) = onclick {

@@ -3,6 +3,7 @@ pub mod BaseComponents;
 pub mod Collections;
 pub mod MainPage;
 
+use anyhow::bail;
 use dioxus::desktop::tao::dpi::PhysicalSize;
 use dioxus::desktop::WindowBuilder;
 use std::hash::{DefaultHasher, Hash, Hasher};
@@ -13,7 +14,7 @@ use tailwind_fuse::*;
 
 use dioxus::prelude::*;
 use log::LevelFilter;
-use BaseComponents::{ActiveCompare, ComponentPointer};
+use BaseComponents::{subModalProps, ActiveCompare, ComponentPointer};
 
 use crate::BaseComponents::{Alignment, Button, ContentType, FillMode, Modal, Roundness};
 use crate::Collections::Collections;
@@ -30,7 +31,8 @@ pub const TAILWIND_STR_: &str = manganis::mg!(file("./public/tailwind.css"));
 /// `Option<Pages>`: Previous page
 static ACTIVE_PAGE: GlobalSignal<(Pages, Option<Pages>)> =
     GlobalSignal::new(|| (Pages::MainPage, None));
-pub static TOP_LEVEL_COMPONENT: GlobalSignal<Vec<ComponentPointer>> = GlobalSignal::new(Vec::new);
+pub static TOP_LEVEL_COMPONENT: GlobalSignal<Vec<ComponentPointer<subModalProps>>> =
+    GlobalSignal::new(Vec::new);
 
 fn main() {
     dioxus_logger::init(LevelFilter::Info).expect("failed to init logger");
@@ -189,7 +191,7 @@ fn App() -> Element {
     rsx! {
         div { class: "bg-deep-background min-h-screen min-w-full font-display leading-normal",
             {
-                TOP_LEVEL_COMPONENT().into_iter().map(|(_, args, func)| func(args))
+                TOP_LEVEL_COMPONENT().into_iter().map(|x| (x.pointer)(x.props))
             }
             ErrorBoundary {
                 handle_error: move |error| {
@@ -197,18 +199,20 @@ fn App() -> Element {
                         Modal {
                             active: error_active,
                             name: "error_modal",
+                            close_on_outer_click: false,
                             div {
                                 div {
                                     class: "flex flex-col space-y-3",
                                     div {
-                                        class: "text-red text-3xl font-bold",
+                                        class: "text-red text-2xl font-bold",
                                         "Hmm, something went wrong. Please copy the following error to the developer."
                                     }
                                     Button {
                                         roundness: Roundness::Pill,
-                                        extended_css_class: "text-[13px] font-normal",
+                                        extended_css_class: "text-[13px] font-bold",
                                         string_placements: rsx!{"{error} "},
                                         fill_mode: FillMode::Fit,
+                                        clickable: false,
                                     }
                                 }
                             }

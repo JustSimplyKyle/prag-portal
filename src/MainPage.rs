@@ -230,7 +230,7 @@ fn SuggestionPage() -> Element {
                         },
                         string_placements: x,
                         extended_css_class: "bg-deep-background min-w-full px-[30px] py-[35px]",
-                        is_button: false
+                        clickable: false
                     }
                 }
             }
@@ -264,7 +264,7 @@ fn CollectionsPage() -> Element {
                     ),
                 ],
                 extended_css_class: "p-[30px] mb-0",
-                is_button: false
+                clickable: false
             }
             div { class: ButtonClass::builder().roundness(Roundness::Bottom).with_class("min-w-screen p-0"),
                 div { class: "flex space-x-[3px] overflow-scroll",
