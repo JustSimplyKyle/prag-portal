@@ -3,7 +3,6 @@ pub mod BaseComponents;
 pub mod Collections;
 pub mod MainPage;
 
-use anyhow::bail;
 use dioxus::desktop::tao::dpi::PhysicalSize;
 use dioxus::desktop::WindowBuilder;
 use std::hash::{DefaultHasher, Hash, Hasher};
@@ -33,6 +32,8 @@ static ACTIVE_PAGE: GlobalSignal<(Pages, Option<Pages>)> =
     GlobalSignal::new(|| (Pages::MainPage, None));
 pub static TOP_LEVEL_COMPONENT: GlobalSignal<Vec<ComponentPointer<subModalProps>>> =
     GlobalSignal::new(Vec::new);
+
+use rust_lib::api::shared_resources::entry;
 
 fn main() {
     dioxus_logger::init(LevelFilter::Info).expect("failed to init logger");
@@ -188,6 +189,15 @@ impl ToString for Pages {
 #[component]
 fn App() -> Element {
     let error_active = use_signal(|| true);
+    spawn(async move {
+        let versions = rust_lib::api::backend_exclusive::vanilla::version::get_versions()
+            .await
+            .unwrap();
+        let version = versions.into_iter().find(|x| x.id == "1.20.1").unwrap();
+        entry::create_collection("test", version, None, None)
+            .await
+            .unwrap();
+    });
     rsx! {
         div { class: "bg-deep-background min-h-screen min-w-full font-display leading-normal",
             {

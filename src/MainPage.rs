@@ -1,6 +1,7 @@
 use dioxus::prelude::*;
 
 use manganis::ImageAsset;
+use rust_lib::api::shared_resources::{collection::Collection, entry::STORAGE};
 use tailwind_fuse::*;
 
 use crate::BaseComponents::{
@@ -28,13 +29,14 @@ pub fn MainPage() -> Element {
 /// Creates a Collection Block with a `280px` square, with a default roundness of `5px`
 #[component]
 pub fn CollectionBlock(
-    #[props(into)] main_text: Option<String>,
-    #[props(into)] hint: Option<String>,
+    #[props(into)] collection: Option<Collection>,
     picture: ImageAsset,
     #[props(default = true)] gradient: bool,
     #[props(extends=GlobalAttributes)] attributes: Vec<Attribute>,
     #[props(default)] extended_class: String,
 ) -> Element {
+    let main_text = collection.map(|x| x.display_name);
+    let hint = String::from("遊玩中•由我建立");
     let (roundness, extended_class): (Vec<_>, Vec<_>) = extended_class
         .split(' ')
         .partition(|x| x.contains("rounded"));
@@ -240,6 +242,12 @@ fn SuggestionPage() -> Element {
 
 #[component]
 fn CollectionsPage() -> Element {
+    let collections =
+        use_resource(
+            move || async move { STORAGE.collections.clone().read_owned().await.to_owned() },
+        );
+    let collections_iterator = collections().into_iter().flat_map(|x| x.into_iter());
+
     rsx! {
         div { class: "flex flex-col space-x-0",
             Button {
@@ -268,45 +276,11 @@ fn CollectionsPage() -> Element {
             }
             div { class: ButtonClass::builder().roundness(Roundness::Bottom).with_class("min-w-screen p-0"),
                 div { class: "flex space-x-[3px] overflow-scroll",
-                    CollectionBlock {
-                        main_text: "創世幻想",
-                        hint: "不久前開啟•由我建立",
-                        picture: COLLECTION_PIC
-                    }
-                    CollectionBlock {
-                        main_text: "創世幻想arstarstat",
-                        hint: "不久前開啟•由我建立",
-                        picture: COLLECTION_PIC
-                    }
-                    CollectionBlock {
-                        main_text: "創世幻想",
-                        hint: "不久前開啟•由我建立",
-                        picture: COLLECTION_PIC
-                    }
-                    CollectionBlock {
-                        main_text: "創世幻想",
-                        hint: "不久前開啟•由我建立",
-                        picture: COLLECTION_PIC
-                    }
-                    CollectionBlock {
-                        main_text: "創世幻想",
-                        hint: "不久前開啟•由我建立",
-                        picture: COLLECTION_PIC
-                    }
-                    CollectionBlock {
-                        main_text: "創世幻想",
-                        hint: "不久前開啟•由我建立",
-                        picture: COLLECTION_PIC
-                    }
-                    CollectionBlock {
-                        main_text: "創世幻想",
-                        hint: "不久前開啟•由我建立",
-                        picture: COLLECTION_PIC
-                    }
-                    CollectionBlock {
-                        main_text: "創世幻想",
-                        hint: "不久前開啟•由我建立",
-                        picture: COLLECTION_PIC
+                    for collection in collections_iterator {
+                        CollectionBlock {
+                            collection,
+                            picture: COLLECTION_PIC
+                        }
                     }
                 }
             }

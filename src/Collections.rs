@@ -1,4 +1,5 @@
 use dioxus::prelude::*;
+use rust_lib::api::shared_resources::{authentication::MINECRAFT_USER_PROFILE_URL, entry::STORAGE};
 
 use crate::{
     BaseComponents::{Alignment, Button, ContentType, Contents, FillMode, Roundness, Size},
@@ -8,6 +9,11 @@ use crate::{
 
 #[component]
 pub fn Collections() -> Element {
+    let collections =
+        use_resource(
+            move || async move { STORAGE.collections.clone().read_owned().await.to_owned() },
+        );
+    let collections_iterator = collections().into_iter().flat_map(|x| x.into_iter());
     rsx! {
         div { class: "flex flex-col space-y-[10px]",
             div { class: "flex space-x-[10px]",
@@ -49,41 +55,12 @@ pub fn Collections() -> Element {
                 }
             }
             div { class: "grid grid-flow-row grid-cols-[repeat(auto-fill,280px)] gap-[20px]",
-                CollectionBlock {
-                    extended_class: "rounded-[20px]",
-                    main_text: "創世幻想",
-                    hint: "不久前開啟•由我建立",
-                    picture: COLLECTION_PIC
-                }
-                CollectionBlock {
-                    extended_class: "rounded-[20px]",
-                    main_text: "text",
-                    hint: "arst",
-                    picture: COLLECTION_PIC
-                }
-                CollectionBlock {
-                    extended_class: "rounded-[20px]",
-                    main_text: "text",
-                    hint: "arst",
-                    picture: COLLECTION_PIC
-                }
-                CollectionBlock {
-                    extended_class: "rounded-[20px]",
-                    main_text: "text",
-                    hint: "arst",
-                    picture: COLLECTION_PIC
-                }
-                CollectionBlock {
-                    extended_class: "rounded-[20px]",
-                    main_text: "text",
-                    hint: "arst",
-                    picture: COLLECTION_PIC
-                }
-                CollectionBlock {
-                    extended_class: "rounded-[20px]",
-                    main_text: "text",
-                    hint: "arst",
-                    picture: COLLECTION_PIC
+                for collection in collections_iterator {
+                    CollectionBlock {
+                        collection: Some(collection),
+                        extended_class: "rounded-[20px]",
+                        picture: COLLECTION_PIC
+                    }
                 }
             }
         }

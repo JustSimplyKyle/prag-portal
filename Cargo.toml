@@ -8,6 +8,8 @@ edition = "2021"
 
 [dependencies]
 
+rust_lib = { path = "./era-connect/app/rust/" }
+
 dioxus = { version = "0.5.1", features = ["desktop", "router"] }
 
 # Debug

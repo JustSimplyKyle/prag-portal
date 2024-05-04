@@ -1,0 +1,4 @@
+[submodule "era-connect"]
+	path = era-connect
+	url = https://github.com/RPMTW/era-connect.git
+	branch = feature/collection-frb-v2
