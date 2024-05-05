@@ -72,28 +72,6 @@ pub fn subModal(
     }
 }
 
-#[derive(Clone, Props, PartialEq)]
-pub struct ButtonProps {
-    pub roundness: Roundness,
-    #[props(into)]
-    pub string_placements: StringPlacements,
-    #[props(default)]
-    pub extended_css_class: String,
-    #[props(into)]
-    pub signal: Option<Rc<dyn ActiveCompare>>,
-    #[props(default = true)]
-    pub clickable: bool,
-    pub onclick: Option<EventHandler>,
-    #[props(extends = GlobalAttributes)]
-    pub attributes: Vec<Attribute>,
-    #[props(default)]
-    pub size: Size,
-    #[props(default)]
-    pub fill_mode: FillMode,
-    #[props(default = true)]
-    pub focus_color_change: bool,
-}
-
 pub trait ActiveCompare {
     // Compare with the Global Signal
     fn compare(&self) -> bool;
@@ -193,30 +171,19 @@ pub enum Roundness {
     Pill,
 }
 
-/// # Props
-/// - roundness: `Roundness`
-/// - string_placements: `StringPlacements`,
-/// - signal: `Option<Pages>`,
-/// - extended_css_class: `String`, // optional
-/// - is_button: `bool`, // default = true
-/// - onclick: `Option<EventHandler>`,
-/// - attributes: `Vec<Attribute>`,
-/// - size: `Size`, // optional, default = Size::Fat
-/// - fill_mode: `FillMode`, // optional default = FillMode::Fill
 #[component]
-pub fn Button(props: ButtonProps) -> Element {
-    let ButtonProps {
-        roundness,
-        string_placements,
-        signal,
-        extended_css_class,
-        clickable,
-        onclick,
-        mut attributes,
-        size,
-        fill_mode,
-        focus_color_change,
-    } = props;
+pub fn Button(
+    roundness: Roundness,
+    #[props(into)] string_placements: StringPlacements,
+    #[props(default)] extended_css_class: String,
+    #[props(into)] signal: Option<Rc<dyn ActiveCompare>>,
+    #[props(default = true)] clickable: bool,
+    onclick: Option<EventHandler>,
+    #[props(extends = GlobalAttributes)] mut attributes: Vec<Attribute>,
+    #[props(default)] size: Size,
+    #[props(default)] fill_mode: FillMode,
+    #[props(default = true)] focus_color_change: bool,
+) -> Element {
     attributes.retain(|x| x.name != "class");
     let class = ButtonClass {
         roundness,
