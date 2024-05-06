@@ -4,8 +4,11 @@ use manganis::ImageAsset;
 use rust_lib::api::shared_resources::{collection::Collection, entry::STORAGE};
 use tailwind_fuse::*;
 
-use crate::BaseComponents::{
-    Alignment, Button, ButtonClass, ContentType, Contents, FillMode, Roundness, Size,
+use crate::{
+    get_collections,
+    BaseComponents::{
+        Alignment, Button, ButtonClass, ContentType, Contents, FillMode, Roundness, Size,
+    },
 };
 
 pub const COLLECTION_PIC: ImageAsset =
@@ -242,11 +245,8 @@ fn SuggestionPage() -> Element {
 
 #[component]
 fn CollectionsPage() -> Element {
-    let collections =
-        use_resource(
-            move || async move { STORAGE.collections.clone().read_owned().await.to_owned() },
-        );
-    let collections_iterator = collections().into_iter().flat_map(|x| x.into_iter());
+    let collections = get_collections();
+    let collections_iterator = collections().into_iter().flatten();
 
     rsx! {
         div { class: "flex flex-col space-x-0",
