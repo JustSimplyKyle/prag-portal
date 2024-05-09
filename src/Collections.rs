@@ -57,7 +57,7 @@ pub fn Collections() -> Element {
             div { class: "grid grid-flow-row grid-cols-[repeat(auto-fill,280px)] gap-[20px]",
                 for collection in collections_iterator {
                     CollectionBlock {
-                        collection: Some(collection),
+                        collection,
                         extended_class: "rounded-[20px]",
                         picture: COLLECTION_PIC
                     }
