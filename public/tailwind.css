@@ -1602,6 +1602,10 @@ html {
   max-height: 450px;
 }
 
+.max-h-\[451px\] {
+  max-height: 451px;
+}
+
 .max-h-full {
   max-height: 100%;
 }
@@ -1739,6 +1743,10 @@ html {
 
 .flex-col {
   flex-direction: column;
+}
+
+.flex-nowrap {
+  flex-wrap: nowrap;
 }
 
 .place-content-start {
@@ -1933,6 +1941,11 @@ html {
 
 .border-2 {
   border-width: 2px;
+}
+
+.border-deep-background {
+  --tw-border-opacity: 1;
+  border-color: rgb(14 14 14 / var(--tw-border-opacity));
 }
 
 .border-zinc-900 {
@@ -2343,6 +2356,10 @@ body {
 
 .group[aria-expanded="true"] .group-aria-expanded\:w-20 {
   width: 5rem;
+}
+
+.group[aria-expanded="true"] .group-aria-expanded\:bg-none {
+  background-image: none;
 }
 
 .group[aria-expanded="true"] .group-aria-expanded\:p-0 {

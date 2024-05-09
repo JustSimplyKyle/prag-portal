@@ -523,7 +523,7 @@ fn SideBar() -> Element {
                     }
                 }
                 // middle
-                div { class: "flex flex-col space-y-1",
+                div { class: "flex flex-col flex-nowrap overflow-scroll max-h-[451px] space-y-1",
                     Button { roundness: Roundness::Top, string_placements: folded_images, extended_css_class: "bg-background" }
                     SidebarCollectionBlock {
                         string: "新的收藏"
@@ -571,14 +571,16 @@ fn SidebarCollectionBlock(string: ReadOnlySignal<String>) -> Element {
             string_placements: vec![
                 ContentType::image(COLLECTION_PIC.to_string())
                     .css(
-                        "transition-all w-[50px] h-[50px] object-cover inline-flex items-center rounded-[15px] border-2 border-zinc-900 group-aria-expanded:w-20 group-aria-expanded:h-20",
+                        "transition-all w-[50px] h-[50px] object-cover inline-flex items-center rounded-[15px] border-2 border-deep-background group-aria-expanded:w-20 group-aria-expanded:h-20",
                     )
                     .align_left(),
                 ContentType::text(string()).align_right().css("group-aria-busy:hidden"),
             ],
             signal: Rc::new(Pages::new_collection_page(string())) as Rc<dyn ActiveCompare>,
             focus_color_change: false,
-            extended_css_class: "bg-background transition-all delay-[25ms] group-aria-expanded:w-20 group-aria-expanded:min-h-20 group-aria-expanded:p-0"
+            background_image: format!("linear-gradient(to right, rgba(25, 25, 25, 0.8) 0%, rgba(25, 25, 25, 1) 68%, rgba(25, 25, 25, 1) 100%),url(\"{}\")",COLLECTION_PIC),
+            background_size: "cover",
+            extended_css_class: "bg-background object-cover transition-all delay-[25ms] group-aria-expanded:w-20 group-aria-expanded:min-h-20 group-aria-expanded:p-0"
         }
     }
 }

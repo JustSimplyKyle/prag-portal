@@ -36,7 +36,7 @@ pub fn CollectionBlock(
     #[props(default)] extended_class: String,
 ) -> Element {
     let (roundness, extended_class): (Vec<_>, Vec<_>) = extended_class
-        .split(' ')
+        .split_whitespace()
         .partition(|x| x.contains("rounded"));
     let extended_class = extended_class.join(" ");
     let mut img_class = String::from("h-full w-full object-cover rounded-[5px]");
