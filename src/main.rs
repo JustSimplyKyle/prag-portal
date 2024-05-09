@@ -277,18 +277,15 @@ fn LayoutContainer(children: Element, #[props(default)] extended_class: String) 
     }
 }
 
+pub type Comparison<T> = (T, Option<T>);
+
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
-pub enum CollectionPageTopSelection {
+enum CollectionPageTopSelection {
     Mods,
     World,
     ResourcePack,
     ShaderPacks,
 }
-
-const A: GlobalSignal<(
-    CollectionPageTopSelection,
-    Option<CollectionPageTopSelection>,
-)> = GlobalSignal::new(|| (CollectionPageTopSelection::Mods, None));
 
 impl ActiveCompare for CollectionPageTopSelection {
     fn hashed_value(&self) -> u64 {
@@ -298,20 +295,24 @@ impl ActiveCompare for CollectionPageTopSelection {
     }
 
     fn compare(&self) -> bool {
-        &A().0 == self
+        let top = use_context::<Signal<Comparison<CollectionPageTopSelection>>>();
+        &top().0 == self
     }
 
     fn switch_active_to_self(&self) {
-        let prev = A().0;
+        let mut global = use_context::<Signal<Comparison<CollectionPageTopSelection>>>();
+        let prev = global().0;
         if &prev != self {
-            A.write().1 = Some(prev);
+            global.write().1 = Some(prev);
         }
-        A.write().0 = *self;
+        global.write().0 = *self;
     }
 }
 
 #[component]
 fn CollectionPage() -> Element {
+    let _: Signal<Comparison<CollectionPageTopSelection>> =
+        use_context_provider(|| Signal::new((CollectionPageTopSelection::Mods, None)));
     rsx! {
         div { class: "flex flex-col",
             div { class: "sticky top-0 p-[50px] rounded-2xl bg-slate-800 grid grid-flow-col items-stretch",
