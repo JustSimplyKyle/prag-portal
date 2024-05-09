@@ -611,9 +611,13 @@ fn SidebarCollectionBlock(
             ],
             signal: Rc::new(Pages::new_collection_page(signal_check())) as Rc<dyn ActiveCompare>,
             focus_color_change: false,
-            background_image: format!("linear-gradient(to right, rgba(25, 25, 25, 0.8) 0%, rgba(25, 25, 25, 1) 68%, rgba(25, 25, 25, 1) 100%),url(\"{}\")",COLLECTION_PIC),
+            background_image: darken_sidebar_background(COLLECTION_PIC),
             background_size: "cover",
             extended_css_class: "bg-background object-cover transition-all delay-[25ms] group-aria-expanded:w-20 group-aria-expanded:min-h-20 group-aria-expanded:p-0"
         }
     }
+}
+
+fn darken_sidebar_background(s: impl ToString) -> String {
+    format!("linear-gradient(to right, rgba(25, 25, 25, 0.8) 0%, rgba(25, 25, 25, 1) 68%, rgba(25, 25, 25, 1) 100%),url(\"{}\")", s.to_string())
 }
