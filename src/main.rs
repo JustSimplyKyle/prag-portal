@@ -554,7 +554,8 @@ fn SideBar() -> Element {
                     Button { roundness: Roundness::Top, string_placements: folded_images, extended_css_class: "bg-background" }
                     for collection in collections {
                         SidebarCollectionBlock {
-                            string: &collection.display_name,
+                            display: &collection.display_name,
+                            signal_check: &collection.get_collection_id().0,
                         }
                     }
                 }
@@ -593,7 +594,10 @@ fn SideBar() -> Element {
 }
 
 #[component]
-fn SidebarCollectionBlock(string: ReadOnlySignal<String>) -> Element {
+fn SidebarCollectionBlock(
+    display: ReadOnlySignal<String>,
+    signal_check: ReadOnlySignal<String>,
+) -> Element {
     rsx! {
         Button {
             roundness: Roundness::None,
@@ -603,9 +607,9 @@ fn SidebarCollectionBlock(string: ReadOnlySignal<String>) -> Element {
                         "transition-all w-[50px] h-[50px] object-cover inline-flex items-center rounded-[15px] border-2 border-zinc-900 group-aria-expanded:w-20 group-aria-expanded:h-20",
                     )
                     .align_left(),
-                ContentType::text(string()).align_right().css("group-aria-busy:hidden"),
+                ContentType::text(display()).align_right().css("group-aria-busy:hidden"),
             ],
-            signal: Rc::new(Pages::new_collection_page(string())) as Rc<dyn ActiveCompare>,
+            signal: Rc::new(Pages::new_collection_page(signal_check())) as Rc<dyn ActiveCompare>,
             focus_color_change: false,
             extended_css_class: "bg-background transition-all delay-[25ms] group-aria-expanded:w-20 group-aria-expanded:min-h-20 group-aria-expanded:p-0"
         }

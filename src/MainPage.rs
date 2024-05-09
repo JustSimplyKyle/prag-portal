@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 
 use manganis::ImageAsset;
-use rust_lib::api::shared_resources::{collection::Collection, entry::STORAGE};
+use rust_lib::api::shared_resources::collection::Collection;
 use tailwind_fuse::*;
 
 use crate::{
@@ -12,11 +12,13 @@ use crate::{
 };
 
 pub const COLLECTION_PIC: ImageAsset =
-    manganis::mg!(image("./public/pic1.png").format(ImageType::Avif));
+    manganis::mg!(image("./public/pic1.png").format(ImageType::Avif).preload());
 pub const BLOCK: &str = manganis::mg!(file("./public/block.svg"));
 pub const EXPAND_CONTENT: &str = manganis::mg!(file("./public/expand_content.svg"));
 pub const ICON: &str = manganis::mg!(file("./public/icon.svg"));
-pub const IMG: ImageAsset = manganis::mg!(image("./public/project.png"));
+pub const IMG: ImageAsset = manganis::mg!(image("./public/project.png")
+    .format(ImageType::Avif)
+    .preload());
 pub const STAR: &str = manganis::mg!(file("./public/award_star.svg"));
 pub const ARROW_LEFT: &str = manganis::mg!(file("./public/keyboard_arrow_left.svg"));
 pub const ARROW_RIGHT: &str = manganis::mg!(file("./public/keyboard_arrow_right.svg"));
