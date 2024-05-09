@@ -6,6 +6,16 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[workspace]
+
+members = [
+  "era-connect/app/rust",
+]
+
+default-members = [
+  "era-connect/app/rust",
+]
+
 [dependencies]
 
 rust_lib = { path = "./era-connect/app/rust/" }
