@@ -43,7 +43,7 @@ pub fn CollectionBlock(
     let main_text = collection.map(|x| x.display_name);
     let hint = String::from("遊玩中•由我建立");
     let (roundness, extended_class): (Vec<_>, Vec<_>) = extended_class
-        .split(' ')
+        .split_whitespace()
         .partition(|x| x.contains("rounded"));
     let extended_class = extended_class.join(" ");
     let mut img_class = String::from("h-full w-full object-cover rounded-[5px]");
