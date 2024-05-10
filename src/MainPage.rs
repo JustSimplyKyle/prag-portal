@@ -53,12 +53,10 @@ pub fn CollectionBlock(
                     div { class: "absolute inset-0 bg-gradient-to-t from-deep-background to-23%" }
                 }
                 div { class: "absolute inset-0 px-5 pt-5 pb-[25px] flex flex-col gap-[15px] *:text-ellipsis overflow-hidden justify-end items-start",
-                    div {
-                        class: "text-3xl leading-normal capsize text-white font-bold",
+                    div { class: "text-3xl leading-normal capsize text-white font-bold",
                         {main_text}
                     }
-                    div {
-                        class: "text-[15px] leading-normal capsize text-white text-opacity-50",
+                    div { class: "text-[15px] leading-normal capsize text-white text-opacity-50",
                         {hint}
                     }
                 }

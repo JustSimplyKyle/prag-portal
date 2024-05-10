@@ -192,33 +192,26 @@ fn App() -> Element {
         div { class: "bg-deep-background min-h-screen min-w-full font-display leading-normal",
             {
                 TOP_LEVEL_COMPONENT().into_iter().map(|x| (x.pointer)(x.props))
-            }
+            },
             ErrorBoundary {
-                handle_error: move |error| {
-                    rsx! {
-                        Modal {
-                            active: error_active,
-                            name: "error_modal",
-                            close_on_outer_click: false,
-                            div {
-                                div {
-                                    class: "flex flex-col space-y-3",
-                                    div {
-                                        class: "text-red text-2xl font-bold",
-                                        "Hmm, something went wrong. Please copy the following error to the developer."
-                                    }
-                                    Button {
-                                        roundness: Roundness::Pill,
-                                        extended_css_class: "text-[13px] font-bold",
-                                        string_placements: rsx!{"{error} "},
-                                        fill_mode: FillMode::Fit,
-                                        clickable: false,
-                                    }
+                handle_error: move |error| { rsx! {
+                    Modal { active: error_active, name: "error_modal", close_on_outer_click: false,
+                        div {
+                            div { class: "flex flex-col space-y-3",
+                                div { class: "text-red text-2xl font-bold",
+                                    "Hmm, something went wrong. Please copy the following error to the developer."
+                                }
+                                Button {
+                                    roundness: Roundness::Pill,
+                                    extended_css_class: "text-[13px] font-bold",
+                                    string_placements: rsx! { "{error} " },
+                                    fill_mode: FillMode::Fit,
+                                    clickable: false
                                 }
                             }
                         }
                     }
-                },
+                } },
                 div { class: "[&_*]:transform-gpu", Layout {} }
             }
         }
@@ -525,9 +518,7 @@ fn SideBar() -> Element {
                 // middle
                 div { class: "flex flex-col flex-nowrap overflow-scroll max-h-[451px] space-y-1",
                     Button { roundness: Roundness::Top, string_placements: folded_images, extended_css_class: "bg-background" }
-                    SidebarCollectionBlock {
-                        string: "新的收藏"
-                    }
+                    SidebarCollectionBlock { string: "新的收藏" }
                 }
                 // bottom
                 div { class: "flex flex-col space-y-1",
@@ -569,27 +560,25 @@ fn SidebarCollectionBlock(string: ReadOnlySignal<String>) -> Element {
         Button {
             roundness: Roundness::None,
             string_placements: vec![
-                ContentType::custom(rsx! {
-                    div {
-                        class: "relative transition-all container w-[50px] h-[50px] group-aria-expanded:w-20 group-aria-expanded:h-20 border-2 border-[#2E2E2E] rounded-[15px] group-aria-expanded:rounded-[5px]",
-                        {
-                        ContentType::image(COLLECTION_PIC.to_string())
-                            .css(
-                                "absolute inset-0 transition-all w-full h-full object-cover inline-flex items-center rounded-[15px] group-aria-expanded:rounded-[5px]",
-                            )
-                            .get_element()
-                        }
-                        div {
-                            class: "absolute inset-x-0 bottom-0 w-3 h-3 bg-[#CCE246] rounded-full",
-                        }
-                    }
-                })
-                .align_left(),
+                ContentType::custom(
+                        rsx! {
+                            div { class :
+                            "relative transition-all container w-[50px] h-[50px] group-aria-expanded:w-20 group-aria-expanded:h-20 border-2 border-[#2E2E2E] rounded-[15px] group-aria-expanded:rounded-[5px]",
+                            { ContentType::image(COLLECTION_PIC.to_string())
+                            .css("absolute inset-0 transition-all w-full h-full object-cover inline-flex items-center rounded-[15px] group-aria-expanded:rounded-[5px]",)
+                            .get_element() } div { class :
+                            "absolute inset-x-0 bottom-0 w-3 h-3 bg-[#CCE246] rounded-full", } }
+                        },
+                    )
+                    .align_left(),
                 ContentType::text(string()).align_right().css("group-aria-busy:hidden"),
             ],
             signal: Rc::new(Pages::new_collection_page(string())) as Rc<dyn Switcher>,
             focus_color_change: false,
-            background_image: format!("linear-gradient(to right, rgba(25, 25, 25, 0.8) 0%, rgba(25, 25, 25, 1) 68%, rgba(25, 25, 25, 1) 100%),url(\"{}\")",COLLECTION_PIC),
+            background_image: format!(
+                "linear-gradient(to right, rgba(25, 25, 25, 0.8) 0%, rgba(25, 25, 25, 1) 68%, rgba(25, 25, 25, 1) 100%),url(\"{}\")",
+                COLLECTION_PIC,
+            ),
             background_size: "cover",
             extended_css_class: "bg-background object-cover transition-all delay-[25ms] group-aria-expanded:w-20 group-aria-expanded:min-h-20 group-aria-expanded:p-0"
         }
