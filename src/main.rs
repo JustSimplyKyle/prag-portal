@@ -288,12 +288,12 @@ impl Switcher for CollectionPageTopSelection {
     }
 
     fn compare(&self) -> bool {
-        let top = use_context::<Signal<Comparison<CollectionPageTopSelection>>>();
+        let top = use_context::<Signal<Comparison<Self>>>();
         &top().0 == self
     }
 
     fn switch_active_to_self(&self) {
-        let mut global = use_context::<Signal<Comparison<CollectionPageTopSelection>>>();
+        let mut global = use_context::<Signal<Comparison<Self>>>();
         let prev = global().0;
         if &prev != self {
             global.write().1 = Some(prev);
