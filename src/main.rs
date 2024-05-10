@@ -571,11 +571,11 @@ fn SidebarCollectionBlock(string: ReadOnlySignal<String>) -> Element {
             string_placements: vec![
                 ContentType::custom(rsx! {
                     div {
-                        class: "relative transition-all container w-[50px] h-[50px] group-aria-expanded:w-20 group-aria-expanded:h-20 border-2 border-[#2E2E2E] rounded-[15px]",
+                        class: "relative transition-all container w-[50px] h-[50px] group-aria-expanded:w-20 group-aria-expanded:h-20 border-2 border-[#2E2E2E] rounded-[15px] group-aria-expanded:rounded-[5px]",
                         {
                         ContentType::image(COLLECTION_PIC.to_string())
                             .css(
-                                "absolute inset-0 transition-all w-full h-full object-cover inline-flex items-center rounded-[15px]",
+                                "absolute inset-0 transition-all w-full h-full object-cover inline-flex items-center rounded-[15px] group-aria-expanded:rounded-[5px]",
                             )
                             .get_element()
                         }

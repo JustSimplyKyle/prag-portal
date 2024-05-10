@@ -2385,6 +2385,10 @@ body {
   width: 5rem;
 }
 
+.group[aria-expanded="true"] .group-aria-expanded\:rounded-\[5px\] {
+  border-radius: 5px;
+}
+
 .group[aria-expanded="true"] .group-aria-expanded\:p-0 {
   padding: 0px;
 }
