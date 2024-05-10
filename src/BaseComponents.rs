@@ -256,7 +256,7 @@ impl From<Element> for StringPlacements {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Contents {
     contents: Vec<Content>,
     css: String,
@@ -287,7 +287,7 @@ impl Contents {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Content {
     content: ContentType,
     css: String,
@@ -364,16 +364,18 @@ impl Content {
                     div { class: self.css, { x } }
                 }
             }
+            ContentType::Custom(x) => x,
         }
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum ContentType {
     Svg(&'static str),
     Text(String),
     Hint(String),
     Image(String),
+    Custom(Element),
 }
 
 impl ContentType {
@@ -452,6 +454,16 @@ impl ContentType {
     pub fn hint(string: impl Into<String>) -> Content {
         let content_type = Self::Hint(string.into());
         let css = String::from("text-[17px] text-hint leading-normal capsize");
+        Content {
+            content: content_type,
+            css,
+        }
+    }
+
+    #[must_use]
+    pub fn custom(custom: impl Into<Element>) -> Content {
+        let content_type = Self::Custom(custom.into());
+        let css = String::new();
         Content {
             content: content_type,
             css,
