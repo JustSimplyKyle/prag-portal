@@ -14,7 +14,7 @@ use tailwind_fuse::*;
 
 use dioxus::prelude::*;
 use log::LevelFilter;
-use BaseComponents::{subModalProps, ActiveCompare, ComponentPointer};
+use BaseComponents::{subModalProps, ComponentPointer, Switcher};
 
 use crate::BaseComponents::{Alignment, Button, ContentType, FillMode, Modal, Roundness};
 use crate::Collections::Collections;
@@ -62,7 +62,7 @@ impl Pages {
     }
 }
 
-impl ActiveCompare for Pages {
+impl Switcher for Pages {
     fn hashed_value(&self) -> u64 {
         let mut hasher = DefaultHasher::new();
         self.hash(&mut hasher);
@@ -287,7 +287,7 @@ enum CollectionPageTopSelection {
     ShaderPacks,
 }
 
-impl ActiveCompare for CollectionPageTopSelection {
+impl Switcher for CollectionPageTopSelection {
     fn hashed_value(&self) -> u64 {
         let mut hasher = DefaultHasher::new();
         self.hash(&mut hasher);
@@ -360,19 +360,19 @@ fn CollectionPage() -> Element {
                         Button {
                             roundness: Roundness::Pill,
                             fill_mode: FillMode::Fit,
-                            signal: Rc::new(CollectionPageTopSelection::Mods) as Rc<dyn ActiveCompare>,
+                            signal: Rc::new(CollectionPageTopSelection::Mods) as Rc<dyn Switcher>,
                             string_placements: vec![ContentType::text("A").align_left(), ContentType::text("模組").align_right()]
                         }
                         Button {
                             roundness: Roundness::Pill,
                             fill_mode: FillMode::Fit,
-                            signal: Rc::new(CollectionPageTopSelection::World) as Rc<dyn ActiveCompare>,
+                            signal: Rc::new(CollectionPageTopSelection::World) as Rc<dyn Switcher>,
                             string_placements: vec![ContentType::text("B").align_left(), ContentType::text("世界").align_right()]
                         }
                         Button {
                             roundness: Roundness::Pill,
                             fill_mode: FillMode::Fit,
-                            signal: Rc::new(CollectionPageTopSelection::ResourcePack) as Rc<dyn ActiveCompare>,
+                            signal: Rc::new(CollectionPageTopSelection::ResourcePack) as Rc<dyn Switcher>,
                             string_placements: vec![
                                 ContentType::text("C").align_left(),
                                 ContentType::text("資源包").align_right(),
@@ -381,7 +381,7 @@ fn CollectionPage() -> Element {
                         Button {
                             roundness: Roundness::Pill,
                             fill_mode: FillMode::Fit,
-                            signal: Rc::new(CollectionPageTopSelection::ShaderPacks) as Rc<dyn ActiveCompare>,
+                            signal: Rc::new(CollectionPageTopSelection::ShaderPacks) as Rc<dyn Switcher>,
                             string_placements: vec![
                                 ContentType::text("D").align_left(),
                                 ContentType::text("光影包").align_right(),
@@ -499,7 +499,7 @@ fn SideBar() -> Element {
                             ContentType::svg(HOME).align_left(),
                             ContentType::text("首頁").css("group-aria-busy:hidden").align_right(),
                         ],
-                        signal: Rc::new(Pages::MainPage) as Rc<dyn ActiveCompare>,
+                        signal: Rc::new(Pages::MainPage) as Rc<dyn Switcher>,
                         extended_css_class: "bg-background group-aria-expanded:pr-5"
                     }
                     Button {
@@ -508,7 +508,7 @@ fn SideBar() -> Element {
                             ContentType::svg(EXPLORE).align_left(),
                             ContentType::text("探索").css("group-aria-busy:hidden").align_right(),
                         ],
-                        signal: Rc::new(Pages::Explore) as Rc<dyn ActiveCompare>,
+                        signal: Rc::new(Pages::Explore) as Rc<dyn Switcher>,
                         extended_css_class: "bg-background group-aria-expanded:pr-5"
                     }
                     Button {
@@ -517,7 +517,7 @@ fn SideBar() -> Element {
                             ContentType::svg(SIDEBAR_COLLECTION).align_left(),
                             ContentType::text("收藏庫").css("group-aria-busy:hidden").align_right(),
                         ],
-                        signal: Rc::new(Pages::Collections) as Rc<dyn ActiveCompare>,
+                        signal: Rc::new(Pages::Collections) as Rc<dyn Switcher>,
                         onclick,
                         extended_css_class: "bg-background group-aria-expanded:pr-5"
                     }
@@ -544,7 +544,7 @@ fn SideBar() -> Element {
                                 .align_right()
                                 .css("group-aria-selected/active:hidden group-aria-busy:hidden text-hint"),
                         ],
-                        signal: Rc::new(Pages::DownloadProgress) as Rc<dyn ActiveCompare>,
+                        signal: Rc::new(Pages::DownloadProgress) as Rc<dyn Switcher>,
                         extended_css_class: "bg-background group/active items-center",
                         onclick: move |()| {
                             let prev = ACTIVE_PAGE().1;
@@ -587,7 +587,7 @@ fn SidebarCollectionBlock(string: ReadOnlySignal<String>) -> Element {
                 .align_left(),
                 ContentType::text(string()).align_right().css("group-aria-busy:hidden"),
             ],
-            signal: Rc::new(Pages::new_collection_page(string())) as Rc<dyn ActiveCompare>,
+            signal: Rc::new(Pages::new_collection_page(string())) as Rc<dyn Switcher>,
             focus_color_change: false,
             background_image: format!("linear-gradient(to right, rgba(25, 25, 25, 0.8) 0%, rgba(25, 25, 25, 1) 68%, rgba(25, 25, 25, 1) 100%),url(\"{}\")",COLLECTION_PIC),
             background_size: "cover",

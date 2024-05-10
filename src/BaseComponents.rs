@@ -72,7 +72,7 @@ pub fn subModal(
     }
 }
 
-pub trait ActiveCompare {
+pub trait Switcher {
     // Compare with the Global Signal
     fn compare(&self) -> bool;
     // Changes the current Global Signal to this
@@ -81,8 +81,8 @@ pub trait ActiveCompare {
     fn hashed_value(&self) -> u64;
 }
 
-impl<'a, 'b> PartialEq<dyn ActiveCompare + 'b> for dyn ActiveCompare + 'a {
-    fn eq(&self, other: &(dyn ActiveCompare + 'b)) -> bool {
+impl<'a, 'b> PartialEq<dyn Switcher + 'b> for dyn Switcher + 'a {
+    fn eq(&self, other: &(dyn Switcher + 'b)) -> bool {
         self.hashed_value() == other.hashed_value()
     }
 }
@@ -176,7 +176,7 @@ pub fn Button(
     roundness: Roundness,
     #[props(into)] string_placements: StringPlacements,
     #[props(default)] extended_css_class: String,
-    #[props(into)] signal: Option<Rc<dyn ActiveCompare>>,
+    #[props(into)] signal: Option<Rc<dyn Switcher>>,
     #[props(default = true)] clickable: bool,
     onclick: Option<EventHandler>,
     #[props(extends = GlobalAttributes)] mut attributes: Vec<Attribute>,
