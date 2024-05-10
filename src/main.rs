@@ -14,7 +14,7 @@ use tailwind_fuse::*;
 
 use dioxus::prelude::*;
 use log::LevelFilter;
-use BaseComponents::{subModalProps, ActiveCompare, ComponentPointer};
+use BaseComponents::{subModalProps, ComponentPointer, Switcher};
 
 use crate::BaseComponents::{Alignment, Button, ContentType, FillMode, Modal, Roundness};
 use crate::Collections::Collections;
@@ -64,7 +64,7 @@ impl Pages {
     }
 }
 
-impl ActiveCompare for Pages {
+impl Switcher for Pages {
     fn hashed_value(&self) -> u64 {
         let mut hasher = DefaultHasher::new();
         self.hash(&mut hasher);
@@ -207,33 +207,26 @@ fn App() -> Element {
         div { class: "bg-deep-background min-h-screen min-w-full font-display leading-normal",
             {
                 TOP_LEVEL_COMPONENT().into_iter().map(|x| (x.pointer)(x.props))
-            }
+            },
             ErrorBoundary {
-                handle_error: move |error| {
-                    rsx! {
-                        Modal {
-                            active: error_active,
-                            name: "error_modal",
-                            close_on_outer_click: false,
-                            div {
-                                div {
-                                    class: "flex flex-col space-y-3",
-                                    div {
-                                        class: "text-red text-2xl font-bold",
-                                        "Hmm, something went wrong. Please copy the following error to the developer."
-                                    }
-                                    Button {
-                                        roundness: Roundness::Pill,
-                                        extended_css_class: "text-[13px] font-bold",
-                                        string_placements: rsx!{"{error} "},
-                                        fill_mode: FillMode::Fit,
-                                        clickable: false,
-                                    }
+                handle_error: move |error| { rsx! {
+                    Modal { active: error_active, name: "error_modal", close_on_outer_click: false,
+                        div {
+                            div { class: "flex flex-col space-y-3",
+                                div { class: "text-red text-2xl font-bold",
+                                    "Hmm, something went wrong. Please copy the following error to the developer."
+                                }
+                                Button {
+                                    roundness: Roundness::Pill,
+                                    extended_css_class: "text-[13px] font-bold",
+                                    string_placements: rsx! { "{error} " },
+                                    fill_mode: FillMode::Fit,
+                                    clickable: false
                                 }
                             }
                         }
                     }
-                },
+                } },
                 div { class: "[&_*]:transform-gpu", Layout {} }
             }
         }
@@ -278,11 +271,13 @@ fn Layout() -> Element {
                     id: Pages::DownloadProgress.slide_in_id(),
                     LayoutContainer { DownloadProgress {} }
                 }
-                for (name, collection) in collections_iterator {
+                for (name , collection) in collections_iterator {
                     div {
                         class: "absolute inset-0 z-0 min-h-full min-w-full",
                         id: Pages::new_collection_page(name).slide_in_id(),
-                        LayoutContainer { extended_class: "p-0", CollectionPage {collection} }
+                        LayoutContainer { extended_class: "p-0",
+                            CollectionPage { collection }
+                        }
                     }
                 }
             }
@@ -313,7 +308,7 @@ enum CollectionPageTopSelection {
     ShaderPacks,
 }
 
-impl ActiveCompare for CollectionPageTopSelection {
+impl Switcher for CollectionPageTopSelection {
     fn hashed_value(&self) -> u64 {
         let mut hasher = DefaultHasher::new();
         self.hash(&mut hasher);
@@ -345,7 +340,7 @@ fn CollectionPage(collection: ReadOnlySignal<Collection>) -> Element {
                 div { class: "flex flex-col space-y-[35px]",
                     div { class: "text-white font-black text-[80px] leading-normal capsize",
                         {collection().display_name}
-                    },
+                    }
                     Button {
                         roundness: Roundness::Pill,
                         string_placements: vec![ContentType::text("F").css("w-[30px] h-[30px]").align_center()],
@@ -386,19 +381,19 @@ fn CollectionPage(collection: ReadOnlySignal<Collection>) -> Element {
                         Button {
                             roundness: Roundness::Pill,
                             fill_mode: FillMode::Fit,
-                            signal: Rc::new(CollectionPageTopSelection::Mods) as Rc<dyn ActiveCompare>,
+                            signal: Rc::new(CollectionPageTopSelection::Mods) as Rc<dyn Switcher>,
                             string_placements: vec![ContentType::text("A").align_left(), ContentType::text("模組").align_right()]
                         }
                         Button {
                             roundness: Roundness::Pill,
                             fill_mode: FillMode::Fit,
-                            signal: Rc::new(CollectionPageTopSelection::World) as Rc<dyn ActiveCompare>,
+                            signal: Rc::new(CollectionPageTopSelection::World) as Rc<dyn Switcher>,
                             string_placements: vec![ContentType::text("B").align_left(), ContentType::text("世界").align_right()]
                         }
                         Button {
                             roundness: Roundness::Pill,
                             fill_mode: FillMode::Fit,
-                            signal: Rc::new(CollectionPageTopSelection::ResourcePack) as Rc<dyn ActiveCompare>,
+                            signal: Rc::new(CollectionPageTopSelection::ResourcePack) as Rc<dyn Switcher>,
                             string_placements: vec![
                                 ContentType::text("C").align_left(),
                                 ContentType::text("資源包").align_right(),
@@ -407,7 +402,7 @@ fn CollectionPage(collection: ReadOnlySignal<Collection>) -> Element {
                         Button {
                             roundness: Roundness::Pill,
                             fill_mode: FillMode::Fit,
-                            signal: Rc::new(CollectionPageTopSelection::ShaderPacks) as Rc<dyn ActiveCompare>,
+                            signal: Rc::new(CollectionPageTopSelection::ShaderPacks) as Rc<dyn Switcher>,
                             string_placements: vec![
                                 ContentType::text("D").align_left(),
                                 ContentType::text("光影包").align_right(),
@@ -526,7 +521,7 @@ fn SideBar() -> Element {
                             ContentType::svg(HOME).align_left(),
                             ContentType::text("首頁").css("group-aria-busy:hidden").align_right(),
                         ],
-                        signal: Rc::new(Pages::MainPage) as Rc<dyn ActiveCompare>,
+                        signal: Rc::new(Pages::MainPage) as Rc<dyn Switcher>,
                         extended_css_class: "bg-background group-aria-expanded:pr-5"
                     }
                     Button {
@@ -535,7 +530,7 @@ fn SideBar() -> Element {
                             ContentType::svg(EXPLORE).align_left(),
                             ContentType::text("探索").css("group-aria-busy:hidden").align_right(),
                         ],
-                        signal: Rc::new(Pages::Explore) as Rc<dyn ActiveCompare>,
+                        signal: Rc::new(Pages::Explore) as Rc<dyn Switcher>,
                         extended_css_class: "bg-background group-aria-expanded:pr-5"
                     }
                     Button {
@@ -544,7 +539,7 @@ fn SideBar() -> Element {
                             ContentType::svg(SIDEBAR_COLLECTION).align_left(),
                             ContentType::text("收藏庫").css("group-aria-busy:hidden").align_right(),
                         ],
-                        signal: Rc::new(Pages::Collections) as Rc<dyn ActiveCompare>,
+                        signal: Rc::new(Pages::Collections) as Rc<dyn Switcher>,
                         onclick,
                         extended_css_class: "bg-background group-aria-expanded:pr-5"
                     }
@@ -553,10 +548,7 @@ fn SideBar() -> Element {
                 div { class: "flex flex-col flex-nowrap overflow-scroll max-h-[451px] space-y-1",
                     Button { roundness: Roundness::Top, string_placements: folded_images, extended_css_class: "bg-background" }
                     for collection in collections {
-                        SidebarCollectionBlock {
-                            display: &collection.display_name,
-                            signal_check: &collection.get_collection_id().0,
-                        }
+                        SidebarCollectionBlock { display: &collection.display_name, signal_check: &collection.get_collection_id().0 }
                     }
                 }
                 // bottom
@@ -574,7 +566,7 @@ fn SideBar() -> Element {
                                 .align_right()
                                 .css("group-aria-selected/active:hidden group-aria-busy:hidden text-hint"),
                         ],
-                        signal: Rc::new(Pages::DownloadProgress) as Rc<dyn ActiveCompare>,
+                        signal: Rc::new(Pages::DownloadProgress) as Rc<dyn Switcher>,
                         extended_css_class: "bg-background group/active items-center",
                         onclick: move |()| {
                             let prev = ACTIVE_PAGE().1;
@@ -598,18 +590,22 @@ fn SidebarCollectionBlock(
     display: ReadOnlySignal<String>,
     signal_check: ReadOnlySignal<String>,
 ) -> Element {
+    let img_block = rsx! {
+        div { class: "relative transition-all container w-[50px] h-[50px] group-aria-expanded:w-20 group-aria-expanded:h-20 border-2 border-[#2E2E2E] rounded-[15px] group-aria-expanded:rounded-[5px]",
+            { ContentType::image(COLLECTION_PIC.to_string())
+            .css("absolute inset-0 transition-all w-full h-full object-cover inline-flex items-center rounded-[15px] group-aria-expanded:rounded-[5px]",)
+            .get_element() },
+            div { class: "absolute inset-x-0 bottom-0 w-3 h-3 bg-[#CCE246] rounded-full" }
+        }
+    };
     rsx! {
         Button {
             roundness: Roundness::None,
             string_placements: vec![
-                ContentType::image(COLLECTION_PIC.to_string())
-                    .css(
-                        "transition-all w-[50px] h-[50px] object-cover inline-flex items-center rounded-[15px] border-2 border-deep-background group-aria-expanded:w-20 group-aria-expanded:h-20",
-                    )
-                    .align_left(),
+                ContentType::custom(img_block).align_left(),
                 ContentType::text(display()).align_right().css("group-aria-busy:hidden"),
             ],
-            signal: Rc::new(Pages::new_collection_page(signal_check())) as Rc<dyn ActiveCompare>,
+            signal: Rc::new(Pages::new_collection_page(signal_check())) as Rc<dyn Switcher>,
             focus_color_change: false,
             background_image: darken_sidebar_background(COLLECTION_PIC),
             background_size: "cover",
