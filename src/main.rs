@@ -5,7 +5,7 @@ pub mod MainPage;
 
 use dioxus::desktop::tao::dpi::PhysicalSize;
 use dioxus::desktop::WindowBuilder;
-use rust_lib::api::shared_resources::collection::Collection;
+use rust_lib::api::shared_resources::collection::{Collection, CollectionId};
 use std::hash::{DefaultHasher, Hash, Hasher};
 use std::rc::Rc;
 use std::sync::Arc;
@@ -59,7 +59,8 @@ pub enum Pages {
 }
 
 impl Pages {
-    fn new_collection_page(s: impl Into<Arc<str>>) -> Self {
+    fn new_collection_page(s: CollectionId) -> Self {
+        let s = s.0;
         Self::CollectionPage(s.into())
     }
 }
@@ -241,14 +242,14 @@ fn Layout() -> Element {
     let collections = get_collections();
     let collections_iterator = collections().into_iter().flat_map(|x| x.into_iter());
     for collection in collections_iterator {
-        Pages::new_collection_page(collection.get_collection_id().0)
+        Pages::new_collection_page(collection.get_collection_id())
             .apply_slide_in()
             .unwrap();
     }
     let collections_iterator = collections()
         .into_iter()
         .flatten()
-        .map(|x| (x.get_collection_id().0, x));
+        .map(|x| (x.get_collection_id(), x));
     Pages::DownloadProgress.apply_slide_in().throw()?;
     rsx! {
         div {
@@ -351,6 +352,7 @@ fn CollectionPage(collection: ReadOnlySignal<Collection>) -> Element {
                 div { class: "flex justify-end",
                     div { class: "flex flex-col space-y-[3px] w-full max-w-[250px]",
                         CollectionBlock {
+                            collection: collection(),
                             extended_class: "rounded-[20px] w-full h-[250px]",
                             picture: COLLECTION_PIC,
                             gradient: false
@@ -548,7 +550,7 @@ fn SideBar() -> Element {
                 div { class: "flex flex-col flex-nowrap overflow-scroll max-h-[451px] space-y-1",
                     Button { roundness: Roundness::Top, string_placements: folded_images, extended_css_class: "bg-background" }
                     for collection in collections {
-                        SidebarCollectionBlock { display: &collection.display_name, signal_check: &collection.get_collection_id().0 }
+                        SidebarCollectionBlock { collection: collection }
                     }
                 }
                 // bottom
@@ -586,10 +588,7 @@ fn SideBar() -> Element {
 }
 
 #[component]
-fn SidebarCollectionBlock(
-    display: ReadOnlySignal<String>,
-    signal_check: ReadOnlySignal<String>,
-) -> Element {
+fn SidebarCollectionBlock(collection: ReadOnlySignal<Collection>) -> Element {
     let img_block = rsx! {
         div { class: "relative transition-all container w-[50px] h-[50px] group-aria-expanded:w-20 group-aria-expanded:h-20 border-2 border-[#2E2E2E] rounded-[15px] group-aria-expanded:rounded-[5px]",
             { ContentType::image(COLLECTION_PIC.to_string())
@@ -598,14 +597,16 @@ fn SidebarCollectionBlock(
             div { class: "absolute inset-x-0 bottom-0 w-3 h-3 bg-[#CCE246] rounded-full" }
         }
     };
+    let display = collection().display_name;
+    let signal_check = collection().get_collection_id();
     rsx! {
         Button {
             roundness: Roundness::None,
             string_placements: vec![
                 ContentType::custom(img_block).align_left(),
-                ContentType::text(display()).align_right().css("group-aria-busy:hidden"),
+                ContentType::text(display).align_right().css("group-aria-busy:hidden"),
             ],
-            signal: Rc::new(Pages::new_collection_page(signal_check())) as Rc<dyn Switcher>,
+            signal: Rc::new(Pages::new_collection_page(signal_check)) as Rc<dyn Switcher>,
             focus_color_change: false,
             background_image: darken_sidebar_background(COLLECTION_PIC),
             background_size: "cover",

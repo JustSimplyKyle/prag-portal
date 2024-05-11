@@ -7,8 +7,9 @@ use tailwind_fuse::*;
 use crate::{
     get_collections,
     BaseComponents::{
-        Alignment, Button, ButtonClass, ContentType, Contents, FillMode, Roundness, Size,
+        Alignment, Button, ButtonClass, ContentType, Contents, FillMode, Roundness, Size, Switcher,
     },
+    Pages, ACTIVE_PAGE,
 };
 
 pub const COLLECTION_PIC: ImageAsset =
@@ -34,13 +35,13 @@ pub fn MainPage() -> Element {
 /// Creates a Collection Block with a `280px` square, with a default roundness of `5px`
 #[component]
 pub fn CollectionBlock(
-    #[props(into)] collection: Option<Collection>,
+    #[props(into)] collection: Collection,
     picture: ImageAsset,
     #[props(default = true)] gradient: bool,
     #[props(extends=GlobalAttributes)] attributes: Vec<Attribute>,
     #[props(default)] extended_class: String,
 ) -> Element {
-    let main_text = collection.map(|x| x.display_name);
+    let main_text = collection.display_name.clone();
     let hint = String::from("遊玩中•由我建立");
     let (roundness, extended_class): (Vec<_>, Vec<_>) = extended_class
         .split_whitespace()
@@ -52,8 +53,11 @@ pub fn CollectionBlock(
     }
     rsx! {
         div {
-            div {
+            button {
                 class: tw_merge!("relative h-[280px] w-[280px]", extended_class),
+                onclick: move |_| {
+                    Pages::new_collection_page(collection.get_collection_id()).switch_active_to_self();
+                },
                 ..attributes,
                 img { class: img_class, src: picture }
                 if gradient {
