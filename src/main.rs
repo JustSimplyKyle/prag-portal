@@ -6,6 +6,7 @@ pub mod MainPage;
 use anyhow::bail;
 use dioxus::desktop::tao::dpi::PhysicalSize;
 use dioxus::desktop::WindowBuilder;
+use dioxus::html::input_data::MouseButton;
 use std::hash::{DefaultHasher, Hash, Hasher};
 use std::rc::Rc;
 use std::sync::Arc;
@@ -231,6 +232,15 @@ fn Layout() -> Element {
             class: "w-screen inline-flex self-stretch group flex overflow-hidden",
             "data-selected": selected.to_string(),
             "data-prev": prev.map_or_else(String::new, |x| x.to_string()),
+            onmousedown: move |x| {
+                if let Some(x) = x.data().trigger_button() {
+                    if x == MouseButton::Fourth  {
+                        if let Some(x) = ACTIVE_PAGE().1 {
+                            x.switch_active_to_self();
+                        }
+                    }
+                }
+            },
             SideBar {}
             div { class: "w-full min-h-screen relative *:overflow-scroll",
                 div { class: "absolute inset-0 z-0 min-h-full animation-[main-page^slideDown^explore^slideOutUp] animation-[main-page^slideDown^collections^slideOutUp]",
