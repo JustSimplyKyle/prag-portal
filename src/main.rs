@@ -3,9 +3,9 @@ pub mod BaseComponents;
 pub mod Collections;
 pub mod MainPage;
 
-use anyhow::bail;
 use dioxus::desktop::tao::dpi::PhysicalSize;
 use dioxus::desktop::WindowBuilder;
+use rust_lib::api::shared_resources::collection::{Collection, CollectionId};
 use dioxus::html::input_data::MouseButton;
 use std::hash::{DefaultHasher, Hash, Hasher};
 use std::rc::Rc;
@@ -35,6 +35,8 @@ static ACTIVE_PAGE: GlobalSignal<(Pages, Option<Pages>)> =
 pub static TOP_LEVEL_COMPONENT: GlobalSignal<Vec<ComponentPointer<subModalProps>>> =
     GlobalSignal::new(Vec::new);
 
+use rust_lib::api::shared_resources::entry::{self, STORAGE};
+
 fn main() {
     dioxus_logger::init(LevelFilter::Info).expect("failed to init logger");
 
@@ -58,7 +60,8 @@ pub enum Pages {
 }
 
 impl Pages {
-    fn new_collection_page(s: impl Into<Arc<str>>) -> Self {
+    fn new_collection_page(s: CollectionId) -> Self {
+        let s = s.0;
         Self::CollectionPage(s.into())
     }
 }
@@ -186,9 +189,22 @@ impl ToString for Pages {
     }
 }
 
+fn get_collections() -> Resource<Vec<Collection>> {
+    use_resource(move || async move { STORAGE.collections.clone().read_owned().await.to_owned() })
+}
+
 #[component]
 fn App() -> Element {
     let error_active = use_signal(|| true);
+    // spawn(async move {
+    //     let versions = rust_lib::api::backend_exclusive::vanilla::version::get_versions()
+    //         .await
+    //         .unwrap();
+    //     let version = versions.into_iter().find(|x| x.id == "1.20.1").unwrap();
+    //     entry::create_collection("fuck test", version, None, None)
+    //         .await
+    //         .unwrap();
+    // });
     rsx! {
         div { class: "bg-deep-background min-h-screen min-w-full font-display leading-normal",
             {
@@ -223,9 +239,18 @@ fn App() -> Element {
 fn Layout() -> Element {
     let selected = ACTIVE_PAGE().0;
     let prev = ACTIVE_PAGE().1;
-    Pages::new_collection_page("新的收藏")
-        .apply_slide_in()
-        .throw()?;
+
+    let collections = get_collections();
+    let collections_iterator = collections().into_iter().flat_map(|x| x.into_iter());
+    for collection in collections_iterator {
+        Pages::new_collection_page(collection.get_collection_id())
+            .apply_slide_in()
+            .unwrap();
+    }
+    let collections_iterator = collections()
+        .into_iter()
+        .flatten()
+        .map(|x| (x.get_collection_id(), x));
     Pages::DownloadProgress.apply_slide_in().throw()?;
     rsx! {
         div {
@@ -257,10 +282,14 @@ fn Layout() -> Element {
                     id: Pages::DownloadProgress.slide_in_id(),
                     LayoutContainer { DownloadProgress {} }
                 }
-                div {
-                    class: "absolute inset-0 z-0 min-h-full min-w-full",
-                    id: Pages::new_collection_page("新的收藏").slide_in_id(),
-                    LayoutContainer { extended_class: "p-0", CollectionPage {} }
+                for (name , collection) in collections_iterator {
+                    div {
+                        class: "absolute inset-0 z-0 min-h-full min-w-full",
+                        id: Pages::new_collection_page(name).slide_in_id(),
+                        LayoutContainer { extended_class: "p-0",
+                            CollectionPage { collection }
+                        }
+                    }
                 }
             }
         }
@@ -313,7 +342,7 @@ impl Switcher for CollectionPageTopSelection {
 }
 
 #[component]
-fn CollectionPage() -> Element {
+fn CollectionPage(collection: ReadOnlySignal<Collection>) -> Element {
     let _: Signal<Comparison<CollectionPageTopSelection>> =
         use_context_provider(|| Signal::new((CollectionPageTopSelection::Mods, None)));
     rsx! {
@@ -321,7 +350,7 @@ fn CollectionPage() -> Element {
             div { class: "sticky top-0 p-[50px] rounded-2xl bg-slate-800 grid grid-flow-col items-stretch",
                 div { class: "flex flex-col space-y-[35px]",
                     div { class: "text-white font-black text-[80px] leading-normal capsize",
-                        "新的收藏"
+                        {collection().display_name}
                     }
                     Button {
                         roundness: Roundness::Pill,
@@ -333,6 +362,7 @@ fn CollectionPage() -> Element {
                 div { class: "flex justify-end",
                     div { class: "flex flex-col space-y-[3px] w-full max-w-[250px]",
                         CollectionBlock {
+                            collection: collection(),
                             extended_class: "rounded-[20px] w-full h-[250px]",
                             picture: COLLECTION_PIC,
                             gradient: false
@@ -461,6 +491,7 @@ fn SideBar() -> Element {
         Pages::Collections.switch_active_to_self();
         *EXPANDED.write() = !EXPANDED();
     };
+    let collections = get_collections()().into_iter().flatten();
     let folded_images = rsx! {
         div { class: "transition-all",
             {ContentType::svg(HOME).css("hidden group-aria-expanded:block").get_element()},
@@ -528,7 +559,9 @@ fn SideBar() -> Element {
                 // middle
                 div { class: "flex flex-col flex-nowrap overflow-scroll max-h-[451px] space-y-1",
                     Button { roundness: Roundness::Top, string_placements: folded_images, extended_css_class: "bg-background" }
-                    SidebarCollectionBlock { string: "新的收藏" }
+                    for collection in collections {
+                        SidebarCollectionBlock { collection: collection }
+                    }
                 }
                 // bottom
                 div { class: "flex flex-col space-y-1",
@@ -565,32 +598,33 @@ fn SideBar() -> Element {
 }
 
 #[component]
-fn SidebarCollectionBlock(string: ReadOnlySignal<String>) -> Element {
+fn SidebarCollectionBlock(collection: ReadOnlySignal<Collection>) -> Element {
+    let img_block = rsx! {
+        div { class: "relative transition-all container w-[50px] h-[50px] group-aria-expanded:w-20 group-aria-expanded:h-20 border-2 border-[#2E2E2E] rounded-[15px] group-aria-expanded:rounded-[5px]",
+            { ContentType::image(COLLECTION_PIC.to_string())
+            .css("absolute inset-0 transition-all w-full h-full object-cover inline-flex items-center rounded-[15px] group-aria-expanded:rounded-[5px]",)
+            .get_element() },
+            div { class: "absolute inset-x-0 bottom-0 w-3 h-3 bg-[#CCE246] rounded-full" }
+        }
+    };
+    let display = collection().display_name;
+    let signal_check = collection().get_collection_id();
     rsx! {
         Button {
             roundness: Roundness::None,
             string_placements: vec![
-                ContentType::custom(
-                        rsx! {
-                            div { class :
-                            "relative transition-all container w-[50px] h-[50px] group-aria-expanded:w-20 group-aria-expanded:h-20 border-2 border-[#2E2E2E] rounded-[15px] group-aria-expanded:rounded-[5px]",
-                            { ContentType::image(COLLECTION_PIC.to_string())
-                            .css("absolute inset-0 transition-all w-full h-full object-cover inline-flex items-center rounded-[15px] group-aria-expanded:rounded-[5px]",)
-                            .get_element() } div { class :
-                            "absolute inset-x-0 bottom-0 w-3 h-3 bg-[#CCE246] rounded-full", } }
-                        },
-                    )
-                    .align_left(),
-                ContentType::text(string()).align_right().css("group-aria-busy:hidden"),
+                ContentType::custom(img_block).align_left(),
+                ContentType::text(display).align_right().css("group-aria-busy:hidden"),
             ],
-            signal: Rc::new(Pages::new_collection_page(string())) as Rc<dyn Switcher>,
+            signal: Rc::new(Pages::new_collection_page(signal_check)) as Rc<dyn Switcher>,
             focus_color_change: false,
-            background_image: format!(
-                "linear-gradient(to right, rgba(25, 25, 25, 0.8) 0%, rgba(25, 25, 25, 1) 68%, rgba(25, 25, 25, 1) 100%),url(\"{}\")",
-                COLLECTION_PIC,
-            ),
+            background_image: darken_sidebar_background(COLLECTION_PIC),
             background_size: "cover",
             extended_css_class: "bg-background object-cover transition-all delay-[25ms] group-aria-expanded:w-20 group-aria-expanded:min-h-20 group-aria-expanded:p-0"
         }
     }
+}
+
+fn darken_sidebar_background(s: impl ToString) -> String {
+    format!("linear-gradient(to right, rgba(25, 25, 25, 0.8) 0%, rgba(25, 25, 25, 1) 68%, rgba(25, 25, 25, 1) 100%),url(\"{}\")", s.to_string())
 }

@@ -1,18 +1,25 @@
 use dioxus::prelude::*;
 
 use manganis::ImageAsset;
+use rust_lib::api::shared_resources::collection::Collection;
 use tailwind_fuse::*;
 
-use crate::BaseComponents::{
-    Alignment, Button, ButtonClass, ContentType, Contents, FillMode, Roundness, Size,
+use crate::{
+    get_collections,
+    BaseComponents::{
+        Alignment, Button, ButtonClass, ContentType, Contents, FillMode, Roundness, Size, Switcher,
+    },
+    Pages, ACTIVE_PAGE,
 };
 
 pub const COLLECTION_PIC: ImageAsset =
-    manganis::mg!(image("./public/pic1.png").format(ImageType::Avif));
+    manganis::mg!(image("./public/pic1.png").format(ImageType::Avif).preload());
 pub const BLOCK: &str = manganis::mg!(file("./public/block.svg"));
 pub const EXPAND_CONTENT: &str = manganis::mg!(file("./public/expand_content.svg"));
 pub const ICON: &str = manganis::mg!(file("./public/icon.svg"));
-pub const IMG: ImageAsset = manganis::mg!(image("./public/project.png"));
+pub const IMG: ImageAsset = manganis::mg!(image("./public/project.png")
+    .format(ImageType::Avif)
+    .preload());
 pub const STAR: &str = manganis::mg!(file("./public/award_star.svg"));
 pub const ARROW_LEFT: &str = manganis::mg!(file("./public/keyboard_arrow_left.svg"));
 pub const ARROW_RIGHT: &str = manganis::mg!(file("./public/keyboard_arrow_right.svg"));
@@ -28,13 +35,14 @@ pub fn MainPage() -> Element {
 /// Creates a Collection Block with a `280px` square, with a default roundness of `5px`
 #[component]
 pub fn CollectionBlock(
-    #[props(into)] main_text: Option<String>,
-    #[props(into)] hint: Option<String>,
+    #[props(into)] collection: Collection,
     picture: ImageAsset,
     #[props(default = true)] gradient: bool,
     #[props(extends=GlobalAttributes)] attributes: Vec<Attribute>,
     #[props(default)] extended_class: String,
 ) -> Element {
+    let main_text = collection.display_name.clone();
+    let hint = String::from("遊玩中•由我建立");
     let (roundness, extended_class): (Vec<_>, Vec<_>) = extended_class
         .split_whitespace()
         .partition(|x| x.contains("rounded"));
@@ -45,8 +53,11 @@ pub fn CollectionBlock(
     }
     rsx! {
         div {
-            div {
+            button {
                 class: tw_merge!("relative h-[280px] w-[280px]", extended_class),
+                onclick: move |_| {
+                    Pages::new_collection_page(collection.get_collection_id()).switch_active_to_self();
+                },
                 ..attributes,
                 img { class: img_class, src: picture }
                 if gradient {
@@ -238,6 +249,9 @@ fn SuggestionPage() -> Element {
 
 #[component]
 fn CollectionsPage() -> Element {
+    let collections = get_collections();
+    let collections_iterator = collections().into_iter().flatten();
+
     rsx! {
         div { class: "flex flex-col space-x-0",
             Button {
@@ -266,45 +280,8 @@ fn CollectionsPage() -> Element {
             }
             div { class: ButtonClass::builder().roundness(Roundness::Bottom).with_class("min-w-screen p-0"),
                 div { class: "flex space-x-[3px] overflow-scroll",
-                    CollectionBlock {
-                        main_text: "創世幻想",
-                        hint: "不久前開啟•由我建立",
-                        picture: COLLECTION_PIC
-                    }
-                    CollectionBlock {
-                        main_text: "創世幻想arstarstat",
-                        hint: "不久前開啟•由我建立",
-                        picture: COLLECTION_PIC
-                    }
-                    CollectionBlock {
-                        main_text: "創世幻想",
-                        hint: "不久前開啟•由我建立",
-                        picture: COLLECTION_PIC
-                    }
-                    CollectionBlock {
-                        main_text: "創世幻想",
-                        hint: "不久前開啟•由我建立",
-                        picture: COLLECTION_PIC
-                    }
-                    CollectionBlock {
-                        main_text: "創世幻想",
-                        hint: "不久前開啟•由我建立",
-                        picture: COLLECTION_PIC
-                    }
-                    CollectionBlock {
-                        main_text: "創世幻想",
-                        hint: "不久前開啟•由我建立",
-                        picture: COLLECTION_PIC
-                    }
-                    CollectionBlock {
-                        main_text: "創世幻想",
-                        hint: "不久前開啟•由我建立",
-                        picture: COLLECTION_PIC
-                    }
-                    CollectionBlock {
-                        main_text: "創世幻想",
-                        hint: "不久前開啟•由我建立",
-                        picture: COLLECTION_PIC
+                    for collection in collections_iterator {
+                        CollectionBlock { collection, picture: COLLECTION_PIC }
                     }
                 }
             }
