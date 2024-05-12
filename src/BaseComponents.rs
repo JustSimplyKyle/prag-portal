@@ -336,7 +336,7 @@ impl Content {
 
     // Method to apply additional CSS, modifying existing styling
     pub fn css(mut self, css: impl Into<String>) -> Self {
-        self.css = tw_merge!(self.css, css.into());
+        self.css = tw_merge!(self.css, css.into(), "leading-none capsize");
         self
     }
 
@@ -429,7 +429,7 @@ impl ContentType {
     #[must_use]
     pub fn text(string: impl Into<String>) -> Content {
         let content_type = Self::Text(string.into());
-        let css = String::from("text-[1em] leading-normal capsize");
+        let css = String::from("text-[1em] leading-none capsize");
         Content {
             content: content_type,
             css,
@@ -453,7 +453,7 @@ impl ContentType {
     #[must_use]
     pub fn hint(string: impl Into<String>) -> Content {
         let content_type = Self::Hint(string.into());
-        let css = String::from("text-[17px] text-hint leading-normal capsize");
+        let css = String::from("text-[17px] text-hint leading-none capsize");
         Content {
             content: content_type,
             css,

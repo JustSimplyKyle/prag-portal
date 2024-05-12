@@ -5,8 +5,8 @@ pub mod MainPage;
 
 use dioxus::desktop::tao::dpi::PhysicalSize;
 use dioxus::desktop::WindowBuilder;
-use rust_lib::api::shared_resources::collection::{Collection, CollectionId};
 use dioxus::html::input_data::MouseButton;
+use rust_lib::api::shared_resources::collection::{Collection, CollectionId};
 use std::hash::{DefaultHasher, Hash, Hasher};
 use std::rc::Rc;
 use std::sync::Arc;
@@ -206,7 +206,7 @@ fn App() -> Element {
     //         .unwrap();
     // });
     rsx! {
-        div { class: "bg-deep-background min-h-screen min-w-full font-display leading-normal",
+        div { class: "font-['GenSenRounded TW'] bg-deep-background min-h-screen min-w-full font-display leading-normal",
             {
                 TOP_LEVEL_COMPONENT().into_iter().map(|x| (x.pointer)(x.props))
             },
