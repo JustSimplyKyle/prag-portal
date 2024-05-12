@@ -1530,6 +1530,11 @@ html {
   margin-right: 1.25rem;
 }
 
+.my-0 {
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
+
 .mb-0 {
   margin-bottom: 0px;
 }
@@ -1598,6 +1603,10 @@ html {
   height: 52px;
 }
 
+.h-\[55px\] {
+  height: 55px;
+}
+
 .h-fit {
   height: -moz-fit-content;
   height: fit-content;
@@ -1609,6 +1618,10 @@ html {
 
 .h-screen {
   height: 100vh;
+}
+
+.max-h-\[30px\] {
+  max-height: 30px;
 }
 
 .max-h-\[450px\] {
@@ -1697,6 +1710,10 @@ html {
   max-width: 250px;
 }
 
+.max-w-\[30px\] {
+  max-width: 30px;
+}
+
 .max-w-fit {
   max-width: -moz-fit-content;
   max-width: fit-content;
@@ -1758,6 +1775,10 @@ html {
   grid-template-columns: repeat(auto-fill,280px);
 }
 
+.flex-row-reverse {
+  flex-direction: row-reverse;
+}
+
 .flex-col {
   flex-direction: column;
 }
@@ -1802,16 +1823,16 @@ html {
   justify-content: stretch;
 }
 
+.gap-\[10px\] {
+  gap: 10px;
+}
+
 .gap-\[15px\] {
   gap: 15px;
 }
 
 .gap-\[20px\] {
   gap: 20px;
-}
-
-.gap-\[30px\] {
-  gap: 30px;
 }
 
 .space-x-0 > :not([hidden]) ~ :not([hidden]) {
@@ -1880,12 +1901,6 @@ html {
   margin-bottom: calc(10px * var(--tw-space-y-reverse));
 }
 
-.space-y-\[15px\] > :not([hidden]) ~ :not([hidden]) {
-  --tw-space-y-reverse: 0;
-  margin-top: calc(15px * calc(1 - var(--tw-space-y-reverse)));
-  margin-bottom: calc(15px * var(--tw-space-y-reverse));
-}
-
 .space-y-\[20px\] > :not([hidden]) ~ :not([hidden]) {
   --tw-space-y-reverse: 0;
   margin-top: calc(20px * calc(1 - var(--tw-space-y-reverse)));
@@ -1906,6 +1921,10 @@ html {
 
 .self-stretch {
   align-self: stretch;
+}
+
+.justify-self-end {
+  justify-self: end;
 }
 
 .overflow-hidden {
@@ -2018,6 +2037,11 @@ html {
   background-color: rgb(39 39 42 / var(--tw-bg-opacity));
 }
 
+.bg-white {
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 255 255 / var(--tw-bg-opacity));
+}
+
 .bg-gradient-to-t {
   background-image: linear-gradient(to top, var(--tw-gradient-stops));
 }
@@ -2121,6 +2145,10 @@ html {
 
 .pr-8 {
   padding-right: 2rem;
+}
+
+.pr-\[10px\] {
+  padding-right: 10px;
 }
 
 .pr-\[25px\] {
@@ -2280,11 +2308,6 @@ html {
   font-size: 18px;
 }
 
-.text-\[1em\] {
-  --font-size-px: 1;
-  font-size: 1em;
-}
-
 .text-\[35px\] {
   --font-size-px: 35;
   font-size: 35px;
@@ -2295,6 +2318,13 @@ html {
   font-size: 80px;
 }
 
+.text-base {
+  --font-size-px: 16;
+  font-size: 1rem;
+  --line-height-offset: calc((((var(--line-height-scale) * var(--font-size-px)) - 24) / 2) / var(--font-size-px));
+  line-height: 1.5rem;
+}
+
 .text-lg {
   --font-size-px: 18;
   font-size: 1.125rem;
@@ -2302,9 +2332,19 @@ html {
   line-height: 1.75rem;
 }
 
+.text-\[1em\] {
+  --font-size-px: 1;
+  font-size: 1em;
+}
+
 .leading-\[78px\] {
   --line-height-offset: calc((((var(--line-height-scale) * var(--font-size-px)) - 78) / 2) / var(--font-size-px));
   line-height: 78px;
+}
+
+.leading-\[normal\] {
+  --line-height-offset: calc((((var(--line-height-scale) * var(--font-size-px)) - NaN) / 2) / var(--font-size-px));
+  line-height: normal;
 }
 
 .leading-normal {
@@ -2315,6 +2355,16 @@ html {
 .leading-none {
   --line-height-offset: calc((((var(--line-height-scale) * var(--font-size-px)) - calc(1 * var(--font-size-px))) / 2) / var(--font-size-px));
   line-height: 1;
+}
+
+.leading-\[1\.2\] {
+  --line-height-offset: calc((((var(--line-height-scale) * var(--font-size-px)) - calc(1.2 * var(--font-size-px))) / 2) / var(--font-size-px));
+  line-height: 1.2;
+}
+
+.leading-\[1\.2em\] {
+  --line-height-offset: calc((((var(--line-height-scale) * var(--font-size-px)) - 1) / 2) / var(--font-size-px));
+  line-height: 1.2em;
 }
 
 .capsize::before {
@@ -2347,6 +2397,11 @@ body {
 
 .\*\:text-ellipsis > * {
   text-overflow: ellipsis;
+}
+
+.hover\:bg-green:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(20 174 92 / var(--tw-bg-opacity));
 }
 
 .aria-expanded\:w-\[80px\][aria-expanded="true"] {
@@ -2449,8 +2504,12 @@ body {
   pointer-events: none;
 }
 
-.\[\&_\*\]\:pointer-events-auto * {
-  pointer-events: auto;
+.\[\&_\*\]\:max-h-\[30px\] * {
+  max-height: 30px;
+}
+
+.\[\&_\*\]\:max-w-\[30px\] * {
+  max-width: 30px;
 }
 
 .\[\&_\*\]\:transform-gpu * {
