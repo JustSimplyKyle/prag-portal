@@ -348,7 +348,7 @@ impl Content {
         match self.content {
             ContentType::Svg(x) => {
                 rsx! {
-                    div { class: self.css,
+                    div { class: tw_merge!(self.css, "[&_*]:pointer-events-none"),
                         object { r#type: "image/svg+xml", data: x }
                     }
                 }
