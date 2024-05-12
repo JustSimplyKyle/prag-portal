@@ -396,7 +396,7 @@ impl ContentType {
     #[must_use]
     pub fn svg(string: &'static str) -> Content {
         let content_type = Self::Svg(string);
-        let css = String::new();
+        let css = String::from("flex items-center");
         Content {
             content: content_type,
             css,
@@ -429,7 +429,7 @@ impl ContentType {
     #[must_use]
     pub fn text(string: impl Into<String>) -> Content {
         let content_type = Self::Text(string.into());
-        let css = String::from("text-[1em] leading-none capsize");
+        let css = String::from("flex items-center text-[1em] leading-none capsize");
         Content {
             content: content_type,
             css,
