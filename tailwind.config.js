@@ -20,6 +20,26 @@ const animationPlugin = plugin(function({ matchComponents, theme, e }) {
     });
 });
 
+const svgPlugin = plugin(function({ matchComponents, theme, e }) {
+  /// the first two arguments is, when it being selected, and its animation
+  /// the last two argument is, when it selects the target, and its animation
+    matchComponents(
+    {
+        "svg": (value) => {
+          return {
+              [`@apply w-[${value}] h-[${value}] [&_*]:max-w-[${value}] [&_*]:max-h-[${value}]`]: {},
+          };
+        },
+        "svg-direct": (value) => {
+          return {
+              [`@apply w-[${value}] h-[${value}]`]: {},
+          };
+        },
+    },
+    
+  );
+});
+
 module.exports = {
   mode: "all",
   content: ["./src/**/*.{rs,html,css}", "./dist/**/*.html"],
@@ -137,6 +157,7 @@ module.exports = {
   plugins: [
     require("daisyui"),
     require("tailwindcss-capsize"),
-    animationPlugin 
+    animationPlugin,
+    svgPlugin,
   ],
 };
