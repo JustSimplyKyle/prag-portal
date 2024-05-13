@@ -1,25 +1,27 @@
 #![allow(non_snake_case)]
 pub mod BaseComponents;
+pub mod CollectionDisplay;
 pub mod Collections;
 pub mod MainPage;
+pub mod SideBar;
 
 use dioxus::desktop::tao::dpi::PhysicalSize;
 use dioxus::desktop::WindowBuilder;
 use dioxus::html::input_data::MouseButton;
 use rust_lib::api::shared_resources::collection::{Collection, CollectionId};
 use std::hash::{DefaultHasher, Hash, Hasher};
-use std::rc::Rc;
 use std::sync::Arc;
-use std::time::Duration;
 use tailwind_fuse::*;
 
 use dioxus::prelude::*;
 use log::LevelFilter;
 use BaseComponents::{subModalProps, ComponentPointer, Switcher};
 
-use crate::BaseComponents::{Alignment, Button, ContentType, FillMode, Modal, Roundness};
+use crate::BaseComponents::{Button, ContentType, FillMode, Modal, Roundness};
+use crate::CollectionDisplay::CollectionDisplay;
 use crate::Collections::Collections;
-use crate::MainPage::{CollectionBlock, MainPage, COLLECTION_PIC};
+use crate::MainPage::MainPage;
+use crate::SideBar::SideBar;
 
 pub const HOME: &str = manganis::mg!(file("./public/home.svg"));
 pub const EXPLORE: &str = manganis::mg!(file("./public/explore.svg"));
@@ -35,7 +37,7 @@ static ACTIVE_PAGE: GlobalSignal<(Pages, Option<Pages>)> =
 pub static TOP_LEVEL_COMPONENT: GlobalSignal<Vec<ComponentPointer<subModalProps>>> =
     GlobalSignal::new(Vec::new);
 
-use rust_lib::api::shared_resources::entry::{self, STORAGE};
+use rust_lib::api::shared_resources::entry::STORAGE;
 
 fn main() {
     dioxus_logger::init(LevelFilter::Info).expect("failed to init logger");
@@ -287,7 +289,7 @@ fn Layout() -> Element {
                         class: "absolute inset-0 z-0 min-h-full min-w-full",
                         id: Pages::new_collection_page(name).slide_in_id(),
                         LayoutContainer { extended_class: "p-0",
-                            CollectionPage { collection }
+                            CollectionDisplay { collection }
                         }
                     }
                 }
@@ -304,142 +306,6 @@ fn LayoutContainer(children: Element, #[props(default)] extended_class: String) 
         div { class: tw_merge!("bg-background min-h-screen rounded-xl p-8 min-w-full", extended_class),
             div { class: "flex flex-col space-y-[20px] transition-all xl:items-center xl:*:justify-center xl:*:max-w-[1180px] xl:*:w-full",
                 {children}
-            }
-        }
-    }
-}
-
-pub type Comparison<T> = (T, Option<T>);
-
-#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
-enum CollectionPageTopSelection {
-    Mods,
-    World,
-    ResourcePack,
-    ShaderPacks,
-}
-
-impl Switcher for CollectionPageTopSelection {
-    fn hashed_value(&self) -> u64 {
-        let mut hasher = DefaultHasher::new();
-        self.hash(&mut hasher);
-        hasher.finish()
-    }
-
-    fn compare(&self) -> bool {
-        let top = use_context::<Signal<Comparison<Self>>>();
-        &top().0 == self
-    }
-
-    fn switch_active_to_self(&self) {
-        let mut global = use_context::<Signal<Comparison<Self>>>();
-        let prev = global().0;
-        if &prev != self {
-            global.write().1 = Some(prev);
-        }
-        global.write().0 = *self;
-    }
-}
-
-#[component]
-fn CollectionPage(collection: ReadOnlySignal<Collection>) -> Element {
-    let _: Signal<Comparison<CollectionPageTopSelection>> =
-        use_context_provider(|| Signal::new((CollectionPageTopSelection::Mods, None)));
-    rsx! {
-        div { class: "flex flex-col",
-            div { class: "sticky top-0 p-[50px] rounded-2xl bg-slate-800 grid grid-flow-col items-stretch",
-                div { class: "flex flex-col space-y-[35px]",
-                    div { class: "text-white font-black text-[80px] leading-normal capsize",
-                        {collection().display_name}
-                    }
-                    Button {
-                        roundness: Roundness::Pill,
-                        string_placements: vec![ContentType::text("F").css("w-[30px] h-[30px]").align_center()],
-                        fill_mode: FillMode::Fit,
-                        extended_css_class: "w-fit shadow p-[13px]"
-                    }
-                }
-                div { class: "flex justify-end",
-                    div { class: "flex flex-col space-y-[3px] w-full max-w-[250px]",
-                        CollectionBlock {
-                            collection: collection(),
-                            extended_class: "rounded-[20px] w-full h-[250px]",
-                            picture: COLLECTION_PIC,
-                            gradient: false
-                        }
-                        div { class: "flex space-x-[3px] min-w-full",
-                            Button {
-                                roundness: Roundness::None,
-                                string_placements: vec![ContentType::text("s").align_center()],
-                                fill_mode: FillMode::Fill,
-                                extended_css_class: "rounded-[5px] rounded-bl-[20px] flex-1 min-w-0 bg-lime-300"
-                            }
-                            Button {
-                                roundness: Roundness::None,
-                                string_placements: vec![ContentType::text("...").align_center()],
-                                fill_mode: FillMode::Fit,
-                                extended_css_class: "rounded-[5px] rounded-br-[20px] bg-white/10 backdrop-blur-[100px] flex-none"
-                            }
-                        }
-                    }
-                }
-            }
-            div { class: "px-[30px] bg-background rounded-2xl min-h-dvh scroll-smooth",
-                div { class: "bg-background flex justify-center items-center min-h-full py-[30px]",
-                    {ContentType::svg(manganis::mg!(file("public/Line 155.svg"))).get_element()}
-                }
-                div { class: "grid grid-flow-col items-stretch",
-                    div { class: "bg-deep-background rounded-full flex justify-start w-fit",
-                        Button {
-                            roundness: Roundness::Pill,
-                            fill_mode: FillMode::Fit,
-                            signal: Rc::new(CollectionPageTopSelection::Mods) as Rc<dyn Switcher>,
-                            string_placements: vec![ContentType::text("A").align_left(), ContentType::text("模組").align_right()]
-                        }
-                        Button {
-                            roundness: Roundness::Pill,
-                            fill_mode: FillMode::Fit,
-                            signal: Rc::new(CollectionPageTopSelection::World) as Rc<dyn Switcher>,
-                            string_placements: vec![ContentType::text("B").align_left(), ContentType::text("世界").align_right()]
-                        }
-                        Button {
-                            roundness: Roundness::Pill,
-                            fill_mode: FillMode::Fit,
-                            signal: Rc::new(CollectionPageTopSelection::ResourcePack) as Rc<dyn Switcher>,
-                            string_placements: vec![
-                                ContentType::text("C").align_left(),
-                                ContentType::text("資源包").align_right(),
-                            ]
-                        }
-                        Button {
-                            roundness: Roundness::Pill,
-                            fill_mode: FillMode::Fit,
-                            signal: Rc::new(CollectionPageTopSelection::ShaderPacks) as Rc<dyn Switcher>,
-                            string_placements: vec![
-                                ContentType::text("D").align_left(),
-                                ContentType::text("光影包").align_right(),
-                            ]
-                        }
-                    }
-                    div { class: "flex items-center space-x-[7px] h-[55px] *:h-full justify-end",
-                        Button {
-                            roundness: Roundness::Pill,
-                            string_placements: vec![
-                                ContentType::svg(EXPLORE)
-                                    .css("svg-[25px]")
-                                    .align_center(),
-                            ],
-                            fill_mode: FillMode::Fit,
-                            extended_css_class: "px-[25px]"
-                        }
-                        Button {
-                            roundness: Roundness::Pill,
-                            string_placements: vec![ContentType::text("F").css("w-[25px] h-[25px]").align_center()],
-                            fill_mode: FillMode::Fit,
-                            extended_css_class: "px-[25px]"
-                        }
-                    }
-                }
             }
         }
     }
@@ -473,158 +339,4 @@ fn DownloadProgress() -> Element {
             }
         }
     }
-}
-
-pub static EXPANDED: GlobalSignal<bool> = GlobalSignal::new(|| false);
-
-#[component]
-fn SideBar() -> Element {
-    let delayed_expanded = use_resource(move || async move {
-        if EXPANDED() {
-            tokio::time::sleep(Duration::from_millis(100)).await;
-        } else {
-            // tokio::time::sleep(Duration::from_millis(100)).await;
-        }
-        EXPANDED()
-    });
-    let onclick = move |()| {
-        Pages::Collections.switch_active_to_self();
-        *EXPANDED.write() = !EXPANDED();
-    };
-    let collections = get_collections()().into_iter().flatten();
-    let folded_images = rsx! {
-        div { class: "transition-all",
-            {ContentType::svg(HOME).css("hidden group-aria-expanded:block").get_element()},
-            div { class: "flex items-center space-x-0",
-                div { class: "flex space-x-[-20px]",
-                    {ContentType::image(COLLECTION_PIC.to_string())
-                        .css(
-                            "z-50 w-10 h-10 object-cover shrink-0 inline-flex justify-center items-center rounded-full border-2 border-zinc-900 group-aria-expanded:hidden"
-                        ).get_element()},
-                    {ContentType::image(COLLECTION_PIC.to_string())
-                        .css(
-                            "z-40 w-10 h-10 object-cover shrink-0 inline-flex justify-center items-center rounded-full border-2 border-zinc-900 group-aria-expanded:hidden"
-                        ).get_element()},
-                    {ContentType::image(COLLECTION_PIC.to_string())
-                        .css(
-                            "z-30 w-10 h-10 object-cover shrink-0 inline-flex justify-center items-center rounded-full border-2 border-zinc-900 group-aria-expanded:hidden"
-                        ).get_element()}
-                }
-                {
-                    ContentType::svg(ARROW_RIGHT).css("svg-[25px] group-aria-expanded:hidden").get_element()
-                }
-            }
-        }
-        div { class: tw_merge!(Alignment::Right.get_alignment_class(), "group-aria-busy:hidden"),
-            {ContentType::text("我的錦集").css("text-lime-300").get_element()}
-        }
-    };
-    rsx! {
-        div { class: "flex flex-col place-content-start mx-5",
-            div {
-                class: "w-[300px] space-y-5 transition-all ease-linear duration-500 aria-expanded:w-[80px] group",
-                aria_expanded: !EXPANDED(),
-                aria_busy: !delayed_expanded().unwrap_or(false),
-                // top
-                div { class: "flex flex-col space-y-1",
-                    Button {
-                        roundness: Roundness::Top,
-                        string_placements: vec![
-                            ContentType::svg(HOME).align_left(),
-                            ContentType::text("首頁").css("group-aria-busy:hidden").align_right(),
-                        ],
-                        signal: Rc::new(Pages::MainPage) as Rc<dyn Switcher>,
-                        extended_css_class: "bg-background group-aria-expanded:pr-5"
-                    }
-                    Button {
-                        roundness: Roundness::None,
-                        string_placements: vec![
-                            ContentType::svg(EXPLORE).align_left(),
-                            ContentType::text("探索").css("group-aria-busy:hidden").align_right(),
-                        ],
-                        signal: Rc::new(Pages::Explore) as Rc<dyn Switcher>,
-                        extended_css_class: "bg-background group-aria-expanded:pr-5"
-                    }
-                    Button {
-                        roundness: Roundness::Bottom,
-                        string_placements: vec![
-                            ContentType::svg(SIDEBAR_COLLECTION).align_left(),
-                            ContentType::text("收藏庫").css("group-aria-busy:hidden").align_right(),
-                        ],
-                        signal: Rc::new(Pages::Collections) as Rc<dyn Switcher>,
-                        onclick,
-                        extended_css_class: "bg-background group-aria-expanded:pr-5"
-                    }
-                }
-                // middle
-                div { class: "flex flex-col flex-nowrap overflow-scroll max-h-[451px] space-y-1",
-                    Button { roundness: Roundness::Top, string_placements: folded_images, extended_css_class: "bg-background" }
-                    for collection in collections {
-                        SidebarCollectionBlock { collection: collection }
-                    }
-                }
-                // bottom
-                div { class: "flex flex-col space-y-1",
-                    Button {
-                        roundness: Roundness::Top,
-                        string_placements: vec![
-                            ContentType::svg(SIM_CARD).align_left(),
-                            ContentType::text("返回")
-                                .align_right()
-                                .css(
-                                    "hidden group-aria-[busy=false]:group-aria-selected/active:block group-aria-busy:hidden",
-                                ),
-                            ContentType::text("無下載佇列")
-                                .align_right()
-                                .css("group-aria-selected/active:hidden group-aria-busy:hidden text-hint"),
-                        ],
-                        signal: Rc::new(Pages::DownloadProgress) as Rc<dyn Switcher>,
-                        extended_css_class: "bg-background group/active items-center",
-                        onclick: move |()| {
-                            let prev = ACTIVE_PAGE().1;
-                            if ACTIVE_PAGE().0 == Pages::DownloadProgress {
-                                if let Some(prev) = prev {
-                                    prev.switch_active_to_self();
-                                }
-                            } else {
-                                Pages::DownloadProgress.switch_active_to_self();
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-#[component]
-fn SidebarCollectionBlock(collection: ReadOnlySignal<Collection>) -> Element {
-    let img_block = rsx! {
-        div { class: "relative transition-all container w-[50px] h-[50px] group-aria-expanded:w-20 group-aria-expanded:h-20 border-2 border-[#2E2E2E] rounded-[15px] group-aria-expanded:rounded-[5px]",
-            { ContentType::image(COLLECTION_PIC.to_string())
-            .css("absolute inset-0 transition-all w-full h-full object-cover inline-flex items-center rounded-[15px] group-aria-expanded:rounded-[5px]",)
-            .get_element() },
-            div { class: "absolute inset-x-0 bottom-0 w-3 h-3 bg-[#CCE246] rounded-full" }
-        }
-    };
-    let display = collection().display_name;
-    let signal_check = collection().get_collection_id();
-    rsx! {
-        Button {
-            roundness: Roundness::None,
-            string_placements: vec![
-                ContentType::custom(img_block).align_left(),
-                ContentType::text(display).align_right().css("group-aria-busy:hidden"),
-            ],
-            signal: Rc::new(Pages::new_collection_page(signal_check)) as Rc<dyn Switcher>,
-            focus_color_change: false,
-            background_image: darken_sidebar_background(COLLECTION_PIC),
-            background_size: "cover",
-            extended_css_class: "bg-background object-cover transition-all delay-[25ms] group-aria-expanded:w-20 group-aria-expanded:min-h-20 group-aria-expanded:p-0"
-        }
-    }
-}
-
-fn darken_sidebar_background(s: impl ToString) -> String {
-    format!("linear-gradient(to right, rgba(25, 25, 25, 0.8) 0%, rgba(25, 25, 25, 1) 68%, rgba(25, 25, 25, 1) 100%),url(\"{}\")", s.to_string())
 }

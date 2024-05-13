@@ -1,12 +1,9 @@
 use dioxus::prelude::*;
-use manganis::ImageAsset;
 use rust_lib::api::shared_resources::entry::STORAGE;
 
 use crate::{
-    BaseComponents::{
-        Alignment, Button, Content, ContentType, Contents, FillMode, Roundness, Size,
-    },
-    MainPage::{CollectionBlock, ARROW_LEFT, ARROW_RIGHT, COLLECTION_PIC, STAR},
+    BaseComponents::{Alignment, Button, ContentType, Contents, FillMode, Roundness, Size},
+    MainPage::{CollectionBlock, ARROW_LEFT, COLLECTION_PIC, STAR},
     EXPLORE,
 };
 

@@ -9,7 +9,7 @@ use crate::{
     BaseComponents::{
         Alignment, Button, ButtonClass, ContentType, Contents, FillMode, Roundness, Size, Switcher,
     },
-    Pages, ACTIVE_PAGE,
+    Pages,
 };
 
 pub const COLLECTION_PIC: ImageAsset =
