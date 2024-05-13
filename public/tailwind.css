@@ -1660,6 +1660,10 @@ html {
   height: 100vh;
 }
 
+.max-h-\[30px\] {
+  max-height: 30px;
+}
+
 .max-h-\[450px\] {
   max-height: 450px;
 }
@@ -1744,6 +1748,10 @@ html {
 
 .max-w-\[250px\] {
   max-width: 250px;
+}
+
+.max-w-\[30px\] {
+  max-width: 30px;
 }
 
 .max-w-fit {
@@ -1866,6 +1874,7 @@ html {
 .gap-\[20px\] {
   gap: 20px;
 }
+
 
 .gap-\[5px\] {
   gap: 5px;
@@ -2071,6 +2080,11 @@ html {
 .bg-zinc-800 {
   --tw-bg-opacity: 1;
   background-color: rgb(39 39 42 / var(--tw-bg-opacity));
+}
+
+.bg-white {
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 255 255 / var(--tw-bg-opacity));
 }
 
 .bg-gradient-to-t {
@@ -2339,11 +2353,6 @@ html {
   font-size: 18px;
 }
 
-.text-\[1em\] {
-  --font-size-px: 1;
-  font-size: 1em;
-}
-
 .text-\[35px\] {
   --font-size-px: 35;
   font-size: 35px;
@@ -2352,6 +2361,13 @@ html {
 .text-\[80px\] {
   --font-size-px: 80;
   font-size: 80px;
+}
+
+.text-base {
+  --font-size-px: 16;
+  font-size: 1rem;
+  --line-height-offset: calc((((var(--line-height-scale) * var(--font-size-px)) - 24) / 2) / var(--font-size-px));
+  line-height: 1.5rem;
 }
 
 .text-lg {
@@ -2366,15 +2382,42 @@ html {
   line-height: 1.2;
 }
 
+.text-\[1em\] {
+  --font-size-px: 1;
+  font-size: 1em;
+}
+
 .leading-\[78px\] {
   --line-height-offset: calc((((var(--line-height-scale) * var(--font-size-px)) - 78) / 2) / var(--font-size-px));
   line-height: 78px;
+}
+
+.leading-\[normal\] {
+  --line-height-offset: calc((((var(--line-height-scale) * var(--font-size-px)) - NaN) / 2) / var(--font-size-px));
+  line-height: normal;
 }
 
 .leading-normal {
   --line-height-offset: calc((((var(--line-height-scale) * var(--font-size-px)) - calc(1.5 * var(--font-size-px))) / 2) / var(--font-size-px));
   line-height: 1.5;
 }
+
+
+.leading-none {
+  --line-height-offset: calc((((var(--line-height-scale) * var(--font-size-px)) - calc(1 * var(--font-size-px))) / 2) / var(--font-size-px));
+  line-height: 1;
+}
+
+.leading-\[1\.2\] {
+  --line-height-offset: calc((((var(--line-height-scale) * var(--font-size-px)) - calc(1.2 * var(--font-size-px))) / 2) / var(--font-size-px));
+  line-height: 1.2;
+}
+
+.leading-\[1\.2em\] {
+  --line-height-offset: calc((((var(--line-height-scale) * var(--font-size-px)) - 1) / 2) / var(--font-size-px));
+  line-height: 1.2em;
+}
+
 
 .capsize::before {
   display: table;
@@ -2507,6 +2550,15 @@ body {
 
 .\[\&_\*\]\:pointer-events-none * {
   pointer-events: none;
+}
+
+
+.\[\&_\*\]\:max-h-\[30px\] * {
+  max-height: 30px;
+}
+
+.\[\&_\*\]\:max-w-\[30px\] * {
+  max-width: 30px;
 }
 
 .\[\&_\*\]\:transform-gpu * {
