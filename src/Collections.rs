@@ -3,12 +3,18 @@ use manganis::ImageAsset;
 use rust_lib::api::shared_resources::entry::STORAGE;
 
 use crate::{
-    BaseComponents::{Alignment, Button, ContentType, Contents, FillMode, Roundness, Size},
-    MainPage::{CollectionBlock, COLLECTION_PIC, STAR},
+    BaseComponents::{
+        Alignment, Button, Content, ContentType, Contents, FillMode, Roundness, Size,
+    },
+    MainPage::{CollectionBlock, ARROW_LEFT, ARROW_RIGHT, COLLECTION_PIC, STAR},
     EXPLORE,
 };
 
 pub static NOTE: &str = manganis::mg!(file("./public/note_stack_add.svg"));
+pub static CROP_FREE: &str = manganis::mg!(file("./public/crop_free.svg"));
+pub static FILTER_LIST: &str = manganis::mg!(file("./public/filter_list.svg"));
+pub static SEARCH: &str = manganis::mg!(file("./public/search.svg"));
+pub static ARROW_DOWN: &str = manganis::mg!(file("./public/arrow_drop_down.svg"));
 pub static BOOKMARK: &str = manganis::mg!(file("./public/bookmark.svg"));
 pub static BOOKMARK_ADD: &str = manganis::mg!(file("./public/bookmark_add.svg"));
 
@@ -74,8 +80,14 @@ pub fn Collections() -> Element {
                         fill_mode: FillMode::Fit,
                         size: Size::Medium,
                         string_placements: vec![
-                            ContentType::text("Condition").align_left(),
-                            ContentType::text("DOWN").align_right(),
+                            Contents::new(
+                                vec![
+                                    ContentType::svg(FILTER_LIST).css("svg-[25px]"),
+                                    ContentType::svg(ARROW_DOWN).css("svg-[20px]")
+                                ],
+                                Alignment::Center,
+                            )
+                            .css("gap-[5px]")
                         ],
                         extended_css_class: "pl-[20px] pr-[10px] h-full"
                     }
@@ -84,8 +96,14 @@ pub fn Collections() -> Element {
                         fill_mode: FillMode::Fit,
                         size: Size::Medium,
                         string_placements: vec![
-                            ContentType::text("Fullscreen").align_center(),
-                            ContentType::text("DOWN").align_right(),
+                            Contents::new(
+                                vec![
+                                    ContentType::svg(CROP_FREE).css("svg-[25px]"),
+                                    ContentType::svg(ARROW_DOWN).css("svg-[20px]")
+                                ],
+                                Alignment::Center,
+                            )
+                            .css("gap-[5px]")
                         ],
                         extended_css_class: "pl-[20px] pr-[10px] h-full"
                     }
@@ -103,8 +121,14 @@ pub fn Collections() -> Element {
                         fill_mode: FillMode::Fit,
                         size: Size::Medium,
                         string_placements: vec![
-                            ContentType::text("Search").align_center(),
-                            ContentType::text("DOWN").align_right(),
+                            Contents::new(
+                                vec![
+                                    ContentType::svg(SEARCH).css("svg-[25px]"),
+                                    ContentType::svg(ARROW_LEFT).css("svg-[20px]"),
+                                ],
+                                Alignment::Center,
+                            )
+                            .css("gap-[5px]")
                         ],
                         extended_css_class: "pl-[20px] pr-[10px] h-full"
                     }
