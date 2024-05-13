@@ -5,7 +5,6 @@ use dioxus::prelude::*;
 use tailwind_fuse::*;
 
 use crate::TOP_LEVEL_COMPONENT;
-pub const SVG_CSS: &str = "max-w-[30px] max-h-[30px] [&_*]:max-w-[30px] [&_*]:max-h-[30px]";
 
 #[derive(Clone)]
 pub struct ComponentPointer<P: Properties> {
@@ -349,7 +348,9 @@ impl Content {
         match self.content {
             ContentType::Svg(x) => {
                 rsx! {
-                    div { class: tw_merge!(self.css, "[&_*]:pointer-events-none"),
+                    div {
+                        id: "mysvg",
+                        class: tw_merge!(self.css, "[&_*]:pointer-events-none"),
                         object { r#type: "image/svg+xml", data: x }
                     }
                 }

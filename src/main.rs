@@ -421,12 +421,12 @@ fn CollectionPage(collection: ReadOnlySignal<Collection>) -> Element {
                             ]
                         }
                     }
-                    div { class: "flex space-x-[7px] justify-end",
+                    div { class: "flex items-center space-x-[7px] h-[55px] *:h-full justify-end",
                         Button {
                             roundness: Roundness::Pill,
                             string_placements: vec![
                                 ContentType::svg(EXPLORE)
-                                    .css("flex justify-center items-center w-[25px] h-[25px] overflow-none")
+                                    .css("svg-[25px]")
                                     .align_center(),
                             ],
                             fill_mode: FillMode::Fit,
@@ -511,7 +511,7 @@ fn SideBar() -> Element {
                         ).get_element()}
                 }
                 {
-                    ContentType::svg(ARROW_RIGHT).css("flex items-center w-[25px] h-[25px] *:w-[25px] *:h-[25px] block group-aria-expanded:hidden").get_element()
+                    ContentType::svg(ARROW_RIGHT).css("svg-[25px] group-aria-expanded:hidden").get_element()
                 }
             }
         }

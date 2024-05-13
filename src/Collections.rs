@@ -3,9 +3,7 @@ use manganis::ImageAsset;
 use rust_lib::api::shared_resources::entry::STORAGE;
 
 use crate::{
-    BaseComponents::{
-        Alignment, Button, ContentType, Contents, FillMode, Roundness, Size, SVG_CSS,
-    },
+    BaseComponents::{Alignment, Button, ContentType, Contents, FillMode, Roundness, Size},
     MainPage::{CollectionBlock, COLLECTION_PIC, STAR},
     EXPLORE,
 };
@@ -32,7 +30,7 @@ pub fn Collections() -> Element {
                         size: Size::Medium,
                         string_placements: vec![
                             ContentType::svg(EXPLORE)
-                                .css(SVG_CSS)
+                                .css("svg-[30px]")
                                 .align_left(),
                             ContentType::text("全部").align_right(),
                         ],
@@ -43,7 +41,7 @@ pub fn Collections() -> Element {
                         fill_mode: FillMode::Fit,
                         size: Size::Medium,
                         string_placements: vec![
-                            ContentType::svg(STAR).css(SVG_CSS).align_center(),
+                            ContentType::svg(STAR).css("svg-[30px]").align_center(),
                         ],
                         extended_css_class: "px-[20px] h-full"
                     }
@@ -53,7 +51,7 @@ pub fn Collections() -> Element {
                         size: Size::Medium,
                         string_placements: vec![
                             ContentType::svg(BOOKMARK)
-                                .css(SVG_CSS)
+                                .css("svg-[30px]")
                                 .align_left(),
                             ContentType::text("分類夾").align_right(),
                         ],
@@ -64,7 +62,7 @@ pub fn Collections() -> Element {
                         fill_mode: FillMode::Fit,
                         size: Size::Medium,
                         string_placements: vec![
-                            ContentType::svg(BOOKMARK_ADD).css(SVG_CSS).align_center(),
+                            ContentType::svg(BOOKMARK_ADD).css("svg-[30px]").align_center(),
                         ],
                         extended_css_class: "pl-[20px] pr-[25px] h-full"
                     }
@@ -96,7 +94,7 @@ pub fn Collections() -> Element {
                         fill_mode: FillMode::Fit,
                         size: Size::Medium,
                         string_placements: vec![
-                            ContentType::svg(NOTE).css(SVG_CSS).align_center(),
+                            ContentType::svg(NOTE).css("svg-[30px]").align_center(),
                         ],
                         extended_css_class: "hover:bg-green px-[20px] h-full"
                     }

@@ -1464,6 +1464,41 @@ html {
   animation: slideOutUp 500ms;
 }
 
+.svg-\[25px\] {
+  height: 25px;
+  width: 25px;
+}
+
+.svg-\[25px\] * {
+  max-height: 25px;
+  max-width: 25px;
+}
+
+.svg-\[30px\] {
+  height: 30px;
+  width: 30px;
+}
+
+.svg-\[30px\] * {
+  max-height: 30px;
+  max-width: 30px;
+}
+
+.svg-direct-\[25px\] {
+  height: 25px;
+  width: 25px;
+}
+
+.svg-\[40px\] {
+  height: 40px;
+  width: 40px;
+}
+
+.svg-\[40px\] * {
+  max-height: 40px;
+  max-width: 40px;
+}
+
 .static {
   position: static;
 }
@@ -1620,10 +1655,6 @@ html {
   height: 100vh;
 }
 
-.max-h-\[30px\] {
-  max-height: 30px;
-}
-
 .max-h-\[450px\] {
   max-height: 450px;
 }
@@ -1708,10 +1739,6 @@ html {
 
 .max-w-\[250px\] {
   max-width: 250px;
-}
-
-.max-w-\[30px\] {
-  max-width: 30px;
 }
 
 .max-w-fit {
@@ -2037,11 +2064,6 @@ html {
   background-color: rgb(39 39 42 / var(--tw-bg-opacity));
 }
 
-.bg-white {
-  --tw-bg-opacity: 1;
-  background-color: rgb(255 255 255 / var(--tw-bg-opacity));
-}
-
 .bg-gradient-to-t {
   background-image: linear-gradient(to top, var(--tw-gradient-stops));
 }
@@ -2308,6 +2330,11 @@ html {
   font-size: 18px;
 }
 
+.text-\[1em\] {
+  --font-size-px: 1;
+  font-size: 1em;
+}
+
 .text-\[35px\] {
   --font-size-px: 35;
   font-size: 35px;
@@ -2318,13 +2345,6 @@ html {
   font-size: 80px;
 }
 
-.text-base {
-  --font-size-px: 16;
-  font-size: 1rem;
-  --line-height-offset: calc((((var(--line-height-scale) * var(--font-size-px)) - 24) / 2) / var(--font-size-px));
-  line-height: 1.5rem;
-}
-
 .text-lg {
   --font-size-px: 18;
   font-size: 1.125rem;
@@ -2332,9 +2352,9 @@ html {
   line-height: 1.75rem;
 }
 
-.text-\[1em\] {
-  --font-size-px: 1;
-  font-size: 1em;
+.leading-\[1\.2\] {
+  --line-height-offset: calc((((var(--line-height-scale) * var(--font-size-px)) - calc(1.2 * var(--font-size-px))) / 2) / var(--font-size-px));
+  line-height: 1.2;
 }
 
 .leading-\[78px\] {
@@ -2342,29 +2362,9 @@ html {
   line-height: 78px;
 }
 
-.leading-\[normal\] {
-  --line-height-offset: calc((((var(--line-height-scale) * var(--font-size-px)) - NaN) / 2) / var(--font-size-px));
-  line-height: normal;
-}
-
 .leading-normal {
   --line-height-offset: calc((((var(--line-height-scale) * var(--font-size-px)) - calc(1.5 * var(--font-size-px))) / 2) / var(--font-size-px));
   line-height: 1.5;
-}
-
-.leading-none {
-  --line-height-offset: calc((((var(--line-height-scale) * var(--font-size-px)) - calc(1 * var(--font-size-px))) / 2) / var(--font-size-px));
-  line-height: 1;
-}
-
-.leading-\[1\.2\] {
-  --line-height-offset: calc((((var(--line-height-scale) * var(--font-size-px)) - calc(1.2 * var(--font-size-px))) / 2) / var(--font-size-px));
-  line-height: 1.2;
-}
-
-.leading-\[1\.2em\] {
-  --line-height-offset: calc((((var(--line-height-scale) * var(--font-size-px)) - 1) / 2) / var(--font-size-px));
-  line-height: 1.2em;
 }
 
 .capsize::before {
@@ -2383,12 +2383,8 @@ body {
   scroll-behavior: smooth;
 }
 
-.\*\:h-\[25px\] > * {
-  height: 25px;
-}
-
-.\*\:w-\[25px\] > * {
-  width: 25px;
+.\*\:h-full > * {
+  height: 100%;
 }
 
 .\*\:overflow-scroll > * {
@@ -2502,14 +2498,6 @@ body {
 
 .\[\&_\*\]\:pointer-events-none * {
   pointer-events: none;
-}
-
-.\[\&_\*\]\:max-h-\[30px\] * {
-  max-height: 30px;
-}
-
-.\[\&_\*\]\:max-w-\[30px\] * {
-  max-width: 30px;
 }
 
 .\[\&_\*\]\:transform-gpu * {

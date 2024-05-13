@@ -164,7 +164,7 @@ fn SuggestionPage() -> Element {
                     ContentType::text("建議：快速設定").align_left(),
                     ContentType::svg(BLOCK)
                         .css(
-                            "drop-shadow-lg bg-background w-10 h-10 rounded-full inline-flex justify-center items-center",
+                            "drop-shadow-lg bg-background svg-[40px] inline-flex justify-center rounded-full",
                         )
                         .align_right(),
                 ]
@@ -177,7 +177,7 @@ fn SuggestionPage() -> Element {
                     ContentType::text("建議：更新提醒").align_left(),
                     ContentType::svg(BLOCK)
                         .css(
-                            "drop-shadow-lg bg-background w-10 h-10 rounded-full inline-flex justify-center items-center",
+                            "drop-shadow-lg bg-background svg-[40px] rounded-full inline-flex justify-center",
                         )
                         .align_right(),
                 ]
