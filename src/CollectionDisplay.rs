@@ -1,4 +1,5 @@
 use dioxus::prelude::*;
+use manganis::ImageAsset;
 use rust_lib::api::shared_resources::collection::Collection;
 use std::{
     hash::{DefaultHasher, Hash, Hasher},
@@ -10,6 +11,14 @@ use crate::{
     MainPage::{CollectionBlock, COLLECTION_PIC},
     EXPLORE,
 };
+
+pub static DISPLAY_BACKGROUND: ImageAsset = manganis::mg!(image("./public/cool_image.png")
+    .format(ImageType::Avif)
+    .preload());
+
+pub static GAME_CONTROLLER: &str = manganis::mg!(file("./public/stadia_controller.svg"));
+pub static UNDO: &str = manganis::mg!(file("./public/undo.svg"));
+pub static HORIZ: &str = manganis::mg!(file("./public/more_horiz.svg"));
 
 pub(crate) type Comparison<T> = (T, Option<T>);
 
@@ -48,39 +57,49 @@ pub(crate) fn CollectionDisplay(collection: ReadOnlySignal<Collection>) -> Eleme
     let _: Signal<Comparison<CollectionDisplayTopSelection>> =
         use_context_provider(|| Signal::new((CollectionDisplayTopSelection::Mods, None)));
     rsx! {
-        div { class: "flex flex-col",
-            div { class: "sticky top-0 p-[50px] rounded-2xl bg-slate-800 grid grid-flow-col items-stretch",
+        div { class: "relative flex flex-col",
+            div { class: "sticky top-0 p-[50px] rounded-2xl grid grid-flow-col items-stretch",
+                div {
+                    class: "fixed inset-0 h-[900px]",
+                    background: format!("radial-gradient(198.55% 100% at 50% 0%, rgba(25, 25, 25, 0.00) 0%, #191919 82.94%), url(\'{}\') lightgray 50% / cover no-repeat", DISPLAY_BACKGROUND),
+                }
                 div { class: "flex flex-col space-y-[35px]",
                     div { class: "text-white font-black text-[80px] leading-normal capsize",
                         {collection().display_name}
                     }
                     Button {
                         roundness: Roundness::Pill,
-                        string_placements: vec![ContentType::text("F").css("w-[30px] h-[30px]").align_center()],
+                        string_placements: vec![ContentType::svg(UNDO).css("svg-[30px]").align_center()],
                         fill_mode: FillMode::Fit,
                         extended_css_class: "w-fit shadow p-[13px]"
                     }
                 }
                 div { class: "flex justify-end",
                     div { class: "flex flex-col space-y-[3px] w-full max-w-[250px]",
-                        CollectionBlock {
-                            collection: collection(),
-                            extended_class: "rounded-[20px] w-full h-[250px]",
-                            picture: COLLECTION_PIC,
-                            gradient: false
+                        img {
+                            class: "w-full h-[250px] rounded-t-[20px] rounded-b-[5px] object-cover",
+                            src: COLLECTION_PIC
                         }
                         div { class: "flex space-x-[3px] min-w-full",
                             Button {
                                 roundness: Roundness::None,
-                                string_placements: vec![ContentType::text("s").align_center()],
+                                string_placements: vec![
+                                    ContentType::svg(GAME_CONTROLLER)
+                                        .css("svg-[30px]")
+                                        .align_center()
+                                ],
                                 fill_mode: FillMode::Fill,
-                                extended_css_class: "rounded-[5px] rounded-bl-[20px] flex-1 min-w-0 bg-lime-300"
+                                extended_css_class: "px-[40px] py-[15px] rounded-[5px] rounded-bl-[20px] flex-1 min-w-0 bg-lime-300"
                             }
-                            Button {
-                                roundness: Roundness::None,
-                                string_placements: vec![ContentType::text("...").align_center()],
-                                fill_mode: FillMode::Fit,
-                                extended_css_class: "rounded-[5px] rounded-br-[20px] bg-white/10 backdrop-blur-[100px] flex-none"
+                            div {
+                                Button {
+                                    roundness: Roundness::None,
+                                    string_placements: vec![ContentType::svg(HORIZ).css("svg-[25px]").align_center()],
+                                    fill_mode: FillMode::Fit,
+                                    background: "rgba(255,255,255,0.10)",
+                                    backdrop_filter: "blur(50px)",
+                                    extended_css_class: "rounded-[5px] rounded-[5px] rounded-br-[20px] flex-none"
+                                }
                             }
                         }
                     }

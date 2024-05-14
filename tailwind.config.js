@@ -75,7 +75,7 @@ module.exports = {
         'hint': '#4F4F4F',
         'deep-background': '#0E0E0E',
         'background': '#191919',
-        'green': '#14AE5C',
+        'green': '#CDE347',
         'red': '#C92B45',
         'black': "#232E3D",
         'light-blue': '#7CAED3',
