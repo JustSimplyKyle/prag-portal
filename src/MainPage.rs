@@ -5,11 +5,10 @@ use rust_lib::api::shared_resources::collection::Collection;
 use tailwind_fuse::*;
 
 use crate::{
-    get_collections,
     BaseComponents::{
         Alignment, Button, ButtonClass, ContentType, Contents, FillMode, Roundness, Size, Switcher,
     },
-    Pages,
+    Pages, COLLECT,
 };
 
 pub const COLLECTION_PIC: ImageAsset =
@@ -35,7 +34,7 @@ pub fn MainPage() -> Element {
 /// Creates a Collection Block with a `280px` square, with a default roundness of `5px`
 #[component]
 pub fn CollectionBlock(
-    #[props(into)] collection: Collection,
+    collection: Collection,
     picture: ImageAsset,
     #[props(default = true)] gradient: bool,
     #[props(extends=GlobalAttributes)] attributes: Vec<Attribute>,
@@ -249,9 +248,7 @@ fn SuggestionPage() -> Element {
 
 #[component]
 fn CollectionsPage() -> Element {
-    let collections = get_collections();
-    let collections_iterator = collections().into_iter().flatten();
-
+    let collections = COLLECT();
     rsx! {
         div { class: "flex flex-col space-x-0",
             Button {
@@ -280,7 +277,7 @@ fn CollectionsPage() -> Element {
             }
             div { class: ButtonClass::builder().roundness(Roundness::Bottom).with_class("min-w-screen p-0"),
                 div { class: "flex space-x-[3px] overflow-scroll",
-                    for collection in collections_iterator {
+                    for collection in collections {
                         CollectionBlock { collection, picture: COLLECTION_PIC }
                     }
                 }

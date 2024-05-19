@@ -11,6 +11,7 @@ use dioxus::html::input_data::MouseButton;
 use rust_lib::api::shared_resources::collection::{Collection, CollectionId};
 use std::hash::{DefaultHasher, Hash, Hasher};
 use std::sync::Arc;
+use std::time::Duration;
 use tailwind_fuse::*;
 
 use dioxus::prelude::*;
@@ -37,7 +38,7 @@ static ACTIVE_PAGE: GlobalSignal<(Pages, Option<Pages>)> =
 pub static TOP_LEVEL_COMPONENT: GlobalSignal<Vec<ComponentPointer<subModalProps>>> =
     GlobalSignal::new(Vec::new);
 
-use rust_lib::api::shared_resources::entry::STORAGE;
+use rust_lib::api::shared_resources::entry::{self, DOWNLOAD_PROGRESS, STORAGE};
 
 fn main() {
     dioxus_logger::init(LevelFilter::Info).expect("failed to init logger");
@@ -191,22 +192,34 @@ impl ToString for Pages {
     }
 }
 
-fn get_collections() -> Resource<Vec<Collection>> {
-    use_resource(move || async move { STORAGE.collections.clone().read_owned().await.to_owned() })
-}
+pub static COLLECT: GlobalSignal<Vec<Collection>> =
+    GlobalSignal::new(|| Collection::scan().unwrap_or_default());
 
 #[component]
 fn App() -> Element {
     let error_active = use_signal(|| true);
-    // spawn(async move {
-    //     let versions = rust_lib::api::backend_exclusive::vanilla::version::get_versions()
-    //         .await
-    //         .unwrap();
-    //     let version = versions.into_iter().find(|x| x.id == "1.20.1").unwrap();
-    //     entry::create_collection("fuck test", version, None, None)
-    //         .await
-    //         .unwrap();
-    // });
+    spawn(async move {
+        let mut last = None;
+        loop {
+            let collections = STORAGE.collections.clone().read_owned().await.to_owned();
+            if last.as_ref() != Some(&collections) {
+                *COLLECT.write() = collections;
+            }
+            last = Some(COLLECT());
+            tokio::time::sleep(Duration::from_millis(500)).await;
+        }
+    });
+
+    spawn(async move {
+        let versions = rust_lib::api::backend_exclusive::vanilla::version::get_versions()
+            .await
+            .unwrap();
+        let version = versions.into_iter().find(|x| x.id == "1.20.1").unwrap();
+        entry::create_collection("weird test", version, None, None)
+            .await
+            .unwrap();
+    });
+
     rsx! {
         div { class: "font-['GenSenRounded TW'] bg-deep-background min-h-screen min-w-full font-display leading-normal",
             {
@@ -242,17 +255,13 @@ fn Layout() -> Element {
     let selected = ACTIVE_PAGE().0;
     let prev = ACTIVE_PAGE().1;
 
-    let collections = get_collections();
-    let collections_iterator = collections().into_iter().flat_map(|x| x.into_iter());
-    for collection in collections_iterator {
+    let collections = COLLECT();
+
+    for collection in &collections {
         Pages::new_collection_page(collection.get_collection_id())
             .apply_slide_in()
             .unwrap();
     }
-    let collections_iterator = collections()
-        .into_iter()
-        .flatten()
-        .map(|x| (x.get_collection_id(), x));
     Pages::DownloadProgress.apply_slide_in().throw()?;
     rsx! {
         div {
@@ -284,14 +293,23 @@ fn Layout() -> Element {
                     id: Pages::DownloadProgress.slide_in_id(),
                     LayoutContainer { DownloadProgress {} }
                 }
-                for (name , collection) in collections_iterator {
-                    div {
-                        class: "absolute inset-0 z-0 min-h-full min-w-full",
-                        id: Pages::new_collection_page(name).slide_in_id(),
-                        LayoutContainer { extended_class: "p-0",
-                            CollectionDisplay { collection }
-                        }
-                    }
+                CollectionContainer {
+                    collections,
+                }
+            }
+        }
+    }
+}
+
+#[component]
+fn CollectionContainer(collections: ReadOnlySignal<Vec<Collection>>) -> Element {
+    rsx! {
+        for (name, collection) in collections().into_iter().map(|x| (x.get_collection_id(), x)) {
+            div {
+                class: "absolute inset-0 z-0 min-h-full min-w-full",
+                id: Pages::new_collection_page(name).slide_in_id(),
+                LayoutContainer { extended_class: "p-0",
+                    CollectionDisplay { collection }
                 }
             }
         }
@@ -328,14 +346,24 @@ fn Explore() -> Element {
 
 #[component]
 fn DownloadProgress() -> Element {
+    let progress = use_resource(move || async move {
+        use_reactive(&*DOWNLOAD_PROGRESS, |x| x)()
+            .get_all()
+            .await
+            .unwrap()
+    });
+    let display = progress().map(|x| {
+        x.into_iter()
+            .map(|x| ContentType::text(x.percentages.to_string()).align_left())
+            .collect::<Vec<_>>()
+    });
     rsx! {
         div {
-            Button {
-                roundness: Roundness::Top,
-                string_placements: vec![
-                    ContentType::text("Progress").align_left(),
-                    ContentType::text("stop").align_right(),
-                ]
+            if let Some(p) = display {
+                Button {
+                    roundness: Roundness::Top,
+                    string_placements: p,
+                }
             }
         }
     }

@@ -5,10 +5,9 @@ use rust_lib::api::shared_resources::collection::Collection;
 use tailwind_fuse::tw_merge;
 
 use crate::{
-    get_collections,
     BaseComponents::{Alignment, Button, ContentType, Roundness, Switcher},
     MainPage::COLLECTION_PIC,
-    Pages, ACTIVE_PAGE, ARROW_RIGHT, EXPLORE, HOME, SIDEBAR_COLLECTION, SIM_CARD,
+    Pages, ACTIVE_PAGE, ARROW_RIGHT, COLLECT, EXPLORE, HOME, SIDEBAR_COLLECTION, SIM_CARD,
 };
 
 static EXPANDED: GlobalSignal<bool> = GlobalSignal::new(|| false);
@@ -27,7 +26,9 @@ pub fn SideBar() -> Element {
         Pages::Collections.switch_active_to_self();
         *EXPANDED.write() = !EXPANDED();
     };
-    let collections = get_collections()().into_iter().flatten();
+
+    let collections = COLLECT();
+
     let folded_images = rsx! {
         div { class: "transition-all",
             {ContentType::svg(HOME).css("hidden group-aria-expanded:block").get_element()},

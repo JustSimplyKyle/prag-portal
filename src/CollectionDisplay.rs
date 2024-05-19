@@ -8,7 +8,7 @@ use std::{
 
 use crate::{
     BaseComponents::{Button, ContentType, FillMode, Roundness, Switcher},
-    MainPage::{CollectionBlock, COLLECTION_PIC},
+    MainPage::COLLECTION_PIC,
     EXPLORE,
 };
 
@@ -53,7 +53,7 @@ impl Switcher for CollectionDisplayTopSelection {
 }
 
 #[component]
-pub(crate) fn CollectionDisplay(collection: ReadOnlySignal<Collection>) -> Element {
+pub fn CollectionDisplay(collection: ReadOnlySignal<Collection>) -> Element {
     let _: Signal<Comparison<CollectionDisplayTopSelection>> =
         use_context_provider(|| Signal::new((CollectionDisplayTopSelection::Mods, None)));
     rsx! {
@@ -109,57 +109,97 @@ pub(crate) fn CollectionDisplay(collection: ReadOnlySignal<Collection>) -> Eleme
                 div { class: "bg-background flex justify-center items-center min-h-full py-[30px]",
                     {ContentType::svg(manganis::mg!(file("public/Line 155.svg"))).get_element()}
                 }
-                div { class: "grid grid-flow-col items-stretch",
-                    div { class: "bg-deep-background rounded-full flex justify-start w-fit",
-                        Button {
-                            roundness: Roundness::Pill,
-                            fill_mode: FillMode::Fit,
-                            signal: Rc::new(CollectionDisplayTopSelection::Mods) as Rc<dyn Switcher>,
-                            string_placements: vec![ContentType::text("A").align_left(), ContentType::text("模組").align_right()]
+                div {
+                    class: "flex flex-col gap-[15px]",
+                    SelectionBar {}
+                    ModViewer {collection}
+                }
+            }
+        }
+    }
+}
+
+#[component]
+fn ModViewer(collection: ReadOnlySignal<Collection>) -> Element {
+    let mut mods = collection().mod_manager.mods;
+    mods.sort_unstable_by_key(|x| x.name.clone());
+    rsx! {
+        div {
+            class: "grid grid-flow-row grid-cols-[repeat(auto-fill,300px)] gap-[3px]",
+            for x in mods {
+                div {
+                    class: "bg-deep-background p-[10px] rounded-[5px]",
+                    div {
+                        class: "flex gap-[15px] items-center",
+                        if let Some(icon) = x.get_icon_path() {
+                            {ContentType::image(icon.to_string_lossy().to_string()).css("w-[50px] h-[50px]").get_element()}
                         }
-                        Button {
-                            roundness: Roundness::Pill,
-                            fill_mode: FillMode::Fit,
-                            signal: Rc::new(CollectionDisplayTopSelection::World) as Rc<dyn Switcher>,
-                            string_placements: vec![ContentType::text("B").align_left(), ContentType::text("世界").align_right()]
-                        }
-                        Button {
-                            roundness: Roundness::Pill,
-                            fill_mode: FillMode::Fit,
-                            signal: Rc::new(CollectionDisplayTopSelection::ResourcePack) as Rc<dyn Switcher>,
-                            string_placements: vec![
-                                ContentType::text("C").align_left(),
-                                ContentType::text("資源包").align_right(),
-                            ]
-                        }
-                        Button {
-                            roundness: Roundness::Pill,
-                            fill_mode: FillMode::Fit,
-                            signal: Rc::new(CollectionDisplayTopSelection::ShaderPacks) as Rc<dyn Switcher>,
-                            string_placements: vec![
-                                ContentType::text("D").align_left(),
-                                ContentType::text("光影包").align_right(),
-                            ]
-                        }
-                    }
-                    div { class: "flex items-center space-x-[7px] h-[55px] *:h-full justify-end",
-                        Button {
-                            roundness: Roundness::Pill,
-                            string_placements: vec![
-                                ContentType::svg(EXPLORE)
-                                    .css("svg-[25px]")
-                                    .align_center(),
-                            ],
-                            fill_mode: FillMode::Fit,
-                            extended_css_class: "px-[25px]"
-                        }
-                        Button {
-                            roundness: Roundness::Pill,
-                            string_placements: vec![ContentType::text("F").css("w-[25px] h-[25px]").align_center()],
-                            fill_mode: FillMode::Fit,
-                            extended_css_class: "px-[25px]"
+                        div {
+                            class: "flex flex-col gap-[10px]",
+                            {ContentType::text(x.name).css("text-xl font-bold").get_element()}
+                            if let Some(version) = x.mod_version {
+                                {ContentType::hint(version).css("font-semibold text-xs italic").get_element()}
+                            }
                         }
                     }
+                }
+            }
+        }
+    }
+}
+
+#[component]
+fn SelectionBar() -> Element {
+    rsx! {
+        div { class: "grid grid-flow-col items-stretch",
+            div { class: "bg-deep-background rounded-full flex justify-start w-fit",
+                Button {
+                    roundness: Roundness::Pill,
+                    fill_mode: FillMode::Fit,
+                    signal: Rc::new(CollectionDisplayTopSelection::Mods) as Rc<dyn Switcher>,
+                    string_placements: vec![ContentType::text("A").align_left(), ContentType::text("模組").align_right()]
+                }
+                Button {
+                    roundness: Roundness::Pill,
+                    fill_mode: FillMode::Fit,
+                    signal: Rc::new(CollectionDisplayTopSelection::World) as Rc<dyn Switcher>,
+                    string_placements: vec![ContentType::text("B").align_left(), ContentType::text("世界").align_right()]
+                }
+                Button {
+                    roundness: Roundness::Pill,
+                    fill_mode: FillMode::Fit,
+                    signal: Rc::new(CollectionDisplayTopSelection::ResourcePack) as Rc<dyn Switcher>,
+                    string_placements: vec![
+                        ContentType::text("C").align_left(),
+                        ContentType::text("資源包").align_right(),
+                    ]
+                }
+                Button {
+                    roundness: Roundness::Pill,
+                    fill_mode: FillMode::Fit,
+                    signal: Rc::new(CollectionDisplayTopSelection::ShaderPacks) as Rc<dyn Switcher>,
+                    string_placements: vec![
+                        ContentType::text("D").align_left(),
+                        ContentType::text("光影包").align_right(),
+                    ]
+                }
+            }
+            div { class: "justify-end flex items-center space-x-[7px] h-[55px] *:h-full",
+                Button {
+                    roundness: Roundness::Pill,
+                    string_placements: vec![
+                        ContentType::svg(EXPLORE)
+                            .css("svg-[25px]")
+                            .align_center(),
+                    ],
+                    fill_mode: FillMode::Fit,
+                    extended_css_class: "px-[25px]"
+                }
+                Button {
+                    roundness: Roundness::Pill,
+                    string_placements: vec![ContentType::text("F").css("w-[25px] h-[25px]").align_center()],
+                    fill_mode: FillMode::Fit,
+                    extended_css_class: "px-[25px]"
                 }
             }
         }

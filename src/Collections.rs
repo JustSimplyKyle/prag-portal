@@ -1,10 +1,9 @@
 use dioxus::prelude::*;
-use rust_lib::api::shared_resources::entry::STORAGE;
 
 use crate::{
     BaseComponents::{Alignment, Button, ContentType, Contents, FillMode, Roundness, Size},
     MainPage::{CollectionBlock, ARROW_LEFT, COLLECTION_PIC, STAR},
-    EXPLORE,
+    COLLECT, EXPLORE,
 };
 
 pub static NOTE: &str = manganis::mg!(file("./public/note_stack_add.svg"));
@@ -17,11 +16,7 @@ pub static BOOKMARK_ADD: &str = manganis::mg!(file("./public/bookmark_add.svg"))
 
 #[component]
 pub fn Collections() -> Element {
-    let collections =
-        use_resource(
-            move || async move { STORAGE.collections.clone().read_owned().await.to_owned() },
-        );
-    let collections_iterator = collections().into_iter().flat_map(|x| x.into_iter());
+    let collections = COLLECT();
 
     rsx! {
         div { class: "flex flex-col space-y-[10px]",
@@ -132,7 +127,7 @@ pub fn Collections() -> Element {
                 }
             }
             div { class: "grid grid-flow-row grid-cols-[repeat(auto-fill,280px)] gap-[20px]",
-                for collection in collections_iterator {
+                for collection in collections {
                     CollectionBlock { collection, extended_class: "rounded-[20px]", picture: COLLECTION_PIC }
                 }
             }
