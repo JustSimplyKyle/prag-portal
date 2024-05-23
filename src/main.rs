@@ -74,11 +74,11 @@ impl History {
         if self.active != page {
             self.active = page.clone();
             if self.prev_steps != 0 {
+                let len = self.history.len() - 1 - self.prev_steps;
+                self.history = self.history[..=len].to_vec();
                 self.prev_steps = 0;
-                self.history.clear();
-            } else {
-                self.history.push(page);
             }
+            self.history.push(page);
         }
     }
     pub fn focus_without_history(&mut self, page: Pages) {
