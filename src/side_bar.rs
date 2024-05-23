@@ -5,8 +5,8 @@ use rust_lib::api::shared_resources::collection::Collection;
 use tailwind_fuse::tw_merge;
 
 use crate::{
+    main_page::COLLECTION_PIC,
     BaseComponents::{Alignment, Button, ContentType, Roundness, Switcher},
-    MainPage::COLLECTION_PIC,
     Pages, ACTIVE_PAGE, ARROW_RIGHT, COLLECT, EXPLORE, HOME, SIDEBAR_COLLECTION, SIM_CARD,
 };
 

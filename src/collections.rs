@@ -1,8 +1,8 @@
 use dioxus::prelude::*;
 
 use crate::{
+    main_page::{CollectionBlock, ARROW_LEFT, COLLECTION_PIC, STAR},
     BaseComponents::{Alignment, Button, ContentType, Contents, FillMode, Roundness, Size},
-    MainPage::{CollectionBlock, ARROW_LEFT, COLLECTION_PIC, STAR},
     COLLECT, EXPLORE,
 };
 

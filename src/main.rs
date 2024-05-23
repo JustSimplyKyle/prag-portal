@@ -1,9 +1,9 @@
 #![allow(non_snake_case)]
 pub mod BaseComponents;
-pub mod CollectionDisplay;
-pub mod Collections;
-pub mod MainPage;
-pub mod SideBar;
+pub mod collection_display;
+pub mod collections;
+pub mod main_page;
+pub mod side_bar;
 
 use dioxus::desktop::tao::dpi::PhysicalSize;
 use dioxus::desktop::WindowBuilder;
@@ -18,11 +18,11 @@ use dioxus::prelude::*;
 use log::LevelFilter;
 use BaseComponents::{subModalProps, ComponentPointer, Switcher};
 
+use crate::collection_display::CollectionDisplay;
+use crate::collections::Collections;
+use crate::main_page::MainPage;
+use crate::side_bar::SideBar;
 use crate::BaseComponents::{Button, ContentType, FillMode, Modal, Roundness};
-use crate::CollectionDisplay::CollectionDisplay;
-use crate::Collections::Collections;
-use crate::MainPage::MainPage;
-use crate::SideBar::SideBar;
 
 pub const HOME: &str = manganis::mg!(file("./public/home.svg"));
 pub const EXPLORE: &str = manganis::mg!(file("./public/explore.svg"));
@@ -43,13 +43,12 @@ use rust_lib::api::shared_resources::entry::{self, DOWNLOAD_PROGRESS, STORAGE};
 fn main() {
     dioxus_logger::init(LevelFilter::Info).expect("failed to init logger");
 
-    let cfg = dioxus::desktop::Config::new()
-        .with_window(
-            WindowBuilder::new()
-                .with_decorations(true)
-                .with_inner_size(PhysicalSize::new(1600, 920)),
-        )
-        .with_menu(None);
+    let cfg = dioxus::desktop::Config::new().with_window(
+        WindowBuilder::new()
+            .with_decorations(true)
+            .with_inner_size(PhysicalSize::new(1600, 920)),
+    );
+    // .with_menu(DioxusMenu);
     LaunchBuilder::desktop().with_cfg(cfg).launch(App);
 }
 
@@ -92,6 +91,10 @@ impl Switcher for Pages {
 impl Pages {
     pub fn slide_in_id(&self) -> String {
         format!("flyinout-{}", self.to_string())
+    }
+
+    pub fn should_render(&self) -> bool {
+        &ACTIVE_PAGE().0 == self || ACTIVE_PAGE().1.as_ref() == Some(self)
     }
 
     /// Applies slide-in animations to HTML elements based on data attributes.
@@ -195,6 +198,16 @@ impl ToString for Pages {
 pub static COLLECT: GlobalSignal<Vec<Collection>> =
     GlobalSignal::new(|| Collection::scan().unwrap_or_default());
 
+trait ErrorToString<T> {
+    fn error_to_string(&self) -> Result<&T, String>;
+}
+
+impl<T> ErrorToString<T> for Result<T, anyhow::Error> {
+    fn error_to_string(&self) -> Result<&T, String> {
+        self.as_ref().map_err(|x| format!("{x:#?}"))
+    }
+}
+
 #[component]
 fn App() -> Element {
     let error_active = use_signal(|| true);
@@ -210,41 +223,31 @@ fn App() -> Element {
         }
     });
 
-    spawn(async move {
-        let versions = rust_lib::api::backend_exclusive::vanilla::version::get_versions()
-            .await
-            .unwrap();
-        let version = versions.into_iter().find(|x| x.id == "1.20.1").unwrap();
-        entry::create_collection("weird test", version, None, None)
-            .await
-            .unwrap();
-    });
-
     rsx! {
         div { class: "font-['GenSenRounded TW'] bg-deep-background min-h-screen min-w-full font-display leading-normal",
             {
                 TOP_LEVEL_COMPONENT().into_iter().map(|x| (x.pointer)(x.props))
             },
             ErrorBoundary {
-                handle_error: move |error| { rsx! {
-                    Modal { active: error_active, name: "error_modal", close_on_outer_click: false,
-                        div {
-                            div { class: "flex flex-col space-y-3",
-                                div { class: "text-red text-2xl font-bold",
-                                    "Hmm, something went wrong. Please copy the following error to the developer."
-                                }
-                                Button {
-                                    roundness: Roundness::Pill,
-                                    extended_css_class: "text-[13px] font-bold",
-                                    string_placements: rsx! { "{error} " },
-                                    fill_mode: FillMode::Fit,
-                                    clickable: false
-                                }
-                            }
-                        }
-                    }
-                } },
-                div { class: "[&_*]:transform-gpu", Layout {} }
+                // handle_error: move |error| { rsx! {
+                //     Modal { active: error_active, name: "error_modal", close_on_outer_click: false,
+                //         div {
+                //             div { class: "flex flex-col space-y-3",
+                //                 div { class: "text-red text-2xl font-bold",
+                //                     "Hmm, something went wrong. Please copy the following error to the developer."
+                //                 }
+                //                 Button {
+                //                     roundness: Roundness::Pill,
+                //                     extended_css_class: "text-[13px] font-bold",
+                //                     string_placements: rsx! { "{error} " },
+                //                     fill_mode: FillMode::Fit,
+                //                     clickable: false
+                //                 }
+                //             }
+                //         }
+                //     }
+                // } },
+                Layout {}
             }
         }
     }
@@ -255,13 +258,29 @@ fn Layout() -> Element {
     let selected = ACTIVE_PAGE().0;
     let prev = ACTIVE_PAGE().1;
 
-    let collections = COLLECT();
+    use_resource(move || async move {
+        let versions = rust_lib::api::backend_exclusive::vanilla::version::get_versions().await?;
+        let version = versions.into_iter().find(|x| x.id == "1.20.1");
+        if let Some(version) = version {
+            entry::create_collection("weird test", version, None, None).await?;
+        }
+        Ok::<(), anyhow::Error>(())
+    })
+    .read()
+    .as_ref()
+    .map(ErrorToString::error_to_string)
+    .transpose()
+    .throw()?;
 
-    for collection in &collections {
-        Pages::new_collection_page(collection.get_collection_id())
-            .apply_slide_in()
-            .unwrap();
-    }
+    use_effect(move || {
+        let _ = ACTIVE_PAGE();
+        for collection in COLLECT() {
+            Pages::new_collection_page(collection.get_collection_id())
+                .apply_slide_in()
+                .unwrap();
+        }
+    });
+
     Pages::DownloadProgress.apply_slide_in().throw()?;
     rsx! {
         div {
@@ -293,23 +312,23 @@ fn Layout() -> Element {
                     id: Pages::DownloadProgress.slide_in_id(),
                     LayoutContainer { DownloadProgress {} }
                 }
-                CollectionContainer {
-                    collections,
-                }
+                CollectionContainer {}
             }
         }
     }
 }
 
 #[component]
-fn CollectionContainer(collections: ReadOnlySignal<Vec<Collection>>) -> Element {
+fn CollectionContainer() -> Element {
     rsx! {
-        for (name, collection) in collections().into_iter().map(|x| (x.get_collection_id(), x)) {
-            div {
-                class: "absolute inset-0 z-0 min-h-full min-w-full",
-                id: Pages::new_collection_page(name).slide_in_id(),
-                LayoutContainer { extended_class: "p-0",
-                    CollectionDisplay { collection }
+        for (name, collection) in COLLECT().into_iter().map(|x| (x.get_collection_id(), x)) {
+            if Pages::new_collection_page(collection.get_collection_id()).should_render() {
+                div {
+                    class: "absolute inset-0 z-0 min-h-full min-w-full",
+                    id: Pages::new_collection_page(name).slide_in_id(),
+                    LayoutContainer { extended_class: "p-0",
+                        CollectionDisplay { collection }
+                    }
                 }
             }
         }
@@ -346,12 +365,27 @@ fn Explore() -> Element {
 
 #[component]
 fn DownloadProgress() -> Element {
-    let progress = use_resource(move || async move {
-        use_reactive(&*DOWNLOAD_PROGRESS, |x| x)()
-            .get_all()
-            .await
-            .unwrap()
-    });
+    let mut progress = use_signal(|| None);
+    use_resource(move || async move {
+        let mut last = None;
+        loop {
+            let collections = match DOWNLOAD_PROGRESS.get_all().await {
+                Ok(x) => x,
+                Err(x) => return Err::<(), anyhow::Error>(x),
+            };
+            if last.as_ref() != Some(&collections) {
+                last = Some(collections.clone());
+                *progress.write() = Some(collections);
+            }
+            tokio::time::sleep(Duration::from_millis(500)).await;
+        }
+    })
+    .read()
+    .as_ref()
+    .map(ErrorToString::error_to_string)
+    .transpose()
+    .throw()?;
+
     let display = progress().map(|x| {
         x.into_iter()
             .map(|x| ContentType::text(x.percentages.to_string()).align_left())

@@ -356,9 +356,17 @@ impl Content {
                 }
             }
             ContentType::Image(x) => {
+                let mut background_size = "contain";
+                if self.css.contains("object-cover") || self.css.contains("bg-cover") {
+                    background_size = "cover"
+                }
                 rsx! {
-                    // div { class: self.css,
-                    img { class: self.css, src: x }
+                    div {
+                        class: self.css,
+                        background_size,
+                        background_position: "center",
+                        background_image: format!("url(\'{}\')", x),
+                    }
                 }
             }
             ContentType::Text(x) | ContentType::Hint(x) => {
@@ -405,8 +413,8 @@ impl ContentType {
         }
     }
 
-    pub fn image(string: String) -> Content {
-        let content_type = Self::Image(string);
+    pub fn image(string: impl Into<String>) -> Content {
+        let content_type = Self::Image(string.into());
         let css = String::new();
         Content {
             content: content_type,
