@@ -224,7 +224,7 @@ fn App() -> Element {
     });
 
     rsx! {
-        div { class: "font-['GenSenRounded TW'] bg-deep-background min-h-screen min-w-full font-display leading-normal",
+        div { class: "[&_*]:transform-gpu font-['GenSenRounded TW'] bg-deep-background min-h-screen min-w-full font-display leading-normal",
             {
                 TOP_LEVEL_COMPONENT().into_iter().map(|x| (x.pointer)(x.props))
             },
