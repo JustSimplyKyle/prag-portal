@@ -33,10 +33,58 @@ pub const TAILWIND_STR_: &str = manganis::mg!(file("./public/tailwind.css"));
 
 /// `(Pages)`: Current active page
 /// `Option<Pages>`: Previous page
-static ACTIVE_PAGE: GlobalSignal<(Pages, Option<Pages>)> =
-    GlobalSignal::new(|| (Pages::MainPage, None));
+static HISTORY: GlobalSignal<History> = GlobalSignal::new(|| History::new(Pages::MainPage));
 pub static TOP_LEVEL_COMPONENT: GlobalSignal<Vec<ComponentPointer<subModalProps>>> =
     GlobalSignal::new(Vec::new);
+
+#[derive(PartialEq, Eq, Clone, Debug)]
+pub struct History {
+    active: Pages,
+    history: Vec<Pages>,
+    prev_steps: usize,
+}
+
+impl History {
+    pub fn new(page: Pages) -> Self {
+        Self {
+            active: page.clone(),
+            history: vec![page],
+            prev_steps: 0,
+        }
+    }
+    pub fn active(&self) -> &Pages {
+        &self.active
+    }
+    pub fn history(&self) -> &Vec<Pages> {
+        &self.history
+    }
+    pub fn prev_peek(&self) -> Option<&Pages> {
+        self.history.iter().rev().nth(self.prev_steps + 1)
+    }
+
+    pub fn go_prev(&mut self) {
+        self.prev_steps += 1;
+        if let Some(x) = self.history.iter().rev().nth(self.prev_steps) {
+            self.focus_without_history(x.clone());
+        } else {
+            self.prev_steps -= 1;
+        }
+    }
+    pub fn focus_with_history(&mut self, page: Pages) {
+        if self.active != page {
+            self.active = page.clone();
+            if self.prev_steps != 0 {
+                self.prev_steps = 0;
+                self.history.clear();
+            } else {
+                self.history.push(page);
+            }
+        }
+    }
+    pub fn focus_without_history(&mut self, page: Pages) {
+        self.active = page;
+    }
+}
 
 use rust_lib::api::shared_resources::entry::{self, DOWNLOAD_PROGRESS, STORAGE};
 
@@ -76,15 +124,11 @@ impl Switcher for Pages {
     }
 
     fn compare(&self) -> bool {
-        &ACTIVE_PAGE().0 == self
+        HISTORY().active() == self
     }
 
     fn switch_active_to_self(&self) {
-        let prev = ACTIVE_PAGE().0;
-        if &prev != self {
-            ACTIVE_PAGE.write().1 = Some(prev);
-        }
-        ACTIVE_PAGE.write().0 = self.clone();
+        HISTORY.write().focus_with_history(self.clone());
     }
 }
 
@@ -94,7 +138,7 @@ impl Pages {
     }
 
     pub fn should_render(&self) -> bool {
-        &ACTIVE_PAGE().0 == self || ACTIVE_PAGE().1.as_ref() == Some(self)
+        HISTORY().active() == self || HISTORY().prev_peek() == Some(self)
     }
 
     /// Applies slide-in animations to HTML elements based on data attributes.
@@ -229,24 +273,24 @@ fn App() -> Element {
                 TOP_LEVEL_COMPONENT().into_iter().map(|x| (x.pointer)(x.props))
             },
             ErrorBoundary {
-                // handle_error: move |error| { rsx! {
-                //     Modal { active: error_active, name: "error_modal", close_on_outer_click: false,
-                //         div {
-                //             div { class: "flex flex-col space-y-3",
-                //                 div { class: "text-red text-2xl font-bold",
-                //                     "Hmm, something went wrong. Please copy the following error to the developer."
-                //                 }
-                //                 Button {
-                //                     roundness: Roundness::Pill,
-                //                     extended_css_class: "text-[13px] font-bold",
-                //                     string_placements: rsx! { "{error} " },
-                //                     fill_mode: FillMode::Fit,
-                //                     clickable: false
-                //                 }
-                //             }
-                //         }
-                //     }
-                // } },
+                handle_error: move |error| { rsx! {
+                    Modal { active: error_active, name: "error_modal", close_on_outer_click: false,
+                        div {
+                            div { class: "flex flex-col space-y-3",
+                                div { class: "text-red text-2xl font-bold",
+                                    "Hmm, something went wrong. Please copy the following error to the developer."
+                                }
+                                Button {
+                                    roundness: Roundness::Pill,
+                                    extended_css_class: "text-[13px] font-bold",
+                                    string_placements: rsx! { "{error} " },
+                                    fill_mode: FillMode::Fit,
+                                    clickable: false
+                                }
+                            }
+                        }
+                    }
+                } },
                 Layout {}
             }
         }
@@ -255,9 +299,6 @@ fn App() -> Element {
 
 #[component]
 fn Layout() -> Element {
-    let selected = ACTIVE_PAGE().0;
-    let prev = ACTIVE_PAGE().1;
-
     use_resource(move || async move {
         let versions = rust_lib::api::backend_exclusive::vanilla::version::get_versions().await?;
         let version = versions.into_iter().find(|x| x.id == "1.20.1");
@@ -272,8 +313,10 @@ fn Layout() -> Element {
     .transpose()
     .throw()?;
 
+    let active = use_memo(move || HISTORY().active);
+
     use_effect(move || {
-        let _ = ACTIVE_PAGE();
+        let _ = active();
         for collection in COLLECT() {
             Pages::new_collection_page(collection.get_collection_id())
                 .apply_slide_in()
@@ -281,18 +324,18 @@ fn Layout() -> Element {
         }
     });
 
+    let history = HISTORY();
+
     Pages::DownloadProgress.apply_slide_in().throw()?;
     rsx! {
         div {
             class: "w-screen inline-flex self-stretch group flex overflow-hidden",
-            "data-selected": selected.to_string(),
-            "data-prev": prev.map_or_else(String::new, |x| x.to_string()),
+            "data-selected": history.active().to_string(),
+            "data-prev": history.prev_peek().map_or_else(String::new, |x| x.to_string()),
             onmousedown: move |x| {
                 if let Some(x) = x.data().trigger_button() {
                     if x == MouseButton::Fourth  {
-                        if let Some(x) = ACTIVE_PAGE().1 {
-                            x.switch_active_to_self();
-                        }
+                        HISTORY.write().go_prev()
                     }
                 }
             },

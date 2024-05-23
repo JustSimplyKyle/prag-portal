@@ -9,7 +9,7 @@ use std::{
 use crate::{
     main_page::COLLECTION_PIC,
     BaseComponents::{Button, ContentType, FillMode, Roundness, Switcher},
-    Pages, ACTIVE_PAGE, EXPLORE,
+    Pages, EXPLORE, HISTORY,
 };
 
 pub static DISPLAY_BACKGROUND: ImageAsset = manganis::mg!(image("./public/cool_image.png")
@@ -88,7 +88,7 @@ pub fn CollectionDisplay(collection: ReadOnlySignal<Collection>) -> Element {
                         roundness: Roundness::Pill,
                         string_placements: vec![ContentType::svg(UNDO).css("svg-[30px]").align_center()],
                         onclick: move |_| {
-                            if let Some(x) = ACTIVE_PAGE().1 {
+                            if let Some(x) = HISTORY().prev_peek() {
                                 x.switch_active_to_self();
                             }
                         },

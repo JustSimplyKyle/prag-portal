@@ -7,7 +7,7 @@ use tailwind_fuse::tw_merge;
 use crate::{
     main_page::COLLECTION_PIC,
     BaseComponents::{Alignment, Button, ContentType, Roundness, Switcher},
-    Pages, ACTIVE_PAGE, ARROW_RIGHT, COLLECT, EXPLORE, HOME, SIDEBAR_COLLECTION, SIM_CARD,
+    Pages, ARROW_RIGHT, COLLECT, EXPLORE, HISTORY, HOME, SIDEBAR_COLLECTION, SIM_CARD,
 };
 
 static EXPANDED: GlobalSignal<bool> = GlobalSignal::new(|| false);
@@ -118,8 +118,9 @@ pub fn SideBar() -> Element {
                         signal: Rc::new(Pages::DownloadProgress) as Rc<dyn Switcher>,
                         extended_css_class: "bg-background group/active items-center",
                         onclick: move |()| {
-                            let prev = ACTIVE_PAGE().1;
-                            if ACTIVE_PAGE().0 == Pages::DownloadProgress {
+                            let history = HISTORY();
+                            let prev = history.prev_peek();
+                            if HISTORY().active() == &Pages::DownloadProgress {
                                 if let Some(prev) = prev {
                                     prev.switch_active_to_self();
                                 }
@@ -135,7 +136,7 @@ pub fn SideBar() -> Element {
 }
 
 #[component]
-fn SidebarCollectionBlock(collection: ReadOnlySignal<Collection>) -> Element {
+fn SidebarCollectionBlock(collection: Collection) -> Element {
     let img_block = rsx! {
         div { class: "relative transition-all container w-[50px] h-[50px] group-aria-expanded:w-20 group-aria-expanded:h-20 border-2 border-[#2E2E2E] rounded-[15px] group-aria-expanded:rounded-[5px]",
             { ContentType::image(COLLECTION_PIC.to_string())
@@ -144,8 +145,8 @@ fn SidebarCollectionBlock(collection: ReadOnlySignal<Collection>) -> Element {
             div { class: "absolute inset-x-0 bottom-0 w-3 h-3 bg-[#CCE246] rounded-full" }
         }
     };
-    let display = collection().display_name;
-    let signal_check = collection().get_collection_id();
+    let display = &collection.display_name;
+    let signal_check = collection.get_collection_id();
     rsx! {
         Button {
             roundness: Roundness::None,
