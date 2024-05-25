@@ -8,7 +8,9 @@ pub mod side_bar;
 use dioxus::desktop::tao::dpi::PhysicalSize;
 use dioxus::desktop::WindowBuilder;
 use dioxus::html::input_data::MouseButton;
-use rust_lib::api::shared_resources::collection::{Collection, CollectionId};
+use rust_lib::api::shared_resources::collection::{
+    Collection, CollectionId, ModLoader, ModLoaderType,
+};
 use std::hash::{DefaultHasher, Hash, Hasher};
 use std::sync::Arc;
 use std::time::Duration;
@@ -59,7 +61,11 @@ impl History {
         &self.history
     }
     pub fn prev_peek(&self) -> Option<&Pages> {
-        self.history.iter().rev().nth(self.prev_steps + 1)
+        if self.prev_steps == 0 {
+            self.history.iter().rev().nth(1)
+        } else {
+            self.history.iter().rev().nth(self.prev_steps - 1)
+        }
     }
 
     pub fn go_prev(&mut self) {
@@ -68,6 +74,17 @@ impl History {
             self.focus_without_history(x.clone());
         } else {
             self.prev_steps -= 1;
+        }
+    }
+
+    pub fn go_next(&mut self) {
+        if let Some(steps) = self.prev_steps.checked_sub(1) {
+            self.prev_steps = steps;
+            if let Some(x) = self.history.iter().rev().nth(steps) {
+                self.focus_without_history(x.clone());
+            } else {
+                self.prev_steps += 1;
+            }
         }
     }
     pub fn focus_with_history(&mut self, page: Pages) {
@@ -303,7 +320,29 @@ fn Layout() -> Element {
         let versions = rust_lib::api::backend_exclusive::vanilla::version::get_versions().await?;
         let version = versions.into_iter().find(|x| x.id == "1.20.1");
         if let Some(version) = version {
-            entry::create_collection("weird test", version, None, None).await?;
+            let mut collection = entry::create_collection(
+                "weird test",
+                version,
+                ModLoader::new(ModLoaderType::Fabric, None),
+                None,
+            )
+            .await?;
+            collection
+                .add_multiple_modrinth_mod(
+                    vec![
+                        "fabric-api",
+                        "sodium",
+                        "modmenu",
+                        "ferrite-core",
+                        "lazydfu",
+                        "iris",
+                        "indium",
+                    ],
+                    vec![],
+                    None,
+                )
+                .await?;
+            collection.download_mods().await?;
         }
         Ok::<(), anyhow::Error>(())
     })
@@ -336,6 +375,9 @@ fn Layout() -> Element {
                 if let Some(x) = x.data().trigger_button() {
                     if x == MouseButton::Fourth  {
                         HISTORY.write().go_prev()
+                    }
+                    if x == MouseButton::Fifth {
+                        HISTORY.write().go_next()
                     }
                 }
             },
