@@ -1,11 +1,14 @@
 use dioxus::prelude::*;
 use manganis::ImageAsset;
-use rust_lib::api::shared_resources::collection::Collection;
+use rust_lib::api::{
+    backend_exclusive::mod_management::mods::ModMetadata, shared_resources::collection::Collection,
+};
 use std::{
     hash::{DefaultHasher, Hash, Hasher},
     rc::Rc,
 };
 
+use crate::BaseComponents::Switch;
 use crate::{
     main_page::COLLECTION_PIC,
     BaseComponents::{Button, ContentType, FillMode, Roundness, Switcher},
@@ -17,6 +20,8 @@ pub static DISPLAY_BACKGROUND: ImageAsset = manganis::mg!(image("./public/cool_i
     .preload());
 
 pub static GAME_CONTROLLER: &str = manganis::mg!(file("./public/stadia_controller.svg"));
+pub static UNARCHIVE: &str = manganis::mg!(file("./public/unarchive.svg"));
+pub static DELETE: &str = manganis::mg!(file("./public/delete.svg"));
 pub static UNDO: &str = manganis::mg!(file("./public/undo.svg"));
 pub static HORIZ: &str = manganis::mg!(file("./public/more_horiz.svg"));
 
@@ -152,27 +157,70 @@ fn ModViewer(collection: ReadOnlySignal<Collection>) -> Element {
     mods.sort_unstable_by_key(|x| x.name.clone());
     rsx! {
         div {
-            class: "grid grid-flow-row grid-cols-[repeat(auto-fill,300px)] gap-[3px]",
+            class: "grid grid-flow-row grid-cols-[repeat(auto-fill,273px)] gap-[3px]",
             for x in mods {
+                SubModViewer {collection, mods: x}
+            }
+        }
+    }
+}
+
+#[component]
+fn SubModViewer(collection: ReadOnlySignal<Collection>, mods: ModMetadata) -> Element {
+    let clicked = use_signal(|| false);
+    rsx! {
+        div {
+            class: "bg-deep-background flex flex-col p-[10px] w-[273px] rounded-[5px]",
+            div {
+                class: "pb-[10px]",
                 div {
-                    class: "bg-deep-background p-[10px] rounded-[5px]",
-                    div {
-                        class: "flex gap-[15px] items-center",
-                        if let Some(icon) = x.get_icon_path() {
-                            div {
-                                {
-                                    ContentType::image(icon.to_string_lossy()).css("w-[50px] h-[50px]").get_element()
-                                }
-                            }
-                        }
+                    class: "flex gap-[15px] items-center",
+                    if let Some(icon) = mods.get_icon_path() {
                         div {
-                            class: "flex flex-col gap-[10px]",
-                            {ContentType::text(x.name).css("text-xl font-bold").get_element()}
-                            if let Some(version) = x.mod_version {
-                                {ContentType::hint(version).css("font-semibold text-xs italic").get_element()}
+                            {
+                                ContentType::image(icon.to_string_lossy()).css("w-[50px] h-[50px] rounded-[10px]").get_element()
                             }
                         }
                     }
+                    div {
+                        class: "flex flex-col gap-[10px]",
+                        {ContentType::text(mods.name).css("text-xl font-bold").get_element()}
+                        if let Some(version) = mods.mod_version {
+                            {ContentType::hint(version).css("font-semibold text-xs italic").get_element()}
+                        }
+                    }
+                }
+            }
+            div {
+                class: "grid grid-flow-col items-stretch",
+                div {
+                    class: "justify-self-start flex gap-[5px]",
+                    Button {
+                        roundness: Roundness::Pill,
+                        string_placements: vec![
+                            ContentType::svg(UNARCHIVE)
+                                .css("svg-[16px]")
+                                .align_center()
+                        ],
+                        extended_css_class: "bg-background px-[15px] h-[30px]",
+                        size: crate::BaseComponents::Size::Small,
+                        fill_mode: FillMode::Fit
+                    }
+                    Button {
+                        roundness: Roundness::Pill,
+                        string_placements: vec![
+                            ContentType::svg(DELETE)
+                                .css("svg-[16px]")
+                                .align_center()
+                        ],
+                        extended_css_class: "bg-background px-[15px] h-[30px]",
+                        size: crate::BaseComponents::Size::Small,
+                        fill_mode: FillMode::Fit
+                    }
+                }
+                div {
+                    class: "justify-self-end",
+                    Switch {clicked}
                 }
             }
         }

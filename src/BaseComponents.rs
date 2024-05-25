@@ -172,6 +172,28 @@ pub enum Roundness {
 }
 
 #[component]
+pub fn Switch(clicked: Signal<bool>, onclick: Option<EventHandler>) -> Element {
+    rsx! {
+        button {
+            class: "transition-all group w-[45px] h-[30px] p-[5px] rounded-full flex justify-start items-center bg-background",
+            "aria-selected": clicked(),
+            onclick: move |_| {
+                clicked.toggle();
+                if let Some(onclick) = onclick {
+                    onclick(());
+                }
+            },
+            div {
+                class: "transition-all flex-none group-aria-selected:flex-auto",
+            }
+            div {
+                class: "transition-all w-[20px] h-[20px] group-aria-selected:border-4 group-aria-selected:border-green group-aria-selected:bg-none rounded-full bg-secondary-surface",
+            }
+        }
+    }
+}
+
+#[component]
 pub fn Button(
     roundness: Roundness,
     #[props(into)] string_placements: StringPlacements,
