@@ -70,6 +70,7 @@ pub fn SideBar() -> Element {
                             ContentType::svg(HOME).align_left(),
                             ContentType::text("首頁").css("group-aria-busy:hidden").align_right(),
                         ],
+                        focus_color_change: true,
                         signal: Rc::new(Pages::MainPage) as Rc<dyn Switcher>,
                         extended_css_class: "bg-background group-aria-expanded:pr-5"
                     }
@@ -79,6 +80,7 @@ pub fn SideBar() -> Element {
                             ContentType::svg(EXPLORE).align_left(),
                             ContentType::text("探索").css("group-aria-busy:hidden").align_right(),
                         ],
+                        focus_color_change: true,
                         signal: Rc::new(Pages::Explore) as Rc<dyn Switcher>,
                         extended_css_class: "bg-background group-aria-expanded:pr-5"
                     }
@@ -90,6 +92,7 @@ pub fn SideBar() -> Element {
                         ],
                         signal: Rc::new(Pages::Collections) as Rc<dyn Switcher>,
                         onclick,
+                        focus_color_change: true,
                         extended_css_class: "bg-background group-aria-expanded:pr-5"
                     }
                 }

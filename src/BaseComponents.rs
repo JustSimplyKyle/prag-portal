@@ -4,7 +4,7 @@ use dioxus::prelude::*;
 
 use tailwind_fuse::*;
 
-use crate::TOP_LEVEL_COMPONENT;
+use crate::{collections::SEARCH, main_page::ARROW_LEFT, TOP_LEVEL_COMPONENT};
 
 #[derive(Clone)]
 pub struct ComponentPointer<P: Properties> {
@@ -175,7 +175,7 @@ pub enum Roundness {
 pub fn Switch(clicked: Signal<bool>, onclick: Option<EventHandler>) -> Element {
     rsx! {
         button {
-            class: "transition-all group w-[45px] h-[30px] p-[5px] rounded-full flex justify-start items-center bg-background",
+            class: "group w-[45px] p-[5px] rounded-full flex justify-start items-center bg-background",
             "aria-selected": clicked(),
             onclick: move |_| {
                 clicked.toggle();
@@ -184,11 +184,34 @@ pub fn Switch(clicked: Signal<bool>, onclick: Option<EventHandler>) -> Element {
                 }
             },
             div {
-                class: "transition-all flex-none group-aria-selected:flex-auto",
+                class: "transition-all duration-700 ease-linear flex-none group-aria-selected:flex-auto",
             }
             div {
-                class: "transition-all w-[20px] h-[20px] group-aria-selected:border-4 group-aria-selected:border-green group-aria-selected:bg-none rounded-full bg-secondary-surface",
+                class: "transition-all ease-in-out w-[20px] h-[20px] group-aria-selected:border-4 group-aria-selected:border-green group-aria-selected:bg-none rounded-full bg-secondary-surface",
             }
+        }
+    }
+}
+
+#[component]
+pub fn SearchBar() -> Element {
+    rsx! {
+        Button {
+            roundness: Roundness::Pill,
+            string_placements: rsx! {
+                div {
+                    class: "pointer-events-auto hidden text-stone-950/20 group-aria-selected:block",
+                    "搜尋"
+                }
+                div {
+                    class: "flex flex-row-reverse items-baseline",
+                    {ContentType::svg(ARROW_LEFT).css("svg-[20px]").get_element()}
+                    {ContentType::svg(SEARCH).css("svg-[30px]").get_element()}
+                }
+            },
+            focus_color_change: true,
+            fill_mode: FillMode::Fit,
+            extended_css_class: "group transition-all w-full max-w-20 grid grid-flow-col justify-stretch content-center [&_*]:transition-all h-[55px] aria-selected:max-w-[300px] aria-selected:bg-white pl-[15px] pr-[10px]",
         }
     }
 }
@@ -198,13 +221,13 @@ pub fn Button(
     roundness: Roundness,
     #[props(into)] string_placements: StringPlacements,
     #[props(default)] extended_css_class: String,
-    #[props(into)] signal: Option<Rc<dyn Switcher>>,
+    signal: Option<Rc<dyn Switcher>>,
     #[props(default = true)] clickable: bool,
     onclick: Option<EventHandler>,
     #[props(extends = GlobalAttributes)] mut attributes: Vec<Attribute>,
     #[props(default)] size: Size,
     #[props(default)] fill_mode: FillMode,
-    #[props(default = true)] focus_color_change: bool,
+    #[props(default = false)] focus_color_change: bool,
 ) -> Element {
     attributes.retain(|x| x.name != "class");
     let class = ButtonClass {
@@ -218,17 +241,26 @@ pub fn Button(
     } else {
         ""
     });
+    let mut clickiness = use_signal(|| false);
     let class = tw_merge!(class, extended_css_class);
     rsx! {
         div {
             class,
             role: if clickable { "button" } else { "" },
-            aria_selected: signal.as_ref().is_some_and(|x| x.compare()),
+            aria_selected: {
+                if let Some(x) = signal.as_ref() {
+                    x.compare()
+                } else {
+                    focus_color_change && clickiness()
+                }
+            },
             onclick: move |_| {
                 if let Some(x) = onclick {
                     x(());
-                } else if let Some(x) = &signal {
+                } else if let Some(x) = &mut signal {
                     x.switch_active_to_self();
+                } else if signal.is_none() && focus_color_change {
+                    clickiness.toggle();
                 }
             },
             ..attributes,
@@ -256,7 +288,7 @@ impl StringPlacements {
     pub fn len(&self) -> usize {
         match &self {
             Self::Designed(x) => x.len(),
-            Self::Custom(x) => x.as_ref().map_or(0, |x| x.dynamic_nodes.len()),
+            Self::Custom(_) => 1,
         }
     }
     pub fn is_empty(&self) -> bool {
@@ -371,9 +403,11 @@ impl Content {
             ContentType::Svg(x) => {
                 rsx! {
                     div {
-                        id: "mysvg",
                         class: tw_merge!(self.css, "[&_*]:pointer-events-none"),
-                        object { r#type: "image/svg+xml", data: x }
+                        object {
+                            id: "mysvg",
+                            r#type: "image/svg+xml", data: x
+                        }
                     }
                 }
             }
@@ -538,8 +572,8 @@ impl Alignment {
     pub fn get_alignment_class(&self) -> String {
         match self {
             Self::Left => "text-left",
-            Self::Center => "text-center flex justify-center items-center",
-            Self::Right => "text-right flex justify-end items-center",
+            Self::Center => "text-center justify-self-center flex",
+            Self::Right => "text-right justify-self-end flex",
             Self::Custom(ref class) => class,
         }
         .into()

@@ -5,10 +5,11 @@ use rust_lib::api::{
 };
 use std::{
     hash::{DefaultHasher, Hash, Hasher},
+    ops::Deref,
     rc::Rc,
 };
 
-use crate::BaseComponents::Switch;
+use crate::BaseComponents::{SearchBar, Switch};
 use crate::{
     main_page::COLLECTION_PIC,
     BaseComponents::{Button, ContentType, FillMode, Roundness, Switcher},
@@ -21,6 +22,10 @@ pub static DISPLAY_BACKGROUND: ImageAsset = manganis::mg!(image("./public/cool_i
 
 pub static GAME_CONTROLLER: &str = manganis::mg!(file("./public/stadia_controller.svg"));
 pub static UNARCHIVE: &str = manganis::mg!(file("./public/unarchive.svg"));
+pub static CUBE: &str = manganis::mg!(file("./public/deployed_code.svg"));
+pub static GLOBAL_ASIA: &str = manganis::mg!(file("./public/globe_asia.svg"));
+pub static CIRCLE_JOIN: &str = manganis::mg!(file("./public/join.svg"));
+pub static MOTION_MODE: &str = manganis::mg!(file("./public/motion_mode.svg"));
 pub static DELETE: &str = manganis::mg!(file("./public/delete.svg"));
 pub static UNDO: &str = manganis::mg!(file("./public/undo.svg"));
 pub static HORIZ: &str = manganis::mg!(file("./public/more_horiz.svg"));
@@ -233,37 +238,60 @@ fn SelectionBar() -> Element {
         div { class: "grid grid-flow-col items-stretch",
             div { class: "bg-deep-background rounded-full flex justify-start w-fit",
                 Button {
+                    extended_css_class: "pl-[20px] pr-[25px] py-[12px]",
                     roundness: Roundness::Pill,
                     fill_mode: FillMode::Fit,
                     signal: Rc::new(CollectionDisplayTopSelection::Mods) as Rc<dyn Switcher>,
-                    string_placements: vec![ContentType::text("A").align_left(), ContentType::text("模組").align_right()]
+                    focus_color_change: true,
+                    string_placements: vec![
+                        ContentType::svg(CUBE)
+                            .css("svg-[30px]")
+                            .align_left(),
+                        ContentType::text("模組").align_right()
+                    ]
                 }
                 Button {
+                    extended_css_class: "pl-[20px] pr-[25px] py-[12px]",
                     roundness: Roundness::Pill,
                     fill_mode: FillMode::Fit,
+                    focus_color_change: true,
                     signal: Rc::new(CollectionDisplayTopSelection::World) as Rc<dyn Switcher>,
-                    string_placements: vec![ContentType::text("B").align_left(), ContentType::text("世界").align_right()]
+                    string_placements: vec![
+                        ContentType::svg(GLOBAL_ASIA)
+                            .css("svg-[30px]")
+                            .align_left(),
+                        ContentType::text("世界").align_right()
+                    ]
                 }
                 Button {
+                    extended_css_class: "pl-[20px] pr-[25px] py-[12px]",
                     roundness: Roundness::Pill,
                     fill_mode: FillMode::Fit,
+                    focus_color_change: true,
                     signal: Rc::new(CollectionDisplayTopSelection::ResourcePack) as Rc<dyn Switcher>,
                     string_placements: vec![
-                        ContentType::text("C").align_left(),
+                        ContentType::svg(CIRCLE_JOIN)
+                            .css("svg-[30px]")
+                            .align_left(),
                         ContentType::text("資源包").align_right(),
                     ]
                 }
                 Button {
+                    extended_css_class: "pl-[20px] pr-[25px] py-[12px]",
                     roundness: Roundness::Pill,
                     fill_mode: FillMode::Fit,
+                    focus_color_change: true,
                     signal: Rc::new(CollectionDisplayTopSelection::ShaderPacks) as Rc<dyn Switcher>,
                     string_placements: vec![
-                        ContentType::text("D").align_left(),
+                        ContentType::svg(MOTION_MODE)
+                            .css("svg-[30px]")
+                            .align_left(),
                         ContentType::text("光影包").align_right(),
                     ]
                 }
             }
-            div { class: "justify-end flex items-center space-x-[7px] h-[55px] *:h-full",
+            div { class: "justify-end flex items-center space-x-[7px]",
+                SearchBar {}
                 Button {
                     roundness: Roundness::Pill,
                     string_placements: vec![
