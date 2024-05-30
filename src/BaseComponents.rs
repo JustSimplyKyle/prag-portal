@@ -195,13 +195,30 @@ pub fn Switch(clicked: Signal<bool>, onclick: Option<EventHandler>) -> Element {
 
 #[component]
 pub fn SearchBar() -> Element {
+    let mut inside_clicked = use_signal(|| false);
+    let mut total_clicked = use_signal(|| false);
     rsx! {
         Button {
             roundness: Roundness::Pill,
             string_placements: rsx! {
                 div {
-                    class: "pointer-events-auto hidden text-stone-950/20 group-aria-selected:block",
-                    "搜尋"
+                    class: "relative text-stone-950/20 ",
+                    resize: false,
+                    div {
+                        class: "absolute inset-0 hidden group-aria-selected:aria-[selected=false]:block",
+                        aria_selected: inside_clicked(),
+                        "搜尋",
+                    }
+                    if total_clicked() {
+                        div {
+                            class: "aboslute w-full grow-0 inset-0 hidden group-aria-selected:block align-middle border-0 overflow-x-clip",
+                            contenteditable: true,
+                            onclick: move |event| {
+                                *inside_clicked.write() = true;
+                                event.stop_propagation();
+                            },
+                        }
+                    }
                 }
                 div {
                     class: "flex flex-row-reverse items-baseline",
@@ -209,9 +226,13 @@ pub fn SearchBar() -> Element {
                     {ContentType::svg(SEARCH).css("svg-[30px]").get_element()}
                 }
             },
+            onclick: move |()| {
+                *inside_clicked.write() = false;
+                total_clicked.toggle();
+            },
             focus_color_change: true,
             fill_mode: FillMode::Fit,
-            extended_css_class: "group transition-all w-full max-w-20 grid grid-flow-col justify-stretch content-center [&_*]:transition-all h-[55px] aria-selected:max-w-[300px] aria-selected:bg-white pl-[15px] pr-[10px]",
+            extended_css_class: "group grow-0 transition-all w-20 grid grid-flow-col justify-stretch content-center [&_*]:transition-all h-[55px] aria-selected:w-[300px] aria-selected:bg-white pl-[15px] pr-[10px]",
         }
     }
 }
@@ -255,12 +276,14 @@ pub fn Button(
                 }
             },
             onclick: move |_| {
+                if signal.is_none() && focus_color_change {
+                    clickiness.toggle();
+                }
+
                 if let Some(x) = onclick {
                     x(());
                 } else if let Some(x) = &mut signal {
                     x.switch_active_to_self();
-                } else if signal.is_none() && focus_color_change {
-                    clickiness.toggle();
                 }
             },
             ..attributes,

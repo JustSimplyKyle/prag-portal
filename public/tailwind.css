@@ -939,23 +939,6 @@ html {
   min-width: 4rem;
 }
 
-.textarea {
-  min-height: 3rem;
-  flex-shrink: 1;
-  padding-left: 1rem;
-  padding-right: 1rem;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-  line-height: 2;
-  border-radius: var(--rounded-btn, 0.5rem);
-  border-width: 1px;
-  border-color: transparent;
-  --tw-bg-opacity: 1;
-  background-color: var(--fallback-b1,oklch(var(--b1)/var(--tw-bg-opacity)));
-}
-
 .toggle {
   flex-shrink: 0;
   --tglbg: var(--fallback-b1,oklch(var(--b1)/1));
@@ -1277,38 +1260,6 @@ html {
     .table-zebra-zebra tbody tr:nth-child(even) {
   --tw-bg-opacity: 1;
   background-color: var(--fallback-b3,oklch(var(--b3)/var(--tw-bg-opacity)));
-}
-
-.textarea:focus {
-  box-shadow: none;
-  border-color: var(--fallback-bc,oklch(var(--bc)/0.2));
-  outline-style: solid;
-  outline-width: 2px;
-  outline-offset: 2px;
-  outline-color: var(--fallback-bc,oklch(var(--bc)/0.2));
-}
-
-.textarea-disabled,
-  .textarea:disabled,
-  .textarea[disabled] {
-  cursor: not-allowed;
-  --tw-border-opacity: 1;
-  border-color: var(--fallback-b2,oklch(var(--b2)/var(--tw-border-opacity)));
-  --tw-bg-opacity: 1;
-  background-color: var(--fallback-b2,oklch(var(--b2)/var(--tw-bg-opacity)));
-  --tw-text-opacity: 0.2;
-}
-
-.textarea-disabled::-moz-placeholder, .textarea:disabled::-moz-placeholder, .textarea[disabled]::-moz-placeholder {
-  color: var(--fallback-bc,oklch(var(--bc)/var(--tw-placeholder-opacity)));
-  --tw-placeholder-opacity: 0.2;
-}
-
-.textarea-disabled::placeholder,
-  .textarea:disabled::placeholder,
-  .textarea[disabled]::placeholder {
-  color: var(--fallback-bc,oklch(var(--bc)/var(--tw-placeholder-opacity)));
-  --tw-placeholder-opacity: 0.2;
 }
 
 @keyframes toast-pop {
@@ -1780,10 +1731,6 @@ html {
   max-width: 40px;
 }
 
-.pointer-events-auto {
-  pointer-events: auto;
-}
-
 .static {
   position: static;
 }
@@ -1980,6 +1927,10 @@ html {
   width: 2.5rem;
 }
 
+.w-20 {
+  width: 5rem;
+}
+
 .w-3 {
   width: 0.75rem;
 }
@@ -2042,10 +1993,6 @@ html {
   min-width: 100%;
 }
 
-.max-w-20 {
-  max-width: 5rem;
-}
-
 .max-w-\[250px\] {
   max-width: 250px;
 }
@@ -2065,6 +2012,10 @@ html {
 
 .shrink-0 {
   flex-shrink: 0;
+}
+
+.grow-0 {
+  flex-grow: 0;
 }
 
 @keyframes slideLeft {
@@ -2097,6 +2048,10 @@ html {
 
 .animate-slideRight {
   animation: slideRight 500ms ease-in-out;
+}
+
+.resize {
+  resize: both;
 }
 
 .grid-flow-row {
@@ -2299,6 +2254,14 @@ html {
   overflow: scroll;
 }
 
+.overflow-x-clip {
+  overflow-x: clip;
+}
+
+.overflow-x-scroll {
+  overflow-x: scroll;
+}
+
 .scroll-smooth {
   scroll-behavior: smooth;
 }
@@ -2363,6 +2326,10 @@ html {
   border-bottom-right-radius: 20px;
 }
 
+.border-0 {
+  border-width: 0px;
+}
+
 .border-2 {
   border-width: 2px;
 }
@@ -2402,11 +2369,6 @@ html {
   background-color: rgb(47 47 47 / var(--tw-bg-opacity));
 }
 
-.bg-white {
-  --tw-bg-opacity: 1;
-  background-color: rgb(255 255 255 / var(--tw-bg-opacity));
-}
-
 .bg-white\/30 {
   background-color: rgb(255 255 255 / 0.3);
 }
@@ -2414,6 +2376,11 @@ html {
 .bg-zinc-800 {
   --tw-bg-opacity: 1;
   background-color: rgb(39 39 42 / var(--tw-bg-opacity));
+}
+
+.bg-white {
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 255 255 / var(--tw-bg-opacity));
 }
 
 .bg-gradient-to-t {
@@ -2577,6 +2544,10 @@ html {
 
 .text-right {
   text-align: right;
+}
+
+.align-middle {
+  vertical-align: middle;
 }
 
 .font-black {
@@ -2811,16 +2782,8 @@ body {
   width: 80px;
 }
 
-.aria-selected\:max-w-\[300px\][aria-selected="true"] {
-  max-width: 300px;
-}
-
-.aria-selected\:justify-center[aria-selected="true"] {
-  justify-content: center;
-}
-
-.aria-selected\:justify-stretch[aria-selected="true"] {
-  justify-content: stretch;
+.aria-selected\:w-\[300px\][aria-selected="true"] {
+  width: 300px;
 }
 
 .aria-selected\:bg-white[aria-selected="true"] {
@@ -2900,6 +2863,10 @@ body {
 
 .group[aria-selected="true"] .group-aria-selected\:bg-none {
   background-image: none;
+}
+
+.group[aria-selected="true"] .group-aria-selected\:aria-\[selected\=false\]\:block[aria-selected=false] {
+  display: block;
 }
 
 .group[aria-busy=false] .group\/active[aria-selected="true"] .group-aria-\[busy\=false\]\:group-aria-selected\/active\:block {
