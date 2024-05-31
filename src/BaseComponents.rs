@@ -195,8 +195,17 @@ pub fn Switch(clicked: Signal<bool>, onclick: Option<EventHandler>) -> Element {
 
 #[component]
 pub fn SearchBar() -> Element {
-    let mut inside_clicked = use_signal(|| false);
     let mut total_clicked = use_signal(|| false);
+    let mut input_clicked = use_signal(|| false);
+    let mut search = use_signal(|| String::from("搜尋"));
+    use_effect(move || {
+        if !total_clicked() {
+            search.set(String::from("搜尋"));
+        }
+        if input_clicked() {
+            search.set(String::new());
+        }
+    });
     rsx! {
         Button {
             roundness: Roundness::Pill,
@@ -204,20 +213,20 @@ pub fn SearchBar() -> Element {
                 div {
                     class: "relative text-stone-950/20 ",
                     resize: false,
-                    div {
-                        class: "absolute inset-0 hidden group-aria-selected:aria-[selected=false]:block",
-                        aria_selected: inside_clicked(),
-                        "搜尋",
-                    }
-                    if total_clicked() {
-                        div {
-                            class: "aboslute w-full grow-0 inset-0 hidden group-aria-selected:block align-middle border-0 overflow-x-clip",
-                            contenteditable: true,
-                            onclick: move |event| {
-                                *inside_clicked.write() = true;
-                                event.stop_propagation();
-                            },
-                        }
+                    input {
+                        r#type: "text",
+                        id: "test",
+                        class: "aboslute overflow-x-scroll w-full grow-0 inset-0 hidden group-aria-selected:block align-middle border-0 overflow-x-clip",
+                        value: search(),
+                        oninput: move |event| {
+                            search.set(event.value());
+                        },
+                        onclick: move |event| {
+                            if !input_clicked() {
+                                input_clicked.set(true);
+                            }
+                            event.stop_propagation();
+                        },
                     }
                 }
                 div {
@@ -227,12 +236,12 @@ pub fn SearchBar() -> Element {
                 }
             },
             onclick: move |()| {
-                *inside_clicked.write() = false;
+                input_clicked.set(false);
                 total_clicked.toggle();
             },
             focus_color_change: true,
             fill_mode: FillMode::Fit,
-            extended_css_class: "group grow-0 transition-all w-20 grid grid-flow-col justify-stretch content-center [&_*]:transition-all h-[55px] aria-selected:w-[300px] aria-selected:bg-white pl-[15px] pr-[10px]",
+            extended_css_class: "group transition-all w-20 grid grid-flow-col justify-stretch content-center [&_*]:transition-all h-[55px] aria-selected:w-[300px] aria-selected:bg-white pl-[15px] pr-[10px]",
         }
     }
 }

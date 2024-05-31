@@ -11,6 +11,10 @@ body {
     font-family: 'GenSenRounded TW';
   }
 
+  input {
+    all: unset;
+  }
+
   @font-face {
     font-family: 'GenSenRounded TW';
     font-style: normal;
