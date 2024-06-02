@@ -7,7 +7,9 @@ use std::{
     hash::{DefaultHasher, Hash, Hasher},
     ops::Deref,
     rc::Rc,
+    time::{Duration, Instant},
 };
+use tokio::time::interval;
 
 use crate::BaseComponents::{SearchBar, Switch};
 use crate::{
@@ -158,21 +160,29 @@ pub fn CollectionDisplay(collection: ReadOnlySignal<Collection>) -> Element {
 
 #[component]
 fn ModViewer(collection: ReadOnlySignal<Collection>) -> Element {
-    let mut mods = collection().mod_manager.mods;
-    mods.sort_unstable_by_key(|x| x.name.clone());
-    rsx! {
-        div {
-            class: "grid grid-flow-row grid-cols-[repeat(auto-fill,273px)] gap-[3px]",
-            for x in mods {
-                SubModViewer {collection, mods: x}
+    let collections = collection();
+    if let Some(mut mods) = collections.mod_controller.map(|x| x.manager.mods) {
+        mods.sort_unstable_by_key(|x| x.name.clone());
+        rsx! {
+            div {
+                class: "grid grid-flow-row grid-cols-[repeat(auto-fill,273px)] gap-[3px]",
+                for x in mods {
+                    SubModViewer {collection, mods: x}
+                }
             }
         }
+    } else {
+        None
     }
 }
 
 #[component]
-fn SubModViewer(collection: ReadOnlySignal<Collection>, mods: ModMetadata) -> Element {
+fn SubModViewer(
+    collection: ReadOnlySignal<Collection>,
+    mods: ReadOnlySignal<ModMetadata>,
+) -> Element {
     let clicked = use_signal(|| false);
+    let icon = use_memo(move || mods().get_icon_path());
     rsx! {
         div {
             class: "bg-deep-background flex flex-col p-[10px] w-[273px] rounded-[5px]",
@@ -180,17 +190,13 @@ fn SubModViewer(collection: ReadOnlySignal<Collection>, mods: ModMetadata) -> El
                 class: "pb-[10px]",
                 div {
                     class: "flex gap-[15px] items-center",
-                    if let Some(icon) = mods.get_icon_path() {
-                        div {
-                            {
-                                ContentType::image(icon.to_string_lossy()).css("w-[50px] h-[50px] rounded-[10px]").get_element()
-                            }
-                        }
+                    if let Some(icon) = icon() {
+                        {ContentType::image(icon.to_string_lossy()).css("w-[50px] h-[50px] rounded-[10px]").get_element()}
                     }
                     div {
                         class: "flex flex-col gap-[10px]",
-                        {ContentType::text(mods.name).css("text-xl font-bold").get_element()}
-                        if let Some(version) = mods.mod_version {
+                        {ContentType::text(mods().name).css("text-xl font-bold").get_element()}
+                        if let Some(version) = mods().mod_version {
                             {ContentType::hint(version).css("font-semibold text-xs italic").get_element()}
                         }
                     }

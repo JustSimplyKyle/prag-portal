@@ -24,7 +24,7 @@ use crate::collection_display::CollectionDisplay;
 use crate::collections::Collections;
 use crate::main_page::MainPage;
 use crate::side_bar::SideBar;
-use crate::BaseComponents::{Button, ContentType, FillMode, Modal, Roundness};
+use crate::BaseComponents::{Alignment, Button, ContentType, Contents, FillMode, Modal, Roundness};
 
 pub const HOME: &str = manganis::mg!(file("./public/home.svg"));
 pub const EXPLORE: &str = manganis::mg!(file("./public/explore.svg"));
@@ -454,15 +454,15 @@ fn DownloadProgress() -> Element {
     use_resource(move || async move {
         let mut last = None;
         loop {
-            let collections = match DOWNLOAD_PROGRESS.get_all().await {
+            let current_progress = match DOWNLOAD_PROGRESS.get_all().await {
                 Ok(x) => x,
                 Err(x) => return Err::<(), anyhow::Error>(x),
             };
-            if last.as_ref() != Some(&collections) {
-                last = Some(collections.clone());
-                *progress.write() = Some(collections);
+            if last.as_ref() != Some(&current_progress) {
+                last = Some(current_progress.clone());
+                *progress.write() = Some(current_progress);
             }
-            tokio::time::sleep(Duration::from_millis(500)).await;
+            tokio::time::sleep(Duration::from_millis(300)).await;
         }
     })
     .read()
@@ -471,17 +471,24 @@ fn DownloadProgress() -> Element {
     .transpose()
     .throw()?;
 
-    let display = progress().map(|x| {
-        x.into_iter()
-            .map(|x| ContentType::text(x.percentages.to_string()).align_left())
-            .collect::<Vec<_>>()
-    });
     rsx! {
         div {
-            if let Some(p) = display {
-                Button {
-                    roundness: Roundness::Top,
-                    string_placements: p,
+            if let Some(x) = progress() {
+                for progress in x {
+                    Button {
+                        roundness: Roundness::Pill,
+                        string_placements: vec! [
+                            ContentType::text(progress.name.to_string()).align_left(),
+                            Contents::new(
+                                vec![
+                                    ContentType::text(format!("percentages: {}",progress.percentages.to_string())),
+                                    ContentType::text(format!("speed: {}", progress.speed.unwrap_or_default().to_string())),
+                                ],
+                                Alignment::Right,
+                            ).css("flex flex-col gap-[3px]")
+                        ],
+                        fill_mode: FillMode::Fit
+                    }
                 }
             }
         }

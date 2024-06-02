@@ -2908,10 +2908,6 @@ body {
   width: 300px;
 }
 
-.aria-selected\:max-w-\[300px\][aria-selected="true"] {
-  max-width: 300px;
-}
-
 .aria-selected\:bg-white[aria-selected="true"] {
   --tw-bg-opacity: 1;
   background-color: rgb(255 255 255 / var(--tw-bg-opacity));
@@ -2989,10 +2985,6 @@ body {
 
 .group[aria-selected="true"] .group-aria-selected\:bg-none {
   background-image: none;
-}
-
-.group[aria-selected="true"] .group-aria-selected\:aria-\[selected\=false\]\:block[aria-selected=false] {
-  display: block;
 }
 
 .group[aria-busy=false] .group\/active[aria-selected="true"] .group-aria-\[busy\=false\]\:group-aria-selected\/active\:block {

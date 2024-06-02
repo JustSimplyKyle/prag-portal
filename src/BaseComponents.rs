@@ -444,10 +444,12 @@ impl Content {
                 }
             }
             ContentType::Image(x) => {
-                let mut background_size = "contain";
-                if self.css.contains("object-cover") || self.css.contains("bg-cover") {
-                    background_size = "cover"
-                }
+                let background_size =
+                    if self.css.contains("object-cover") || self.css.contains("bg-cover") {
+                        "cover"
+                    } else {
+                        "contain"
+                    };
                 rsx! {
                     div {
                         class: self.css,
