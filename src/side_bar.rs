@@ -118,6 +118,7 @@ pub fn SideBar() -> Element {
                                 .align_right()
                                 .css("group-aria-selected/active:hidden group-aria-busy:hidden text-hint"),
                         ],
+                        focus_color_change: true,
                         signal: Rc::new(Pages::DownloadProgress) as Rc<dyn Switcher>,
                         extended_css_class: "bg-background group/active items-center",
                         onclick: move |()| {
