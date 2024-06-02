@@ -5,17 +5,14 @@ use rust_lib::api::{
 };
 use std::{
     hash::{DefaultHasher, Hash, Hasher},
-    ops::Deref,
     rc::Rc,
-    time::{Duration, Instant},
 };
-use tokio::time::interval;
 
 use crate::BaseComponents::{SearchBar, Switch};
 use crate::{
     main_page::COLLECTION_PIC,
     BaseComponents::{Button, ContentType, FillMode, Roundness, Switcher},
-    Pages, EXPLORE, HISTORY,
+    EXPLORE, HISTORY,
 };
 
 pub static DISPLAY_BACKGROUND: ImageAsset = manganis::mg!(image("./public/cool_image.png")
@@ -182,7 +179,7 @@ fn SubModViewer(
     mods: ReadOnlySignal<ModMetadata>,
 ) -> Element {
     let clicked = use_signal(|| false);
-    let icon = use_memo(move || mods().get_icon_path());
+    let icon = use_memo(move || mods().icon_url);
     rsx! {
         div {
             class: "bg-deep-background flex flex-col p-[10px] w-[273px] rounded-[5px]",
@@ -191,7 +188,7 @@ fn SubModViewer(
                 div {
                     class: "flex gap-[15px] items-center",
                     if let Some(icon) = icon() {
-                        {ContentType::image(icon.to_string_lossy()).css("w-[50px] h-[50px] rounded-[10px]").get_element()}
+                        {ContentType::image(icon.to_string()).css("w-[50px] h-[50px] rounded-[10px]").get_element()}
                     }
                     div {
                         class: "flex flex-col gap-[10px]",

@@ -1,14 +1,14 @@
 use dioxus::prelude::*;
 
 use manganis::ImageAsset;
-use rust_lib::api::shared_resources::collection::Collection;
+use rust_lib::api::shared_resources::{collection::Collection, entry::STORAGE};
 use tailwind_fuse::*;
 
 use crate::{
     BaseComponents::{
         Alignment, Button, ButtonClass, ContentType, Contents, FillMode, Roundness, Size, Switcher,
     },
-    Pages, COLLECT,
+    Pages,
 };
 
 pub const COLLECTION_PIC: ImageAsset =
@@ -248,7 +248,7 @@ fn SuggestionPage() -> Element {
 
 #[component]
 fn CollectionsPage() -> Element {
-    let collections = COLLECT();
+    let collections = STORAGE().collections;
     rsx! {
         div { class: "flex flex-col space-x-0",
             Button {

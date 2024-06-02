@@ -8,12 +8,9 @@ pub mod side_bar;
 use dioxus::desktop::tao::dpi::PhysicalSize;
 use dioxus::desktop::WindowBuilder;
 use dioxus::html::input_data::MouseButton;
-use rust_lib::api::shared_resources::collection::{
-    Collection, CollectionId, ModLoader, ModLoaderType,
-};
+use rust_lib::api::shared_resources::collection::{CollectionId, ModLoader, ModLoaderType};
 use std::hash::{DefaultHasher, Hash, Hasher};
 use std::sync::Arc;
-use std::time::Duration;
 use tailwind_fuse::*;
 
 use dioxus::prelude::*;
@@ -256,9 +253,6 @@ impl ToString for Pages {
     }
 }
 
-pub static COLLECT: GlobalSignal<Vec<Collection>> =
-    GlobalSignal::new(|| Collection::scan().unwrap_or_default());
-
 trait ErrorToString<T> {
     fn error_to_string(&self) -> Result<&T, String>;
 }
@@ -269,21 +263,43 @@ impl<T> ErrorToString<T> for Result<T, anyhow::Error> {
     }
 }
 
+async fn stupidity() -> anyhow::Result<()> {
+    let versions = rust_lib::api::backend_exclusive::vanilla::version::get_versions().await?;
+    let version = versions.into_iter().find(|x| x.id == "1.20.1");
+    if let Some(version) = version {
+        let mut collection = entry::create_collection(
+            "weird test",
+            version,
+            ModLoader::new(ModLoaderType::Fabric, None),
+            None,
+        )
+        .await?;
+        collection
+            .add_multiple_modrinth_mod(
+                vec![
+                    "fabric-api",
+                    "sodium",
+                    "modmenu",
+                    "ferrite-core",
+                    "lazydfu",
+                    "iris",
+                    "indium",
+                ],
+                vec![],
+                None,
+            )
+            .await?;
+        collection.download_mods().await?;
+    }
+    Ok::<(), anyhow::Error>(())
+}
+
 #[component]
 fn App() -> Element {
     let error_active = use_signal(|| true);
-    spawn(async move {
-        let mut last = None;
-        loop {
-            let collections = STORAGE.collections.clone().read_owned().await.to_owned();
-            if last.as_ref() != Some(&collections) {
-                *COLLECT.write() = collections;
-            }
-            last = Some(COLLECT());
-            tokio::time::sleep(Duration::from_millis(500)).await;
-        }
+    use_future(move || async move {
+        stupidity().await.unwrap();
     });
-
     rsx! {
         div { class: "[&_*]:transform-gpu font-['GenSenRounded TW'] bg-deep-background min-h-screen min-w-full font-display leading-normal",
             {
@@ -316,47 +332,11 @@ fn App() -> Element {
 
 #[component]
 fn Layout() -> Element {
-    use_resource(move || async move {
-        let versions = rust_lib::api::backend_exclusive::vanilla::version::get_versions().await?;
-        let version = versions.into_iter().find(|x| x.id == "1.20.1");
-        if let Some(version) = version {
-            let mut collection = entry::create_collection(
-                "weird test",
-                version,
-                ModLoader::new(ModLoaderType::Fabric, None),
-                None,
-            )
-            .await?;
-            collection
-                .add_multiple_modrinth_mod(
-                    vec![
-                        "fabric-api",
-                        "sodium",
-                        "modmenu",
-                        "ferrite-core",
-                        "lazydfu",
-                        "iris",
-                        "indium",
-                    ],
-                    vec![],
-                    None,
-                )
-                .await?;
-            collection.download_mods().await?;
-        }
-        Ok::<(), anyhow::Error>(())
-    })
-    .read()
-    .as_ref()
-    .map(ErrorToString::error_to_string)
-    .transpose()
-    .throw()?;
-
     let active = use_memo(move || HISTORY().active);
 
     use_effect(move || {
         let _ = active();
-        for collection in COLLECT() {
+        for collection in STORAGE().collections {
             Pages::new_collection_page(collection.get_collection_id())
                 .apply_slide_in()
                 .unwrap();
@@ -406,7 +386,7 @@ fn Layout() -> Element {
 #[component]
 fn CollectionContainer() -> Element {
     rsx! {
-        for (name, collection) in COLLECT().into_iter().map(|x| (x.get_collection_id(), x)) {
+        for (name, collection) in STORAGE().collections.into_iter().map(|x| (x.get_collection_id(), x)) {
             if Pages::new_collection_page(collection.get_collection_id()).should_render() {
                 div {
                     class: "absolute inset-0 z-0 min-h-full min-w-full",
@@ -450,27 +430,7 @@ fn Explore() -> Element {
 
 #[component]
 fn DownloadProgress() -> Element {
-    let mut progress = use_signal(|| None);
-    use_resource(move || async move {
-        let mut last = None;
-        loop {
-            let current_progress = match DOWNLOAD_PROGRESS.get_all().await {
-                Ok(x) => x,
-                Err(x) => return Err::<(), anyhow::Error>(x),
-            };
-            if last.as_ref() != Some(&current_progress) {
-                last = Some(current_progress.clone());
-                *progress.write() = Some(current_progress);
-            }
-            tokio::time::sleep(Duration::from_millis(300)).await;
-        }
-    })
-    .read()
-    .as_ref()
-    .map(ErrorToString::error_to_string)
-    .transpose()
-    .throw()?;
-
+    let progress = use_resource(move || async move { DOWNLOAD_PROGRESS().get_all().await });
     rsx! {
         div {
             if let Some(x) = progress() {

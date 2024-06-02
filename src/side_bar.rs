@@ -1,13 +1,13 @@
 use std::{rc::Rc, time::Duration};
 
 use dioxus::prelude::*;
-use rust_lib::api::shared_resources::collection::Collection;
+use rust_lib::api::shared_resources::{collection::Collection, entry::STORAGE};
 use tailwind_fuse::tw_merge;
 
 use crate::{
     main_page::COLLECTION_PIC,
     BaseComponents::{Alignment, Button, ContentType, Roundness, Switcher},
-    Pages, ARROW_RIGHT, COLLECT, EXPLORE, HISTORY, HOME, SIDEBAR_COLLECTION, SIM_CARD,
+    Pages, ARROW_RIGHT, EXPLORE, HISTORY, HOME, SIDEBAR_COLLECTION, SIM_CARD,
 };
 
 static EXPANDED: GlobalSignal<bool> = GlobalSignal::new(|| false);
@@ -27,7 +27,7 @@ pub fn SideBar() -> Element {
         *EXPANDED.write() = !EXPANDED();
     };
 
-    let collections = COLLECT();
+    let collections = STORAGE().collections;
 
     let folded_images = rsx! {
         div { class: "transition-all",
