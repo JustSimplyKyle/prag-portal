@@ -236,6 +236,7 @@ fn SubModViewer(
 
 #[component]
 fn SelectionBar() -> Element {
+    let sender = use_signal(String::new);
     rsx! {
         div { class: "grid grid-flow-col items-stretch",
             div { class: "bg-deep-background rounded-full flex justify-start w-fit",
@@ -293,7 +294,7 @@ fn SelectionBar() -> Element {
                 }
             }
             div { class: "justify-end flex items-center space-x-[7px]",
-                SearchBar {}
+                SearchBar { sender }
                 Button {
                     roundness: Roundness::Pill,
                     string_placements: vec![

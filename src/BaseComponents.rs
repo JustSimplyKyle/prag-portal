@@ -192,9 +192,8 @@ pub fn Switch(clicked: Signal<bool>, onclick: Option<EventHandler>) -> Element {
         }
     }
 }
-
 #[component]
-pub fn SearchBar() -> Element {
+pub fn SearchBar(sender: Option<Signal<String>>) -> Element {
     let mut total_clicked = use_signal(|| false);
     let mut input_clicked = use_signal(|| false);
     let mut search = use_signal(|| String::from("搜尋"));
@@ -204,6 +203,11 @@ pub fn SearchBar() -> Element {
         }
         if input_clicked() {
             search.set(String::new());
+        }
+    });
+    use_effect(move || {
+        if let Some(mut sender) = sender {
+            sender.set(search());
         }
     });
     rsx! {

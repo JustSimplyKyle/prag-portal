@@ -3,7 +3,9 @@ use rust_lib::api::shared_resources::entry::STORAGE;
 
 use crate::{
     main_page::{CollectionBlock, ARROW_LEFT, STAR},
-    BaseComponents::{Alignment, Button, ContentType, Contents, FillMode, Roundness, Size},
+    BaseComponents::{
+        Alignment, Button, ContentType, Contents, FillMode, Roundness, SearchBar, Size,
+    },
     EXPLORE,
 };
 
@@ -18,6 +20,7 @@ pub static BOOKMARK_ADD: &str = manganis::mg!(file("./public/bookmark_add.svg"))
 #[component]
 pub fn Collections() -> Element {
     let collections = STORAGE().collections;
+    let sender = use_signal(String::new);
 
     rsx! {
         div { class: "flex flex-col space-y-[10px]",
@@ -109,22 +112,7 @@ pub fn Collections() -> Element {
                         ],
                         extended_css_class: "hover:bg-green px-[20px] h-full"
                     }
-                    Button {
-                        roundness: Roundness::Pill,
-                        fill_mode: FillMode::Fit,
-                        size: Size::Medium,
-                        string_placements: vec![
-                            Contents::new(
-                                vec![
-                                    ContentType::svg(SEARCH).css("svg-[25px]"),
-                                    ContentType::svg(ARROW_LEFT).css("svg-[20px]"),
-                                ],
-                                Alignment::Center,
-                            )
-                            .css("gap-[5px]")
-                        ],
-                        extended_css_class: "pl-[20px] pr-[10px] h-full"
-                    }
+                    SearchBar { sender }
                 }
             }
             div { class: "grid grid-flow-row grid-cols-[repeat(auto-fill,280px)] gap-[20px]",
