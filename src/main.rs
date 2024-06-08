@@ -9,6 +9,7 @@ use dioxus::desktop::tao::dpi::PhysicalSize;
 use dioxus::desktop::WindowBuilder;
 use dioxus::html::input_data::MouseButton;
 use rust_lib::api::shared_resources::collection::{CollectionId, ModLoader, ModLoaderType};
+use std::collections::BTreeMap;
 use std::hash::{DefaultHasher, Hash, Hasher};
 use std::sync::Arc;
 use tailwind_fuse::*;
@@ -17,7 +18,7 @@ use dioxus::prelude::*;
 use log::LevelFilter;
 use BaseComponents::{subModalProps, ComponentPointer, Switcher};
 
-use crate::collection_display::CollectionDisplay;
+use crate::collection_display::{CollectionDisplay, DISPLAY_BACKGROUND};
 use crate::collections::Collections;
 use crate::main_page::MainPage;
 use crate::side_bar::SideBar;
@@ -242,7 +243,7 @@ impl ToString for Pages {
             Self::MainPage => "main-page".into(),
             Self::Explore => "explore".into(),
             Self::Collections => "collections".into(),
-            Self::DownloadProgress => "progress".into(),
+            Self::DownloadProgress => "download-progress".into(),
             Self::CollectionPage(x) => {
                 let mut hasher = DefaultHasher::new();
                 x.hash(&mut hasher);
@@ -332,20 +333,18 @@ fn App() -> Element {
 
 #[component]
 fn Layout() -> Element {
-    let active = use_memo(move || HISTORY().active);
-
     use_effect(move || {
-        let _ = active();
-        for collection in STORAGE().collections {
+        let _ = HISTORY.read();
+        Pages::DownloadProgress.apply_slide_in().unwrap();
+        for collection in &STORAGE.read().collections {
             Pages::new_collection_page(collection.get_collection_id())
                 .apply_slide_in()
                 .unwrap();
         }
     });
 
-    let history = HISTORY();
+    let history = HISTORY.read();
 
-    Pages::DownloadProgress.apply_slide_in().throw()?;
     rsx! {
         div {
             class: "w-screen inline-flex self-stretch group flex overflow-hidden",
@@ -430,25 +429,58 @@ fn Explore() -> Element {
 
 #[component]
 fn DownloadProgress() -> Element {
-    let progress = use_resource(move || async move { DOWNLOAD_PROGRESS().get_all().await });
+    let download_progress = DOWNLOAD_PROGRESS.read();
+    let progress = download_progress
+        .iter()
+        .filter(|(_, x)| !x.finished())
+        .collect::<BTreeMap<_, _>>();
+    let storage = STORAGE.read();
+    let collections = &storage.collections;
+    let progress = progress.into_iter().filter_map(|(id, progress)| {
+        collections
+            .iter()
+            .find(|c| c.get_collection_id() == id.collection_id)
+            .map(|c| (c, progress))
+    });
+    let first = download_progress.first_key_value();
+    let background = storage
+        .collections
+        .iter()
+        .find(|x| first.is_some_and(|(id, _)| id.collection_id == x.get_collection_id()))
+        .map(|x| (x.picture_path.to_string_lossy().to_string(), x));
     rsx! {
         div {
-            if let Some(x) = progress() {
-                for progress in x {
-                    Button {
-                        roundness: Roundness::Pill,
-                        string_placements: vec! [
-                            ContentType::text(progress.name.to_string()).align_left(),
-                            Contents::new(
-                                vec![
-                                    ContentType::text(format!("percentages: {}",progress.percentages.to_string())),
-                                    ContentType::text(format!("speed: {}", progress.speed.unwrap_or_default().to_string())),
-                                ],
-                                Alignment::Right,
-                            ).css("flex flex-col gap-[3px]")
-                        ],
-                        fill_mode: FillMode::Fit
+            if let Some((background, collection)) = background {
+                div {
+                    class: "w-full h-[350px] p-[30px] rounded-[20px]",
+                    background: format!("linear-gradient(88deg, #0E0E0E 14.88%, rgba(14, 14, 14, 0.70) 100%), url('{}') lightgray 50% / cover no-repeat", background),
+                    div {
+                        class: "w-full grid grid-flow-col justify-stretch",
+                        {ContentType::text(&collection.display_name).css("justify-self-start text-[60px] font-black text-white").get_element()}
+                        div {
+                            class: "justify-self-end flex",
+                            {ContentType::text(format!("{:.3} MB",first.unwrap().1.speed.unwrap_or_default())).css("text-[50px] font-bold text-white").get_element()}
+                            {ContentType::hint("/s").css("text-[50px] font-bold").get_element()}
+                        }
                     }
+                }
+            }
+            for (collection,progress) in progress {
+                Button {
+                    roundness: Roundness::Pill,
+                    string_placements: vec! [
+                        ContentType::image(collection.picture_path.to_string_lossy().to_string()).css("bg-cover w-[80px] h-[80px] rounded-[10px]").align_left(),
+                        ContentType::text(progress.name.to_string()).align_left(),
+                        Contents::new(
+                            vec![
+                                ContentType::text(format!("percentages: {}",progress.percentages.to_string())),
+                                ContentType::text(format!("speed: {}", progress.speed.unwrap_or_default().to_string())),
+                            ],
+                            Alignment::Right,
+                        ).css("flex flex-col gap-[3px]")
+                    ],
+                    extended_css_class: "rounded-[5px]",
+                    fill_mode: FillMode::Fill
                 }
             }
         }

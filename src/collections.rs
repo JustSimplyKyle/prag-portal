@@ -2,7 +2,7 @@ use dioxus::prelude::*;
 use rust_lib::api::shared_resources::entry::STORAGE;
 
 use crate::{
-    main_page::{CollectionBlock, ARROW_LEFT, COLLECTION_PIC, STAR},
+    main_page::{CollectionBlock, ARROW_LEFT, STAR},
     BaseComponents::{Alignment, Button, ContentType, Contents, FillMode, Roundness, Size},
     EXPLORE,
 };
@@ -129,7 +129,7 @@ pub fn Collections() -> Element {
             }
             div { class: "grid grid-flow-row grid-cols-[repeat(auto-fill,280px)] gap-[20px]",
                 for collection in collections {
-                    CollectionBlock { collection, extended_class: "rounded-[20px]", picture: COLLECTION_PIC }
+                    CollectionBlock { collection, extended_class: "rounded-[20px]" }
                 }
             }
         }

@@ -1907,14 +1907,6 @@ input {
   z-index: 20;
 }
 
-.z-30 {
-  z-index: 30;
-}
-
-.z-40 {
-  z-index: 40;
-}
-
 .z-50 {
   z-index: 50;
 }
@@ -1993,6 +1985,10 @@ input {
   height: 30px;
 }
 
+.h-\[350px\] {
+  height: 350px;
+}
+
 .h-\[450px\] {
   height: 450px;
 }
@@ -2007,6 +2003,10 @@ input {
 
 .h-\[55px\] {
   height: 55px;
+}
+
+.h-\[80px\] {
+  height: 80px;
 }
 
 .h-\[900px\] {
@@ -2092,6 +2092,10 @@ input {
 
 .w-\[50px\] {
   width: 50px;
+}
+
+.w-\[80px\] {
+  width: 80px;
 }
 
 .w-fit {
@@ -2740,6 +2744,10 @@ input {
   filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
 }
 
+.filter {
+  filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
+}
+
 .transition-all {
   transition-property: all;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
@@ -2828,6 +2836,16 @@ input {
 .text-\[35px\] {
   --font-size-px: 35;
   font-size: 35px;
+}
+
+.text-\[50px\] {
+  --font-size-px: 50;
+  font-size: 50px;
+}
+
+.text-\[60px\] {
+  --font-size-px: 60;
+  font-size: 60px;
 }
 
 .text-\[80px\] {

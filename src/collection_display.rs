@@ -10,7 +10,6 @@ use std::{
 
 use crate::BaseComponents::{SearchBar, Switch};
 use crate::{
-    main_page::COLLECTION_PIC,
     BaseComponents::{Button, ContentType, FillMode, Roundness, Switcher},
     EXPLORE, HISTORY,
 };
@@ -109,7 +108,7 @@ pub fn CollectionDisplay(collection: ReadOnlySignal<Collection>) -> Element {
                     div { class: "flex flex-col space-y-[3px] w-full max-w-[250px]",
                         img {
                             class: "w-full h-[250px] rounded-t-[20px] rounded-b-[5px] object-cover",
-                            src: COLLECTION_PIC.to_string()
+                            src: collection.read().picture_path.to_string_lossy().to_string(),
                         }
                         div { class: "flex space-x-[3px] min-w-full",
                             Button {
@@ -157,19 +156,19 @@ pub fn CollectionDisplay(collection: ReadOnlySignal<Collection>) -> Element {
 
 #[component]
 fn ModViewer(collection: ReadOnlySignal<Collection>) -> Element {
-    let collections = collection();
-    if let Some(mut mods) = collections.mod_controller.map(|x| x.manager.mods) {
-        mods.sort_unstable_by_key(|x| x.name.clone());
-        rsx! {
-            div {
-                class: "grid grid-flow-row grid-cols-[repeat(auto-fill,273px)] gap-[3px]",
-                for x in mods {
-                    SubModViewer {collection, mods: x}
-                }
+    let mods = use_memo(move || {
+        collection().mod_controller.map(|mut x| {
+            x.manager.mods.sort_unstable_by_key(|x| x.name.clone());
+            x.manager.mods
+        })
+    });
+    rsx! {
+        div {
+            class: "grid grid-flow-row grid-cols-[repeat(auto-fill,273px)] gap-[3px]",
+            for x in mods().into_iter().flatten() {
+                SubModViewer {collection, mods: x}
             }
         }
-    } else {
-        None
     }
 }
 

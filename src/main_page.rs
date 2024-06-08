@@ -11,8 +11,8 @@ use crate::{
     Pages,
 };
 
-pub const COLLECTION_PIC: ImageAsset =
-    manganis::mg!(image("./public/pic1.png").format(ImageType::Avif).preload());
+// pub const COLLECTION_PIC: ImageAsset =
+//     manganis::mg!(image("./public/pic1.png").format(ImageType::Avif).preload());
 pub const BLOCK: &str = manganis::mg!(file("./public/block.svg"));
 pub const EXPAND_CONTENT: &str = manganis::mg!(file("./public/expand_content.svg"));
 pub const ICON: &str = manganis::mg!(file("./public/icon.svg"));
@@ -35,7 +35,6 @@ pub fn MainPage() -> Element {
 #[component]
 pub fn CollectionBlock(
     collection: Collection,
-    picture: ImageAsset,
     #[props(default = true)] gradient: bool,
     #[props(extends=GlobalAttributes)] attributes: Vec<Attribute>,
     #[props(default)] extended_class: String,
@@ -50,6 +49,7 @@ pub fn CollectionBlock(
     for x in roundness {
         img_class = tw_merge!(img_class, x);
     }
+    let picture_path = collection.picture_path.to_string_lossy().to_string();
     rsx! {
         div {
             button {
@@ -58,7 +58,7 @@ pub fn CollectionBlock(
                     Pages::new_collection_page(collection.get_collection_id()).switch_active_to_self();
                 },
                 ..attributes,
-                img { class: img_class, src: picture.to_string() }
+                img { class: img_class, src: picture_path }
                 if gradient {
                     div { class: "absolute inset-0 bg-gradient-to-t from-deep-background to-23%" }
                 }
@@ -278,7 +278,7 @@ fn CollectionsPage() -> Element {
             div { class: ButtonClass::builder().roundness(Roundness::Bottom).with_class("min-w-screen p-0"),
                 div { class: "flex space-x-[3px] overflow-scroll",
                     for collection in collections {
-                        CollectionBlock { collection, picture: COLLECTION_PIC }
+                        CollectionBlock { collection }
                     }
                 }
             }
