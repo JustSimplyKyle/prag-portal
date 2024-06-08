@@ -1,13 +1,12 @@
 use std::{rc::Rc, time::Duration};
 
 use dioxus::prelude::*;
-use rust_lib::api::shared_resources::collection::Collection;
+use rust_lib::api::shared_resources::{collection::Collection, entry::STORAGE};
 use tailwind_fuse::tw_merge;
 
 use crate::{
-    main_page::COLLECTION_PIC,
     BaseComponents::{Alignment, Button, ContentType, Roundness, Switcher},
-    Pages, ARROW_RIGHT, COLLECT, EXPLORE, HISTORY, HOME, SIDEBAR_COLLECTION, SIM_CARD,
+    Pages, ARROW_RIGHT, EXPLORE, HISTORY, HOME, SIDEBAR_COLLECTION, SIM_CARD,
 };
 
 static EXPANDED: GlobalSignal<bool> = GlobalSignal::new(|| false);
@@ -27,25 +26,21 @@ pub fn SideBar() -> Element {
         *EXPANDED.write() = !EXPANDED();
     };
 
-    let collections = COLLECT();
+    let collections = STORAGE().collections;
+
+    let collection_preview = collections.iter().take(3).collect::<Vec<_>>();
 
     let folded_images = rsx! {
         div { class: "transition-all",
             {ContentType::svg(HOME).css("hidden group-aria-expanded:block").get_element()},
             div { class: "flex items-center space-x-0",
                 div { class: "flex space-x-[-20px]",
-                    {ContentType::image(COLLECTION_PIC.to_string())
-                        .css(
-                            "z-50 w-10 h-10 object-cover shrink-0 inline-flex justify-center items-center rounded-full border-2 border-zinc-900 group-aria-expanded:hidden"
-                        ).get_element()},
-                    {ContentType::image(COLLECTION_PIC.to_string())
-                        .css(
-                            "z-40 w-10 h-10 object-cover shrink-0 inline-flex justify-center items-center rounded-full border-2 border-zinc-900 group-aria-expanded:hidden"
-                        ).get_element()},
-                    {ContentType::image(COLLECTION_PIC.to_string())
-                        .css(
-                            "z-30 w-10 h-10 object-cover shrink-0 inline-flex justify-center items-center rounded-full border-2 border-zinc-900 group-aria-expanded:hidden"
-                        ).get_element()}
+                    for x in collection_preview {
+                        {ContentType::image(x.picture_path.to_string_lossy().to_string())
+                            .css(
+                                "z-50 w-10 h-10 object-cover shrink-0 inline-flex justify-center items-center rounded-full border-2 border-zinc-900 group-aria-expanded:hidden"
+                            ).get_element()}
+                    }
                 }
                 {
                     ContentType::svg(ARROW_RIGHT).css("svg-[25px] group-aria-expanded:hidden").get_element()
@@ -100,7 +95,7 @@ pub fn SideBar() -> Element {
                 div { class: "flex flex-col flex-nowrap overflow-scroll max-h-[451px] space-y-1",
                     Button { roundness: Roundness::Top, string_placements: folded_images, extended_css_class: "bg-background" }
                     for collection in collections {
-                        SidebarCollectionBlock { collection: collection }
+                        SidebarCollectionBlock { collection }
                     }
                 }
                 // bottom
@@ -124,7 +119,7 @@ pub fn SideBar() -> Element {
                         onclick: move |()| {
                             let history = HISTORY();
                             let prev = history.prev_peek();
-                            if HISTORY().active() == &Pages::DownloadProgress {
+                            if history.active() == &Pages::DownloadProgress {
                                 if let Some(prev) = prev {
                                     prev.switch_active_to_self();
                                 }
@@ -141,9 +136,10 @@ pub fn SideBar() -> Element {
 
 #[component]
 fn SidebarCollectionBlock(collection: Collection) -> Element {
+    let picture_path = collection.picture_path.to_string_lossy().to_string();
     let img_block = rsx! {
         div { class: "relative transition-all container w-[50px] h-[50px] group-aria-expanded:w-20 group-aria-expanded:h-20 border-2 border-[#2E2E2E] rounded-[15px] group-aria-expanded:rounded-[5px]",
-            { ContentType::image(COLLECTION_PIC.to_string())
+            { ContentType::image(&picture_path)
             .css("absolute inset-0 transition-all w-full h-full object-cover inline-flex items-center rounded-[15px] group-aria-expanded:rounded-[5px]",)
             .get_element() },
             div { class: "absolute inset-x-0 bottom-0 w-3 h-3 bg-[#CCE246] rounded-full" }
@@ -160,7 +156,7 @@ fn SidebarCollectionBlock(collection: Collection) -> Element {
             ],
             signal: Rc::new(Pages::new_collection_page(signal_check)) as Rc<dyn Switcher>,
             focus_color_change: false,
-            background_image: darken_sidebar_background(COLLECTION_PIC),
+            background_image: darken_sidebar_background(picture_path),
             background_size: "cover",
             extended_css_class: "bg-background object-cover transition-all delay-[25ms] group-aria-expanded:w-20 group-aria-expanded:min-h-20 group-aria-expanded:p-0"
         }

@@ -5,17 +5,13 @@ use rust_lib::api::{
 };
 use std::{
     hash::{DefaultHasher, Hash, Hasher},
-    ops::Deref,
     rc::Rc,
-    time::{Duration, Instant},
 };
-use tokio::time::interval;
 
 use crate::BaseComponents::{SearchBar, Switch};
 use crate::{
-    main_page::COLLECTION_PIC,
     BaseComponents::{Button, ContentType, FillMode, Roundness, Switcher},
-    Pages, EXPLORE, HISTORY,
+    EXPLORE, HISTORY,
 };
 
 pub static DISPLAY_BACKGROUND: ImageAsset = manganis::mg!(image("./public/cool_image.png")
@@ -112,7 +108,7 @@ pub fn CollectionDisplay(collection: ReadOnlySignal<Collection>) -> Element {
                     div { class: "flex flex-col space-y-[3px] w-full max-w-[250px]",
                         img {
                             class: "w-full h-[250px] rounded-t-[20px] rounded-b-[5px] object-cover",
-                            src: COLLECTION_PIC.to_string()
+                            src: collection.read().picture_path.to_string_lossy().to_string(),
                         }
                         div { class: "flex space-x-[3px] min-w-full",
                             Button {
@@ -160,19 +156,19 @@ pub fn CollectionDisplay(collection: ReadOnlySignal<Collection>) -> Element {
 
 #[component]
 fn ModViewer(collection: ReadOnlySignal<Collection>) -> Element {
-    let collections = collection();
-    if let Some(mut mods) = collections.mod_controller.map(|x| x.manager.mods) {
-        mods.sort_unstable_by_key(|x| x.name.clone());
-        rsx! {
-            div {
-                class: "grid grid-flow-row grid-cols-[repeat(auto-fill,273px)] gap-[3px]",
-                for x in mods {
-                    SubModViewer {collection, mods: x}
-                }
+    let mods = use_memo(move || {
+        collection().mod_controller.map(|mut x| {
+            x.manager.mods.sort_unstable_by_key(|x| x.name.clone());
+            x.manager.mods
+        })
+    });
+    rsx! {
+        div {
+            class: "grid grid-flow-row grid-cols-[repeat(auto-fill,273px)] gap-[3px]",
+            for x in mods().into_iter().flatten() {
+                SubModViewer {collection, mods: x}
             }
         }
-    } else {
-        None
     }
 }
 
@@ -182,7 +178,7 @@ fn SubModViewer(
     mods: ReadOnlySignal<ModMetadata>,
 ) -> Element {
     let clicked = use_signal(|| false);
-    let icon = use_memo(move || mods().get_icon_path());
+    let icon = use_memo(move || mods().icon_url);
     rsx! {
         div {
             class: "bg-deep-background flex flex-col p-[10px] w-[273px] rounded-[5px]",
@@ -191,7 +187,7 @@ fn SubModViewer(
                 div {
                     class: "flex gap-[15px] items-center",
                     if let Some(icon) = icon() {
-                        {ContentType::image(icon.to_string_lossy()).css("w-[50px] h-[50px] rounded-[10px]").get_element()}
+                        {ContentType::image(icon.to_string()).css("w-[50px] h-[50px] rounded-[10px]").get_element()}
                     }
                     div {
                         class: "flex flex-col gap-[10px]",
@@ -240,6 +236,7 @@ fn SubModViewer(
 
 #[component]
 fn SelectionBar() -> Element {
+    let sender = use_signal(String::new);
     rsx! {
         div { class: "grid grid-flow-col items-stretch",
             div { class: "bg-deep-background rounded-full flex justify-start w-fit",
@@ -297,7 +294,7 @@ fn SelectionBar() -> Element {
                 }
             }
             div { class: "justify-end flex items-center space-x-[7px]",
-                SearchBar {}
+                SearchBar { sender }
                 Button {
                     roundness: Roundness::Pill,
                     string_placements: vec![

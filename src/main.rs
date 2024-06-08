@@ -8,19 +8,17 @@ pub mod side_bar;
 use dioxus::desktop::tao::dpi::PhysicalSize;
 use dioxus::desktop::WindowBuilder;
 use dioxus::html::input_data::MouseButton;
-use rust_lib::api::shared_resources::collection::{
-    Collection, CollectionId, ModLoader, ModLoaderType,
-};
+use rust_lib::api::shared_resources::collection::{CollectionId, ModLoader, ModLoaderType};
+use std::collections::BTreeMap;
 use std::hash::{DefaultHasher, Hash, Hasher};
 use std::sync::Arc;
-use std::time::Duration;
 use tailwind_fuse::*;
 
 use dioxus::prelude::*;
 use log::LevelFilter;
 use BaseComponents::{subModalProps, ComponentPointer, Switcher};
 
-use crate::collection_display::CollectionDisplay;
+use crate::collection_display::{CollectionDisplay, DISPLAY_BACKGROUND};
 use crate::collections::Collections;
 use crate::main_page::MainPage;
 use crate::side_bar::SideBar;
@@ -245,7 +243,7 @@ impl ToString for Pages {
             Self::MainPage => "main-page".into(),
             Self::Explore => "explore".into(),
             Self::Collections => "collections".into(),
-            Self::DownloadProgress => "progress".into(),
+            Self::DownloadProgress => "download-progress".into(),
             Self::CollectionPage(x) => {
                 let mut hasher = DefaultHasher::new();
                 x.hash(&mut hasher);
@@ -255,9 +253,6 @@ impl ToString for Pages {
         }
     }
 }
-
-pub static COLLECT: GlobalSignal<Vec<Collection>> =
-    GlobalSignal::new(|| Collection::scan().unwrap_or_default());
 
 trait ErrorToString<T> {
     fn error_to_string(&self) -> Result<&T, String>;
@@ -269,21 +264,43 @@ impl<T> ErrorToString<T> for Result<T, anyhow::Error> {
     }
 }
 
+async fn stupidity() -> anyhow::Result<()> {
+    let versions = rust_lib::api::backend_exclusive::vanilla::version::get_versions().await?;
+    let version = versions.into_iter().find(|x| x.id == "1.20.1");
+    if let Some(version) = version {
+        let mut collection = entry::create_collection(
+            "weird test",
+            version,
+            ModLoader::new(ModLoaderType::Fabric, None),
+            None,
+        )
+        .await?;
+        collection
+            .add_multiple_modrinth_mod(
+                vec![
+                    "fabric-api",
+                    "sodium",
+                    "modmenu",
+                    "ferrite-core",
+                    "lazydfu",
+                    "iris",
+                    "indium",
+                ],
+                vec![],
+                None,
+            )
+            .await?;
+        collection.download_mods().await?;
+    }
+    Ok::<(), anyhow::Error>(())
+}
+
 #[component]
 fn App() -> Element {
     let error_active = use_signal(|| true);
-    spawn(async move {
-        let mut last = None;
-        loop {
-            let collections = STORAGE.collections.clone().read_owned().await.to_owned();
-            if last.as_ref() != Some(&collections) {
-                *COLLECT.write() = collections;
-            }
-            last = Some(COLLECT());
-            tokio::time::sleep(Duration::from_millis(500)).await;
-        }
+    use_future(move || async move {
+        stupidity().await.unwrap();
     });
-
     rsx! {
         div { class: "[&_*]:transform-gpu font-['GenSenRounded TW'] bg-deep-background min-h-screen min-w-full font-display leading-normal",
             {
@@ -316,56 +333,18 @@ fn App() -> Element {
 
 #[component]
 fn Layout() -> Element {
-    use_resource(move || async move {
-        let versions = rust_lib::api::backend_exclusive::vanilla::version::get_versions().await?;
-        let version = versions.into_iter().find(|x| x.id == "1.20.1");
-        if let Some(version) = version {
-            let mut collection = entry::create_collection(
-                "weird test",
-                version,
-                ModLoader::new(ModLoaderType::Fabric, None),
-                None,
-            )
-            .await?;
-            collection
-                .add_multiple_modrinth_mod(
-                    vec![
-                        "fabric-api",
-                        "sodium",
-                        "modmenu",
-                        "ferrite-core",
-                        "lazydfu",
-                        "iris",
-                        "indium",
-                    ],
-                    vec![],
-                    None,
-                )
-                .await?;
-            collection.download_mods().await?;
-        }
-        Ok::<(), anyhow::Error>(())
-    })
-    .read()
-    .as_ref()
-    .map(ErrorToString::error_to_string)
-    .transpose()
-    .throw()?;
-
-    let active = use_memo(move || HISTORY().active);
-
     use_effect(move || {
-        let _ = active();
-        for collection in COLLECT() {
+        let _ = HISTORY.read();
+        Pages::DownloadProgress.apply_slide_in().unwrap();
+        for collection in &STORAGE.read().collections {
             Pages::new_collection_page(collection.get_collection_id())
                 .apply_slide_in()
                 .unwrap();
         }
     });
 
-    let history = HISTORY();
+    let history = HISTORY.read();
 
-    Pages::DownloadProgress.apply_slide_in().throw()?;
     rsx! {
         div {
             class: "w-screen inline-flex self-stretch group flex overflow-hidden",
@@ -406,7 +385,7 @@ fn Layout() -> Element {
 #[component]
 fn CollectionContainer() -> Element {
     rsx! {
-        for (name, collection) in COLLECT().into_iter().map(|x| (x.get_collection_id(), x)) {
+        for (name, collection) in STORAGE().collections.into_iter().map(|x| (x.get_collection_id(), x)) {
             if Pages::new_collection_page(collection.get_collection_id()).should_render() {
                 div {
                     class: "absolute inset-0 z-0 min-h-full min-w-full",
@@ -450,45 +429,58 @@ fn Explore() -> Element {
 
 #[component]
 fn DownloadProgress() -> Element {
-    let mut progress = use_signal(|| None);
-    use_resource(move || async move {
-        let mut last = None;
-        loop {
-            let current_progress = match DOWNLOAD_PROGRESS.get_all().await {
-                Ok(x) => x,
-                Err(x) => return Err::<(), anyhow::Error>(x),
-            };
-            if last.as_ref() != Some(&current_progress) {
-                last = Some(current_progress.clone());
-                *progress.write() = Some(current_progress);
-            }
-            tokio::time::sleep(Duration::from_millis(300)).await;
-        }
-    })
-    .read()
-    .as_ref()
-    .map(ErrorToString::error_to_string)
-    .transpose()
-    .throw()?;
-
+    let download_progress = DOWNLOAD_PROGRESS.read();
+    let progress = download_progress
+        .iter()
+        .filter(|(_, x)| !x.finished())
+        .collect::<BTreeMap<_, _>>();
+    let storage = STORAGE.read();
+    let collections = &storage.collections;
+    let progress = progress.into_iter().filter_map(|(id, progress)| {
+        collections
+            .iter()
+            .find(|c| c.get_collection_id() == id.collection_id)
+            .map(|c| (c, progress))
+    });
+    let first = download_progress.first_key_value();
+    let background = storage
+        .collections
+        .iter()
+        .find(|x| first.is_some_and(|(id, _)| id.collection_id == x.get_collection_id()))
+        .map(|x| (x.picture_path.to_string_lossy().to_string(), x));
     rsx! {
         div {
-            if let Some(x) = progress() {
-                for progress in x {
-                    Button {
-                        roundness: Roundness::Pill,
-                        string_placements: vec! [
-                            ContentType::text(progress.name.to_string()).align_left(),
-                            Contents::new(
-                                vec![
-                                    ContentType::text(format!("percentages: {}",progress.percentages.to_string())),
-                                    ContentType::text(format!("speed: {}", progress.speed.unwrap_or_default().to_string())),
-                                ],
-                                Alignment::Right,
-                            ).css("flex flex-col gap-[3px]")
-                        ],
-                        fill_mode: FillMode::Fit
+            if let Some((background, collection)) = background {
+                div {
+                    class: "w-full h-[350px] p-[30px] rounded-[20px]",
+                    background: format!("linear-gradient(88deg, #0E0E0E 14.88%, rgba(14, 14, 14, 0.70) 100%), url('{}') lightgray 50% / cover no-repeat", background),
+                    div {
+                        class: "w-full grid grid-flow-col justify-stretch",
+                        {ContentType::text(&collection.display_name).css("justify-self-start text-[60px] font-black text-white").get_element()}
+                        div {
+                            class: "justify-self-end flex",
+                            {ContentType::text(format!("{:.3} MB",first.unwrap().1.speed.unwrap_or_default())).css("text-[50px] font-bold text-white").get_element()}
+                            {ContentType::hint("/s").css("text-[50px] font-bold").get_element()}
+                        }
                     }
+                }
+            }
+            for (collection,progress) in progress {
+                Button {
+                    roundness: Roundness::Pill,
+                    string_placements: vec! [
+                        ContentType::image(collection.picture_path.to_string_lossy().to_string()).css("bg-cover w-[80px] h-[80px] rounded-[10px]").align_left(),
+                        ContentType::text(progress.name.to_string()).align_left(),
+                        Contents::new(
+                            vec![
+                                ContentType::text(format!("percentages: {}",progress.percentages.to_string())),
+                                ContentType::text(format!("speed: {}", progress.speed.unwrap_or_default().to_string())),
+                            ],
+                            Alignment::Right,
+                        ).css("flex flex-col gap-[3px]")
+                    ],
+                    extended_css_class: "rounded-[5px]",
+                    fill_mode: FillMode::Fill
                 }
             }
         }
