@@ -2,28 +2,26 @@ use std::{rc::Rc, time::Duration};
 
 use dioxus::prelude::*;
 use rust_lib::api::shared_resources::{collection::Collection, entry::STORAGE};
-use tailwind_fuse::tw_merge;
 
 use crate::{
-    BaseComponents::{Alignment, Button, ContentType, Roundness, Switcher},
+    BaseComponents::{Button, ContentType, Roundness, Switcher},
     Pages, ARROW_RIGHT, EXPLORE, HISTORY, HOME, SIDEBAR_COLLECTION, SIM_CARD,
 };
 
-static EXPANDED: GlobalSignal<bool> = GlobalSignal::new(|| false);
-
 #[component]
 pub fn SideBar() -> Element {
+    let mut expanded = use_signal(|| false);
     let delayed_expanded = use_resource(move || async move {
-        if EXPANDED() {
+        if expanded() {
             tokio::time::sleep(Duration::from_millis(100)).await;
         } else {
             // tokio::time::sleep(Duration::from_millis(100)).await;
         }
-        EXPANDED()
+        expanded()
     });
     let onclick = move |()| {
         Pages::Collections.switch_active_to_self();
-        *EXPANDED.write() = !EXPANDED();
+        expanded.toggle();
     };
 
     let collections = STORAGE().collections;
@@ -31,31 +29,34 @@ pub fn SideBar() -> Element {
     let collection_preview = collections.iter().take(3).collect::<Vec<_>>();
 
     let folded_images = rsx! {
-        div { class: "transition-all",
-            {ContentType::svg(HOME).css("hidden group-aria-expanded:block").get_element()},
-            div { class: "flex items-center space-x-0",
-                div { class: "flex space-x-[-20px]",
-                    for x in collection_preview {
-                        {ContentType::image(x.picture_path.to_string_lossy().to_string())
-                            .css(
-                                "z-50 w-10 h-10 object-cover shrink-0 inline-flex justify-center items-center rounded-full border-2 border-zinc-900 group-aria-expanded:hidden"
-                            ).get_element()}
+        div {
+            class: "grid grid-flow-col justify-stretch items-center",
+            div { class: "justify-self-start transition-all",
+                {ContentType::svg(HOME).css("hidden group-aria-expanded:block")},
+                div { class: "flex items-center space-x-0",
+                    div { class: "flex space-x-[-20px]",
+                        for x in collection_preview {
+                            {ContentType::image(x.picture_path.to_string_lossy().to_string())
+                                .css(
+                                    "z-50 w-10 h-10 object-cover shrink-0 inline-flex justify-center items-center rounded-full border-2 border-zinc-900 group-aria-expanded:hidden"
+                                )}
+                        }
+                    }
+                    {
+                        ContentType::svg(ARROW_RIGHT).css("svg-[25px] group-aria-expanded:hidden")
                     }
                 }
-                {
-                    ContentType::svg(ARROW_RIGHT).css("svg-[25px] group-aria-expanded:hidden").get_element()
-                }
             }
-        }
-        div { class: tw_merge!(Alignment::Right.get_alignment_class(), "group-aria-busy:hidden"),
-            {ContentType::text("我的錦集").css("text-lime-300").get_element()}
+            div { class: "justify-self-end group-aria-busy:hidden",
+                {ContentType::text("我的錦集").css("text-lime-300")}
+            }
         }
     };
     rsx! {
         div { class: "flex flex-col place-content-start mx-5",
             div {
                 class: "w-[300px] space-y-5 transition-all ease-linear duration-500 aria-expanded:w-[80px] group",
-                aria_expanded: !EXPANDED(),
+                aria_expanded: !expanded(),
                 aria_busy: !delayed_expanded().unwrap_or(false),
                 // top
                 div { class: "flex flex-col space-y-1",
