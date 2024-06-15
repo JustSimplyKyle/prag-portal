@@ -16,9 +16,7 @@ use crate::{
 pub const BLOCK: &str = manganis::mg!(file("./public/block.svg"));
 pub const EXPAND_CONTENT: &str = manganis::mg!(file("./public/expand_content.svg"));
 pub const ICON: &str = manganis::mg!(file("./public/icon.svg"));
-pub const IMG: ImageAsset = manganis::mg!(image("./public/project.png")
-    .format(ImageType::Avif)
-    .preload());
+pub const IMG: ImageAsset = manganis::mg!(image("./public/project.png").preload());
 pub const STAR: &str = manganis::mg!(file("./public/award_star.svg"));
 pub const ARROW_LEFT: &str = manganis::mg!(file("./public/keyboard_arrow_left.svg"));
 pub const ARROW_RIGHT: &str = manganis::mg!(file("./public/keyboard_arrow_right.svg"));

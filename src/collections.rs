@@ -2,7 +2,7 @@ use dioxus::prelude::*;
 use rust_lib::api::shared_resources::entry::STORAGE;
 
 use crate::{
-    main_page::{CollectionBlock, ARROW_LEFT, STAR},
+    main_page::{CollectionBlock, STAR},
     BaseComponents::{
         Alignment, Button, ContentType, Contents, FillMode, Roundness, SearchBar, Size,
     },

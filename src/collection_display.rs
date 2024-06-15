@@ -14,9 +14,8 @@ use crate::{
     EXPLORE, HISTORY,
 };
 
-pub static DISPLAY_BACKGROUND: ImageAsset = manganis::mg!(image("./public/cool_image.png")
-    .format(ImageType::Avif)
-    .preload());
+pub static DISPLAY_BACKGROUND: ImageAsset =
+    manganis::mg!(image("./public/cool_image.png").preload());
 
 pub static GAME_CONTROLLER: &str = manganis::mg!(file("./public/stadia_controller.svg"));
 pub static UNARCHIVE: &str = manganis::mg!(file("./public/unarchive.svg"));
