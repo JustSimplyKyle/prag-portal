@@ -8,9 +8,14 @@ pub mod side_bar;
 use dioxus::desktop::tao::dpi::PhysicalSize;
 use dioxus::desktop::WindowBuilder;
 use dioxus::html::input_data::MouseButton;
+use manganis::ImageAsset;
+use rust_lib::api::backend_exclusive::vanilla::version::VersionMetadata;
 use rust_lib::api::shared_resources::collection::{CollectionId, ModLoader, ModLoaderType};
+use std::any::Any;
 use std::collections::BTreeMap;
+use std::fmt::Display;
 use std::hash::{DefaultHasher, Hash, Hasher};
+use std::path::PathBuf;
 use std::sync::Arc;
 use tailwind_fuse::*;
 
@@ -18,17 +23,19 @@ use dioxus::prelude::*;
 use log::LevelFilter;
 use BaseComponents::{subModalProps, ComponentPointer, Switcher};
 
-use crate::collection_display::{CollectionDisplay, DISPLAY_BACKGROUND};
+use crate::collection_display::CollectionDisplay;
 use crate::collections::Collections;
 use crate::main_page::MainPage;
 use crate::side_bar::SideBar;
 use crate::BaseComponents::{Alignment, Button, ContentType, Contents, FillMode, Modal, Roundness};
 
+pub const COLLECTION_PIC: ImageAsset = manganis::mg!(image("./public/pic1.png").preload());
 pub const HOME: &str = manganis::mg!(file("./public/home.svg"));
 pub const EXPLORE: &str = manganis::mg!(file("./public/explore.svg"));
 pub const SIDEBAR_COLLECTION: &str = manganis::mg!(file("./public/collections.svg"));
 pub const ARROW_RIGHT: &str = manganis::mg!(file("./public/keyboard_arrow_right.svg"));
 pub const SIM_CARD: &str = manganis::mg!(file("./public/sim_card_download.svg"));
+pub const DRAG_INDICATOR: &str = manganis::mg!(file("./public/drag_indicator.svg"));
 pub const TAILWIND_STR_: &str = manganis::mg!(file("./public/tailwind.css"));
 
 /// `(Pages)`: Current active page
@@ -37,14 +44,32 @@ static HISTORY: GlobalSignal<History> = GlobalSignal::new(|| History::new(Pages:
 pub static TOP_LEVEL_COMPONENT: GlobalSignal<Vec<ComponentPointer<subModalProps>>> =
     GlobalSignal::new(Vec::new);
 
+/// `History` is used to keep track of the navigation history in the application.
+/// It contains the following fields:
+/// * `active`: The current active page.
+/// * `history`: A vector of pages that have been visited.
+/// * `prev_steps`: The number of steps taken back in the history.
+/// Represents a browsing history.
 #[derive(PartialEq, Eq, Clone, Debug)]
 pub struct History {
+    /// The currently active page.
     active: Pages,
+    /// The history of visited pages.
     history: Vec<Pages>,
+    /// The number of previous steps taken.
     prev_steps: usize,
 }
 
 impl History {
+    /// Creates a new `History` instance with the given page as the active page.
+    ///
+    /// # Arguments
+    ///
+    /// * `page` - The initial page to start the history with.
+    ///
+    /// # Returns
+    ///
+    /// A new `History` instance.
     pub fn new(page: Pages) -> Self {
         Self {
             active: page.clone(),
@@ -71,7 +96,7 @@ impl History {
         if let Some(x) = self.history.iter().rev().nth(self.prev_steps) {
             self.focus_without_history(x.clone());
         } else {
-            self.prev_steps -= 1;
+            self.prev_steps = self.prev_steps.saturating_sub(1);
         }
     }
 
@@ -126,8 +151,7 @@ pub enum Pages {
 
 impl Pages {
     fn new_collection_page(s: CollectionId) -> Self {
-        let s = s.0;
-        Self::CollectionPage(s.into())
+        Self::CollectionPage(s.0.into())
     }
 }
 
@@ -139,7 +163,7 @@ impl Switcher for Pages {
     }
 
     fn compare(&self) -> bool {
-        HISTORY().active() == self
+        HISTORY.read().active() == self
     }
 
     fn switch_active_to_self(&self) {
@@ -153,7 +177,7 @@ impl Pages {
     }
 
     pub fn should_render(&self) -> bool {
-        HISTORY().active() == self || HISTORY().prev_peek() == Some(self)
+        HISTORY.read().active() == self || HISTORY.read().prev_peek() == Some(self)
     }
 
     /// Applies slide-in animations to HTML elements based on data attributes.
@@ -263,43 +287,44 @@ impl<T> ErrorToString<T> for Result<T, anyhow::Error> {
         self.as_ref().map_err(|x| format!("{x:#?}"))
     }
 }
-
-async fn stupidity() -> anyhow::Result<()> {
-    let versions = rust_lib::api::backend_exclusive::vanilla::version::get_versions().await?;
-    let version = versions.into_iter().find(|x| x.id == "1.20.1");
-    if let Some(version) = version {
-        let mut collection = entry::create_collection(
-            "weird test",
-            version,
-            ModLoader::new(ModLoaderType::Fabric, None),
+pub async fn collection_builder(
+    picture_path: impl Into<Option<PathBuf>>,
+    version_id: impl Into<String>,
+) -> anyhow::Result<()> {
+    let version = VersionMetadata::from_id(&version_id.into()).await?;
+    let mut collection = entry::create_collection(
+        "weird test",
+        picture_path
+            .into()
+            .unwrap_or_else(|| COLLECTION_PIC.path().into()),
+        version,
+        ModLoader::new(ModLoaderType::Fabric, None),
+        None,
+    )
+    .await?;
+    collection
+        .add_multiple_modrinth_mod(
+            vec![
+                "fabric-api",
+                "sodium",
+                "modmenu",
+                "ferrite-core",
+                "lazydfu",
+                "iris",
+                "indium",
+            ],
+            vec![],
             None,
         )
         .await?;
-        collection
-            .add_multiple_modrinth_mod(
-                vec![
-                    "fabric-api",
-                    "sodium",
-                    "modmenu",
-                    "ferrite-core",
-                    "lazydfu",
-                    "iris",
-                    "indium",
-                ],
-                vec![],
-                None,
-            )
-            .await?;
-        collection.download_mods().await?;
-    }
-    Ok::<(), anyhow::Error>(())
+    collection.download_mods().await
 }
 
 #[component]
 fn App() -> Element {
     let error_active = use_signal(|| true);
     use_future(move || async move {
-        stupidity().await.unwrap();
+        collection_builder(None, "1.20.1").await.unwrap();
     });
     rsx! {
         div { class: "[&_*]:transform-gpu font-['GenSenRounded TW'] bg-deep-background min-h-screen min-w-full font-display leading-normal",
@@ -430,37 +455,38 @@ fn Explore() -> Element {
 #[component]
 fn DownloadProgress() -> Element {
     let download_progress = DOWNLOAD_PROGRESS.read();
-    let progress = download_progress
+    let stoarge = STORAGE.read();
+    let collections = &stoarge.collections;
+    let mut progress = download_progress
         .iter()
-        .filter(|(_, x)| !x.finished())
-        .collect::<BTreeMap<_, _>>();
-    let storage = STORAGE.read();
-    let collections = &storage.collections;
-    let progress = progress.into_iter().filter_map(|(id, progress)| {
-        collections
-            .iter()
-            .find(|c| c.get_collection_id() == id.collection_id)
-            .map(|c| (c, progress))
-    });
-    let first = download_progress.first_key_value();
-    let background = storage
-        .collections
-        .iter()
-        .find(|x| first.is_some_and(|(id, _)| id.collection_id == x.get_collection_id()))
-        .map(|x| (x.picture_path.to_string_lossy().to_string(), x));
+        .filter(|(_, x)| x.percentages < 100.)
+        .filter_map(|(id, progress)| {
+            collections
+                .iter()
+                .find(|c| c.get_collection_id() == id.collection_id)
+                .map(|c| (c, progress))
+        })
+        .peekable();
     rsx! {
         div {
-            if let Some((background, collection)) = background {
+            if let Some((collection, progress)) = progress.peek() {
                 div {
                     class: "w-full h-[350px] p-[30px] rounded-[20px]",
-                    background: format!("linear-gradient(88deg, #0E0E0E 14.88%, rgba(14, 14, 14, 0.70) 100%), url('{}') lightgray 50% / cover no-repeat", background),
+                    background: format!("linear-gradient(88deg, #0E0E0E 14.88%, rgba(14, 14, 14, 0.70) 100%), url('{}') lightgray 50% / cover no-repeat", collection.picture_path.to_string_lossy().to_string()),
                     div {
                         class: "w-full grid grid-flow-col justify-stretch",
-                        {ContentType::text(&collection.display_name).css("justify-self-start text-[60px] font-black text-white").get_element()}
+                        div {
+                            class: "justify-self-start flex flex-col gap-[20px]",
+                            {ContentType::text(&collection.display_name).css("justify-self-start text-[60px] font-black text-white")}
+                            {
+                                ContentType::hint(format!("總計 {}/已下載 {}", progress.total_size.unwrap_or_default().display_size_from_megabytes(), progress.current_size.unwrap_or_default().display_size_from_megabytes()))
+                                    .css("font-medium")
+                            }
+                        }
                         div {
                             class: "justify-self-end flex",
-                            {ContentType::text(format!("{:.3} MB",first.unwrap().1.speed.unwrap_or_default())).css("text-[50px] font-bold text-white").get_element()}
-                            {ContentType::hint("/s").css("text-[50px] font-bold").get_element()}
+                            {ContentType::text(format!("{}",progress.speed.unwrap_or_default().display_size_from_megabytes())).css("text-[50px] font-bold text-white")}
+                            {ContentType::hint("/s").css("text-[50px] font-bold")}
                         }
                     }
                 }
@@ -468,21 +494,60 @@ fn DownloadProgress() -> Element {
             for (collection,progress) in progress {
                 Button {
                     roundness: Roundness::Pill,
-                    string_placements: vec! [
-                        ContentType::image(collection.picture_path.to_string_lossy().to_string()).css("bg-cover w-[80px] h-[80px] rounded-[10px]").align_left(),
-                        ContentType::text(progress.name.to_string()).align_left(),
-                        Contents::new(
-                            vec![
-                                ContentType::text(format!("percentages: {}",progress.percentages.to_string())),
-                                ContentType::text(format!("speed: {}", progress.speed.unwrap_or_default().to_string())),
-                            ],
-                            Alignment::Right,
-                        ).css("flex flex-col gap-[3px]")
-                    ],
+                    string_placements: rsx! {
+                        div {
+                            class: "w-full grid grid-flow-col justify-stretch items-stretch",
+                            div {
+                                class: "container justify-self-start",
+                                div {
+                                    class: "w-full flex gap-[15px]",
+                                    {ContentType::svg(DRAG_INDICATOR).css("self-center svg-[30px]")}
+                                    div {
+                                        class: "w-full flex gap-[20px]",
+                                        {ContentType::image(collection.picture_path.to_string_lossy().to_string()).css("bg-cover bg-white w-[80px] h-[80px] rounded-[10px]")},
+                                        div {
+                                            class: "w-full flex flex-col justify-start gap-[10px]",
+                                             {ContentType::text(&collection.display_name).css("text-[25px] font-bold")}
+                                             div {
+                                                 class: "flex gap-[4px]",
+                                                 {ContentType::hint(format!("{} / {} |", progress.current_size.unwrap_or_default().display_size_from_megabytes(), progress.total_size.unwrap_or_default().display_size_from_megabytes())).css("text-base font-semibold")}
+                                                 {ContentType::text(format!("{}", progress.speed.unwrap_or_default().display_size_from_megabytes())).css("text-base font-semibold")}
+                                             }
+                                             div {
+                                                class: "w-full h-full flex items-end",
+                                                div {
+                                                    class: "rounded-[50px] w-full h-[7px] bg-zinc-800",
+                                                    div {
+                                                        class: "transition-all rounded-[50px] bg-white h-[7px]",
+                                                        width: format!("{}%", progress.percentages)
+                                                    }
+                                                }
+                                             }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
                     extended_css_class: "rounded-[5px]",
                     fill_mode: FillMode::Fill
                 }
             }
+        }
+    }
+}
+
+trait SizeFromMegaBytes {
+    fn display_size_from_megabytes(&self) -> String;
+}
+
+impl SizeFromMegaBytes for f64 {
+    fn display_size_from_megabytes(&self) -> String {
+        match *self {
+            f if f < 1_000. => format!("{:.2} bytes", f),
+            f if f < 1_000_000. => format!("{:.2} KB", f / 1_000.),
+            f if f < 1_000_000_000. => format!("{:.2} MB", f / 1_000_000.),
+            f => format!("{:.2} GB", f / 1_000_000_000.),
         }
     }
 }

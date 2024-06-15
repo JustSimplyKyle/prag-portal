@@ -2005,6 +2005,10 @@ input {
   height: 55px;
 }
 
+.h-\[7px\] {
+  height: 7px;
+}
+
 .h-\[80px\] {
   height: 80px;
 }
@@ -2229,6 +2233,10 @@ input {
   align-items: flex-start;
 }
 
+.items-end {
+  align-items: flex-end;
+}
+
 .items-center {
   align-items: center;
 }
@@ -2271,6 +2279,10 @@ input {
 
 .gap-\[3px\] {
   gap: 3px;
+}
+
+.gap-\[4px\] {
+  gap: 4px;
 }
 
 .gap-\[5px\] {
@@ -2361,6 +2373,10 @@ input {
   margin-bottom: calc(3px * var(--tw-space-y-reverse));
 }
 
+.self-center {
+  align-self: center;
+}
+
 .self-stretch {
   align-self: stretch;
 }
@@ -2415,6 +2431,10 @@ input {
 
 .rounded-\[20px\] {
   border-radius: 20px;
+}
+
+.rounded-\[50px\] {
+  border-radius: 50px;
 }
 
 .rounded-\[5px\] {
@@ -2498,6 +2518,11 @@ input {
 .bg-secondary-surface {
   --tw-bg-opacity: 1;
   background-color: rgb(47 47 47 / var(--tw-bg-opacity));
+}
+
+.bg-white {
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 255 255 / var(--tw-bg-opacity));
 }
 
 .bg-white\/30 {
@@ -2684,6 +2709,10 @@ input {
   font-weight: 700;
 }
 
+.font-medium {
+  font-weight: 500;
+}
+
 .font-normal {
   font-weight: 400;
 }
@@ -2833,6 +2862,11 @@ input {
   font-size: 1em;
 }
 
+.text-\[25px\] {
+  --font-size-px: 25;
+  font-size: 25px;
+}
+
 .text-\[35px\] {
   --font-size-px: 35;
   font-size: 35px;
@@ -2851,6 +2885,13 @@ input {
 .text-\[80px\] {
   --font-size-px: 80;
   font-size: 80px;
+}
+
+.text-base {
+  --font-size-px: 16;
+  font-size: 1rem;
+  --line-height-offset: calc((((var(--line-height-scale) * var(--font-size-px)) - 24) / 2) / var(--font-size-px));
+  line-height: 1.5rem;
 }
 
 .text-lg {
