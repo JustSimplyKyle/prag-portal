@@ -141,7 +141,7 @@ fn SidebarCollectionBlock(collection: Collection) -> Element {
         div { class: "relative transition-all container w-[50px] h-[50px] group-aria-expanded:w-20 group-aria-expanded:h-20 border-2 border-[#2E2E2E] rounded-[15px] group-aria-expanded:rounded-[5px]",
             { ContentType::image(&picture_path)
             .css("absolute inset-0 transition-all w-full h-full object-cover inline-flex items-center rounded-[15px] group-aria-expanded:rounded-[5px]",)
-            .get_element() },
+             },
             div { class: "absolute inset-x-0 bottom-0 w-3 h-3 bg-[#CCE246] rounded-full" }
         }
     };

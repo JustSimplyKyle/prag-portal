@@ -140,7 +140,7 @@ pub fn CollectionDisplay(collection: ReadOnlySignal<Collection>) -> Element {
             }
             div { class: "px-[30px] bg-background rounded-2xl min-h-dvh scroll-smooth",
                 div { class: "bg-background flex justify-center items-center min-h-full py-[30px]",
-                    {ContentType::svg(manganis::mg!(file("public/Line 155.svg"))).get_element()}
+                    {ContentType::svg(manganis::mg!(file("public/Line 155.svg")))}
                 }
                 div {
                     class: "flex flex-col gap-[15px]",
@@ -187,13 +187,13 @@ fn SubModViewer(
                 div {
                     class: "flex gap-[15px] items-center",
                     if let Some(icon) = icon() {
-                        {ContentType::image(icon.to_string()).css("w-[50px] h-[50px] rounded-[10px]").get_element()}
+                        {ContentType::image(icon.to_string()).css("w-[50px] h-[50px] rounded-[10px]")}
                     }
                     div {
                         class: "flex flex-col gap-[10px]",
-                        {ContentType::text(mods().name).css("text-xl font-bold").get_element()}
+                        {ContentType::text(mods().name).css("text-xl font-bold")}
                         if let Some(version) = mods().mod_version {
-                            {ContentType::hint(version).css("font-semibold text-xs italic").get_element()}
+                            {ContentType::hint(version).css("font-semibold text-xs italic")}
                         }
                     }
                 }

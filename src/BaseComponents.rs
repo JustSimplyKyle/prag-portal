@@ -72,12 +72,17 @@ pub fn subModal(
     }
 }
 
+/// `Switcher` is a trait for objects that can be compared with a global signal,
+/// switch the global signal to themselves, and provide a hashed value for equality checks.
 pub trait Switcher {
-    // Compare with the Global Signal
+    /// Compares the object with the global signal.
+    /// Returns `true` if they are the same, `false` otherwise.
     fn compare(&self) -> bool;
-    // Changes the current Global Signal to this
+
+    /// Changes the global signal to match the object.
     fn switch_active_to_self(&self);
-    // Hashed value to use for partial eq implementation
+
+    /// Returns a hashed value of the object for use in equality checks.
     fn hashed_value(&self) -> u64;
 }
 
@@ -235,8 +240,8 @@ pub fn SearchBar(sender: Option<Signal<String>>) -> Element {
                 }
                 div {
                     class: "flex flex-row-reverse items-baseline",
-                    {ContentType::svg(ARROW_LEFT).css("svg-[20px]").get_element()}
-                    {ContentType::svg(SEARCH).css("svg-[30px]").get_element()}
+                    {ContentType::svg(ARROW_LEFT).css("svg-[20px]")}
+                    {ContentType::svg(SEARCH).css("svg-[30px]")}
                 }
             },
             onclick: move |()| {
@@ -257,8 +262,8 @@ pub fn Button(
     #[props(default)] extended_css_class: String,
     signal: Option<Rc<dyn Switcher>>,
     #[props(default = true)] clickable: bool,
-    onclick: Option<EventHandler>,
-    #[props(extends = GlobalAttributes)] mut attributes: Vec<Attribute>,
+    #[props(into)] onclick: Option<EventHandler>,
+    #[props(extends = GlobalAttributes, extends = div)] mut attributes: Vec<Attribute>,
     #[props(default)] size: Size,
     #[props(default)] fill_mode: FillMode,
     #[props(default = false)] focus_color_change: bool,
@@ -304,7 +309,7 @@ pub fn Button(
                 match string_placements {
                     StringPlacements::Designed(s) => rsx! {
                         for x in s {
-                            { x.get_element() }
+                            { x }
                         }
                     },
                     StringPlacements::Custom(x) => x,
@@ -353,6 +358,12 @@ pub struct Contents {
     alignment: Alignment, // Positioning
 }
 
+impl IntoDynNode for Contents {
+    fn into_dyn_node(self) -> dioxus_core::DynamicNode {
+        self.get_element().into_dyn_node()
+    }
+}
+
 impl Contents {
     pub fn new(contents: impl Into<Vec<Content>>, alignment: Alignment) -> Self {
         Self {
@@ -370,7 +381,7 @@ impl Contents {
         rsx! {
             div { class: tw_merge!(alignment_class, self.css),
                 for x in self.contents {
-                    {x.get_element()}
+                    {x}
                 }
             }
         }
@@ -381,6 +392,12 @@ impl Contents {
 pub struct Content {
     content: ContentType,
     css: String,
+}
+
+impl IntoDynNode for Content {
+    fn into_dyn_node(self) -> dioxus_core::DynamicNode {
+        self.get_element().into_dyn_node()
+    }
 }
 
 impl Content {
@@ -609,7 +626,7 @@ pub enum Alignment {
 impl Alignment {
     pub fn get_alignment_class(&self) -> String {
         match self {
-            Self::Left => "text-left",
+            Self::Left => "text-left justify-self-start flex",
             Self::Center => "text-center justify-self-center flex",
             Self::Right => "text-right justify-self-end flex",
             Self::Custom(ref class) => class,
