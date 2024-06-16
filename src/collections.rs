@@ -31,9 +31,7 @@ pub fn Collections() -> Element {
                         fill_mode: FillMode::Fit,
                         size: Size::Medium,
                         string_placements: vec![
-                            ContentType::svg(EXPLORE)
-                                .css("svg-[30px]")
-                                .align_left(),
+                            ContentType::svg(EXPLORE).css("svg-[30px]").align_left(),
                             ContentType::text("全部").align_right(),
                         ],
                         extended_css_class: "pl-[20px] pr-[25px] h-full"
@@ -42,9 +40,7 @@ pub fn Collections() -> Element {
                         roundness: Roundness::Pill,
                         fill_mode: FillMode::Fit,
                         size: Size::Medium,
-                        string_placements: vec![
-                            ContentType::svg(STAR).css("svg-[30px]").align_center(),
-                        ],
+                        string_placements: vec![ContentType::svg(STAR).css("svg-[30px]").align_center()],
                         extended_css_class: "px-[20px] h-full"
                     }
                     Button {
@@ -52,9 +48,7 @@ pub fn Collections() -> Element {
                         fill_mode: FillMode::Fit,
                         size: Size::Medium,
                         string_placements: vec![
-                            ContentType::svg(BOOKMARK)
-                                .css("svg-[30px]")
-                                .align_left(),
+                            ContentType::svg(BOOKMARK).css("svg-[30px]").align_left(),
                             ContentType::text("分類夾").align_right(),
                         ],
                         extended_css_class: "px-[20px] h-full my-0"
@@ -63,27 +57,24 @@ pub fn Collections() -> Element {
                         roundness: Roundness::Pill,
                         fill_mode: FillMode::Fit,
                         size: Size::Medium,
-                        string_placements: vec![
-                            ContentType::svg(BOOKMARK_ADD).css("svg-[30px]").align_center(),
-                        ],
+                        string_placements: vec![ContentType::svg(BOOKMARK_ADD).css("svg-[30px]").align_center()],
                         extended_css_class: "pl-[20px] pr-[25px] h-full"
                     }
                 }
-                div {
-                    class: "flex h-full items-center gap-[10px] flex-row-reverse justify-self-end",
+                div { class: "flex h-full items-center gap-[10px] flex-row-reverse justify-self-end",
                     Button {
                         roundness: Roundness::Pill,
                         fill_mode: FillMode::Fit,
                         size: Size::Medium,
                         string_placements: vec![
                             Contents::new(
-                                vec![
-                                    ContentType::svg(FILTER_LIST).css("svg-[25px]"),
-                                    ContentType::svg(ARROW_DOWN).css("svg-[20px]")
-                                ],
-                                Alignment::Center,
-                            )
-                            .css("gap-[5px]")
+                                    vec![
+                                        ContentType::svg(FILTER_LIST).css("svg-[25px]"),
+                                        ContentType::svg(ARROW_DOWN).css("svg-[20px]"),
+                                    ],
+                                    Alignment::Center,
+                                )
+                                .css("gap-[5px]"),
                         ],
                         extended_css_class: "pl-[20px] pr-[10px] h-full"
                     }
@@ -93,13 +84,13 @@ pub fn Collections() -> Element {
                         size: Size::Medium,
                         string_placements: vec![
                             Contents::new(
-                                vec![
-                                    ContentType::svg(CROP_FREE).css("svg-[25px]"),
-                                    ContentType::svg(ARROW_DOWN).css("svg-[20px]")
-                                ],
-                                Alignment::Center,
-                            )
-                            .css("gap-[5px]")
+                                    vec![
+                                        ContentType::svg(CROP_FREE).css("svg-[25px]"),
+                                        ContentType::svg(ARROW_DOWN).css("svg-[20px]"),
+                                    ],
+                                    Alignment::Center,
+                                )
+                                .css("gap-[5px]"),
                         ],
                         extended_css_class: "pl-[20px] pr-[10px] h-full"
                     }
@@ -107,9 +98,7 @@ pub fn Collections() -> Element {
                         roundness: Roundness::Pill,
                         fill_mode: FillMode::Fit,
                         size: Size::Medium,
-                        string_placements: vec![
-                            ContentType::svg(NOTE).css("svg-[30px]").align_center(),
-                        ],
+                        string_placements: vec![ContentType::svg(NOTE).css("svg-[30px]").align_center()],
                         extended_css_class: "hover:bg-green px-[20px] h-full"
                     }
                     SearchBar { sender }
@@ -117,7 +106,10 @@ pub fn Collections() -> Element {
             }
             div { class: "grid grid-flow-row grid-cols-[repeat(auto-fill,280px)] gap-[20px]",
                 for collection in collections {
-                    CollectionBlock { key: "{collection.get_collection_id().0}",collection, extended_class: "rounded-[20px]" }
+                    CollectionBlock {key: "{collection.get_collection_id().0}",
+                        collection,
+                        extended_class: "rounded-[20px]"
+                    }
                 }
             }
         }

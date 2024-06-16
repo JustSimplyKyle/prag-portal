@@ -86,7 +86,10 @@ pub fn CollectionDisplay(collection: ReadOnlySignal<Collection>) -> Element {
             div { class: "sticky top-0 p-[50px] rounded-2xl grid grid-flow-col items-stretch",
                 div {
                     class: "fixed inset-0 h-[900px]",
-                    background: format!("radial-gradient(198.55% 100% at 50% 0%, rgba(25, 25, 25, 0.00) 0%, #191919 82.94%), url(\'{}\') lightgray 50% / cover no-repeat", DISPLAY_BACKGROUND),
+                    background: format!(
+                        "radial-gradient(198.55% 100% at 50% 0%, rgba(25, 25, 25, 0.00) 0%, #191919 82.94%), url(\'{}\') lightgray 50% / cover no-repeat",
+                        DISPLAY_BACKGROUND,
+                    )
                 }
                 div { class: "flex flex-col space-y-[35px]",
                     div { class: "text-white font-black text-[80px] leading-normal capsize",
@@ -108,16 +111,12 @@ pub fn CollectionDisplay(collection: ReadOnlySignal<Collection>) -> Element {
                     div { class: "flex flex-col space-y-[3px] w-full max-w-[250px]",
                         img {
                             class: "w-full h-[250px] rounded-t-[20px] rounded-b-[5px] object-cover",
-                            src: collection.read().picture_path.to_string_lossy().to_string(),
+                            src: collection.read().picture_path.to_string_lossy().to_string()
                         }
                         div { class: "flex space-x-[3px] min-w-full",
                             Button {
                                 roundness: Roundness::None,
-                                string_placements: vec![
-                                    ContentType::svg(GAME_CONTROLLER)
-                                        .css("svg-[30px]")
-                                        .align_center()
-                                ],
+                                string_placements: vec![ContentType::svg(GAME_CONTROLLER).css("svg-[30px]").align_center()],
                                 onclick: move |()| {
                                     collection_client.send(Action::Start);
                                 },
@@ -142,14 +141,10 @@ pub fn CollectionDisplay(collection: ReadOnlySignal<Collection>) -> Element {
                 div { class: "bg-background flex justify-center items-center min-h-full py-[30px]",
                     {ContentType::svg(manganis::mg!(file("public/Line 155.svg")))}
                 }
-                div {
-                    class: "flex flex-col gap-[15px]",
+                div { class: "flex flex-col gap-[15px]",
                     SelectionBar { sender: mod_search }
                     if status().0 == CollectionDisplayTopSelection::Mods {
-                        ModViewer {
-                            collection,
-                            search: mod_search()
-                        }
+                        ModViewer { collection, search: mod_search() }
                     }
                 }
             }
@@ -166,15 +161,18 @@ fn ModViewer(collection: ReadOnlySignal<Collection>, search: String) -> Element 
         })
     });
     rsx! {
-        div {
-            class: "grid grid-flow-row grid-cols-[repeat(auto-fill,273px)] gap-[3px]",
-            for x in mods().into_iter().flatten().filter(|x| {
-                if search == "搜尋" || search.is_empty() {
-                    return true;
-                }
-                x.name.to_lowercase().contains(&search.to_lowercase())
-            }) {
-                SubModViewer { collection, mods: x}
+        div { class: "grid grid-flow-row grid-cols-[repeat(auto-fill,273px)] gap-[3px]",
+            for x in mods()
+                .into_iter()
+                .flatten()
+                .filter(|x| {
+                    if search == "搜尋" || search.is_empty() {
+                        return true;
+                    }
+                    x.name.to_lowercase().contains(&search.to_lowercase())
+                })
+            {
+                SubModViewer { collection, mods: x }
             }
         }
     }
@@ -188,54 +186,39 @@ fn SubModViewer(
     let clicked = use_signal(|| false);
     let icon = use_memo(move || mods.read().icon_url.clone());
     rsx! {
-        div {
-            class: "bg-deep-background flex flex-col p-[10px] w-[273px] rounded-[5px]",
-            div {
-                class: "pb-[10px]",
-                div {
-                    class: "flex gap-[15px] items-center",
+        div { class: "bg-deep-background flex flex-col p-[10px] w-[273px] rounded-[5px]",
+            div { class: "pb-[10px]",
+                div { class: "flex gap-[15px] items-center",
                     if let Some(icon) = &*icon.read() {
                         {ContentType::image(icon.to_string()).css("w-[50px] h-[50px] rounded-[10px]")}
                     }
-                    div {
-                        class: "flex flex-col gap-[10px]",
-                        {ContentType::text(mods.read().name.clone()).css("text-xl font-bold")}
+                    div { class: "flex flex-col gap-[10px]",
+                        {ContentType::text(mods.read().name.clone()).css("text-xl font-bold")},
                         if let Some(version) = &mods.read().mod_version {
                             {ContentType::hint(version).css("font-semibold text-xs italic")}
                         }
                     }
                 }
             }
-            div {
-                class: "grid grid-flow-col items-stretch",
-                div {
-                    class: "justify-self-start flex gap-[5px]",
+            div { class: "grid grid-flow-col items-stretch",
+                div { class: "justify-self-start flex gap-[5px]",
                     Button {
                         roundness: Roundness::Pill,
-                        string_placements: vec![
-                            ContentType::svg(UNARCHIVE)
-                                .css("svg-[16px]")
-                                .align_center()
-                        ],
+                        string_placements: vec![ContentType::svg(UNARCHIVE).css("svg-[16px]").align_center()],
                         extended_css_class: "bg-background px-[15px] h-[30px]",
                         size: crate::BaseComponents::Size::Small,
                         fill_mode: FillMode::Fit
                     }
                     Button {
                         roundness: Roundness::Pill,
-                        string_placements: vec![
-                            ContentType::svg(DELETE)
-                                .css("svg-[16px]")
-                                .align_center()
-                        ],
+                        string_placements: vec![ContentType::svg(DELETE).css("svg-[16px]").align_center()],
                         extended_css_class: "bg-background px-[15px] h-[30px]",
                         size: crate::BaseComponents::Size::Small,
                         fill_mode: FillMode::Fit
                     }
                 }
-                div {
-                    class: "justify-self-end",
-                    Switch {clicked}
+                div { class: "justify-self-end",
+                    Switch { clicked }
                 }
             }
         }
@@ -254,10 +237,8 @@ fn SelectionBar(sender: Signal<String>) -> Element {
                     signal: Rc::new(CollectionDisplayTopSelection::Mods) as Rc<dyn Switcher>,
                     focus_color_change: true,
                     string_placements: vec![
-                        ContentType::svg(CUBE)
-                            .css("svg-[30px]")
-                            .align_left(),
-                        ContentType::text("模組").align_right()
+                        ContentType::svg(CUBE).css("svg-[30px]").align_left(),
+                        ContentType::text("模組").align_right(),
                     ]
                 }
                 Button {
@@ -267,10 +248,8 @@ fn SelectionBar(sender: Signal<String>) -> Element {
                     focus_color_change: true,
                     signal: Rc::new(CollectionDisplayTopSelection::World) as Rc<dyn Switcher>,
                     string_placements: vec![
-                        ContentType::svg(GLOBAL_ASIA)
-                            .css("svg-[30px]")
-                            .align_left(),
-                        ContentType::text("世界").align_right()
+                        ContentType::svg(GLOBAL_ASIA).css("svg-[30px]").align_left(),
+                        ContentType::text("世界").align_right(),
                     ]
                 }
                 Button {
@@ -280,9 +259,7 @@ fn SelectionBar(sender: Signal<String>) -> Element {
                     focus_color_change: true,
                     signal: Rc::new(CollectionDisplayTopSelection::ResourcePack) as Rc<dyn Switcher>,
                     string_placements: vec![
-                        ContentType::svg(CIRCLE_JOIN)
-                            .css("svg-[30px]")
-                            .align_left(),
+                        ContentType::svg(CIRCLE_JOIN).css("svg-[30px]").align_left(),
                         ContentType::text("資源包").align_right(),
                     ]
                 }
@@ -293,9 +270,7 @@ fn SelectionBar(sender: Signal<String>) -> Element {
                     focus_color_change: true,
                     signal: Rc::new(CollectionDisplayTopSelection::ShaderPacks) as Rc<dyn Switcher>,
                     string_placements: vec![
-                        ContentType::svg(MOTION_MODE)
-                            .css("svg-[30px]")
-                            .align_left(),
+                        ContentType::svg(MOTION_MODE).css("svg-[30px]").align_left(),
                         ContentType::text("光影包").align_right(),
                     ]
                 }
@@ -304,11 +279,7 @@ fn SelectionBar(sender: Signal<String>) -> Element {
                 SearchBar { sender }
                 Button {
                     roundness: Roundness::Pill,
-                    string_placements: vec![
-                        ContentType::svg(EXPLORE)
-                            .css("svg-[25px]")
-                            .align_center(),
-                    ],
+                    string_placements: vec![ContentType::svg(EXPLORE).css("svg-[25px]").align_center()],
                     fill_mode: FillMode::Fit,
                     extended_css_class: "px-[25px]"
                 }

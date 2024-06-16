@@ -29,15 +29,13 @@ pub fn SideBar() -> Element {
     let collection_preview = collections.iter().take(3).collect::<Vec<_>>();
 
     let folded_images = rsx! {
-        div {
-            class: "grid grid-flow-col justify-stretch items-center",
+        div { class: "grid grid-flow-col justify-stretch items-center",
             div { class: "justify-self-start transition-all",
                 {ContentType::svg(HOME).css("hidden group-aria-expanded:block")},
                 div { class: "flex items-center space-x-0",
                     div { class: "flex space-x-[-20px]",
                         for x in collection_preview {
-                            div {
-                                key: "{x.get_collection_id().0}",
+                            div { key: "{x.get_collection_id().0}",
                                 {
                                     ContentType::image(x.picture_path.to_string_lossy().to_string())
                                     .css(
@@ -101,7 +99,7 @@ pub fn SideBar() -> Element {
                 div { class: "flex flex-col flex-nowrap overflow-scroll max-h-[451px] space-y-1",
                     Button { roundness: Roundness::Top, string_placements: folded_images, extended_css_class: "bg-background" }
                     for collection in collections {
-                        SidebarCollectionBlock { key: "{collection.get_collection_id().0}" , collection }
+                        SidebarCollectionBlock { key: "{collection.get_collection_id().0}", collection }
                     }
                 }
                 // bottom
@@ -147,7 +145,7 @@ fn SidebarCollectionBlock(collection: Collection) -> Element {
         div { class: "relative transition-all container w-[50px] h-[50px] group-aria-expanded:w-20 group-aria-expanded:h-20 border-2 border-[#2E2E2E] rounded-[15px] group-aria-expanded:rounded-[5px]",
             { ContentType::image(&picture_path)
             .css("absolute inset-0 transition-all w-full h-full object-cover inline-flex items-center rounded-[15px] group-aria-expanded:rounded-[5px]",)
-             },
+            },
             div { class: "absolute inset-x-0 bottom-0 w-3 h-3 bg-[#CCE246] rounded-full" }
         }
     };

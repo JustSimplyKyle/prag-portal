@@ -188,12 +188,8 @@ pub fn Switch(clicked: Signal<bool>, onclick: Option<EventHandler>) -> Element {
                     onclick(());
                 }
             },
-            div {
-                class: "transition-all duration-700 ease-linear flex-none group-aria-selected:flex-auto",
-            }
-            div {
-                class: "transition-all ease-in-out w-[20px] h-[20px] group-aria-selected:border-4 group-aria-selected:border-green group-aria-selected:bg-none rounded-full bg-secondary-surface",
-            }
+            div { class: "transition-all duration-700 ease-linear flex-none group-aria-selected:flex-auto" }
+            div { class: "transition-all ease-in-out w-[20px] h-[20px] group-aria-selected:border-4 group-aria-selected:border-green group-aria-selected:bg-none rounded-full bg-secondary-surface" }
         }
     }
 }
@@ -219,9 +215,7 @@ pub fn SearchBar(sender: Option<Signal<String>>) -> Element {
         Button {
             roundness: Roundness::Pill,
             string_placements: rsx! {
-                div {
-                    class: "relative text-stone-950/20 ",
-                    resize: false,
+                div { class: "relative text-stone-950/20 ", resize: false,
                     input {
                         r#type: "text",
                         id: "test",
@@ -235,12 +229,11 @@ pub fn SearchBar(sender: Option<Signal<String>>) -> Element {
                                 input_clicked.set(true);
                             }
                             event.stop_propagation();
-                        },
+                        }
                     }
                 }
-                div {
-                    class: "flex flex-row-reverse items-baseline",
-                    {ContentType::svg(ARROW_LEFT).css("svg-[20px]")}
+                div { class: "flex flex-row-reverse items-baseline",
+                    {ContentType::svg(ARROW_LEFT).css("svg-[20px]")},
                     {ContentType::svg(SEARCH).css("svg-[30px]")}
                 }
             },
@@ -250,7 +243,7 @@ pub fn SearchBar(sender: Option<Signal<String>>) -> Element {
             },
             focus_color_change: true,
             fill_mode: FillMode::Fit,
-            extended_css_class: "group transition-all w-20 grid grid-flow-col justify-stretch content-center [&_*]:transition-all h-[55px] aria-selected:w-[300px] aria-selected:bg-white pl-[15px] pr-[10px]",
+            extended_css_class: "group transition-all w-20 grid grid-flow-col justify-stretch content-center [&_*]:transition-all h-[55px] aria-selected:w-[300px] aria-selected:bg-white pl-[15px] pr-[10px]"
         }
     }
 }
@@ -297,7 +290,6 @@ pub fn Button(
                 if signal.is_none() && focus_color_change {
                     clickiness.toggle();
                 }
-
                 if let Some(x) = onclick {
                     x(());
                 } else if let Some(x) = &mut signal {
@@ -455,12 +447,8 @@ impl Content {
         match self.content {
             ContentType::Svg(x) => {
                 rsx! {
-                    div {
-                        class: tw_merge!(self.css, "[&_*]:pointer-events-none"),
-                        object {
-                            id: "mysvg",
-                            r#type: "image/svg+xml", data: x
-                        }
+                    div { class: tw_merge!(self.css, "[&_*]:pointer-events-none"),
+                        object { id: "mysvg", r#type: "image/svg+xml", data: x }
                     }
                 }
             }
@@ -476,7 +464,7 @@ impl Content {
                         class: self.css,
                         background_size,
                         background_position: "center",
-                        background_image: format!("url(\'{}\')", x),
+                        background_image: format!("url(\'{}\')", x)
                     }
                 }
             }

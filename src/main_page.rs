@@ -53,7 +53,8 @@ pub fn CollectionBlock(
             button {
                 class: tw_merge!("relative h-[280px] w-[280px]", extended_class),
                 onclick: move |_| {
-                    Pages::new_collection_page(collection.get_collection_id()).switch_active_to_self();
+                    Pages::new_collection_page(collection.get_collection_id())
+                        .switch_active_to_self();
                 },
                 ..attributes,
                 img { class: img_class, src: picture_path }
@@ -206,7 +207,10 @@ fn SuggestionPage() -> Element {
         }
         div { class: "flex space-x-0 lg:space-x-[20px] justify-center",
             div { class: "relative hidden shrink-0 lg:block shrink-0 h-[450px] w-[450px] shadow rounded",
-                img { class: "absolute inset-0 z-0 rounded-[20px]", src: IMG.to_string() }
+                img {
+                    class: "absolute inset-0 z-0 rounded-[20px]",
+                    src: IMG.to_string()
+                }
                 div { class: "absolute inset-0 z-50 flex justify-center items-center bg-gradient-to-t from-deep-background to-deep-background min-h-full max-h-full rounded-[20px]",
                     div {
                         span { class: "text-lime-300 text-6xl font-bold font-['GenSenRounded TW'] leading-[78px] tracking-[6px]",
