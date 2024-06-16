@@ -80,6 +80,7 @@ pub fn CollectionDisplay(collection: ReadOnlySignal<Collection>) -> Element {
             }
         }
     });
+    let mod_search = use_signal(String::new);
     rsx! {
         div { class: "relative flex flex-col",
             div { class: "sticky top-0 p-[50px] rounded-2xl grid grid-flow-col items-stretch",
@@ -143,9 +144,12 @@ pub fn CollectionDisplay(collection: ReadOnlySignal<Collection>) -> Element {
                 }
                 div {
                     class: "flex flex-col gap-[15px]",
-                    SelectionBar {}
+                    SelectionBar { sender: mod_search }
                     if status().0 == CollectionDisplayTopSelection::Mods {
-                        ModViewer {collection}
+                        ModViewer {
+                            collection,
+                            search: mod_search()
+                        }
                     }
                 }
             }
@@ -154,7 +158,7 @@ pub fn CollectionDisplay(collection: ReadOnlySignal<Collection>) -> Element {
 }
 
 #[component]
-fn ModViewer(collection: ReadOnlySignal<Collection>) -> Element {
+fn ModViewer(collection: ReadOnlySignal<Collection>, search: String) -> Element {
     let mods = use_memo(move || {
         collection().mod_controller.map(|mut x| {
             x.manager.mods.sort_unstable_by_key(|x| x.name.clone());
@@ -164,8 +168,13 @@ fn ModViewer(collection: ReadOnlySignal<Collection>) -> Element {
     rsx! {
         div {
             class: "grid grid-flow-row grid-cols-[repeat(auto-fill,273px)] gap-[3px]",
-            for x in mods().into_iter().flatten() {
-                SubModViewer {collection, mods: x}
+            for x in mods().into_iter().flatten().filter(|x| {
+                if search == "搜尋" || search.is_empty() {
+                    return true;
+                }
+                x.name.to_lowercase().contains(&search.to_lowercase())
+            }) {
+                SubModViewer { collection, mods: x}
             }
         }
     }
@@ -177,7 +186,7 @@ fn SubModViewer(
     mods: ReadOnlySignal<ModMetadata>,
 ) -> Element {
     let clicked = use_signal(|| false);
-    let icon = use_memo(move || mods().icon_url);
+    let icon = use_memo(move || mods.read().icon_url.clone());
     rsx! {
         div {
             class: "bg-deep-background flex flex-col p-[10px] w-[273px] rounded-[5px]",
@@ -185,13 +194,13 @@ fn SubModViewer(
                 class: "pb-[10px]",
                 div {
                     class: "flex gap-[15px] items-center",
-                    if let Some(icon) = icon() {
+                    if let Some(icon) = &*icon.read() {
                         {ContentType::image(icon.to_string()).css("w-[50px] h-[50px] rounded-[10px]")}
                     }
                     div {
                         class: "flex flex-col gap-[10px]",
-                        {ContentType::text(mods().name).css("text-xl font-bold")}
-                        if let Some(version) = mods().mod_version {
+                        {ContentType::text(mods.read().name.clone()).css("text-xl font-bold")}
+                        if let Some(version) = &mods.read().mod_version {
                             {ContentType::hint(version).css("font-semibold text-xs italic")}
                         }
                     }
@@ -234,8 +243,7 @@ fn SubModViewer(
 }
 
 #[component]
-fn SelectionBar() -> Element {
-    let sender = use_signal(String::new);
+fn SelectionBar(sender: Signal<String>) -> Element {
     rsx! {
         div { class: "grid grid-flow-col items-stretch",
             div { class: "bg-deep-background rounded-full flex justify-start w-fit",

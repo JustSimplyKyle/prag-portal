@@ -413,6 +413,7 @@ fn CollectionContainer() -> Element {
         for (name, collection) in STORAGE().collections.into_iter().map(|x| (x.get_collection_id(), x)) {
             if Pages::new_collection_page(collection.get_collection_id()).should_render() {
                 div {
+                    key: "{name.0}",
                     class: "absolute inset-0 z-0 min-h-full min-w-full",
                     id: Pages::new_collection_page(name).slide_in_id(),
                     LayoutContainer { extended_class: "p-0",
@@ -493,6 +494,7 @@ fn DownloadProgress() -> Element {
             }
             for (collection,progress) in progress {
                 Button {
+                    key: "{collection.get_collection_id().0}",
                     roundness: Roundness::Pill,
                     string_placements: rsx! {
                         div {

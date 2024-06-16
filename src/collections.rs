@@ -117,7 +117,7 @@ pub fn Collections() -> Element {
             }
             div { class: "grid grid-flow-row grid-cols-[repeat(auto-fill,280px)] gap-[20px]",
                 for collection in collections {
-                    CollectionBlock { collection, extended_class: "rounded-[20px]" }
+                    CollectionBlock { key: "{collection.get_collection_id().0}",collection, extended_class: "rounded-[20px]" }
                 }
             }
         }

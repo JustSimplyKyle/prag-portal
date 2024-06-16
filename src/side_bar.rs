@@ -36,10 +36,15 @@ pub fn SideBar() -> Element {
                 div { class: "flex items-center space-x-0",
                     div { class: "flex space-x-[-20px]",
                         for x in collection_preview {
-                            {ContentType::image(x.picture_path.to_string_lossy().to_string())
-                                .css(
-                                    "z-50 w-10 h-10 object-cover shrink-0 inline-flex justify-center items-center rounded-full border-2 border-zinc-900 group-aria-expanded:hidden"
-                                )}
+                            div {
+                                key: "{x.get_collection_id().0}",
+                                {
+                                    ContentType::image(x.picture_path.to_string_lossy().to_string())
+                                    .css(
+                                        "z-50 w-10 h-10 object-cover shrink-0 inline-flex justify-center items-center rounded-full border-2 border-zinc-900 group-aria-expanded:hidden"
+                                    )
+                                }
+                            }
                         }
                     }
                     {
@@ -96,7 +101,7 @@ pub fn SideBar() -> Element {
                 div { class: "flex flex-col flex-nowrap overflow-scroll max-h-[451px] space-y-1",
                     Button { roundness: Roundness::Top, string_placements: folded_images, extended_css_class: "bg-background" }
                     for collection in collections {
-                        SidebarCollectionBlock { collection }
+                        SidebarCollectionBlock { key: "{collection.get_collection_id().0}" , collection }
                     }
                 }
                 // bottom
