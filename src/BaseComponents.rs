@@ -479,7 +479,11 @@ impl Content {
     }
 }
 
-fn sub_content_builder(content_type: fn(String) -> Content, ele: Element, css: String) -> Element {
+fn sub_content_builder(
+    content_type: fn(String) -> ContentType,
+    ele: Element,
+    css: String,
+) -> Element {
     let vnode = ele.as_ref()?;
     let dynamic = vnode.dynamic_nodes.first();
     let inplace = vnode.template.get().roots.first();
@@ -490,17 +494,21 @@ fn sub_content_builder(content_type: fn(String) -> Content, ele: Element, css: S
         _ => return None,
     };
 
-    content_type(text).css(css).get_element()
+    Content {
+        content: content_type(text),
+        css,
+    }
+    .get_element()
 }
 
 #[component]
 pub fn Text(children: Element, css: Option<String>) -> Element {
-    sub_content_builder(ContentType::text, children, css.unwrap_or_default())
+    sub_content_builder(ContentType::Text, children, css.unwrap_or_default())
 }
 
 #[component]
 pub fn Hint(children: Element, css: Option<String>) -> Element {
-    sub_content_builder(ContentType::hint, children, css.unwrap_or_default())
+    sub_content_builder(ContentType::Hint, children, css.unwrap_or_default())
 }
 
 #[derive(Debug, Clone, PartialEq)]
