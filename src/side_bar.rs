@@ -4,7 +4,7 @@ use dioxus::prelude::*;
 use rust_lib::api::shared_resources::{collection::Collection, entry::STORAGE};
 
 use crate::{
-    BaseComponents::{Button, ContentType, Roundness, Switcher},
+    BaseComponents::{Button, ContentType, Roundness, Switcher, Text},
     Pages, ARROW_RIGHT, EXPLORE, HISTORY, HOME, SIDEBAR_COLLECTION, SIM_CARD,
 };
 
@@ -51,7 +51,10 @@ pub fn SideBar() -> Element {
                 }
             }
             div { class: "justify-self-end group-aria-busy:hidden",
-                {ContentType::text("我的錦集").css("text-lime-300")}
+                Text {
+                    css: "text-lime-300",
+                    "我的錦集"
+                }
             }
         }
     };

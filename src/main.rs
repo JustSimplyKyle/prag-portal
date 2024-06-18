@@ -21,7 +21,7 @@ use tailwind_fuse::*;
 
 use dioxus::prelude::*;
 use log::LevelFilter;
-use BaseComponents::{subModalProps, ComponentPointer, Switcher};
+use BaseComponents::{subModalProps, ComponentPointer, Hint, Switcher, Text};
 
 use crate::collection_display::CollectionDisplay;
 use crate::collections::Collections;
@@ -479,15 +479,29 @@ fn DownloadProgress() -> Element {
                     ),
                     div { class: "w-full grid grid-flow-col justify-stretch",
                         div { class: "justify-self-start flex flex-col gap-[20px]",
-                            {ContentType::text(&collection.display_name).css("justify-self-start text-[60px] font-black text-white")},
-                            {
-                                ContentType::hint(format!("總計 {}/已下載 {}", progress.total_size.unwrap_or_default().display_size_from_megabytes(), progress.current_size.unwrap_or_default().display_size_from_megabytes()))
-                                    .css("font-medium")
+                            Text {
+                                css: "justify-self-start text-[60px] font-black text-white",
+                                {collection.display_name.clone()}
+                            }
+                            Hint {
+                                css: "font-medium",
+                                {
+                                    format!("總計 {}/已下載 {}",
+                                        progress.total_size.unwrap_or_default().display_size_from_megabytes(),
+                                        progress.current_size.unwrap_or_default().display_size_from_megabytes()
+                                    )
+                                }
                             }
                         }
                         div { class: "justify-self-end flex",
-                            {ContentType::text(format!("{}",progress.speed.unwrap_or_default().display_size_from_megabytes())).css("text-[50px] font-bold text-white")},
-                            {ContentType::hint("/s").css("text-[50px] font-bold")}
+                            Text {
+                                css: "text-[50px] font-bold text-white",
+                                "{progress.speed.unwrap_or_default().display_size_from_megabytes()}"
+                            }
+                            Hint {
+                                css: "text-[50px] font-bold",
+                                "/s"
+                            }
                         }
                     }
                 }
@@ -503,10 +517,20 @@ fn DownloadProgress() -> Element {
                                     div { class: "w-full flex gap-[20px]",
                                         {ContentType::image(collection.picture_path.to_string_lossy().to_string()).css("bg-cover bg-white w-[80px] h-[80px] rounded-[10px]")},
                                         div { class: "w-full flex flex-col justify-start gap-[10px]",
-                                            {ContentType::text(&collection.display_name).css("text-[25px] font-bold")},
+                                            Text {
+                                                css: "text-[25px] fond-bold"
+                                                {collection.display_name.clone()}
+                                            }
                                             div { class: "flex gap-[4px]",
-                                                {ContentType::hint(format!("{} / {} |", progress.current_size.unwrap_or_default().display_size_from_megabytes(), progress.total_size.unwrap_or_default().display_size_from_megabytes())).css("text-base font-semibold")},
-                                                {ContentType::text(format!("{}", progress.speed.unwrap_or_default().display_size_from_megabytes())).css("text-base font-semibold")}
+                                                Hint {
+                                                    css: "text-base font-semibold",
+                                                    {format!("{} / {} |", progress.current_size.unwrap_or_default().display_size_from_megabytes(), progress.total_size.unwrap_or_default().display_size_from_megabytes())},
+
+                                                }
+                                                Text {
+                                                    css: "text-base font-semibold",
+                                                    "{progress.speed.unwrap_or_default().display_size_from_megabytes()}"
+                                                }
                                             }
                                             div { class: "w-full h-full flex items-end",
                                                 div { class: "rounded-[50px] w-full h-[7px] bg-zinc-800",

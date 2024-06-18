@@ -2,6 +2,7 @@ use std::rc::Rc;
 
 use dioxus::prelude::*;
 
+use dioxus_core::DynamicNode;
 use tailwind_fuse::*;
 
 use crate::{collections::SEARCH, main_page::ARROW_LEFT, TOP_LEVEL_COMPONENT};
@@ -476,6 +477,30 @@ impl Content {
             ContentType::Custom(x) => x,
         }
     }
+}
+
+fn sub_content_builder(content_type: fn(String) -> Content, ele: Element, css: String) -> Element {
+    let vnode = ele.as_ref()?;
+    let dynamic = vnode.dynamic_nodes.first();
+    let inplace = vnode.template.get().roots.first();
+
+    let text = match (dynamic, inplace) {
+        (Some(DynamicNode::Text(text)), _) => text.value.clone(),
+        (_, Some(TemplateNode::Text { text })) => text.to_string(),
+        _ => return None,
+    };
+
+    content_type(text).css(css).get_element()
+}
+
+#[component]
+pub fn Text(children: Element, css: Option<String>) -> Element {
+    sub_content_builder(ContentType::text, children, css.unwrap_or_default())
+}
+
+#[component]
+pub fn Hint(children: Element, css: Option<String>) -> Element {
+    sub_content_builder(ContentType::hint, children, css.unwrap_or_default())
 }
 
 #[derive(Debug, Clone, PartialEq)]

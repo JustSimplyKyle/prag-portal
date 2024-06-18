@@ -8,7 +8,7 @@ use std::{
     rc::Rc,
 };
 
-use crate::BaseComponents::{SearchBar, Switch};
+use crate::BaseComponents::{Hint, SearchBar, Switch, Text};
 use crate::{
     BaseComponents::{Button, ContentType, FillMode, Roundness, Switcher},
     EXPLORE, HISTORY,
@@ -193,9 +193,15 @@ fn SubModViewer(
                         {ContentType::image(icon.to_string()).css("w-[50px] h-[50px] rounded-[10px]")}
                     }
                     div { class: "flex flex-col gap-[10px]",
-                        {ContentType::text(mods.read().name.clone()).css("text-xl font-bold")},
+                        Text {
+                            css: "text-xl font-bold",
+                            {mods.read().name.clone()}
+                        }
                         if let Some(version) = &mods.read().mod_version {
-                            {ContentType::hint(version).css("font-semibold text-xs italic")}
+                            Hint {
+                                css: "font-semibold text-xs italic",
+                                {version.clone()}
+                            }
                         }
                     }
                 }

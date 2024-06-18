@@ -1808,16 +1808,6 @@ input {
   animation: slideOutUp 500ms;
 }
 
-.svg-\[16px\] {
-  height: 16px;
-  width: 16px;
-}
-
-.svg-\[16px\] * {
-  max-height: 16px;
-  max-width: 16px;
-}
-
 .svg-\[20px\] {
   height: 20px;
   width: 20px;
