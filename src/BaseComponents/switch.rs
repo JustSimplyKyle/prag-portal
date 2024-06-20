@@ -12,8 +12,12 @@ pub fn Switch(clicked: Signal<bool>, onclick: Option<EventHandler>) -> Element {
                     onclick(());
                 }
             },
-            div { class: "transition-all duration-700 ease-linear flex-none group-aria-selected:flex-auto" }
-            div { class: "transition-all ease-in-out w-[20px] h-[20px] group-aria-selected:border-4 group-aria-selected:border-green group-aria-selected:bg-none rounded-full bg-secondary-surface" }
+            div {
+                class: "transition-all duration-700 ease-linear flex-none group-aria-selected:flex-auto"
+            }
+            div {
+                class: "transition-all ease-in-out w-[20px] h-[20px] group-aria-selected:border-4 group-aria-selected:border-green group-aria-selected:bg-none rounded-full bg-secondary-surface"
+            }
         }
     }
 }

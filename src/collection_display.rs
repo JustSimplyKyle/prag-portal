@@ -87,8 +87,10 @@ pub fn CollectionDisplay(collection: ReadOnlySignal<Collection>) -> Element {
     });
     let mod_search = use_signal(String::new);
     rsx! {
-        div { class: "relative flex flex-col",
-            div { class: "sticky top-0 p-[50px] rounded-2xl grid grid-flow-col items-stretch",
+        div {
+            class: "relative flex flex-col",
+            div {
+                class: "sticky top-0 p-[50px] rounded-2xl grid grid-flow-col items-stretch",
                 div {
                     class: "fixed inset-0 h-[900px]",
                     background: format!(
@@ -96,8 +98,10 @@ pub fn CollectionDisplay(collection: ReadOnlySignal<Collection>) -> Element {
                         DISPLAY_BACKGROUND,
                     )
                 }
-                div { class: "flex flex-col space-y-[35px]",
-                    div { class: "text-white font-black text-[80px] leading-normal capsize",
+                div {
+                    class: "flex flex-col space-y-[35px]",
+                    div {
+                        class: "text-white font-black text-[80px] leading-normal capsize",
                         {collection().display_name}
                     }
                     Button {
@@ -112,13 +116,16 @@ pub fn CollectionDisplay(collection: ReadOnlySignal<Collection>) -> Element {
                         extended_css_class: "w-fit shadow p-[13px]"
                     }
                 }
-                div { class: "flex justify-end",
-                    div { class: "flex flex-col space-y-[3px] w-full max-w-[250px]",
+                div {
+                    class: "flex justify-end",
+                    div {
+                        class: "flex flex-col space-y-[3px] w-full max-w-[250px]",
                         img {
                             class: "w-full h-[250px] rounded-t-[20px] rounded-b-[5px] object-cover",
                             src: collection.read().picture_path.to_string_lossy().to_string()
                         }
-                        div { class: "flex space-x-[3px] min-w-full",
+                        div {
+                            class: "flex space-x-[3px] min-w-full",
                             Button {
                                 roundness: Roundness::None,
                                 string_placements: vec![ContentType::svg(GAME_CONTROLLER).css("svg-[30px]").align_center()],
@@ -142,14 +149,22 @@ pub fn CollectionDisplay(collection: ReadOnlySignal<Collection>) -> Element {
                     }
                 }
             }
-            div { class: "px-[30px] bg-background rounded-2xl min-h-dvh scroll-smooth",
-                div { class: "bg-background flex justify-center items-center min-h-full py-[30px]",
+            div {
+                class: "px-[30px] bg-background rounded-2xl min-h-dvh scroll-smooth",
+                div {
+                    class: "bg-background flex justify-center items-center min-h-full py-[30px]",
                     {ContentType::svg(manganis::mg!(file("public/Line 155.svg")))}
                 }
-                div { class: "flex flex-col gap-[15px]",
-                    SelectionBar { sender: mod_search }
+                div {
+                    class: "flex flex-col gap-[15px]",
+                    SelectionBar {
+                        sender: mod_search
+                    }
                     if status().0 == CollectionDisplayTopSelection::Mods {
-                        ModViewer { collection, search: mod_search() }
+                        ModViewer {
+                            collection,
+                            search: mod_search()
+                        }
                     }
                 }
             }
@@ -166,7 +181,8 @@ fn ModViewer(collection: ReadOnlySignal<Collection>, search: String) -> Element 
         })
     });
     rsx! {
-        div { class: "grid grid-flow-row grid-cols-[repeat(auto-fill,273px)] gap-[3px]",
+        div {
+            class: "grid grid-flow-row grid-cols-[repeat(auto-fill,273px)] gap-[3px]",
             for x in mods()
                 .into_iter()
                 .flatten()
@@ -177,7 +193,10 @@ fn ModViewer(collection: ReadOnlySignal<Collection>, search: String) -> Element 
                     x.name.to_lowercase().contains(&search.to_lowercase())
                 })
             {
-                SubModViewer { collection, mods: x }
+                SubModViewer {
+                    collection,
+                    mods: x
+                }
             }
         }
     }
@@ -191,13 +210,17 @@ fn SubModViewer(
     let clicked = use_signal(|| false);
     let icon = use_memo(move || mods.read().icon_url.clone());
     rsx! {
-        div { class: "bg-deep-background flex flex-col p-[10px] w-[273px] rounded-[5px]",
-            div { class: "pb-[10px]",
-                div { class: "flex gap-[15px] items-center",
+        div {
+            class: "bg-deep-background flex flex-col p-[10px] w-[273px] rounded-[5px]",
+            div {
+                class: "pb-[10px]",
+                div {
+                    class: "flex gap-[15px] items-center",
                     if let Some(icon) = &*icon.read() {
                         {ContentType::image(icon.to_string()).css("w-[50px] h-[50px] rounded-[10px]")}
                     }
-                    div { class: "flex flex-col gap-[10px]",
+                    div {
+                        class: "flex flex-col gap-[10px]",
                         Text {
                             css: "text-xl font-bold",
                             {mods.read().name.clone()}
@@ -211,8 +234,10 @@ fn SubModViewer(
                     }
                 }
             }
-            div { class: "grid grid-flow-col items-stretch",
-                div { class: "justify-self-start flex gap-[5px]",
+            div {
+                class: "grid grid-flow-col items-stretch",
+                div {
+                    class: "justify-self-start flex gap-[5px]",
                     Button {
                         roundness: Roundness::Pill,
                         string_placements: vec![ContentType::svg(UNARCHIVE).css("svg-[16px]").align_center()],
@@ -228,8 +253,11 @@ fn SubModViewer(
                         fill_mode: FillMode::Fit
                     }
                 }
-                div { class: "justify-self-end",
-                    Switch { clicked }
+                div {
+                    class: "justify-self-end",
+                    Switch {
+                        clicked
+                    }
                 }
             }
         }
@@ -239,8 +267,10 @@ fn SubModViewer(
 #[component]
 fn SelectionBar(sender: Signal<String>) -> Element {
     rsx! {
-        div { class: "grid grid-flow-col items-stretch",
-            div { class: "bg-deep-background rounded-full flex justify-start w-fit",
+        div {
+            class: "grid grid-flow-col items-stretch",
+            div {
+                class: "bg-deep-background rounded-full flex justify-start w-fit",
                 Button {
                     extended_css_class: "pl-[20px] pr-[25px] py-[12px]",
                     roundness: Roundness::Pill,
@@ -286,8 +316,11 @@ fn SelectionBar(sender: Signal<String>) -> Element {
                     ]
                 }
             }
-            div { class: "justify-end flex items-center space-x-[7px]",
-                SearchBar { sender }
+            div {
+                class: "justify-end flex items-center space-x-[7px]",
+                SearchBar {
+                    sender
+                }
                 Button {
                     roundness: Roundness::Pill,
                     string_placements: vec![ContentType::svg(EXPLORE).css("svg-[25px]").align_center()],

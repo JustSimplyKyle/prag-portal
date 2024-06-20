@@ -326,7 +326,8 @@ fn App() -> Element {
         collection_builder(None, "1.20.1").await.unwrap();
     });
     rsx! {
-        div { class: "[&_*]:transform-gpu font-['GenSenRounded TW'] bg-deep-background min-h-screen min-w-full font-display leading-normal",
+        div {
+            class: "[&_*]:transform-gpu font-['GenSenRounded TW'] bg-deep-background min-h-screen min-w-full font-display leading-normal",
             {
                 TOP_LEVEL_COMPONENT().into_iter().map(|x| (x.pointer)(x.props))
             },
@@ -349,7 +350,8 @@ fn App() -> Element {
                         }
                     }
                 } },
-                Layout {}
+                Layout {
+                }
             }
         }
     }
@@ -384,23 +386,41 @@ fn Layout() -> Element {
                     }
                 }
             },
-            SideBar {}
-            div { class: "w-full min-h-screen relative *:overflow-scroll",
-                div { class: "absolute inset-0 z-0 min-h-full animation-[main-page^slideDown^explore^slideOutUp] animation-[main-page^slideDown^collections^slideOutUp]",
-                    LayoutContainer { MainPage {} }
+            SideBar {
+            }
+            div {
+                class: "w-full min-h-screen relative *:overflow-scroll",
+                div {
+                    class: "absolute inset-0 z-0 min-h-full animation-[main-page^slideDown^explore^slideOutUp] animation-[main-page^slideDown^collections^slideOutUp]",
+                    LayoutContainer {
+                        MainPage {
+                        }
+                    }
                 }
-                div { class: "absolute inset-0 z-0 min-h-full animation-[explore^slideUp^main-page^slideOutDown] animation-[explore^slideDown^collections^slideOutUp]",
-                    LayoutContainer { Explore {} }
+                div {
+                    class: "absolute inset-0 z-0 min-h-full animation-[explore^slideUp^main-page^slideOutDown] animation-[explore^slideDown^collections^slideOutUp]",
+                    LayoutContainer {
+                        Explore {
+                        }
+                    }
                 }
-                div { class: "absolute inset-0 z-0 min-h-full animation-[collections^slideUp^explore^slideOutDown] animation-[collections^slideUp^main-page^slideOutDown]",
-                    LayoutContainer { Collections {} }
+                div {
+                    class: "absolute inset-0 z-0 min-h-full animation-[collections^slideUp^explore^slideOutDown] animation-[collections^slideUp^main-page^slideOutDown]",
+                    LayoutContainer {
+                        Collections {
+                        }
+                    }
                 }
                 div {
                     class: "absolute inset-0 z-0 min-h-full min-w-full",
                     id: Pages::DownloadProgress.slide_in_id(),
-                    LayoutContainer { DownloadProgress {} }
+                    LayoutContainer {
+                        DownloadProgress {
+                        }
+                    }
                 }
-                CollectionContainer {}
+                CollectionContainer {
+                }
             }
         }
     }
@@ -415,8 +435,11 @@ fn CollectionContainer() -> Element {
                     key: "{name.0}",
                     class: "absolute inset-0 z-0 min-h-full min-w-full",
                     id: Pages::new_collection_page(name).slide_in_id(),
-                    LayoutContainer { extended_class: "p-0",
-                        CollectionDisplay { collection }
+                    LayoutContainer {
+                        extended_class: "p-0",
+                        CollectionDisplay {
+                            collection
+                        }
                     }
                 }
             }
@@ -429,8 +452,10 @@ fn CollectionContainer() -> Element {
 #[component]
 fn LayoutContainer(children: Element, #[props(default)] extended_class: String) -> Element {
     rsx! {
-        div { class: tw_merge!("bg-background min-h-screen rounded-xl p-8 min-w-full", extended_class),
-            div { class: "flex flex-col space-y-[20px] transition-all xl:items-center xl:*:justify-center xl:*:max-w-[1180px] xl:*:w-full",
+        div {
+            class: tw_merge!("bg-background min-h-screen rounded-xl p-8 min-w-full", extended_class),
+            div {
+                class: "flex flex-col space-y-[20px] transition-all xl:items-center xl:*:justify-center xl:*:max-w-[1180px] xl:*:w-full",
                 {children}
             }
         }
@@ -476,8 +501,10 @@ fn DownloadProgress() -> Element {
                         "linear-gradient(88deg, #0E0E0E 14.88%, rgba(14, 14, 14, 0.70) 100%), url('{}') lightgray 50% / cover no-repeat",
                         collection.picture_path.to_string_lossy().to_string(),
                     ),
-                    div { class: "w-full grid grid-flow-col justify-stretch",
-                        div { class: "justify-self-start flex flex-col gap-[20px]",
+                    div {
+                        class: "w-full grid grid-flow-col justify-stretch",
+                        div {
+                            class: "justify-self-start flex flex-col gap-[20px]",
                             Text {
                                 css: "justify-self-start text-[60px] font-black text-white",
                                 {collection.display_name.clone()}
@@ -492,7 +519,8 @@ fn DownloadProgress() -> Element {
                                 }
                             }
                         }
-                        div { class: "justify-self-end flex",
+                        div {
+                            class: "justify-self-end flex",
                             Text {
                                 css: "text-[50px] font-bold text-white",
                                 "{progress.speed.unwrap_or_default().display_size_from_megabytes()}"
@@ -512,25 +540,12 @@ fn DownloadProgress() -> Element {
                         div { class: "justify-self-center w-full flex gap-[15px]",
                             {ContentType::svg(DRAG_INDICATOR).css("self-center svg-[30px]")},
                             div { class: "w-full flex gap-[20px]",
-                                Image {
-                                    css: "bg-cover bg-white w-[80px] h-[80px] rounded-[10px]",
-                                    {collection.picture_path.to_string_lossy().to_string()}
-                                }
+                                Image { css: "bg-cover bg-white w-[80px] h-[80px] rounded-[10px]", {collection.picture_path.to_string_lossy().to_string()} }
                                 div { class: "w-full flex flex-col justify-start gap-[10px]",
-                                    Text {
-                                        css: "text-[25px] fond-bold"
-                                        {collection.display_name.clone()}
-                                    }
+                                    Text { css: "text-[25px] fond-bold", {collection.display_name.clone()} }
                                     div { class: "flex gap-[4px]",
-                                        Hint {
-                                            css: "text-base font-semibold",
-                                            {format!("{} / {} |", progress.current_size.unwrap_or_default().display_size_from_megabytes(), progress.total_size.unwrap_or_default().display_size_from_megabytes())},
-
-                                        }
-                                        Text {
-                                            css: "text-base font-semibold",
-                                            "{progress.speed.unwrap_or_default().display_size_from_megabytes()}"
-                                        }
+                                        Hint { css: "text-base font-semibold", {format!("{} / {} |", progress.current_size.unwrap_or_default().display_size_from_megabytes(), progress.total_size.unwrap_or_default().display_size_from_megabytes())} }
+                                        Text { css: "text-base font-semibold", "{progress.speed.unwrap_or_default().display_size_from_megabytes()}" }
                                     }
                                     div { class: "w-full h-full flex items-end",
                                         div { class: "rounded-[50px] w-full h-[7px] bg-zinc-800",

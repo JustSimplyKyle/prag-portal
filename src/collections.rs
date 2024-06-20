@@ -25,9 +25,12 @@ pub fn Collections() -> Element {
     let sender = use_signal(String::new);
 
     rsx! {
-        div { class: "flex flex-col space-y-[10px]",
-            div { class: "grid grid-flow-col justify-stretch items-center h-[55px]",
-                div { class: "flex h-full items-center space-x-[10px]",
+        div {
+            class: "flex flex-col space-y-[10px]",
+            div {
+                class: "grid grid-flow-col justify-stretch items-center h-[55px]",
+                div {
+                    class: "flex h-full items-center space-x-[10px]",
                     Button {
                         roundness: Roundness::Pill,
                         fill_mode: FillMode::Fit,
@@ -63,7 +66,8 @@ pub fn Collections() -> Element {
                         extended_css_class: "pl-[20px] pr-[25px] h-full"
                     }
                 }
-                div { class: "flex h-full items-center gap-[10px] flex-row-reverse justify-self-end",
+                div {
+                    class: "flex h-full items-center gap-[10px] flex-row-reverse justify-self-end",
                     Button {
                         roundness: Roundness::Pill,
                         fill_mode: FillMode::Fit,
@@ -103,10 +107,13 @@ pub fn Collections() -> Element {
                         string_placements: vec![ContentType::svg(NOTE).css("svg-[30px]").align_center()],
                         extended_css_class: "hover:bg-green px-[20px] h-full"
                     }
-                    SearchBar { sender }
+                    SearchBar {
+                        sender
+                    }
                 }
             }
-            div { class: "grid grid-flow-row grid-cols-[repeat(auto-fill,280px)] gap-[20px]",
+            div {
+                class: "grid grid-flow-row grid-cols-[repeat(auto-fill,280px)] gap-[20px]",
                 for collection in collections {
                     CollectionBlock {key: "{collection.get_collection_id().0}",
                         collection,

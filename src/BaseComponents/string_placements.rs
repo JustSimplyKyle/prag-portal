@@ -62,7 +62,8 @@ impl Contents {
     pub fn get_element(self) -> Element {
         let alignment_class = self.alignment.get_alignment_class();
         rsx! {
-            div { class: tw_merge!(alignment_class, self.css),
+            div {
+                class: tw_merge!(alignment_class, self.css),
                 for x in self.contents {
                     {x}
                 }
@@ -138,8 +139,13 @@ impl Content {
         match self.content {
             ContentType::Svg(x) => {
                 rsx! {
-                    div { class: tw_merge!(self.css, "[&_*]:pointer-events-none"),
-                        object { id: "mysvg", r#type: "image/svg+xml", data: x }
+                    div {
+                        class: tw_merge!(self.css, "[&_*]:pointer-events-none"),
+                        object {
+                            id: "mysvg",
+                            r#type: "image/svg+xml",
+                            data: x
+                        }
                     }
                 }
             }
@@ -161,7 +167,10 @@ impl Content {
             }
             ContentType::Text(x) | ContentType::Hint(x) => {
                 rsx! {
-                    div { class: self.css, { x } }
+                    div {
+                        class: self.css,
+                        { x }
+                    }
                 }
             }
             ContentType::Custom(x) => x,

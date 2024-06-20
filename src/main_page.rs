@@ -26,8 +26,10 @@ pub const ARROW_RIGHT: &str = manganis::mg!(file("./public/keyboard_arrow_right.
 #[component]
 pub fn MainPage() -> Element {
     rsx! {
-        SuggestionPage {}
-        CollectionsPage {}
+        SuggestionPage {
+        }
+        CollectionsPage {
+        }
     }
 }
 
@@ -59,15 +61,23 @@ pub fn CollectionBlock(
                         .switch_active_to_self();
                 },
                 ..attributes,
-                img { class: img_class, src: picture_path }
-                if gradient {
-                    div { class: "absolute inset-0 bg-gradient-to-t from-deep-background to-23%" }
+                img {
+                    class: img_class,
+                    src: picture_path
                 }
-                div { class: "absolute inset-0 px-5 pt-5 pb-[25px] flex flex-col gap-[15px] *:text-ellipsis overflow-hidden justify-end items-start",
-                    div { class: "text-3xl leading-normal capsize text-white font-bold",
+                if gradient {
+                    div {
+                        class: "absolute inset-0 bg-gradient-to-t from-deep-background to-23%"
+                    }
+                }
+                div {
+                    class: "absolute inset-0 px-5 pt-5 pb-[25px] flex flex-col gap-[15px] *:text-ellipsis overflow-hidden justify-end items-start",
+                    div {
+                        class: "text-3xl leading-normal capsize text-white font-bold",
                         {main_text}
                     }
-                    div { class: "text-[15px] leading-normal capsize text-white text-opacity-50",
+                    div {
+                        class: "text-[15px] leading-normal capsize text-white text-opacity-50",
                         {hint}
                     }
                 }
@@ -155,7 +165,8 @@ fn SuggestionPage() -> Element {
     ];
     let len = suggested_moves_placementss.len();
     rsx! {
-        div { class: "flex space-x-2.5 max-w-fit h-[50px]",
+        div {
+            class: "flex space-x-2.5 max-w-fit h-[50px]",
             Button {
                 roundness: Roundness::Pill,
                 size: Size::Small,
@@ -207,30 +218,42 @@ fn SuggestionPage() -> Element {
                 string_placements: vec![ContentType::text("個人化收藏").align_center()]
             }
         }
-        div { class: "flex space-x-0 lg:space-x-[20px] justify-center",
-            div { class: "relative hidden shrink-0 lg:block shrink-0 h-[450px] w-[450px] shadow rounded",
+        div {
+            class: "flex space-x-0 lg:space-x-[20px] justify-center",
+            div {
+                class: "relative hidden shrink-0 lg:block shrink-0 h-[450px] w-[450px] shadow rounded",
                 img {
                     class: "absolute inset-0 z-0 rounded-[20px]",
                     src: IMG.to_string()
                 }
-                div { class: "absolute inset-0 z-50 flex justify-center items-center bg-gradient-to-t from-deep-background to-deep-background min-h-full max-h-full rounded-[20px]",
+                div {
+                    class: "absolute inset-0 z-50 flex justify-center items-center bg-gradient-to-t from-deep-background to-deep-background min-h-full max-h-full rounded-[20px]",
                     div {
-                        span { class: "text-lime-300 text-6xl font-bold font-['GenSenRounded TW'] leading-[78px] tracking-[6px]",
+                        span {
+                            class: "text-lime-300 text-6xl font-bold font-['GenSenRounded TW'] leading-[78px] tracking-[6px]",
                             "探索  創造"
-                            br {}
+                            br {
+                            }
                         }
-                        span { class: "text-white text-6xl font-normal font-['GenSenRounded TW'] leading-[78px] tracking-[6px]",
+                        span {
+                            class: "text-white text-6xl font-normal font-['GenSenRounded TW'] leading-[78px] tracking-[6px]",
                             "無窮  無限"
-                            br {}
+                            br {
+                            }
                             "創作  可能"
                         }
                     }
                 }
-                div { class: "absolute inset-0 z-20 self-stretch inline-flex justify-center items-center",
-                    object { r#type: "image/svg+xml", data: ICON }
+                div {
+                    class: "absolute inset-0 z-20 self-stretch inline-flex justify-center items-center",
+                    object {
+                        r#type: "image/svg+xml",
+                        data: ICON
+                    }
                 }
             }
-            div { class: "max-h-[450px] grid-flow-row justify-center content-evenly items-center w-full overflow-scroll space-y-1 p-0",
+            div {
+                class: "max-h-[450px] grid-flow-row justify-center content-evenly items-center w-full overflow-scroll space-y-1 p-0",
                 for (u , x) in suggested_moves_placementss.into_iter().enumerate() {
                     Button {
                         roundness: if u == 0 {
@@ -254,7 +277,8 @@ fn SuggestionPage() -> Element {
 fn CollectionsPage() -> Element {
     let collections = STORAGE().collections;
     rsx! {
-        div { class: "flex flex-col space-x-0",
+        div {
+            class: "flex flex-col space-x-0",
             Button {
                 roundness: Roundness::Top,
                 string_placements: vec![
@@ -279,10 +303,14 @@ fn CollectionsPage() -> Element {
                 extended_css_class: "p-[30px] mb-0",
                 clickable: false
             }
-            div { class: ButtonClass::builder().roundness(Roundness::Bottom).with_class("min-w-screen p-0"),
-                div { class: "flex space-x-[3px] overflow-scroll",
+            div {
+                class: ButtonClass::builder().roundness(Roundness::Bottom).with_class("min-w-screen p-0"),
+                div {
+                    class: "flex space-x-[3px] overflow-scroll",
                     for collection in collections {
-                        CollectionBlock { collection }
+                        CollectionBlock {
+                            collection
+                        }
                     }
                 }
             }

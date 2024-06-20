@@ -33,13 +33,18 @@ pub fn SideBar() -> Element {
     let collection_preview = collections.iter().take(3).collect::<Vec<_>>();
 
     let folded_images = rsx! {
-        div { class: "grid grid-flow-col justify-stretch items-center",
-            div { class: "justify-self-start transition-all",
+        div {
+            class: "grid grid-flow-col justify-stretch items-center",
+            div {
+                class: "justify-self-start transition-all",
                 {ContentType::svg(HOME).css("hidden group-aria-expanded:block")},
-                div { class: "flex items-center space-x-0",
-                    div { class: "flex space-x-[-20px]",
+                div {
+                    class: "flex items-center space-x-0",
+                    div {
+                        class: "flex space-x-[-20px]",
                         for x in collection_preview {
-                            div { key: "{x.get_collection_id().0}",
+                            div {
+                                key: "{x.get_collection_id().0}",
                                 {
                                     ContentType::image(x.picture_path.to_string_lossy().to_string())
                                     .css(
@@ -54,7 +59,8 @@ pub fn SideBar() -> Element {
                     }
                 }
             }
-            div { class: "justify-self-end group-aria-busy:hidden",
+            div {
+                class: "justify-self-end group-aria-busy:hidden",
                 Text {
                     css: "text-lime-300",
                     "我的錦集"
@@ -63,13 +69,15 @@ pub fn SideBar() -> Element {
         }
     };
     rsx! {
-        div { class: "flex flex-col place-content-start mx-5",
+        div {
+            class: "flex flex-col place-content-start mx-5",
             div {
                 class: "w-[300px] space-y-5 transition-all ease-linear duration-500 aria-expanded:w-[80px] group",
                 aria_expanded: !expanded(),
                 aria_busy: !delayed_expanded().unwrap_or(false),
                 // top
-                div { class: "flex flex-col space-y-1",
+                div {
+                    class: "flex flex-col space-y-1",
                     Button {
                         roundness: Roundness::Top,
                         string_placements: vec![
@@ -103,14 +111,22 @@ pub fn SideBar() -> Element {
                     }
                 }
                 // middle
-                div { class: "flex flex-col flex-nowrap overflow-scroll max-h-[451px] space-y-1",
-                    Button { roundness: Roundness::Top, string_placements: folded_images, extended_css_class: "bg-background" }
+                div {
+                    class: "flex flex-col flex-nowrap overflow-scroll max-h-[451px] space-y-1",
+                    Button {
+                        roundness: Roundness::Top,
+                        string_placements: folded_images,
+                        extended_css_class: "bg-background"
+                    }
                     for collection in collections {
-                        SidebarCollectionBlock { key: "{collection.get_collection_id().0}", collection }
+                        SidebarCollectionBlock {key: "{collection.get_collection_id().0}",
+                            collection
+                        }
                     }
                 }
                 // bottom
-                div { class: "flex flex-col space-y-1",
+                div {
+                    class: "flex flex-col space-y-1",
                     Button {
                         roundness: Roundness::Top,
                         string_placements: vec![
@@ -149,11 +165,14 @@ pub fn SideBar() -> Element {
 fn SidebarCollectionBlock(collection: Collection) -> Element {
     let picture_path = collection.picture_path.to_string_lossy().to_string();
     let img_block = rsx! {
-        div { class: "relative transition-all container w-[50px] h-[50px] group-aria-expanded:w-20 group-aria-expanded:h-20 border-2 border-[#2E2E2E] rounded-[15px] group-aria-expanded:rounded-[5px]",
+        div {
+            class: "relative transition-all container w-[50px] h-[50px] group-aria-expanded:w-20 group-aria-expanded:h-20 border-2 border-[#2E2E2E] rounded-[15px] group-aria-expanded:rounded-[5px]",
             { ContentType::image(&picture_path)
             .css("absolute inset-0 transition-all w-full h-full object-cover inline-flex items-center rounded-[15px] group-aria-expanded:rounded-[5px]",)
             },
-            div { class: "absolute inset-x-0 bottom-0 w-3 h-3 bg-[#CCE246] rounded-full" }
+            div {
+                class: "absolute inset-x-0 bottom-0 w-3 h-3 bg-[#CCE246] rounded-full"
+            }
         }
     };
     let display = &collection.display_name;
