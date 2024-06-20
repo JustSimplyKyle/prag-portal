@@ -4,7 +4,11 @@ use dioxus::prelude::*;
 use rust_lib::api::shared_resources::{collection::Collection, entry::STORAGE};
 
 use crate::{
-    BaseComponents::{Button, ContentType, Roundness, Switcher, Text},
+    BaseComponents::{
+        button::{Button, Roundness},
+        string_placements::{ContentType, Text},
+        Switcher,
+    },
     Pages, ARROW_RIGHT, EXPLORE, HISTORY, HOME, SIDEBAR_COLLECTION, SIM_CARD,
 };
 

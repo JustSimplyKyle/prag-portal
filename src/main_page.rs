@@ -6,7 +6,9 @@ use tailwind_fuse::*;
 
 use crate::{
     BaseComponents::{
-        Alignment, Button, ButtonClass, ContentType, Contents, FillMode, Roundness, Size, Switcher,
+        button::{Button, ButtonClass, FillMode, Roundness, Size},
+        string_placements::{Alignment, ContentType, Contents},
+        Switcher,
     },
     Pages,
 };

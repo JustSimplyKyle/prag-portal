@@ -8,9 +8,14 @@ use std::{
     rc::Rc,
 };
 
-use crate::BaseComponents::{Hint, SearchBar, Switch, Text};
 use crate::{
-    BaseComponents::{Button, ContentType, FillMode, Roundness, Switcher},
+    BaseComponents::{
+        button::{Button, FillMode, Roundness, Size},
+        search_bar::SearchBar,
+        string_placements::{ContentType, Hint, Text},
+        switch::Switch,
+        Switcher,
+    },
     EXPLORE, HISTORY,
 };
 
@@ -212,14 +217,14 @@ fn SubModViewer(
                         roundness: Roundness::Pill,
                         string_placements: vec![ContentType::svg(UNARCHIVE).css("svg-[16px]").align_center()],
                         extended_css_class: "bg-background px-[15px] h-[30px]",
-                        size: crate::BaseComponents::Size::Small,
+                        size: Size::Small,
                         fill_mode: FillMode::Fit
                     }
                     Button {
                         roundness: Roundness::Pill,
                         string_placements: vec![ContentType::svg(DELETE).css("svg-[16px]").align_center()],
                         extended_css_class: "bg-background px-[15px] h-[30px]",
-                        size: crate::BaseComponents::Size::Small,
+                        size: Size::Small,
                         fill_mode: FillMode::Fit
                     }
                 }

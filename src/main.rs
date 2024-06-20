@@ -11,23 +11,22 @@ use dioxus::html::input_data::MouseButton;
 use manganis::ImageAsset;
 use rust_lib::api::backend_exclusive::vanilla::version::VersionMetadata;
 use rust_lib::api::shared_resources::collection::{CollectionId, ModLoader, ModLoaderType};
-use std::any::Any;
-use std::collections::BTreeMap;
-use std::fmt::Display;
 use std::hash::{DefaultHasher, Hash, Hasher};
 use std::path::PathBuf;
 use std::sync::Arc;
 use tailwind_fuse::*;
+use BaseComponents::button::{Button, FillMode, Roundness};
+use BaseComponents::modal::{subModalProps, ComponentPointer, Modal};
+use BaseComponents::string_placements::{ContentType, Hint, Image, Text};
+use BaseComponents::Switcher;
 
 use dioxus::prelude::*;
 use log::LevelFilter;
-use BaseComponents::{subModalProps, ComponentPointer, Hint, Switcher, Text};
 
 use crate::collection_display::CollectionDisplay;
 use crate::collections::Collections;
 use crate::main_page::MainPage;
 use crate::side_bar::SideBar;
-use crate::BaseComponents::{Alignment, Button, ContentType, Contents, FillMode, Modal, Roundness};
 
 pub const COLLECTION_PIC: ImageAsset = manganis::mg!(image("./public/pic1.png").preload());
 pub const HOME: &str = manganis::mg!(file("./public/home.svg"));
@@ -510,35 +509,34 @@ fn DownloadProgress() -> Element {
                 Button {key: "{collection.get_collection_id().0}",
                     roundness: Roundness::Pill,
                     string_placements: rsx! {
-                        div { class: "w-full grid grid-flow-col justify-stretch items-stretch",
-                            div { class: "container justify-self-start",
-                                div { class: "w-full flex gap-[15px]",
-                                    {ContentType::svg(DRAG_INDICATOR).css("self-center svg-[30px]")},
-                                    div { class: "w-full flex gap-[20px]",
-                                        {ContentType::image(collection.picture_path.to_string_lossy().to_string()).css("bg-cover bg-white w-[80px] h-[80px] rounded-[10px]")},
-                                        div { class: "w-full flex flex-col justify-start gap-[10px]",
-                                            Text {
-                                                css: "text-[25px] fond-bold"
-                                                {collection.display_name.clone()}
-                                            }
-                                            div { class: "flex gap-[4px]",
-                                                Hint {
-                                                    css: "text-base font-semibold",
-                                                    {format!("{} / {} |", progress.current_size.unwrap_or_default().display_size_from_megabytes(), progress.total_size.unwrap_or_default().display_size_from_megabytes())},
+                        div { class: "justify-self-center w-full flex gap-[15px]",
+                            {ContentType::svg(DRAG_INDICATOR).css("self-center svg-[30px]")},
+                            div { class: "w-full flex gap-[20px]",
+                                Image {
+                                    css: "bg-cover bg-white w-[80px] h-[80px] rounded-[10px]",
+                                    {collection.picture_path.to_string_lossy().to_string()}
+                                }
+                                div { class: "w-full flex flex-col justify-start gap-[10px]",
+                                    Text {
+                                        css: "text-[25px] fond-bold"
+                                        {collection.display_name.clone()}
+                                    }
+                                    div { class: "flex gap-[4px]",
+                                        Hint {
+                                            css: "text-base font-semibold",
+                                            {format!("{} / {} |", progress.current_size.unwrap_or_default().display_size_from_megabytes(), progress.total_size.unwrap_or_default().display_size_from_megabytes())},
 
-                                                }
-                                                Text {
-                                                    css: "text-base font-semibold",
-                                                    "{progress.speed.unwrap_or_default().display_size_from_megabytes()}"
-                                                }
-                                            }
-                                            div { class: "w-full h-full flex items-end",
-                                                div { class: "rounded-[50px] w-full h-[7px] bg-zinc-800",
-                                                    div {
-                                                        class: "transition-all rounded-[50px] bg-white h-[7px]",
-                                                        width: format!("{}%", progress.percentages)
-                                                    }
-                                                }
+                                        }
+                                        Text {
+                                            css: "text-base font-semibold",
+                                            "{progress.speed.unwrap_or_default().display_size_from_megabytes()}"
+                                        }
+                                    }
+                                    div { class: "w-full h-full flex items-end",
+                                        div { class: "rounded-[50px] w-full h-[7px] bg-zinc-800",
+                                            div {
+                                                class: "transition-all rounded-[50px] bg-white h-[7px]",
+                                                width: format!("{}%", progress.percentages)
                                             }
                                         }
                                     }
