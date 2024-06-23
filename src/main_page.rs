@@ -8,7 +8,7 @@ use crate::{
     BaseComponents::{
         button::{Button, ButtonClass, FillMode, Roundness, Size},
         string_placements::{Alignment, ContentType, Contents},
-        Switcher,
+        switcher::Switcher,
     },
     Pages,
 };

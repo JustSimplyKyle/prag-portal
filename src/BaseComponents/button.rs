@@ -3,7 +3,7 @@ use std::rc::Rc;
 use dioxus::prelude::*;
 use tailwind_fuse::*;
 
-use super::{string_placements::StringPlacements, Switcher};
+use super::{string_placements::StringPlacements, switcher::Switcher};
 
 #[derive(TwClass, Clone, Copy)]
 #[tw(
@@ -95,7 +95,7 @@ pub fn Button(
     roundness: Roundness,
     #[props(into)] string_placements: StringPlacements,
     #[props(default)] extended_css_class: String,
-    signal: Option<Rc<dyn Switcher>>,
+    #[props(into)] signal: Option<Rc<dyn Switcher>>,
     #[props(default = true)] clickable: bool,
     #[props(into)] onclick: Option<EventHandler>,
     #[props(extends = GlobalAttributes, extends = div)] mut attributes: Vec<Attribute>,

@@ -7,7 +7,7 @@ use crate::{
     BaseComponents::{
         button::{Button, Roundness},
         string_placements::{ContentType, Text},
-        Switcher,
+        switcher::Switcher,
     },
     Pages, ARROW_RIGHT, EXPLORE, HISTORY, HOME, SIDEBAR_COLLECTION, SIM_CARD,
 };
@@ -85,7 +85,7 @@ pub fn SideBar() -> Element {
                             ContentType::text("首頁").css("group-aria-busy:hidden").align_right(),
                         ],
                         focus_color_change: true,
-                        signal: Rc::new(Pages::MainPage) as Rc<dyn Switcher>,
+                        signal: Pages::MainPage,
                         extended_css_class: "bg-background group-aria-expanded:pr-5"
                     }
                     Button {
@@ -95,7 +95,7 @@ pub fn SideBar() -> Element {
                             ContentType::text("探索").css("group-aria-busy:hidden").align_right(),
                         ],
                         focus_color_change: true,
-                        signal: Rc::new(Pages::Explore) as Rc<dyn Switcher>,
+                        signal: Pages::Explore,
                         extended_css_class: "bg-background group-aria-expanded:pr-5"
                     }
                     Button {
@@ -104,7 +104,7 @@ pub fn SideBar() -> Element {
                             ContentType::svg(SIDEBAR_COLLECTION).align_left(),
                             ContentType::text("收藏庫").css("group-aria-busy:hidden").align_right(),
                         ],
-                        signal: Rc::new(Pages::Collections) as Rc<dyn Switcher>,
+                        signal: Pages::Collections,
                         onclick,
                         focus_color_change: true,
                         extended_css_class: "bg-background group-aria-expanded:pr-5"

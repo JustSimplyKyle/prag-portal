@@ -1,20 +1,20 @@
+use crate::impl_optional_switcher;
 use dioxus::prelude::*;
 use manganis::ImageAsset;
 use rust_lib::api::{
     backend_exclusive::mod_management::mods::ModMetadata, shared_resources::collection::Collection,
 };
-use std::{
-    hash::{DefaultHasher, Hash, Hasher},
-    rc::Rc,
-};
+use std::hash::{Hash, Hasher};
+use tokio_stream::StreamExt;
 
 use crate::{
+    impl_context_switcher,
     BaseComponents::{
         button::{Button, FillMode, Roundness, Size},
         search_bar::SearchBar,
         string_placements::{ContentType, Hint, Text},
         switch::Switch,
-        Switcher,
+        switcher::{Comparison, Switcher},
     },
     EXPLORE, HISTORY,
 };
@@ -32,8 +32,6 @@ pub static DELETE: &str = manganis::mg!(file("./public/delete.svg"));
 pub static UNDO: &str = manganis::mg!(file("./public/undo.svg"));
 pub static HORIZ: &str = manganis::mg!(file("./public/more_horiz.svg"));
 
-pub(crate) type Comparison<T> = (T, Option<T>);
-
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
 pub(crate) enum CollectionDisplayTopSelection {
     Mods,
@@ -42,34 +40,13 @@ pub(crate) enum CollectionDisplayTopSelection {
     ShaderPacks,
 }
 
-impl Switcher for CollectionDisplayTopSelection {
-    fn hashed_value(&self) -> u64 {
-        let mut hasher = DefaultHasher::new();
-        self.hash(&mut hasher);
-        hasher.finish()
-    }
-
-    fn compare(&self) -> bool {
-        let top = use_context::<Signal<Comparison<Self>>>();
-        &top().0 == self
-    }
-
-    fn switch_active_to_self(&self) {
-        let mut global = use_context::<Signal<Comparison<Self>>>();
-        let prev = global().0;
-        if &prev != self {
-            global.write().1 = Some(prev);
-        }
-        global.write().0 = *self;
-    }
-}
+impl_context_switcher!(CollectionDisplayTopSelection);
 
 #[derive(Clone)]
 pub enum Action {
     Start,
     Stop,
 }
-use futures_util::stream::StreamExt;
 
 #[component]
 pub fn CollectionDisplay(collection: ReadOnlySignal<Collection>) -> Element {
@@ -275,7 +252,7 @@ fn SelectionBar(sender: Signal<String>) -> Element {
                     extended_css_class: "pl-[20px] pr-[25px] py-[12px]",
                     roundness: Roundness::Pill,
                     fill_mode: FillMode::Fit,
-                    signal: Rc::new(CollectionDisplayTopSelection::Mods) as Rc<dyn Switcher>,
+                    signal: CollectionDisplayTopSelection::Mods,
                     focus_color_change: true,
                     string_placements: vec![
                         ContentType::svg(CUBE).css("svg-[30px]").align_left(),
@@ -287,7 +264,7 @@ fn SelectionBar(sender: Signal<String>) -> Element {
                     roundness: Roundness::Pill,
                     fill_mode: FillMode::Fit,
                     focus_color_change: true,
-                    signal: Rc::new(CollectionDisplayTopSelection::World) as Rc<dyn Switcher>,
+                    signal: CollectionDisplayTopSelection::World,
                     string_placements: vec![
                         ContentType::svg(GLOBAL_ASIA).css("svg-[30px]").align_left(),
                         ContentType::text("世界").align_right(),
@@ -298,7 +275,7 @@ fn SelectionBar(sender: Signal<String>) -> Element {
                     roundness: Roundness::Pill,
                     fill_mode: FillMode::Fit,
                     focus_color_change: true,
-                    signal: Rc::new(CollectionDisplayTopSelection::ResourcePack) as Rc<dyn Switcher>,
+                    signal: CollectionDisplayTopSelection::ResourcePack,
                     string_placements: vec![
                         ContentType::svg(CIRCLE_JOIN).css("svg-[30px]").align_left(),
                         ContentType::text("資源包").align_right(),
@@ -309,7 +286,7 @@ fn SelectionBar(sender: Signal<String>) -> Element {
                     roundness: Roundness::Pill,
                     fill_mode: FillMode::Fit,
                     focus_color_change: true,
-                    signal: Rc::new(CollectionDisplayTopSelection::ShaderPacks) as Rc<dyn Switcher>,
+                    signal: CollectionDisplayTopSelection::ShaderPacks,
                     string_placements: vec![
                         ContentType::svg(MOTION_MODE).css("svg-[30px]").align_left(),
                         ContentType::text("光影包").align_right(),
