@@ -21,3 +21,4 @@ tailwind_fuse = { version = "0.2.0", features = ["variant"] }
 anyhow = "1.0.82"
 futures-util = "0.3.30"
 tokio-stream = "0.1.15"
+strum = { version = "0.26.2", features = ["derive", "strum_macros"] }

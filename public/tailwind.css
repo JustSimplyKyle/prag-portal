@@ -2312,6 +2312,10 @@ input {
   justify-content: stretch;
 }
 
+.gap-0 {
+  gap: 0px;
+}
+
 .gap-\[10px\] {
   gap: 10px;
 }

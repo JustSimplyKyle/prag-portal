@@ -1,10 +1,10 @@
-use crate::impl_optional_switcher;
 use dioxus::prelude::*;
 use manganis::ImageAsset;
 use rust_lib::api::{
     backend_exclusive::mod_management::mods::ModMetadata, shared_resources::collection::Collection,
 };
-use std::hash::{Hash, Hasher};
+use std::hash::Hash;
+use strum::EnumIter;
 use tokio_stream::StreamExt;
 
 use crate::{
@@ -12,9 +12,9 @@ use crate::{
     BaseComponents::{
         button::{Button, FillMode, Roundness, Size},
         search_bar::SearchBar,
-        string_placements::{ContentType, Hint, Text},
+        string_placements::{ContentType, Hint, StringPlacements, Text},
         switch::Switch,
-        switcher::{Comparison, Switcher},
+        switcher::{Comparison, Switcher, SwitcherSelectionBar, ToClass},
     },
     EXPLORE, HISTORY,
 };
@@ -32,7 +32,7 @@ pub static DELETE: &str = manganis::mg!(file("./public/delete.svg"));
 pub static UNDO: &str = manganis::mg!(file("./public/undo.svg"));
 pub static HORIZ: &str = manganis::mg!(file("./public/more_horiz.svg"));
 
-#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, EnumIter)]
 pub(crate) enum CollectionDisplayTopSelection {
     Mods,
     World,
@@ -50,8 +50,6 @@ pub enum Action {
 
 #[component]
 pub fn CollectionDisplay(collection: ReadOnlySignal<Collection>) -> Element {
-    let status: Signal<Comparison<CollectionDisplayTopSelection>> =
-        use_context_provider(|| Signal::new((CollectionDisplayTopSelection::Mods, None)));
     let collection_client = use_coroutine(|mut rx: UnboundedReceiver<Action>| async move {
         while let Some(action) = rx.next().await {
             match action {
@@ -62,6 +60,7 @@ pub fn CollectionDisplay(collection: ReadOnlySignal<Collection>) -> Element {
             }
         }
     });
+    let status = use_signal(|| (CollectionDisplayTopSelection::Mods, None));
     let mod_search = use_signal(String::new);
     rsx! {
         div {
@@ -135,7 +134,8 @@ pub fn CollectionDisplay(collection: ReadOnlySignal<Collection>) -> Element {
                 div {
                     class: "flex flex-col gap-[15px]",
                     SelectionBar {
-                        sender: mod_search
+                        sender: mod_search,
+                        status
                     }
                     if status().0 == CollectionDisplayTopSelection::Mods {
                         ModViewer {
@@ -241,57 +241,49 @@ fn SubModViewer(
     }
 }
 
+impl From<CollectionDisplayTopSelection> for StringPlacements {
+    fn from(value: CollectionDisplayTopSelection) -> Self {
+        use CollectionDisplayTopSelection as T;
+        match value {
+            T::Mods => vec![
+                ContentType::svg(CUBE).css("svg-[30px]").align_left(),
+                ContentType::text("模組").align_right(),
+            ],
+            T::World => vec![
+                ContentType::svg(GLOBAL_ASIA).css("svg-[30px]").align_left(),
+                ContentType::text("世界").align_right(),
+            ],
+            T::ResourcePack => vec![
+                ContentType::svg(CIRCLE_JOIN).css("svg-[30px]").align_left(),
+                ContentType::text("資源包").align_right(),
+            ],
+            T::ShaderPacks => vec![
+                ContentType::svg(MOTION_MODE).css("svg-[30px]").align_left(),
+                ContentType::text("光影包").align_right(),
+            ],
+        }
+        .into()
+    }
+}
+
+impl ToClass for CollectionDisplayTopSelection {
+    fn to_class(&self) -> String {
+        String::from("pl-[20px] pr-[25px] py-[12px]")
+    }
+}
+
 #[component]
-fn SelectionBar(sender: Signal<String>) -> Element {
+fn SelectionBar(
+    sender: Signal<String>,
+    status: Signal<Comparison<CollectionDisplayTopSelection>>,
+) -> Element {
     rsx! {
         div {
             class: "grid grid-flow-col items-stretch",
-            div {
-                class: "bg-deep-background rounded-full flex justify-start w-fit",
-                Button {
-                    extended_css_class: "pl-[20px] pr-[25px] py-[12px]",
-                    roundness: Roundness::Pill,
-                    fill_mode: FillMode::Fit,
-                    switcher: CollectionDisplayTopSelection::Mods,
-                    focus_color_change: true,
-                    string_placements: vec![
-                        ContentType::svg(CUBE).css("svg-[30px]").align_left(),
-                        ContentType::text("模組").align_right(),
-                    ]
-                }
-                Button {
-                    extended_css_class: "pl-[20px] pr-[25px] py-[12px]",
-                    roundness: Roundness::Pill,
-                    fill_mode: FillMode::Fit,
-                    focus_color_change: true,
-                    switcher: CollectionDisplayTopSelection::World,
-                    string_placements: vec![
-                        ContentType::svg(GLOBAL_ASIA).css("svg-[30px]").align_left(),
-                        ContentType::text("世界").align_right(),
-                    ]
-                }
-                Button {
-                    extended_css_class: "pl-[20px] pr-[25px] py-[12px]",
-                    roundness: Roundness::Pill,
-                    fill_mode: FillMode::Fit,
-                    focus_color_change: true,
-                    switcher: CollectionDisplayTopSelection::ResourcePack,
-                    string_placements: vec![
-                        ContentType::svg(CIRCLE_JOIN).css("svg-[30px]").align_left(),
-                        ContentType::text("資源包").align_right(),
-                    ]
-                }
-                Button {
-                    extended_css_class: "pl-[20px] pr-[25px] py-[12px]",
-                    roundness: Roundness::Pill,
-                    fill_mode: FillMode::Fit,
-                    focus_color_change: true,
-                    switcher: CollectionDisplayTopSelection::ShaderPacks,
-                    string_placements: vec![
-                        ContentType::svg(MOTION_MODE).css("svg-[30px]").align_left(),
-                        ContentType::text("光影包").align_right(),
-                    ]
-                }
+            SwitcherSelectionBar {
+                class: "justify-start",
+                signal: status,
+                default_state: CollectionDisplayTopSelection::Mods,
             }
             div {
                 class: "justify-end flex items-center space-x-[7px]",

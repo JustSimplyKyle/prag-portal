@@ -4,22 +4,23 @@ use rust_lib::api::backend_exclusive::download::Progress;
 use rust_lib::api::shared_resources::collection::Collection;
 use rust_lib::api::shared_resources::entry::STORAGE;
 
-use rust_lib::api::shared_resources::entry::DOWNLOAD_PROGRESS;
-
+use crate::impl_context_switcher;
 use crate::BaseComponents::button::Button;
 use crate::BaseComponents::button::FillMode;
 use crate::BaseComponents::button::Roundness;
 use crate::BaseComponents::string_placements::ContentType;
 use crate::BaseComponents::string_placements::Hint;
 use crate::BaseComponents::string_placements::Image;
+use crate::BaseComponents::string_placements::StringPlacements;
 use crate::BaseComponents::string_placements::Text;
+use crate::BaseComponents::switcher::SwitcherSelectionBar;
+use crate::BaseComponents::switcher::ToClass;
 use crate::DRAG_INDICATOR;
+use rust_lib::api::shared_resources::entry::DOWNLOAD_PROGRESS;
+use strum::EnumIter;
 
 #[component]
-pub fn ListItem(
-    collection: ReadOnlySignal<Collection>,
-    progress: ReadOnlySignal<Progress>,
-) -> Element {
+fn ListItem(collection: ReadOnlySignal<Collection>, progress: ReadOnlySignal<Progress>) -> Element {
     let collection = collection.read();
     let progress = progress.read();
     rsx! {
@@ -55,6 +56,94 @@ pub fn ListItem(
 }
 
 #[component]
+fn FirstProgressView(
+    collection: ReadOnlySignal<Collection>,
+    progress: ReadOnlySignal<Progress>,
+) -> Element {
+    let collection = collection.read();
+    let progress = progress.read();
+    rsx! {
+        div {
+            class: "w-full h-[350px] p-[30px] rounded-[20px]",
+            background: format!(
+                "linear-gradient(88deg, #0E0E0E 14.88%, rgba(14, 14, 14, 0.70) 100%), url('{}') lightgray 50% / cover no-repeat",
+                collection.picture_path.to_string_lossy().to_string(),
+            ),
+            div {
+                class: "w-full grid grid-flow-col",
+                div {
+                    class: "justify-self-start flex flex-col gap-[20px]",
+                    Text {
+                        css: "text-[60px] font-black text-white",
+                        {collection.display_name.clone()}
+                    }
+                    Hint {
+                        css: "font-medium",
+                        {
+                            format!("總計 {}/已下載 {}",
+                                progress.total_size.unwrap_or_default().display_size_from_megabytes(),
+                                progress.current_size.unwrap_or_default().display_size_from_megabytes()
+                            )
+                        }
+                    }
+                }
+                div {
+                    class: "justify-self-end flex",
+                    Text {
+                        css: "text-[50px] font-bold text-white",
+                        "{progress.speed.unwrap_or_default().display_size_from_megabytes()}"
+                    }
+                    Hint {
+                        css: "text-[50px] font-bold",
+                        "/s"
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[derive(PartialEq, Eq, Clone, Copy, Hash, EnumIter, Debug)]
+pub enum ProgressState {
+    Running,
+    Finished,
+}
+
+impl From<ProgressState> for StringPlacements {
+    fn from(value: ProgressState) -> Self {
+        match value {
+            ProgressState::Running => vec![
+                ContentType::text("K").align_left(),
+                ContentType::text("正在進行").align_right(),
+            ],
+            ProgressState::Finished => vec![
+                ContentType::text("K").align_left(),
+                ContentType::text("已完成").align_right(),
+            ],
+        }
+        .into()
+    }
+}
+
+impl ToClass for ProgressState {}
+
+impl_context_switcher!(ProgressState);
+
+#[component]
+fn ProgressStateBar() -> Element {
+    rsx! {
+        div {
+            class: "w-full grid grid-flow-col justify-stretch",
+            SwitcherSelectionBar { default_state: ProgressState::Running }
+            div {
+                class: "justify-self-end",
+                "go fuck yourself"
+            }
+        }
+    }
+}
+
+#[component]
 pub fn DownloadProgress() -> Element {
     let mut progress = DOWNLOAD_PROGRESS()
         .0
@@ -70,44 +159,10 @@ pub fn DownloadProgress() -> Element {
         .peekable();
     rsx! {
         div {
-            if let Some((collection, progress)) = progress.peek() {
-                div {
-                    class: "w-full h-[350px] p-[30px] rounded-[20px]",
-                    background: format!(
-                        "linear-gradient(88deg, #0E0E0E 14.88%, rgba(14, 14, 14, 0.70) 100%), url('{}') lightgray 50% / cover no-repeat",
-                        collection.picture_path.to_string_lossy().to_string(),
-                    ),
-                    div {
-                        class: "w-full grid grid-flow-col",
-                        div {
-                            class: "justify-self-start flex flex-col gap-[20px]",
-                            Text {
-                                css: "text-[60px] font-black text-white",
-                                {collection.display_name.clone()}
-                            }
-                            Hint {
-                                css: "font-medium",
-                                {
-                                    format!("總計 {}/已下載 {}",
-                                        progress.total_size.unwrap_or_default().display_size_from_megabytes(),
-                                        progress.current_size.unwrap_or_default().display_size_from_megabytes()
-                                    )
-                                }
-                            }
-                        }
-                        div {
-                            class: "justify-self-end flex",
-                            Text {
-                                css: "text-[50px] font-bold text-white",
-                                "{progress.speed.unwrap_or_default().display_size_from_megabytes()}"
-                            }
-                            Hint {
-                                css: "text-[50px] font-bold",
-                                "/s"
-                            }
-                        }
-                    }
-                }
+            class: "flex flex-col gap-[20px]",
+            if let Some((collection, progress)) = progress.peek().cloned() {
+                FirstProgressView { collection,progress }
+                ProgressStateBar { }
             }
             for (collection, progress) in progress {
                 ListItem {
@@ -115,7 +170,6 @@ pub fn DownloadProgress() -> Element {
                     progress,
                 }
             }
-            // DownloadList { children: progress }
         }
     }
 }
