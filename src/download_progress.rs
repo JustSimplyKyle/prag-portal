@@ -78,11 +78,11 @@ pub fn DownloadProgress() -> Element {
                         collection.picture_path.to_string_lossy().to_string(),
                     ),
                     div {
-                        class: "w-full grid grid-flow-col justify-stretch",
+                        class: "w-full grid grid-flow-col",
                         div {
                             class: "justify-self-start flex flex-col gap-[20px]",
                             Text {
-                                css: "justify-self-start text-[60px] font-black text-white",
+                                css: "text-[60px] font-black text-white",
                                 {collection.display_name.clone()}
                             }
                             Hint {

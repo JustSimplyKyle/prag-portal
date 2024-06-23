@@ -352,9 +352,5 @@ fn sub_content_builder(
         _ => return None,
     };
 
-    Content {
-        content: content_type(text),
-        css,
-    }
-    .get_element()
+    Content::new(content_type(text)).css(css).get_element()
 }
