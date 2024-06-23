@@ -252,7 +252,7 @@ fn SelectionBar(sender: Signal<String>) -> Element {
                     extended_css_class: "pl-[20px] pr-[25px] py-[12px]",
                     roundness: Roundness::Pill,
                     fill_mode: FillMode::Fit,
-                    signal: CollectionDisplayTopSelection::Mods,
+                    switcher: CollectionDisplayTopSelection::Mods,
                     focus_color_change: true,
                     string_placements: vec![
                         ContentType::svg(CUBE).css("svg-[30px]").align_left(),
@@ -264,7 +264,7 @@ fn SelectionBar(sender: Signal<String>) -> Element {
                     roundness: Roundness::Pill,
                     fill_mode: FillMode::Fit,
                     focus_color_change: true,
-                    signal: CollectionDisplayTopSelection::World,
+                    switcher: CollectionDisplayTopSelection::World,
                     string_placements: vec![
                         ContentType::svg(GLOBAL_ASIA).css("svg-[30px]").align_left(),
                         ContentType::text("世界").align_right(),
@@ -275,7 +275,7 @@ fn SelectionBar(sender: Signal<String>) -> Element {
                     roundness: Roundness::Pill,
                     fill_mode: FillMode::Fit,
                     focus_color_change: true,
-                    signal: CollectionDisplayTopSelection::ResourcePack,
+                    switcher: CollectionDisplayTopSelection::ResourcePack,
                     string_placements: vec![
                         ContentType::svg(CIRCLE_JOIN).css("svg-[30px]").align_left(),
                         ContentType::text("資源包").align_right(),
@@ -286,7 +286,7 @@ fn SelectionBar(sender: Signal<String>) -> Element {
                     roundness: Roundness::Pill,
                     fill_mode: FillMode::Fit,
                     focus_color_change: true,
-                    signal: CollectionDisplayTopSelection::ShaderPacks,
+                    switcher: CollectionDisplayTopSelection::ShaderPacks,
                     string_placements: vec![
                         ContentType::svg(MOTION_MODE).css("svg-[30px]").align_left(),
                         ContentType::text("光影包").align_right(),

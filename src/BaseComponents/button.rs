@@ -95,7 +95,7 @@ pub fn Button(
     roundness: Roundness,
     #[props(into)] string_placements: StringPlacements,
     #[props(default)] extended_css_class: String,
-    #[props(into)] signal: Option<Rc<dyn Switcher>>,
+    #[props(into)] switcher: Option<Rc<dyn Switcher>>,
     #[props(default = true)] clickable: bool,
     #[props(into)] onclick: Option<EventHandler>,
     #[props(extends = GlobalAttributes, extends = div)] mut attributes: Vec<Attribute>,
@@ -122,19 +122,19 @@ pub fn Button(
             class,
             role: if clickable { "button" } else { "" },
             aria_selected: {
-                if let Some(x) = signal.as_ref() {
+                if let Some(x) = switcher.as_ref() {
                     x.compare()
                 } else {
                     focus_color_change && clickiness()
                 }
             },
             onclick: move |_| {
-                if signal.is_none() && focus_color_change {
+                if switcher.is_none() && focus_color_change {
                     clickiness.toggle();
                 }
                 if let Some(x) = onclick {
                     x(());
-                } else if let Some(x) = &mut signal {
+                } else if let Some(x) = &mut switcher {
                     x.switch_active_to_self();
                 }
             },

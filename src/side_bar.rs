@@ -28,9 +28,9 @@ pub fn SideBar() -> Element {
         expanded.toggle();
     };
 
-    let collections = STORAGE().collections;
+    let storage = STORAGE.read();
 
-    let collection_preview = collections.iter().take(3).collect::<Vec<_>>();
+    let collection_preview = storage.collections.iter().take(3);
 
     let folded_images = rsx! {
         div {
@@ -85,7 +85,7 @@ pub fn SideBar() -> Element {
                             ContentType::text("首頁").css("group-aria-busy:hidden").align_right(),
                         ],
                         focus_color_change: true,
-                        signal: Pages::MainPage,
+                        switcher: Pages::MainPage,
                         extended_css_class: "bg-background group-aria-expanded:pr-5"
                     }
                     Button {
@@ -95,7 +95,7 @@ pub fn SideBar() -> Element {
                             ContentType::text("探索").css("group-aria-busy:hidden").align_right(),
                         ],
                         focus_color_change: true,
-                        signal: Pages::Explore,
+                        switcher: Pages::Explore,
                         extended_css_class: "bg-background group-aria-expanded:pr-5"
                     }
                     Button {
@@ -104,7 +104,7 @@ pub fn SideBar() -> Element {
                             ContentType::svg(SIDEBAR_COLLECTION).align_left(),
                             ContentType::text("收藏庫").css("group-aria-busy:hidden").align_right(),
                         ],
-                        signal: Pages::Collections,
+                        switcher: Pages::Collections,
                         onclick,
                         focus_color_change: true,
                         extended_css_class: "bg-background group-aria-expanded:pr-5"
@@ -118,9 +118,9 @@ pub fn SideBar() -> Element {
                         string_placements: folded_images,
                         extended_css_class: "bg-background"
                     }
-                    for collection in collections {
-                        SidebarCollectionBlock {key: "{collection.get_collection_id().0}",
-                            collection
+                    for index in 0..storage.collections.len() {
+                        SidebarCollectionBlock {
+                            collection: STORAGE.signal().map(move |v| &v.collections[index])
                         }
                     }
                 }
@@ -141,7 +141,7 @@ pub fn SideBar() -> Element {
                                 .css("group-aria-selected/active:hidden group-aria-busy:hidden text-hint"),
                         ],
                         focus_color_change: true,
-                        signal: Rc::new(Pages::DownloadProgress) as Rc<dyn Switcher>,
+                        switcher: Pages::DownloadProgress,
                         extended_css_class: "bg-background group/active items-center",
                         onclick: move |()| {
                             let history = HISTORY();
@@ -162,7 +162,8 @@ pub fn SideBar() -> Element {
 }
 
 #[component]
-fn SidebarCollectionBlock(collection: Collection) -> Element {
+fn SidebarCollectionBlock(collection: MappedSignal<Collection>) -> Element {
+    let collection = collection.read();
     let picture_path = collection.picture_path.to_string_lossy().to_string();
     let img_block = rsx! {
         div {
@@ -175,16 +176,14 @@ fn SidebarCollectionBlock(collection: Collection) -> Element {
             }
         }
     };
-    let display = &collection.display_name;
-    let signal_check = collection.get_collection_id();
     rsx! {
         Button {
             roundness: Roundness::None,
             string_placements: vec![
                 ContentType::custom(img_block).align_left(),
-                ContentType::text(display).align_right().css("group-aria-busy:hidden"),
+                ContentType::text(collection.display_name.to_string()).align_right().css("group-aria-busy:hidden"),
             ],
-            signal: Rc::new(Pages::new_collection_page(signal_check)) as Rc<dyn Switcher>,
+            switcher: Pages::new_collection_page(collection.get_collection_id()),
             focus_color_change: false,
             background_image: darken_sidebar_background(picture_path),
             background_size: "cover",
