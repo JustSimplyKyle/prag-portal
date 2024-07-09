@@ -30,7 +30,7 @@ pub fn Modal(
         };
         TOP_LEVEL_COMPONENT.write().push(pointer);
     }
-    None
+    Ok(VNode::placeholder())
 }
 
 #[component]
@@ -43,7 +43,7 @@ pub fn subModal(
     let mut modal_hover = use_signal(|| false);
     rsx! {
         div {
-            class: "inline-block z-[200] aria-[selected=false]:hidden aria-[selected=false]:z-0 flex justify-center items-center absolute left-0 top-0 w-screen h-screen bg-white/30",
+            class: "contents z-[200] aria-[selected=false]:hidden aria-[selected=false]:z-0 flex justify-center items-center absolute left-0 top-0 w-screen h-screen bg-white/30",
             "aria-selected": active(),
             onclick: move |_| {
                 if !modal_hover() && close_on_outer_click {

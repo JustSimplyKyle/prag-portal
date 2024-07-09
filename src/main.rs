@@ -11,9 +11,12 @@ use dioxus::desktop::WindowBuilder;
 use dioxus::html::input_data::MouseButton;
 use manganis::ImageAsset;
 use rust_lib::api::backend_exclusive::vanilla::version::VersionMetadata;
-use rust_lib::api::shared_resources::collection::{CollectionId, ModLoader, ModLoaderType};
+use rust_lib::api::shared_resources::collection::{
+    Collection, CollectionId, ModLoader, ModLoaderType,
+};
 use std::hash::{DefaultHasher, Hash, Hasher};
 use std::path::PathBuf;
+use std::str::FromStr;
 use std::sync::Arc;
 use tailwind_fuse::*;
 use BaseComponents::button::{Button, FillMode, Roundness};
@@ -281,15 +284,6 @@ impl ToString for Pages {
     }
 }
 
-trait ErrorToString<T> {
-    fn error_to_string(&self) -> Result<&T, String>;
-}
-
-impl<T> ErrorToString<T> for Result<T, anyhow::Error> {
-    fn error_to_string(&self) -> Result<&T, String> {
-        self.as_ref().map_err(|x| format!("{x:#?}"))
-    }
-}
 pub async fn collection_builder(
     picture_path: impl Into<Option<PathBuf>>,
     version_id: impl Into<String>,
@@ -346,7 +340,7 @@ fn App() -> Element {
                                 Button {
                                     roundness: Roundness::Pill,
                                     extended_css_class: "text-[13px] font-bold",
-                                    string_placements: rsx! { "{error} " },
+                                    string_placements: rsx! { "{error:?} " },
                                     fill_mode: FillMode::Fit,
                                     clickable: false
                                 }
@@ -363,15 +357,18 @@ fn App() -> Element {
 
 #[component]
 fn Layout() -> Element {
-    use_effect(move || {
+    let read = use_resource(move || async move {
         let _ = HISTORY.read();
-        Pages::DownloadProgress.apply_slide_in().unwrap();
-        for collection in &STORAGE.read().collections {
-            Pages::new_collection_page(collection.get_collection_id())
-                .apply_slide_in()
-                .unwrap();
+        Pages::DownloadProgress.apply_slide_in()?;
+        for collection in &*STORAGE.collections.read() {
+            Pages::new_collection_page(collection.get_collection_id()).apply_slide_in()?;
         }
+        Ok::<(), anyhow::Error>(())
     });
+    match &*read.read() {
+        Some(Err(x)) => throw_error(CapturedError::from_str(&x.to_string()).unwrap()),
+        _ => {}
+    }
 
     let history = HISTORY.read();
 
@@ -433,16 +430,15 @@ fn Layout() -> Element {
 #[component]
 fn CollectionContainer() -> Element {
     rsx! {
-        for (name , collection) in STORAGE().collections.into_iter().map(|x| (x.get_collection_id(), x)) {
-            if Pages::new_collection_page(collection.get_collection_id()).should_render() {
+        for collection_id in STORAGE.collections.read().iter().map(|x| x.get_collection_id()) {
+            if Pages::new_collection_page(collection_id.clone()).should_render() {
                 div {
-                    key: "{name.0}",
                     class: "absolute inset-0 z-0 min-h-full min-w-full",
-                    id: Pages::new_collection_page(name).slide_in_id(),
+                    id: Pages::new_collection_page(collection_id).slide_in_id(),
                     LayoutContainer {
                         extended_class: "p-0",
                         CollectionDisplay {
-                            collection
+                            collection_id: collection_id.clone()
                         }
                     }
                 }

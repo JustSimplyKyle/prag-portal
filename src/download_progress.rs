@@ -150,8 +150,7 @@ pub fn DownloadProgress() -> Element {
         .into_iter()
         .filter(|(_, x)| x.percentages < 100.)
         .filter_map(|(id, progress)| {
-            STORAGE()
-                .collections
+            (STORAGE.collections)()
                 .into_iter()
                 .find(|c| c.get_collection_id() == id.collection_id)
                 .map(|c| (c, progress))

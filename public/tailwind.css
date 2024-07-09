@@ -1980,10 +1980,6 @@ input {
   display: block;
 }
 
-.inline-block {
-  display: inline-block;
-}
-
 .flex {
   display: flex;
 }
@@ -2056,12 +2052,12 @@ input {
   height: 7px;
 }
 
-.h-\[80px\] {
-  height: 80px;
+.h-\[800px\] {
+  height: 800px;
 }
 
-.h-\[900px\] {
-  height: 900px;
+.h-\[80px\] {
+  height: 80px;
 }
 
 .h-fit {
@@ -2328,6 +2324,10 @@ input {
   gap: 20px;
 }
 
+.gap-\[35px\] {
+  gap: 35px;
+}
+
 .gap-\[3px\] {
   gap: 3px;
 }
@@ -2410,12 +2410,6 @@ input {
   --tw-space-y-reverse: 0;
   margin-top: calc(20px * calc(1 - var(--tw-space-y-reverse)));
   margin-bottom: calc(20px * var(--tw-space-y-reverse));
-}
-
-.space-y-\[35px\] > :not([hidden]) ~ :not([hidden]) {
-  --tw-space-y-reverse: 0;
-  margin-top: calc(35px * calc(1 - var(--tw-space-y-reverse)));
-  margin-bottom: calc(35px * var(--tw-space-y-reverse));
 }
 
 .space-y-\[3px\] > :not([hidden]) ~ :not([hidden]) {

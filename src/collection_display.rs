@@ -1,9 +1,10 @@
 use dioxus::prelude::*;
 use manganis::ImageAsset;
 use rust_lib::api::{
-    backend_exclusive::mod_management::mods::ModMetadata, shared_resources::collection::Collection,
+    backend_exclusive::mod_management::mods::ModMetadata,
+    shared_resources::collection::{Collection, CollectionId},
 };
-use std::hash::Hash;
+use std::{hash::Hash, rc::Rc};
 use strum::EnumIter;
 use tokio_stream::StreamExt;
 
@@ -49,87 +50,118 @@ pub enum Action {
 }
 
 #[component]
-pub fn CollectionDisplay(collection: ReadOnlySignal<Collection>) -> Element {
-    let collection_client = use_coroutine(|mut rx: UnboundedReceiver<Action>| async move {
+fn CollectionBackground(
+    collection_id: ReadOnlySignal<CollectionId>,
+    onmounted: EventHandler<Event<MountedData>>,
+) -> Element {
+    let launch_game = use_coroutine(move |mut rx| async move {
         while let Some(action) = rx.next().await {
             match action {
                 Action::Start => {
-                    collection().launch_game().await.unwrap();
+                    use_future(move || async move {
+                        let mut collection = collection_id.read().get_mut_collection();
+                        collection.launch_game().await.unwrap();
+                    });
                 }
                 Action::Stop => {}
             }
         }
     });
-    let status = use_signal(|| (CollectionDisplayTopSelection::Mods, None));
-    let mod_search = use_signal(String::new);
+    let id = collection_id.read();
+    let collection = id.get_collection();
     rsx! {
         div {
-            class: "relative flex flex-col",
+            onmounted,
+            class: "sticky top-0 p-[50px] rounded-2xl grid grid-flow-col items-stretch",
             div {
-                class: "sticky top-0 p-[50px] rounded-2xl grid grid-flow-col items-stretch",
+                class: "fixed inset-0 h-[800px]",
+                background: format!(
+                    "radial-gradient(198.55% 100% at 50% 0%, rgba(25, 25, 25, 0.00) 0%, #191919 82.94%), url(\'{}\') lightgray 50% / cover no-repeat",
+                    DISPLAY_BACKGROUND,
+                )
+            }
+            div {
+                class: "flex flex-col gap-[35px]",
                 div {
-                    class: "fixed inset-0 h-[900px]",
-                    background: format!(
-                        "radial-gradient(198.55% 100% at 50% 0%, rgba(25, 25, 25, 0.00) 0%, #191919 82.94%), url(\'{}\') lightgray 50% / cover no-repeat",
-                        DISPLAY_BACKGROUND,
-                    )
+                    class: "text-white font-black text-[80px] leading-normal capsize",
+                    {collection.display_name.clone()}
                 }
-                div {
-                    class: "flex flex-col space-y-[35px]",
-                    div {
-                        class: "text-white font-black text-[80px] leading-normal capsize",
-                        {collection().display_name}
-                    }
-                    Button {
-                        roundness: Roundness::Pill,
-                        string_placements: vec![ContentType::svg(UNDO).css("svg-[30px]").align_center()],
-                        onclick: move |_| {
-                            if let Some(x) = HISTORY().prev_peek() {
-                                x.switch_active_to_self();
-                            }
-                        },
-                        fill_mode: FillMode::Fit,
-                        extended_css_class: "w-fit shadow p-[13px]"
-                    }
+                Button {
+                    roundness: Roundness::Pill,
+                    string_placements: vec![ContentType::svg(UNDO).css("svg-[30px]").align_center()],
+                    onclick: move |_| {
+                        if let Some(x) = HISTORY().prev_peek() {
+                            x.switch_active_to_self();
+                        }
+                    },
+                    fill_mode: FillMode::Fit,
+                    extended_css_class: "w-fit shadow p-[13px]"
                 }
+            }
+            div {
+                class: "flex justify-end",
                 div {
-                    class: "flex justify-end",
+                    class: "flex flex-col space-y-[3px] w-full max-w-[250px]",
+                    img {
+                        class: "w-full h-[250px] rounded-t-[20px] rounded-b-[5px] object-cover",
+                        src: collection.picture_path.to_string_lossy().to_string()
+                    }
                     div {
-                        class: "flex flex-col space-y-[3px] w-full max-w-[250px]",
-                        img {
-                            class: "w-full h-[250px] rounded-t-[20px] rounded-b-[5px] object-cover",
-                            src: collection.read().picture_path.to_string_lossy().to_string()
+                        class: "flex space-x-[3px] min-w-full",
+                        Button {
+                            roundness: Roundness::None,
+                            string_placements: vec![ContentType::svg(GAME_CONTROLLER).css("svg-[30px]").align_center()],
+                            onclick: move |_|  {
+                                launch_game.send(Action::Start);
+                            },
+                            fill_mode: FillMode::Fill,
+                            extended_css_class: "px-[40px] py-[15px] rounded-[5px] rounded-bl-[20px] flex-1 min-w-0 bg-lime-300"
                         }
                         div {
-                            class: "flex space-x-[3px] min-w-full",
                             Button {
                                 roundness: Roundness::None,
-                                string_placements: vec![ContentType::svg(GAME_CONTROLLER).css("svg-[30px]").align_center()],
-                                onclick: move |()| {
-                                    collection_client.send(Action::Start);
-                                },
-                                fill_mode: FillMode::Fill,
-                                extended_css_class: "px-[40px] py-[15px] rounded-[5px] rounded-bl-[20px] flex-1 min-w-0 bg-lime-300"
-                            }
-                            div {
-                                Button {
-                                    roundness: Roundness::None,
-                                    string_placements: vec![ContentType::svg(HORIZ).css("svg-[25px]").align_center()],
-                                    fill_mode: FillMode::Fit,
-                                    background: "rgba(255,255,255,0.10)",
-                                    backdrop_filter: "blur(50px)",
-                                    extended_css_class: "rounded-[5px] rounded-[5px] rounded-br-[20px] flex-none"
-                                }
+                                string_placements: vec![ContentType::svg(HORIZ).css("svg-[25px]").align_center()],
+                                fill_mode: FillMode::Fit,
+                                background: "rgba(255,255,255,0.10)",
+                                backdrop_filter: "blur(50px)",
+                                extended_css_class: "rounded-[5px] rounded-[5px] rounded-br-[20px] flex-none"
                             }
                         }
                     }
                 }
             }
+        }
+    }
+}
+
+#[component]
+pub fn CollectionDisplay(collection_id: ReadOnlySignal<CollectionId>) -> Element {
+    let status = use_signal(|| (CollectionDisplayTopSelection::Mods, None));
+    let mod_search = use_signal(String::new);
+    let top_position = use_signal(|| 0.);
+    let mut container: Signal<Option<Rc<MountedData>>> = use_signal(|| None);
+    let height = use_resource(move || async move {
+        if let Some(x) = container() {
+            x.get_client_rect().await.ok().map(|x| x.height())
+        } else {
+            None
+        }
+    });
+    rsx! {
+        div {
+            class: "relative flex flex-col",
+            CollectionBackground {
+                collection_id
+                onmounted: move |x: Event<MountedData>| {
+                    container.set(Some(x.data()));
+                },
+            },
             div {
-                class: "px-[30px] bg-background rounded-2xl min-h-dvh scroll-smooth",
-                div {
-                    class: "bg-background flex justify-center items-center min-h-full py-[30px]",
-                    {ContentType::svg(manganis::mg!(file("public/Line 155.svg")))}
+                class: "relative px-[30px] bg-background rounded-2xl min-h-dvh scroll-smooth",
+                // top: "{top_position()}px",
+                Separator {
+                    top_position,
+                    container_height: height().flatten(),
                 }
                 div {
                     class: "flex flex-col gap-[15px]",
@@ -139,7 +171,7 @@ pub fn CollectionDisplay(collection: ReadOnlySignal<Collection>) -> Element {
                     }
                     if status().0 == CollectionDisplayTopSelection::Mods {
                         ModViewer {
-                            collection,
+                            collection_id,
                             search: mod_search()
                         }
                     }
@@ -150,9 +182,34 @@ pub fn CollectionDisplay(collection: ReadOnlySignal<Collection>) -> Element {
 }
 
 #[component]
-fn ModViewer(collection: ReadOnlySignal<Collection>, search: String) -> Element {
+fn Separator(mut top_position: Signal<f64>, container_height: Option<f64>) -> Element {
+    rsx! {
+        div {
+            class: "bg-background flex justify-center h-fit items-center py-[30px]",
+            prevent_default: true,
+            onmousemove: move |x: Event<MouseData>| {
+                if let Some(height) = container_height {
+                    if dbg!(x
+                        .data()
+                        .held_buttons()
+                        .contains(dioxus_elements::input_data::MouseButton::Primary))
+                    {
+                        let p = dbg!(x.data().client_coordinates().y - height - 35.);
+                        top_position.set(p);
+                    }
+                }
+            },
+            cursor: "ns-resize",
+            {ContentType::svg(manganis::mg!(file("public/Line 155.svg")))}
+        }
+    }
+}
+
+#[component]
+fn ModViewer(collection_id: ReadOnlySignal<CollectionId>, search: String) -> Element {
     let mods = use_memo(move || {
-        collection().mod_controller.map(|mut x| {
+        let collection = collection_id.read().get_collection_owned();
+        collection.mod_controller.map(move |mut x| {
             x.manager.mods.sort_unstable_by_key(|x| x.name.clone());
             x.manager.mods
         })
@@ -171,8 +228,8 @@ fn ModViewer(collection: ReadOnlySignal<Collection>, search: String) -> Element 
                 })
             {
                 SubModViewer {
-                    collection,
-                    mods: x
+                    collection_id,
+                    mods: x.clone(),
                 }
             }
         }
@@ -181,7 +238,7 @@ fn ModViewer(collection: ReadOnlySignal<Collection>, search: String) -> Element 
 
 #[component]
 fn SubModViewer(
-    collection: ReadOnlySignal<Collection>,
+    collection_id: ReadOnlySignal<CollectionId>,
     mods: ReadOnlySignal<ModMetadata>,
 ) -> Element {
     let clicked = use_signal(|| false);

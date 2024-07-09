@@ -275,7 +275,7 @@ fn SuggestionPage() -> Element {
 
 #[component]
 fn CollectionsPage() -> Element {
-    let collections = STORAGE().collections;
+    let collections = (STORAGE.collections)();
     rsx! {
         div {
             class: "flex flex-col space-x-0",

@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use dioxus::prelude::*;
 use dioxus_core::DynamicNode;
 use tailwind_fuse::*;
@@ -342,14 +344,19 @@ fn sub_content_builder(
     ele: Element,
     css: String,
 ) -> Element {
-    let vnode = ele.as_ref()?;
+    let vnode = ele?;
     let dynamic = vnode.dynamic_nodes.first();
     let inplace = vnode.template.get().roots.first();
 
     let text = match (dynamic, inplace) {
         (Some(DynamicNode::Text(text)), _) => text.value.clone(),
         (_, Some(TemplateNode::Text { text })) => text.to_string(),
-        _ => return None,
+        _ => {
+            return Err(RenderError::Aborted(
+                CapturedError::from_str("please input only text in a `[Text/Hint/Image]` element")
+                    .unwrap(),
+            ))
+        }
     };
 
     Content::new(content_type(text)).css(css).get_element()

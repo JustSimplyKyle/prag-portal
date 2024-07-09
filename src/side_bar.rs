@@ -6,7 +6,7 @@ use rust_lib::api::shared_resources::{collection::Collection, entry::STORAGE};
 use crate::{
     BaseComponents::{
         button::{Button, Roundness},
-        string_placements::{ContentType, Text},
+        string_placements::{ContentType, Image, Text},
         switcher::Switcher,
     },
     Pages, ARROW_RIGHT, EXPLORE, HISTORY, HOME, SIDEBAR_COLLECTION, SIM_CARD,
@@ -28,9 +28,9 @@ pub fn SideBar() -> Element {
         expanded.toggle();
     };
 
-    let storage = STORAGE.read();
+    let binding = STORAGE.collections.read();
 
-    let collection_preview = storage.collections.iter().take(3);
+    let collection_preview = binding.iter().take(3);
 
     let folded_images = rsx! {
         div {
@@ -44,12 +44,9 @@ pub fn SideBar() -> Element {
                         class: "flex space-x-[-20px]",
                         for x in collection_preview {
                             div {
-                                key: "{x.get_collection_id().0}",
-                                {
-                                    ContentType::image(x.picture_path.to_string_lossy().to_string())
-                                    .css(
-                                        "z-50 w-10 h-10 object-cover shrink-0 inline-flex justify-center items-center rounded-full border-2 border-zinc-900 group-aria-expanded:hidden"
-                                    )
+                                Image {
+                                    css: "z-50 w-10 h-10 object-cover shrink-0 inline-flex justify-center items-center rounded-full border-2 border-zinc-900 group-aria-expanded:hidden",
+                                    {x.picture_path.to_string_lossy().to_string()}
                                 }
                             }
                         }
@@ -118,9 +115,9 @@ pub fn SideBar() -> Element {
                         string_placements: folded_images,
                         extended_css_class: "bg-background"
                     }
-                    for index in 0..storage.collections.len() {
+                    for index in 0..STORAGE.collections.len() {
                         SidebarCollectionBlock {
-                            collection: STORAGE.signal().map(move |v| &v.collections[index])
+                            collection: STORAGE.collections.signal().map(move |v| &v[index])
                         }
                     }
                 }
