@@ -111,7 +111,7 @@ fn CollectionBackground(
                         Button {
                             roundness: Roundness::None,
                             string_placements: vec![ContentType::svg(GAME_CONTROLLER).css("svg-[30px]").align_center()],
-                            onclick: move |_|  {
+                            onclick: move |_| {
                                 launch_game.send(Action::Start);
                             },
                             fill_mode: FillMode::Fill,
@@ -151,17 +151,17 @@ pub fn CollectionDisplay(collection_id: ReadOnlySignal<CollectionId>) -> Element
         div {
             class: "relative flex flex-col",
             CollectionBackground {
-                collection_id
+                collection_id,
                 onmounted: move |x: Event<MountedData>| {
                     container.set(Some(x.data()));
-                },
-            },
+                }
+            }
             div {
                 class: "relative px-[30px] bg-background rounded-2xl min-h-dvh scroll-smooth",
                 // top: "{top_position()}px",
                 Separator {
                     top_position,
-                    container_height: height().flatten(),
+                    container_height: height().flatten()
                 }
                 div {
                     class: "flex flex-col gap-[15px]",
@@ -189,10 +189,10 @@ fn Separator(mut top_position: Signal<f64>, container_height: Option<f64>) -> El
             prevent_default: true,
             onmousemove: move |x: Event<MouseData>| {
                 if let Some(height) = container_height {
-                    if dbg!(x
+                    if x
                         .data()
                         .held_buttons()
-                        .contains(dioxus_elements::input_data::MouseButton::Primary))
+                        .contains(dioxus_elements::input_data::MouseButton::Primary)
                     {
                         let p = dbg!(x.data().client_coordinates().y - height - 35.);
                         top_position.set(p);
@@ -229,7 +229,7 @@ fn ModViewer(collection_id: ReadOnlySignal<CollectionId>, search: String) -> Ele
             {
                 SubModViewer {
                     collection_id,
-                    mods: x.clone(),
+                    mods: x.clone()
                 }
             }
         }
@@ -340,7 +340,7 @@ fn SelectionBar(
             SwitcherSelectionBar {
                 class: "justify-start",
                 signal: status,
-                default_state: CollectionDisplayTopSelection::Mods,
+                default_state: CollectionDisplayTopSelection::Mods
             }
             div {
                 class: "justify-end flex items-center space-x-[7px]",

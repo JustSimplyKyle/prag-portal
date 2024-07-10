@@ -134,7 +134,9 @@ fn ProgressStateBar() -> Element {
     rsx! {
         div {
             class: "w-full grid grid-flow-col justify-stretch",
-            SwitcherSelectionBar { default_state: ProgressState::Running }
+            SwitcherSelectionBar {
+                default_state: ProgressState::Running
+            }
             div {
                 class: "justify-self-end",
                 "go fuck yourself"
@@ -160,13 +162,17 @@ pub fn DownloadProgress() -> Element {
         div {
             class: "flex flex-col gap-[20px]",
             if let Some((collection, progress)) = progress.peek().cloned() {
-                FirstProgressView { collection,progress }
-                ProgressStateBar { }
+                FirstProgressView {
+                    collection,
+                    progress
+                }
+                ProgressStateBar {
+                }
             }
-            for (collection, progress) in progress {
+            for (collection , progress) in progress {
                 ListItem {
                     collection,
-                    progress,
+                    progress
                 }
             }
         }

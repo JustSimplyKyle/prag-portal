@@ -178,7 +178,9 @@ fn SidebarCollectionBlock(collection: MappedSignal<Collection>) -> Element {
             roundness: Roundness::None,
             string_placements: vec![
                 ContentType::custom(img_block).align_left(),
-                ContentType::text(collection.display_name.to_string()).align_right().css("group-aria-busy:hidden"),
+                ContentType::text(collection.display_name.to_string())
+                    .align_right()
+                    .css("group-aria-busy:hidden"),
             ],
             switcher: Pages::new_collection_page(collection.get_collection_id()),
             focus_color_change: false,
