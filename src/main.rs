@@ -357,18 +357,15 @@ fn App() -> Element {
 
 #[component]
 fn Layout() -> Element {
-    let read = use_resource(move || async move {
+    use_effect(move || {
         let _ = HISTORY.read();
-        Pages::DownloadProgress.apply_slide_in()?;
+        Pages::DownloadProgress.apply_slide_in().unwrap();
         for collection in &*STORAGE.collections.read() {
-            Pages::new_collection_page(collection.get_collection_id()).apply_slide_in()?;
+            Pages::new_collection_page(collection.get_collection_id())
+                .apply_slide_in()
+                .unwrap();
         }
-        Ok::<(), anyhow::Error>(())
     });
-    match &*read.read() {
-        Some(Err(x)) => throw_error(CapturedError::from_str(&x.to_string()).unwrap()),
-        _ => {}
-    }
 
     let history = HISTORY.read();
 
@@ -430,11 +427,16 @@ fn Layout() -> Element {
 #[component]
 fn CollectionContainer() -> Element {
     rsx! {
-        for collection_id in STORAGE.collections.read().iter().map(|x| x.get_collection_id()) {
-            if Pages::new_collection_page(collection_id.clone()).should_render() {
-                div {
-                    class: "absolute inset-0 z-0 min-h-full min-w-full",
-                    id: Pages::new_collection_page(collection_id).slide_in_id(),
+        for collection_id in STORAGE
+            .collections
+            .read()
+            .iter()
+            .map(|x| x.get_collection_id())
+        {
+            div {
+                class: "absolute inset-0 z-0 min-h-full min-w-full",
+                id: Pages::new_collection_page(collection_id).slide_in_id(),
+                if Pages::new_collection_page(collection_id.clone()).should_render() {
                     LayoutContainer {
                         extended_class: "p-0",
                         CollectionDisplay {
