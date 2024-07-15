@@ -330,14 +330,18 @@ fn App() -> Element {
                 handle_error: move |error| { rsx! {
                     Modal { active: error_active, name: "error_modal", close_on_outer_click: false,
                         div {
-                            div { class: "flex flex-col space-y-3",
+                            div { class: "w-full flex flex-col items-center space-y-3",
                                 div { class: "text-red text-2xl font-bold",
                                     "Hmm, something went wrong. Please copy the following error to the developer."
                                 }
                                 Button {
                                     roundness: Roundness::Pill,
                                     extended_css_class: "text-[13px] font-bold",
-                                    string_placements: rsx! { "{error:?} " },
+                                    string_placements: rsx! {
+                                        pre {
+                                            "{error:#?}"
+                                        }
+                                    },
                                     fill_mode: FillMode::Fit,
                                     clickable: false
                                 }
