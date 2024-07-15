@@ -65,12 +65,12 @@ macro_rules! impl_context_switcher {
                 global.write().0 = self.clone();
             }
         }
-        $crate::impl_optional_switcher!($type);
+        $crate::impl_optional_state_switcher!($type);
     };
 }
 
 #[macro_export]
-macro_rules! impl_optional_switcher {
+macro_rules! impl_optional_state_switcher {
     ($type:ty) => {
         impl From<$type>
             for Option<std::rc::Rc<dyn $crate::BaseComponents::molecules::switcher::StateSwitcher>>
@@ -91,6 +91,65 @@ pub trait ToClass {
     }
 }
 
+/// A component for creating a selection bar that switches between different states.
+///
+/// # Parameters
+///
+/// - `default_state`: The initial state of the switcher.
+/// - `class`: Additional CSS classes to be applied to the root of the component.
+/// - `signal`: An optional signal to synchronize the state externally.
+///
+/// # Type Constraints
+///
+/// - `T`: A type that implements the `StateSwitcher`, `IntoEnumIterator`, `Clone`.
+///         It must also be `'static` and implement `PartialEq`.
+/// - `T` must implement `ToClass`, which functionality is providing each Element's class.
+/// - `T` must be convertible into `Option<Rc<dyn StateSwitcher + 'static>>`.
+/// - `T` must be convertible into `StringPlacements`.
+///
+/// # Example
+///
+/// ```rust
+/// #[derive(PartialEq, Eq, Clone, Copy, Hash, EnumIter, Debug)]
+/// pub enum ProgressState {
+///     Running,
+///     Finished,
+/// }
+///
+/// impl From<ProgressState> for StringPlacements {
+///     fn from(value: ProgressState) -> Self {
+///         match value {
+///             ProgressState::Running => vec![
+///                 ContentType::text("K").align_left(),
+///                 ContentType::text("正在進行").align_right(),
+///             ],
+///             ProgressState::Finished => vec![
+///                 ContentType::text("K").align_left(),
+///                 ContentType::text("已完成").align_right(),
+///             ],
+///         }
+///         .into()
+///     }
+/// }
+///
+/// impl ToClass for ProgressState {
+///     fn to_class(&self) -> String {
+///         match self {
+///             ProgressState::Running => "bg-red",
+///             ProgressState::Finished => "bg-blue",
+///         }
+///         .into()
+///     }
+/// }
+///
+/// impl_context_switcher!(ProgressState);
+/// // Usage in rsx!
+/// rsx! {
+///     StateSwitcherSelectionBar {
+///         default_state: ProgressState::Running
+///     }
+/// }
+/// ```
 #[component]
 pub fn StateSwitcherSelectionBar<T: 'static + PartialEq>(
     default_state: T,

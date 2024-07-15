@@ -154,7 +154,7 @@ pub enum Pages {
     CollectionPage(Arc<str>),
 }
 
-impl_optional_switcher!(Pages);
+impl_optional_state_switcher!(Pages);
 
 impl Pages {
     fn new_collection_page(s: CollectionId) -> Self {
@@ -373,7 +373,6 @@ fn Layout() -> Element {
     });
 
     let history = HISTORY.read();
-
     rsx! {
         div {
             class: "w-screen inline-flex self-stretch group flex overflow-hidden",
