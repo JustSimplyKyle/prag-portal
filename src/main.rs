@@ -11,12 +11,9 @@ use dioxus::desktop::WindowBuilder;
 use dioxus::html::input_data::MouseButton;
 use manganis::ImageAsset;
 use rust_lib::api::backend_exclusive::vanilla::version::VersionMetadata;
-use rust_lib::api::shared_resources::collection::{
-    Collection, CollectionId, ModLoader, ModLoaderType,
-};
+use rust_lib::api::shared_resources::collection::{CollectionId, ModLoader, ModLoaderType};
 use std::hash::{DefaultHasher, Hash, Hasher};
 use std::path::PathBuf;
-use std::str::FromStr;
 use std::sync::Arc;
 use tailwind_fuse::*;
 use BaseComponents::button::{Button, FillMode, Roundness};

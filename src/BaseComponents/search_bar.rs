@@ -1,4 +1,6 @@
 pub use dioxus::prelude::*;
+use itertools::Itertools;
+use nucleo::{Matcher, Utf32Str};
 
 use crate::{
     collections::SEARCH,
@@ -8,6 +10,35 @@ use crate::{
         string_placements::ContentType,
     },
 };
+
+#[component]
+pub fn SearchContainer(search: String, childrens: Vec<(String, Element)>) -> Element {
+    let mut matcher = Matcher::new(nucleo::Config::DEFAULT);
+    let mut buffer_haystack = Vec::new();
+    let mut buffer = Vec::new();
+    let utf32_search = Utf32Str::new(&*search, &mut buffer);
+    let render = childrens
+        .into_iter()
+        .map(|(name, x)| {
+            let haystack = Utf32Str::new(&name, &mut buffer_haystack);
+            let score = matcher.fuzzy_match(haystack, utf32_search);
+            (score, x)
+        })
+        .filter_map(|(score, x)| {
+            if search == "搜尋" {
+                Some((u16::MAX, x))
+            } else {
+                score.map(|score| (score, x))
+            }
+        })
+        .sorted_by_key(|x| std::cmp::Reverse(x.0))
+        .map(|x| x.1);
+    rsx! {
+        for x in render {
+            {x}
+        }
+    }
+}
 
 #[component]
 pub fn SearchBar(sender: Option<Signal<String>>) -> Element {

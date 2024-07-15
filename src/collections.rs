@@ -23,7 +23,6 @@ pub static BOOKMARK_ADD: &str = manganis::mg!(file("./public/bookmark_add.svg"))
 pub fn Collections() -> Element {
     let collections = (STORAGE.collections)();
     let sender = use_signal(String::new);
-
     rsx! {
         div {
             class: "flex flex-col space-y-[10px]",

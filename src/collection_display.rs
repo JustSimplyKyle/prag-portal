@@ -1,10 +1,12 @@
 use dioxus::prelude::*;
+use itertools::Itertools;
 use manganis::ImageAsset;
+use nucleo::{Matcher, Utf32Str};
 use rust_lib::api::{
     backend_exclusive::mod_management::mods::ModMetadata,
-    shared_resources::collection::{Collection, CollectionId},
+    shared_resources::{collection::CollectionId, entry::STORAGE},
 };
-use std::{hash::Hash, rc::Rc};
+use std::rc::Rc;
 use strum::EnumIter;
 use tokio_stream::StreamExt;
 
@@ -12,7 +14,7 @@ use crate::{
     impl_context_switcher,
     BaseComponents::{
         button::{Button, FillMode, Roundness, Size},
-        search_bar::SearchBar,
+        search_bar::{SearchBar, SearchContainer},
         string_placements::{ContentType, Hint, StringPlacements, Text},
         switch::Switch,
         switcher::{Comparison, Switcher, SwitcherSelectionBar, ToClass},
@@ -210,27 +212,28 @@ fn ModViewer(collection_id: ReadOnlySignal<CollectionId>, search: String) -> Ele
     let mods = use_memo(move || {
         let collection = collection_id.read().get_collection_owned();
         collection.mod_controller.map(move |mut x| {
-            x.manager.mods.sort_unstable_by_key(|x| x.name.clone());
+            x.manager.mods.sort_by_key(|x| x.name.clone());
             x.manager.mods
         })
     });
+    let mods = mods()
+        .into_iter()
+        .flatten()
+        .map(|x| {
+            (
+                x.name.clone(),
+                rsx! {
+                    SubModViewer {collection_id, mods: x  }
+                },
+            )
+        })
+        .collect::<Vec<_>>();
     rsx! {
         div {
             class: "grid grid-flow-row grid-cols-[repeat(auto-fill,273px)] gap-[3px]",
-            for x in mods()
-                .into_iter()
-                .flatten()
-                .filter(|x| {
-                    if search == "搜尋" || search.is_empty() {
-                        return true;
-                    }
-                    x.name.to_lowercase().contains(&search.to_lowercase())
-                })
-            {
-                SubModViewer {
-                    collection_id,
-                    mods: x.clone()
-                }
+            SearchContainer {
+                search,
+                childrens: mods,
             }
         }
     }
