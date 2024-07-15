@@ -11,15 +11,19 @@ use dioxus::desktop::WindowBuilder;
 use dioxus::html::input_data::MouseButton;
 use manganis::ImageAsset;
 use rust_lib::api::backend_exclusive::vanilla::version::VersionMetadata;
-use rust_lib::api::shared_resources::collection::{CollectionId, ModLoader, ModLoaderType};
+use rust_lib::api::shared_resources::collection::{
+    Collection, CollectionId, ModLoader, ModLoaderType,
+};
 use std::hash::{DefaultHasher, Hash, Hasher};
 use std::path::PathBuf;
 use std::sync::Arc;
 use tailwind_fuse::*;
-use BaseComponents::button::{Button, FillMode, Roundness};
-use BaseComponents::modal::{subModalProps, ComponentPointer, Modal};
-use BaseComponents::string_placements::ContentType;
-use BaseComponents::switcher::Switcher;
+use BaseComponents::{
+    atoms::button::{Button, FillMode, Roundness},
+    molecules::switcher::StateSwitcher,
+    organisms::modal::{subModalProps, ComponentPointer, Modal},
+    string_placements::ContentType,
+};
 
 use dioxus::prelude::*;
 use log::LevelFilter;
@@ -78,10 +82,10 @@ impl History {
             prev_steps: 0,
         }
     }
-    pub fn active(&self) -> &Pages {
+    pub const fn active(&self) -> &Pages {
         &self.active
     }
-    pub fn history(&self) -> &Vec<Pages> {
+    pub const fn history(&self) -> &Vec<Pages> {
         &self.history
     }
     pub fn prev_peek(&self) -> Option<&Pages> {
@@ -154,11 +158,11 @@ impl_optional_switcher!(Pages);
 
 impl Pages {
     fn new_collection_page(s: CollectionId) -> Self {
-        Self::CollectionPage(s.0.into())
+        Self::CollectionPage(s.0)
     }
 }
 
-impl Switcher for Pages {
+impl StateSwitcher for Pages {
     fn hashed_value(&self) -> u64 {
         let mut hasher = DefaultHasher::new();
         self.hash(&mut hasher);
@@ -282,8 +286,8 @@ impl ToString for Pages {
 }
 
 pub async fn collection_builder(
-    picture_path: impl Into<Option<PathBuf>>,
-    version_id: impl Into<String>,
+    picture_path: impl Into<Option<PathBuf>> + Send,
+    version_id: impl Into<String> + Send,
 ) -> anyhow::Result<()> {
     let version = VersionMetadata::from_id(&version_id.into()).await?;
     let mut collection = entry::create_collection(
@@ -374,14 +378,14 @@ fn Layout() -> Element {
         div {
             class: "w-screen inline-flex self-stretch group flex overflow-hidden",
             "data-selected": history.active().to_string(),
-            "data-prev": history.prev_peek().map_or_else(String::new, |x| x.to_string()),
+            "data-prev": history.prev_peek().map_or_else(String::new, ToString::to_string),
             onmousedown: move |x| {
                 if let Some(x) = x.data().trigger_button() {
                     if x == MouseButton::Fourth {
-                        HISTORY.write().go_prev()
+                        HISTORY.write().go_prev();
                     }
                     if x == MouseButton::Fifth {
-                        HISTORY.write().go_next()
+                        HISTORY.write().go_next();
                     }
                 }
             },
@@ -432,7 +436,7 @@ fn CollectionContainer() -> Element {
             .collections
             .read()
             .iter()
-            .map(|x| x.get_collection_id())
+            .map(Collection::get_collection_id)
         {
             div {
                 class: "absolute inset-0 z-0 min-h-full min-w-full",

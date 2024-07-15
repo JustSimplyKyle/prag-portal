@@ -5,16 +5,11 @@ use rust_lib::api::shared_resources::collection::Collection;
 use rust_lib::api::shared_resources::entry::STORAGE;
 
 use crate::impl_context_switcher;
-use crate::BaseComponents::button::Button;
-use crate::BaseComponents::button::FillMode;
-use crate::BaseComponents::button::Roundness;
-use crate::BaseComponents::string_placements::ContentType;
-use crate::BaseComponents::string_placements::Hint;
-use crate::BaseComponents::string_placements::Image;
-use crate::BaseComponents::string_placements::StringPlacements;
-use crate::BaseComponents::string_placements::Text;
-use crate::BaseComponents::switcher::SwitcherSelectionBar;
-use crate::BaseComponents::switcher::ToClass;
+use crate::BaseComponents::{
+    atoms::button::{Button, FillMode, Roundness},
+    molecules::switcher::{StateSwitcherSelectionBar, ToClass},
+    string_placements::{ContentType, Hint, Image, StringPlacements, Text},
+};
 use crate::DRAG_INDICATOR;
 use rust_lib::api::shared_resources::entry::DOWNLOAD_PROGRESS;
 use strum::EnumIter;
@@ -134,7 +129,7 @@ fn ProgressStateBar() -> Element {
     rsx! {
         div {
             class: "w-full grid grid-flow-col justify-stretch",
-            SwitcherSelectionBar {
+            StateSwitcherSelectionBar {
                 default_state: ProgressState::Running
             }
             div {
@@ -186,7 +181,7 @@ pub(crate) trait SizeFromMegaBytes {
 impl SizeFromMegaBytes for f64 {
     fn display_size_from_megabytes(&self) -> String {
         match *self {
-            f if f < 1_000. => format!("{:.2} bytes", f),
+            f if f < 1_000. => format!("{f:.2} bytes"),
             f if f < 1_000_000. => format!("{:.2} KB", f / 1_000.),
             f if f < 1_000_000_000. => format!("{:.2} MB", f / 1_000_000.),
             f => format!("{:.2} GB", f / 1_000_000_000.),

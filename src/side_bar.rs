@@ -5,9 +5,9 @@ use rust_lib::api::shared_resources::{collection::Collection, entry::STORAGE};
 
 use crate::{
     BaseComponents::{
-        button::{Button, Roundness},
+        atoms::button::{Button, Roundness},
+        molecules::switcher::StateSwitcher,
         string_placements::{ContentType, Image, Text},
-        switcher::Switcher,
     },
     Pages, ARROW_RIGHT, EXPLORE, HISTORY, HOME, SIDEBAR_COLLECTION, SIM_CARD,
 };
@@ -178,19 +178,19 @@ fn SidebarCollectionBlock(collection: MappedSignal<Collection>) -> Element {
             roundness: Roundness::None,
             string_placements: vec![
                 ContentType::custom(img_block).align_left(),
-                ContentType::text(collection.display_name.to_string())
+                ContentType::text(collection.display_name.clone())
                     .align_right()
                     .css("group-aria-busy:hidden"),
             ],
             switcher: Pages::new_collection_page(collection.get_collection_id()),
             focus_color_change: false,
-            background_image: darken_sidebar_background(picture_path),
+            background_image: darken_sidebar_background(&picture_path),
             background_size: "cover",
             extended_css_class: "bg-background object-cover transition-all delay-[25ms] group-aria-expanded:w-20 group-aria-expanded:min-h-20 group-aria-expanded:p-0"
         }
     }
 }
 
-fn darken_sidebar_background(s: impl ToString) -> String {
+fn darken_sidebar_background(s: &impl ToString) -> String {
     format!("linear-gradient(to right, rgba(25, 25, 25, 0.8) 0%, rgba(25, 25, 25, 1) 68%, rgba(25, 25, 25, 1) 100%),url(\"{}\")", s.to_string())
 }

@@ -350,7 +350,7 @@ fn sub_content_builder(
 
     let text = match (dynamic, inplace) {
         (Some(DynamicNode::Text(text)), _) => text.value.clone(),
-        (_, Some(TemplateNode::Text { text })) => text.to_string(),
+        (_, Some(TemplateNode::Text { text })) => (*text).to_string(),
         _ => {
             return Err(RenderError::Aborted(
                 CapturedError::from_str("please input only text in a `[Text/Hint/Image]` element")

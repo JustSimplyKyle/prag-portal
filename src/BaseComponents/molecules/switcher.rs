@@ -1,12 +1,12 @@
-use super::string_placements::StringPlacements;
-use crate::BaseComponents::button::{Button, FillMode, Roundness};
+use crate::BaseComponents::atoms::button::{Button, FillMode, Roundness};
+use crate::BaseComponents::string_placements::StringPlacements;
 use dioxus::prelude::*;
 use std::rc::Rc;
 use strum::IntoEnumIterator;
 
 /// `Switcher` is a trait for objects that can be compared with a global signal,
 /// switch the global signal to themselves, and provide a hashed value for equality checks.
-pub trait Switcher {
+pub trait StateSwitcher {
     /// Compares the object with the global signal.
     /// Returns `true` if they are the same, `false` otherwise.
     fn compare(&self) -> bool;
@@ -18,8 +18,8 @@ pub trait Switcher {
     fn hashed_value(&self) -> u64;
 }
 
-impl<'a, 'b> PartialEq<dyn Switcher + 'b> for dyn Switcher + 'a {
-    fn eq(&self, other: &(dyn Switcher + 'b)) -> bool {
+impl<'a, 'b> PartialEq<dyn StateSwitcher + 'b> for dyn StateSwitcher + 'a {
+    fn eq(&self, other: &(dyn StateSwitcher + 'b)) -> bool {
         self.hashed_value() == other.hashed_value()
     }
 }
@@ -32,7 +32,7 @@ pub(crate) type Comparison<T> = (T, Option<T>);
 #[macro_export]
 macro_rules! impl_context_switcher {
     ($type:ty) => {
-        impl crate::BaseComponents::switcher::Switcher for $type {
+        impl $crate::BaseComponents::molecules::switcher::StateSwitcher for $type {
             fn hashed_value(&self) -> u64 {
                 use std::hash::{Hash, Hasher};
                 let mut hasher = std::collections::hash_map::DefaultHasher::new();
@@ -43,7 +43,9 @@ macro_rules! impl_context_switcher {
             fn compare(&self) -> bool {
                 use dioxus::signals::Readable;
                 let top = use_context::<
-                    dioxus::signals::Signal<crate::BaseComponents::switcher::Comparison<Self>>,
+                    dioxus::signals::Signal<
+                        $crate::BaseComponents::molecules::switcher::Comparison<Self>,
+                    >,
                 >();
                 let x = &top.read().0 == self;
                 x
@@ -52,7 +54,9 @@ macro_rules! impl_context_switcher {
             fn switch_active_to_self(&self) {
                 use dioxus::signals::Writable;
                 let mut global = use_context::<
-                    dioxus::signals::Signal<crate::BaseComponents::switcher::Comparison<Self>>,
+                    dioxus::signals::Signal<
+                        $crate::BaseComponents::molecules::switcher::Comparison<Self>,
+                    >,
                 >();
                 let prev = global().0;
                 if &prev != self {
@@ -61,17 +65,21 @@ macro_rules! impl_context_switcher {
                 global.write().0 = self.clone();
             }
         }
-        crate::impl_optional_switcher!($type);
+        $crate::impl_optional_switcher!($type);
     };
 }
 
 #[macro_export]
 macro_rules! impl_optional_switcher {
     ($type:ty) => {
-        impl From<$type> for Option<std::rc::Rc<dyn crate::BaseComponents::switcher::Switcher>> {
+        impl From<$type>
+            for Option<std::rc::Rc<dyn $crate::BaseComponents::molecules::switcher::StateSwitcher>>
+        {
             fn from(value: $type) -> Self {
                 Some(std::rc::Rc::new(value)
-                    as std::rc::Rc<dyn crate::BaseComponents::switcher::Switcher>)
+                    as std::rc::Rc<
+                        dyn $crate::BaseComponents::molecules::switcher::StateSwitcher,
+                    >)
             }
         }
     };
@@ -84,14 +92,14 @@ pub trait ToClass {
 }
 
 #[component]
-pub fn SwitcherSelectionBar<T: 'static + PartialEq>(
+pub fn StateSwitcherSelectionBar<T: 'static + PartialEq>(
     default_state: T,
     #[props(default)] class: String,
     signal: Option<Signal<Comparison<T>>>,
 ) -> Element
 where
-    T: Switcher + IntoEnumIterator + Clone + ToClass,
-    Option<Rc<(dyn Switcher + 'static)>>: From<T>,
+    T: StateSwitcher + IntoEnumIterator + Clone + ToClass,
+    Option<Rc<(dyn StateSwitcher + 'static)>>: From<T>,
     StringPlacements: From<T>,
 {
     let comp: Signal<Comparison<T>> = use_context_provider(|| Signal::new((default_state, None)));

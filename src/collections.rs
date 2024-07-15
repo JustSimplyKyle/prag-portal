@@ -4,8 +4,8 @@ use rust_lib::api::shared_resources::entry::STORAGE;
 use crate::{
     main_page::{CollectionBlock, STAR},
     BaseComponents::{
-        button::{Button, FillMode, Roundness, Size},
-        search_bar::SearchBar,
+        atoms::button::{Button, FillMode, Roundness, Size},
+        molecules::search_bar::SearchBar,
         string_placements::{Alignment, ContentType, Contents},
     },
     EXPLORE,

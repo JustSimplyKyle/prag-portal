@@ -6,9 +6,9 @@ use tailwind_fuse::*;
 
 use crate::{
     BaseComponents::{
-        button::{Button, ButtonClass, FillMode, Roundness, Size},
+        atoms::button::{Button, ButtonClass, FillMode, Roundness, Size},
+        molecules::switcher::StateSwitcher,
         string_placements::{Alignment, ContentType, Contents},
-        switcher::Switcher,
     },
     Pages,
 };
@@ -233,14 +233,14 @@ fn SuggestionPage() -> Element {
                             class: "text-lime-300 text-6xl font-bold font-['GenSenRounded TW'] leading-[78px] tracking-[6px]",
                             "探索  創造"
                             br {
-                            
+
                             }
                         }
                         span {
                             class: "text-white text-6xl font-normal font-['GenSenRounded TW'] leading-[78px] tracking-[6px]",
                             "無窮  無限"
                             br {
-                            
+
                             }
                             "創作  可能"
                         }

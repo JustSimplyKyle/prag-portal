@@ -6,7 +6,7 @@ use crate::{
     collections::SEARCH,
     main_page::ARROW_LEFT,
     BaseComponents::{
-        button::{Button, FillMode, Roundness},
+        atoms::button::{Button, FillMode, Roundness},
         string_placements::ContentType,
     },
 };
@@ -16,7 +16,7 @@ pub fn SearchContainer(search: String, childrens: Vec<(String, Element)>) -> Ele
     let mut matcher = Matcher::new(nucleo::Config::DEFAULT);
     let mut buffer_haystack = Vec::new();
     let mut buffer = Vec::new();
-    let utf32_search = Utf32Str::new(&*search, &mut buffer);
+    let utf32_search = Utf32Str::new(&search, &mut buffer);
     let render = childrens
         .into_iter()
         .map(|(name, x)| {

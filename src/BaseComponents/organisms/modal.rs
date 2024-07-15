@@ -21,7 +21,7 @@ pub fn Modal(
         .active(active)
         .close_on_outer_click(close_on_outer_click)
         .build();
-    if TOP_LEVEL_COMPONENT().into_iter().all(|x| &x.name != &name) {
+    if TOP_LEVEL_COMPONENT().into_iter().all(|x| x.name != name) {
         #[allow(deprecated)]
         let pointer = ComponentPointer {
             name,

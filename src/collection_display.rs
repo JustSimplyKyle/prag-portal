@@ -1,10 +1,8 @@
 use dioxus::prelude::*;
-use itertools::Itertools;
 use manganis::ImageAsset;
-use nucleo::{Matcher, Utf32Str};
 use rust_lib::api::{
     backend_exclusive::mod_management::mods::ModMetadata,
-    shared_resources::{collection::CollectionId, entry::STORAGE},
+    shared_resources::collection::CollectionId,
 };
 use std::rc::Rc;
 use strum::EnumIter;
@@ -13,11 +11,15 @@ use tokio_stream::StreamExt;
 use crate::{
     impl_context_switcher,
     BaseComponents::{
-        button::{Button, FillMode, Roundness, Size},
-        search_bar::{SearchBar, SearchContainer},
+        atoms::{
+            button::{Button, FillMode, Roundness, Size},
+            switch::Switch,
+        },
+        molecules::{
+            search_bar::{SearchBar, SearchContainer},
+            switcher::{Comparison, StateSwitcher, StateSwitcherSelectionBar, ToClass},
+        },
         string_placements::{ContentType, Hint, StringPlacements, Text},
-        switch::Switch,
-        switcher::{Comparison, Switcher, SwitcherSelectionBar, ToClass},
     },
     EXPLORE, HISTORY,
 };
@@ -340,7 +342,7 @@ fn SelectionBar(
     rsx! {
         div {
             class: "grid grid-flow-col items-stretch",
-            SwitcherSelectionBar {
+            StateSwitcherSelectionBar {
                 class: "justify-start",
                 signal: status,
                 default_state: CollectionDisplayTopSelection::Mods

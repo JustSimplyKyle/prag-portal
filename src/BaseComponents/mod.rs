@@ -1,6 +1,4 @@
-pub mod button;
-pub mod modal;
-pub mod search_bar;
+pub mod atoms;
+pub mod molecules;
+pub mod organisms;
 pub mod string_placements;
-pub mod switch;
-pub mod switcher;
