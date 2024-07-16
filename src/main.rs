@@ -499,6 +499,7 @@ fn Layout() -> Element {
                 }
             },
             SideBar {}
+            CollectionEditContainer { }
             div {
                 class: "w-full min-h-screen relative *:overflow-scroll",
                 div {
@@ -535,7 +536,6 @@ fn Layout() -> Element {
                 }
                 CollectionContainer {  }
             }
-            CollectionEditContainer { }
         }
     }
 }
