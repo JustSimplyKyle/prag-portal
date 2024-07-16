@@ -1577,294 +1577,6 @@ input {
   margin-inline-start: -1px;
 }
 
-.animation-\[collections\^slideUp\^explore\^slideOutDown\] {
-  display: none;
-}
-
-.group[data-selected=collections] .animation-\[collections\^slideUp\^explore\^slideOutDown\] {
-  z-index: 50;
-}
-
-.group[data-prev=collections] .animation-\[collections\^slideUp\^explore\^slideOutDown\] {
-  display: block;
-}
-
-.group[data-selected=collections] .animation-\[collections\^slideUp\^explore\^slideOutDown\] {
-  display: block;
-}
-
-@keyframes slideUp {
-  0% {
-    transform: translateY(100dvh);
-    animation-timing-function: cubic-bezier(.08,.06,0,1.28);
-  }
-
-  100% {
-    transform: translateY(0%);
-    animation-timing-function: cubic-bezier(.08,.06,0,1.28);
-  }
-}
-
-.group[data-prev=explore][data-selected=collections] .animation-\[collections\^slideUp\^explore\^slideOutDown\] {
-  animation: slideUp 500ms;
-}
-
-@keyframes slideOutDown {
-  0% {
-    transform: translateY(0%);
-    animation-timing-function: cubic-bezier(.08,.06,0,1.28);
-  }
-
-  100% {
-    transform: translateY(100dvh);
-    animation-timing-function: cubic-bezier(.08,.06,0,1.28);
-  }
-}
-
-.group[data-selected=explore] .animation-\[collections\^slideUp\^explore\^slideOutDown\] {
-  animation: slideOutDown 500ms;
-}
-
-.animation-\[collections\^slideUp\^main-page\^slideOutDown\] {
-  display: none;
-}
-
-.group[data-selected=collections] .animation-\[collections\^slideUp\^main-page\^slideOutDown\] {
-  z-index: 50;
-}
-
-.group[data-prev=collections] .animation-\[collections\^slideUp\^main-page\^slideOutDown\] {
-  display: block;
-}
-
-.group[data-selected=collections] .animation-\[collections\^slideUp\^main-page\^slideOutDown\] {
-  display: block;
-}
-
-@keyframes slideUp {
-  0% {
-    transform: translateY(100dvh);
-    animation-timing-function: cubic-bezier(.08,.06,0,1.28);
-  }
-
-  100% {
-    transform: translateY(0%);
-    animation-timing-function: cubic-bezier(.08,.06,0,1.28);
-  }
-}
-
-.group[data-prev=main-page][data-selected=collections] .animation-\[collections\^slideUp\^main-page\^slideOutDown\] {
-  animation: slideUp 500ms;
-}
-
-@keyframes slideOutDown {
-  0% {
-    transform: translateY(0%);
-    animation-timing-function: cubic-bezier(.08,.06,0,1.28);
-  }
-
-  100% {
-    transform: translateY(100dvh);
-    animation-timing-function: cubic-bezier(.08,.06,0,1.28);
-  }
-}
-
-.group[data-selected=main-page] .animation-\[collections\^slideUp\^main-page\^slideOutDown\] {
-  animation: slideOutDown 500ms;
-}
-
-.animation-\[explore\^slideDown\^collections\^slideOutUp\] {
-  display: none;
-}
-
-.group[data-selected=explore] .animation-\[explore\^slideDown\^collections\^slideOutUp\] {
-  z-index: 50;
-}
-
-.group[data-prev=explore] .animation-\[explore\^slideDown\^collections\^slideOutUp\] {
-  display: block;
-}
-
-.group[data-selected=explore] .animation-\[explore\^slideDown\^collections\^slideOutUp\] {
-  display: block;
-}
-
-@keyframes slideDown {
-  0% {
-    transform: translateY(-100dvh);
-    animation-timing-function: cubic-bezier(.08,.06,0,1.28);
-  }
-
-  100% {
-    transform: translateY(0%);
-    animation-timing-function: cubic-bezier(.08,.06,0,1.28);
-  }
-}
-
-.group[data-prev=collections][data-selected=explore] .animation-\[explore\^slideDown\^collections\^slideOutUp\] {
-  animation: slideDown 500ms;
-}
-
-@keyframes slideOutUp {
-  0% {
-    transform: translateY(0%);
-    animation-timing-function: cubic-bezier(.08,.06,0,1.28);
-  }
-
-  100% {
-    transform: translateY(-100dvh);
-    animation-timing-function: cubic-bezier(.08,.06,0,1.28);
-  }
-}
-
-.group[data-selected=collections] .animation-\[explore\^slideDown\^collections\^slideOutUp\] {
-  animation: slideOutUp 500ms;
-}
-
-.animation-\[explore\^slideUp\^main-page\^slideOutDown\] {
-  display: none;
-}
-
-.group[data-selected=explore] .animation-\[explore\^slideUp\^main-page\^slideOutDown\] {
-  z-index: 50;
-}
-
-.group[data-prev=explore] .animation-\[explore\^slideUp\^main-page\^slideOutDown\] {
-  display: block;
-}
-
-.group[data-selected=explore] .animation-\[explore\^slideUp\^main-page\^slideOutDown\] {
-  display: block;
-}
-
-@keyframes slideUp {
-  0% {
-    transform: translateY(100dvh);
-    animation-timing-function: cubic-bezier(.08,.06,0,1.28);
-  }
-
-  100% {
-    transform: translateY(0%);
-    animation-timing-function: cubic-bezier(.08,.06,0,1.28);
-  }
-}
-
-.group[data-prev=main-page][data-selected=explore] .animation-\[explore\^slideUp\^main-page\^slideOutDown\] {
-  animation: slideUp 500ms;
-}
-
-@keyframes slideOutDown {
-  0% {
-    transform: translateY(0%);
-    animation-timing-function: cubic-bezier(.08,.06,0,1.28);
-  }
-
-  100% {
-    transform: translateY(100dvh);
-    animation-timing-function: cubic-bezier(.08,.06,0,1.28);
-  }
-}
-
-.group[data-selected=main-page] .animation-\[explore\^slideUp\^main-page\^slideOutDown\] {
-  animation: slideOutDown 500ms;
-}
-
-.animation-\[main-page\^slideDown\^collections\^slideOutUp\] {
-  display: none;
-}
-
-.group[data-selected=main-page] .animation-\[main-page\^slideDown\^collections\^slideOutUp\] {
-  z-index: 50;
-}
-
-.group[data-prev=main-page] .animation-\[main-page\^slideDown\^collections\^slideOutUp\] {
-  display: block;
-}
-
-.group[data-selected=main-page] .animation-\[main-page\^slideDown\^collections\^slideOutUp\] {
-  display: block;
-}
-
-@keyframes slideDown {
-  0% {
-    transform: translateY(-100dvh);
-    animation-timing-function: cubic-bezier(.08,.06,0,1.28);
-  }
-
-  100% {
-    transform: translateY(0%);
-    animation-timing-function: cubic-bezier(.08,.06,0,1.28);
-  }
-}
-
-.group[data-prev=collections][data-selected=main-page] .animation-\[main-page\^slideDown\^collections\^slideOutUp\] {
-  animation: slideDown 500ms;
-}
-
-@keyframes slideOutUp {
-  0% {
-    transform: translateY(0%);
-    animation-timing-function: cubic-bezier(.08,.06,0,1.28);
-  }
-
-  100% {
-    transform: translateY(-100dvh);
-    animation-timing-function: cubic-bezier(.08,.06,0,1.28);
-  }
-}
-
-.group[data-selected=collections] .animation-\[main-page\^slideDown\^collections\^slideOutUp\] {
-  animation: slideOutUp 500ms;
-}
-
-.animation-\[main-page\^slideDown\^explore\^slideOutUp\] {
-  display: none;
-}
-
-.group[data-selected=main-page] .animation-\[main-page\^slideDown\^explore\^slideOutUp\] {
-  z-index: 50;
-}
-
-.group[data-prev=main-page] .animation-\[main-page\^slideDown\^explore\^slideOutUp\] {
-  display: block;
-}
-
-.group[data-selected=main-page] .animation-\[main-page\^slideDown\^explore\^slideOutUp\] {
-  display: block;
-}
-
-@keyframes slideDown {
-  0% {
-    transform: translateY(-100dvh);
-    animation-timing-function: cubic-bezier(.08,.06,0,1.28);
-  }
-
-  100% {
-    transform: translateY(0%);
-    animation-timing-function: cubic-bezier(.08,.06,0,1.28);
-  }
-}
-
-.group[data-prev=explore][data-selected=main-page] .animation-\[main-page\^slideDown\^explore\^slideOutUp\] {
-  animation: slideDown 500ms;
-}
-
-@keyframes slideOutUp {
-  0% {
-    transform: translateY(0%);
-    animation-timing-function: cubic-bezier(.08,.06,0,1.28);
-  }
-
-  100% {
-    transform: translateY(-100dvh);
-    animation-timing-function: cubic-bezier(.08,.06,0,1.28);
-  }
-}
-
-.group[data-selected=explore] .animation-\[main-page\^slideDown\^explore\^slideOutUp\] {
-  animation: slideOutUp 500ms;
-}
-
 .svg-\[20px\] {
   height: 20px;
   width: 20px;
@@ -2196,6 +1908,22 @@ input {
   flex-grow: 0;
 }
 
+@keyframes slideDown {
+  0% {
+    transform: translateY(-100dvh);
+    animation-timing-function: cubic-bezier(.08,.06,0,1.28);
+  }
+
+  100% {
+    transform: translateY(0%);
+    animation-timing-function: cubic-bezier(.08,.06,0,1.28);
+  }
+}
+
+.animate-slideDown {
+  animation: slideDown 500ms;
+}
+
 @keyframes slideLeft {
   0% {
     transform: translateX(100dvw);
@@ -2212,6 +1940,38 @@ input {
   animation: slideLeft 500ms;
 }
 
+@keyframes slideOutDown {
+  0% {
+    transform: translateY(0%);
+    animation-timing-function: cubic-bezier(.08,.06,0,1.28);
+  }
+
+  100% {
+    transform: translateY(100dvh);
+    animation-timing-function: cubic-bezier(.08,.06,0,1.28);
+  }
+}
+
+.animate-slideOutDown {
+  animation: slideOutDown 500ms;
+}
+
+@keyframes slideOutUp {
+  0% {
+    transform: translateY(0%);
+    animation-timing-function: cubic-bezier(.08,.06,0,1.28);
+  }
+
+  100% {
+    transform: translateY(-100dvh);
+    animation-timing-function: cubic-bezier(.08,.06,0,1.28);
+  }
+}
+
+.animate-slideOutUp {
+  animation: slideOutUp 500ms;
+}
+
 @keyframes slideRight {
   0% {
     transform: translateX(-100dvw);
@@ -2226,6 +1986,22 @@ input {
 
 .animate-slideRight {
   animation: slideRight 500ms ease-in-out;
+}
+
+@keyframes slideUp {
+  0% {
+    transform: translateY(100dvh);
+    animation-timing-function: cubic-bezier(.08,.06,0,1.28);
+  }
+
+  100% {
+    transform: translateY(0%);
+    animation-timing-function: cubic-bezier(.08,.06,0,1.28);
+  }
+}
+
+.animate-slideUp {
+  animation: slideUp 500ms;
 }
 
 .resize {

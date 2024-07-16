@@ -217,6 +217,73 @@ impl Pages {
         format!("flyinout-{}", self.to_string())
     }
 
+    pub fn scroller_id(&self) -> String {
+        format!("scrolling-{}", self.to_string())
+    }
+
+    pub fn apply_scroller_animation(
+        &self,
+        bottom: &[Self],
+        top: &[Self],
+    ) -> Result<(), anyhow::Error> {
+        let target = self.to_string();
+        let bottom = bottom
+            .iter()
+            .map(|arg0| arg0.to_string())
+            .collect::<Vec<_>>();
+        let top = top.iter().map(|arg0| arg0.to_string()).collect::<Vec<_>>();
+        eval(
+            r#"
+                function applyStyles(self, bottom, top) {
+                    const groups = document.querySelectorAll('.group');            
+                    groups.forEach(group => {
+                        const prev = group.getAttribute('data-prev');
+                        const selected = group.getAttribute('data-selected');
+                        const target = group.querySelector('#scrolling-' + self);
+                        const bottomElems = bottom.map((x) => group.querySelector('#scrolling-' + x));
+                        const topElems = top.map((x) => group.querySelector('#scrolling-' + x));
+
+                        // Reset styles first
+                        bottomElems.forEach((ele) => {
+                            ele.style.display = 'none';
+                            ele.style.zIndex = '0';
+                            ele.style.animation = '';
+                        });
+                        topElems.forEach((ele) => {
+                            ele.style.display = 'none';
+                            ele.style.zIndex = '0';
+                            ele.style.animation = '';
+                        });
+
+                        target.style.display = 'block';
+                        target.style.zIndex = '50';
+                        const finded_bottom = bottom.find((ele) => prev === ele);
+                        const finded_top = top.find((ele) => prev === ele);
+                        if (finded_bottom) {
+                            const bottomElem = group.querySelector('#scrolling-' + finded_bottom);
+                            target.style.animation = 'slideDown 1000ms';
+                            bottomElem.style.display = 'block';
+                            bottomElem.style.zIndex = '10';
+                            bottomElem.style.animation = 'slideOutDown 1000ms';
+                        }
+                        else if (finded_top) {
+                            const topElem = group.querySelector('#scrolling-' + finded_top);
+                            target.style.animation = 'slideUp 1000ms';
+                            topElem.style.display = 'block';
+                            topElem.style.zIndex = '10';
+                            topElem.style.animation = 'slideOutUp 1000ms';
+                        }
+
+                    });
+                }
+                const [[self], bottom, top] = await dioxus.recv();
+                applyStyles(self, bottom, top);
+            "#,
+        )
+            .send(vec![vec![target], bottom, top].into())
+            .map_err(|x| anyhow::anyhow!("{x:#?}"))
+    }
+
     pub fn should_render(&self) -> bool {
         HISTORY.read().active() == self || HISTORY.read().prev_peek() == Some(self)
     }
@@ -397,8 +464,17 @@ fn App() -> Element {
 #[component]
 fn Layout() -> Element {
     use_effect(move || {
-        let _ = HISTORY.read();
+        let history = HISTORY.read();
         Pages::DownloadProgress.apply_slide_in().unwrap();
+        let pages_scroller = vec![Pages::MainPage, Pages::Explore, Pages::Collections];
+        let iter = pages_scroller
+            .iter()
+            .enumerate()
+            .filter(|(_, x)| x == &&history.active);
+        for (u, x) in iter {
+            let (left, right) = pages_scroller.split_at(u);
+            x.apply_scroller_animation(&right[1..], left).unwrap();
+        }
         for collection in &*STORAGE.collections.read() {
             Pages::collection_display(collection.get_collection_id())
                 .apply_slide_in()
@@ -430,21 +506,24 @@ fn Layout() -> Element {
             div {
                 class: "w-full min-h-screen relative *:overflow-scroll",
                 div {
-                    class: "absolute inset-0 z-0 min-h-full animation-[main-page^slideDown^explore^slideOutUp] animation-[main-page^slideDown^collections^slideOutUp]",
+                    class: "absolute inset-0 z-0 min-h-full",
+                    id: Pages::MainPage.scroller_id(),
                     LayoutContainer {
                         MainPage {
                         }
                     }
                 }
                 div {
-                    class: "absolute inset-0 z-0 min-h-full animation-[explore^slideUp^main-page^slideOutDown] animation-[explore^slideDown^collections^slideOutUp]",
+                    class: "absolute inset-0 z-0 min-h-full",
+                    id: Pages::Explore.scroller_id(),
                     LayoutContainer {
                         Explore {
                         }
                     }
                 }
                 div {
-                    class: "absolute inset-0 z-0 min-h-full animation-[collections^slideUp^explore^slideOutDown] animation-[collections^slideUp^main-page^slideOutDown]",
+                    class: "absolute inset-0 z-0 min-h-full",
+                    id: Pages::Collections.scroller_id(),
                     LayoutContainer {
                         Collections {
                         }

@@ -46,6 +46,10 @@ module.exports = {
   safelist: [
     'animate-slideLeft',
     'animate-slideRight',
+    'animate-slideDown',
+    'animate-slideOutDown',
+    'animate-slideUp',
+    'animate-slideOutUp',
   ],
   theme: {
     fontFamily: {
