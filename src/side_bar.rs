@@ -182,7 +182,7 @@ fn SidebarCollectionBlock(collection: MappedSignal<Collection>) -> Element {
                     .align_right()
                     .css("group-aria-busy:hidden"),
             ],
-            switcher: Pages::new_collection_page(collection.get_collection_id()),
+            switcher: Pages::collection_display(collection.get_collection_id()),
             focus_color_change: false,
             background_image: darken_sidebar_background(&picture_path),
             background_size: "cover",

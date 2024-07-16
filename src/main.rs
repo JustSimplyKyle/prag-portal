@@ -16,7 +16,6 @@ use rust_lib::api::shared_resources::collection::{
 };
 use std::hash::{DefaultHasher, Hash, Hasher};
 use std::path::PathBuf;
-use std::sync::Arc;
 use tailwind_fuse::*;
 use BaseComponents::{
     atoms::button::{Button, FillMode, Roundness},
@@ -151,14 +150,49 @@ pub enum Pages {
     Explore,
     Collections,
     DownloadProgress,
-    CollectionPage(Arc<str>),
+    CollectionPage {
+        id: CollectionId,
+        state: CollectionPageState,
+    },
+}
+
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Hash)]
+pub enum CollectionPageState {
+    Display,
+    Edit(CollectionEditState),
+}
+
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Hash, derive_more::Display)]
+pub enum CollectionEditState {
+    Personlization,
+    Datalog,
+    Export,
+    Advanced,
+}
+
+impl ToString for CollectionPageState {
+    fn to_string(&self) -> String {
+        match self {
+            CollectionPageState::Display => String::from("display"),
+            CollectionPageState::Edit(x) => format!("edit-{}", x.to_string()),
+        }
+    }
 }
 
 impl_optional_state_switcher!(Pages);
 
 impl Pages {
-    fn new_collection_page(s: CollectionId) -> Self {
-        Self::CollectionPage(s.0)
+    fn collection_display(id: CollectionId) -> Self {
+        Self::CollectionPage {
+            id,
+            state: CollectionPageState::Display,
+        }
+    }
+    fn collection_edit(id: CollectionId) -> Self {
+        Self::CollectionPage {
+            id,
+            state: CollectionPageState::Edit(CollectionEditState::Personlization),
+        }
     }
 }
 
@@ -275,11 +309,11 @@ impl ToString for Pages {
             Self::Explore => "explore".into(),
             Self::Collections => "collections".into(),
             Self::DownloadProgress => "download-progress".into(),
-            Self::CollectionPage(x) => {
+            Self::CollectionPage { id, state } => {
                 let mut hasher = DefaultHasher::new();
-                x.hash(&mut hasher);
+                id.hash(&mut hasher);
                 let hash = hasher.finish();
-                format!("collection-page-{hash}")
+                format!("collection-page-{}-{hash}", state.to_string())
             }
         }
     }
@@ -366,7 +400,10 @@ fn Layout() -> Element {
         let _ = HISTORY.read();
         Pages::DownloadProgress.apply_slide_in().unwrap();
         for collection in &*STORAGE.collections.read() {
-            Pages::new_collection_page(collection.get_collection_id())
+            Pages::collection_display(collection.get_collection_id())
+                .apply_slide_in()
+                .unwrap();
+            Pages::collection_edit(collection.get_collection_id())
                 .apply_slide_in()
                 .unwrap();
         }
@@ -439,8 +476,8 @@ fn CollectionContainer() -> Element {
         {
             div {
                 class: "absolute inset-0 z-0 min-h-full min-w-full",
-                id: Pages::new_collection_page(collection_id).slide_in_id(),
-                if Pages::new_collection_page(collection_id.clone()).should_render() {
+                id: Pages::collection_display(collection_id).slide_in_id(),
+                if Pages::collection_display(collection_id.clone()).should_render() {
                     LayoutContainer {
                         extended_class: "p-0",
                         CollectionDisplay {

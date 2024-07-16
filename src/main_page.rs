@@ -57,7 +57,7 @@ pub fn CollectionBlock(
             button {
                 class: tw_merge!("relative h-[280px] w-[280px]", extended_class),
                 onclick: move |_| {
-                    Pages::new_collection_page(collection.get_collection_id())
+                    Pages::collection_display(collection.get_collection_id())
                         .switch_active_to_self();
                 },
                 ..attributes,
