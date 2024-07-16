@@ -21,7 +21,7 @@ use crate::{
         },
         string_placements::{ContentType, Hint, StringPlacements, Text},
     },
-    EXPLORE, HISTORY,
+    Pages, EXPLORE, HISTORY,
 };
 
 pub static DISPLAY_BACKGROUND: ImageAsset =
@@ -125,6 +125,7 @@ fn CollectionBackground(
                             Button {
                                 roundness: Roundness::None,
                                 string_placements: vec![ContentType::svg(HORIZ).css("svg-[25px]").align_center()],
+                                switcher: Pages::collection_edit(collection_id()),
                                 fill_mode: FillMode::Fit,
                                 background: "rgba(255,255,255,0.10)",
                                 backdrop_filter: "blur(50px)",

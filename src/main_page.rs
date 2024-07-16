@@ -10,7 +10,7 @@ use crate::{
         molecules::switcher::StateSwitcher,
         string_placements::{Alignment, ContentType, Contents},
     },
-    Pages,
+    Pages, ARROW_RIGHT,
 };
 
 // pub const COLLECTION_PIC: ImageAsset =
@@ -21,7 +21,6 @@ pub const ICON: &str = manganis::mg!(file("./public/icon.svg"));
 pub const IMG: ImageAsset = manganis::mg!(image("./public/project.png").preload());
 pub const STAR: &str = manganis::mg!(file("./public/award_star.svg"));
 pub const ARROW_LEFT: &str = manganis::mg!(file("./public/keyboard_arrow_left.svg"));
-pub const ARROW_RIGHT: &str = manganis::mg!(file("./public/keyboard_arrow_right.svg"));
 
 #[component]
 pub fn MainPage() -> Element {

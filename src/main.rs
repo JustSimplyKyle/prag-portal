@@ -6,9 +6,11 @@ pub mod download_progress;
 pub mod main_page;
 pub mod side_bar;
 
+use collection_display::{DISPLAY_BACKGROUND, GAME_CONTROLLER, UNDO};
 use dioxus::desktop::tao::dpi::PhysicalSize;
 use dioxus::desktop::WindowBuilder;
 use dioxus::html::input_data::MouseButton;
+use main_page::ARROW_LEFT;
 use manganis::ImageAsset;
 use rust_lib::api::backend_exclusive::vanilla::version::VersionMetadata;
 use rust_lib::api::shared_resources::collection::{
@@ -17,6 +19,8 @@ use rust_lib::api::shared_resources::collection::{
 use std::hash::{DefaultHasher, Hash, Hasher};
 use std::path::PathBuf;
 use tailwind_fuse::*;
+use BaseComponents::molecules::switcher::Comparison;
+use BaseComponents::string_placements::{Alignment, Content, Contents};
 use BaseComponents::{
     atoms::button::{Button, FillMode, Roundness},
     molecules::switcher::StateSwitcher,
@@ -156,28 +160,21 @@ pub enum Pages {
     },
 }
 
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Hash)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Hash, derive_more::Display)]
 pub enum CollectionPageState {
     Display,
-    Edit(CollectionEditState),
+    Edit,
 }
 
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Hash, derive_more::Display)]
-pub enum CollectionEditState {
-    Personlization,
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+pub enum EditState {
+    Personalization,
     Datalog,
     Export,
     Advanced,
 }
 
-impl ToString for CollectionPageState {
-    fn to_string(&self) -> String {
-        match self {
-            CollectionPageState::Display => String::from("display"),
-            CollectionPageState::Edit(x) => format!("edit-{}", x.to_string()),
-        }
-    }
-}
+impl_context_switcher!(EditState);
 
 impl_optional_state_switcher!(Pages);
 
@@ -191,7 +188,7 @@ impl Pages {
     fn collection_edit(id: CollectionId) -> Self {
         Self::CollectionPage {
             id,
-            state: CollectionPageState::Edit(CollectionEditState::Personlization),
+            state: CollectionPageState::Edit,
         }
     }
 }
@@ -488,7 +485,7 @@ fn Layout() -> Element {
     let history = HISTORY.read();
     rsx! {
         div {
-            class: "w-screen inline-flex self-stretch group flex overflow-hidden",
+            class: "w-screen inline-flex self-stretch relative group flex overflow-hidden",
             "data-selected": history.active().to_string(),
             "data-prev": history.prev_peek().map_or_else(String::new, ToString::to_string),
             onmousedown: move |x| {
@@ -501,8 +498,7 @@ fn Layout() -> Element {
                     }
                 }
             },
-            SideBar {
-            }
+            SideBar {}
             div {
                 class: "w-full min-h-screen relative *:overflow-scroll",
                 div {
@@ -537,7 +533,129 @@ fn Layout() -> Element {
                         }
                     }
                 }
-                CollectionContainer {
+                CollectionContainer {  }
+            }
+            CollectionEditContainer { }
+        }
+    }
+}
+
+#[component]
+fn CollectionEditContainer() -> Element {
+    let binding = STORAGE.collections.read();
+    let collection_ids = binding.iter().map(Collection::get_collection_id);
+    rsx! {
+        for collection_id in collection_ids {
+            div {
+                class: "absolute inset-0 z-0 min-w-full min-h-full",
+                id: Pages::collection_edit(collection_id).slide_in_id(),
+                if Pages::collection_edit(collection_id.clone()).should_render() {
+                    CollectionEdit {
+                        collection_id: collection_id.clone()
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[component]
+fn CollectionEdit(collection_id: ReadOnlySignal<CollectionId>) -> Element {
+    let read = collection_id.read();
+    let collection = read.get_collection();
+    let _: Signal<Comparison<EditState>> =
+        use_context_provider(|| Signal::new((EditState::Personalization, None)));
+    rsx! {
+        div {
+            class: "flex w-full bg-deep-background min-h-screen gap-[20px] rounded-[5px] px-[20px] pb-[20px]",
+            div {
+                class: "flex flex-col min-w-[400px] gap-[20px]",
+                div {
+                    class: "flex flex-col w-full",
+                    div {
+                        class: "flex flex-col p-5 justify-end rounded-t-[50px] w-full h-[250px]",
+                        background: format!("radial-gradient(171.48% 102.52% at 0% 100%, #000 0%, rgba(0, 0, 0, 0.00) 100%), url(\"{}\") lightgray 50% / cover no-repeat", DISPLAY_BACKGROUND),
+                        {
+                            ContentType::image(collection.picture_path.to_string_lossy().to_string()).css("w-[100px] h-[100px] bg-cover rounded-t-[50px] rounded-bl-[15px] rounded-br-[50px] p-[5px]")
+                        }
+                    }
+                    Button {
+                        roundness: Roundness::Bottom,
+                        extended_css_class: "bg-background justify-start px-5 pt-[22px]",
+                        string_placements: vec![
+                            Contents::new(
+                                vec![
+                                    ContentType::text(&collection.display_name).css("text-3xl font-balck"),
+                                    ContentType::hint("由我建立•18 分鐘•不久前開啟").css("font-medium text-[15px]")
+                                ],
+                                Alignment::Left
+                            ).css("flex flex-col gap-[15px]")
+                        ]
+                    }
+                }
+                div {
+                    class: "flex flex-col",
+                    Button {
+                        roundness: Roundness::Top,
+                        fill_mode: FillMode::Fit,
+                        extended_css_class: "bg-background",
+                        focus_color_change: true,
+                        switcher: EditState::Personalization,
+                        string_placements: vec![
+                            ContentType::text("風格化").align_left(),
+                            ContentType::svg(ARROW_RIGHT).css("svg-[30px]").align_right(),
+                        ]
+                    }
+                    Button {
+                        roundness: Roundness::None,
+                        extended_css_class: "bg-background",
+                        fill_mode: FillMode::Fit,
+                        focus_color_change: true,
+                        switcher: EditState::Datalog,
+                        string_placements: vec![
+                            ContentType::text("收藏紀錄").align_left(),
+                            ContentType::svg(ARROW_RIGHT).css("svg-[30px]").align_right(),
+                        ]
+                    }
+                }
+                div {
+                    class: "flex justify-stretch w-full gap-[10px]",
+                    Button {
+                        roundness: Roundness::Pill,
+                        onclick: move |_| {
+                            Pages::collection_display(collection_id()).switch_active_to_self();
+                        },
+                        extended_css_class: "flex w-auto min-w-auto justify-center items-center bg-background gap-[15px] pl-[20px] pr-[30px]",
+                        string_placements: vec![
+                            ContentType::svg(UNDO).css("svg-[35px]").align_center(),
+                            ContentType::text("返回頁面").align_center()
+                        ]
+                    }
+                    Button {
+                        roundness: Roundness::Pill,
+                        extended_css_class: "flex w-auto min-w-auto items-center bg-background gap-[15px] pl-[20px] pr-[30px]",
+                        string_placements: vec![
+                            ContentType::svg(ARROW_LEFT).align_center(),
+                            ContentType::text("返回頁面").align_center()
+                        ]
+                    }
+                }
+            }
+            div {
+                class: "flex flex-col w-full bg-background p-[30px] rounded-[30px]",
+                Button {
+                    roundness: Roundness::None,
+                    extended_css_class: "rounded-[20px] p-[40px]",
+                    string_placements: vec![
+                        Contents::new(
+                            vec![
+                                ContentType::text("風格化").css("font-black text-white text-[40px]"),
+                                ContentType::hint("自訂你的收藏樣式")
+                            ],
+                            Alignment::Left
+                        ).css("flex flex-col gap-[20px]"),
+                        ContentType::svg(GAME_CONTROLLER).css("svg-[70px]").align_right()
+                    ]
                 }
             }
         }
@@ -555,7 +673,7 @@ fn CollectionContainer() -> Element {
         {
             div {
                 class: "absolute inset-0 z-0 min-h-full min-w-full",
-                id: Pages::collection_display(collection_id).slide_in_id(),
+                id: Pages::collection_display(collection_id.clone()).slide_in_id(),
                 if Pages::collection_display(collection_id.clone()).should_render() {
                     LayoutContainer {
                         extended_class: "p-0",

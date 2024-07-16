@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use dioxus::prelude::*;
-use rust_lib::api::shared_resources::{collection::Collection, entry::STORAGE};
+use rust_lib::api::shared_resources::{collection::CollectionId, entry::STORAGE};
 
 use crate::{
     BaseComponents::{
@@ -115,9 +115,9 @@ pub fn SideBar() -> Element {
                         string_placements: folded_images,
                         extended_css_class: "bg-background"
                     }
-                    for index in 0..STORAGE.collections.len() {
+                    for collection_id in &*STORAGE.collections.read() {
                         SidebarCollectionBlock {
-                            collection: STORAGE.collections.signal().map(move |v| &v[index])
+                            collection_id: collection_id.get_collection_id()
                         }
                     }
                 }
@@ -159,8 +159,9 @@ pub fn SideBar() -> Element {
 }
 
 #[component]
-fn SidebarCollectionBlock(collection: MappedSignal<Collection>) -> Element {
-    let collection = collection.read();
+fn SidebarCollectionBlock(collection_id: ReadOnlySignal<CollectionId>) -> Element {
+    let binding = collection_id.read();
+    let collection = binding.get_collection();
     let picture_path = collection.picture_path.to_string_lossy().to_string();
     let img_block = rsx! {
         div {
