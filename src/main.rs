@@ -18,6 +18,7 @@ use rust_lib::api::shared_resources::collection::{
 };
 use std::hash::{DefaultHasher, Hash, Hasher};
 use std::path::PathBuf;
+use strum::{EnumIter, IntoEnumIterator};
 use tailwind_fuse::*;
 use BaseComponents::molecules::switcher::Comparison;
 use BaseComponents::string_placements::{Alignment, Content, Contents};
@@ -166,12 +167,31 @@ pub enum CollectionPageState {
     Edit,
 }
 
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, EnumIter)]
 pub enum EditState {
     Personalization,
-    Datalog,
+    DataLog,
     Export,
     Advanced,
+}
+
+impl std::fmt::Display for EditState {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "edit-{}",
+            match self {
+                EditState::Personalization => "personalization",
+                EditState::DataLog => "datalog",
+                EditState::Export => "export",
+                EditState::Advanced => "advanced",
+            }
+        )
+    }
+}
+
+impl Scrollable for EditState {
+    const GROUP_SELECTOR: &'static str = "group-edit";
 }
 
 impl_context_switcher!(EditState);
@@ -209,33 +229,24 @@ impl StateSwitcher for Pages {
     }
 }
 
-impl Pages {
-    pub fn slide_in_id(&self) -> String {
-        format!("flyinout-{}", self.to_string())
-    }
-
-    pub fn scroller_id(&self) -> String {
+pub trait Scrollable: Sized + ToString {
+    const GROUP_SELECTOR: &'static str;
+    fn scroller_id(&self) -> String {
         format!("scrolling-{}", self.to_string())
     }
-
-    pub fn apply_scroller_animation(
-        &self,
-        bottom: &[Self],
-        top: &[Self],
-    ) -> Result<(), anyhow::Error> {
+    fn apply_scroller_animation(&self, bottom: &[Self], top: &[Self]) -> Result<(), anyhow::Error> {
         let target = self.to_string();
         let bottom = bottom
             .iter()
             .map(|arg0| arg0.to_string())
             .collect::<Vec<_>>();
         let top = top.iter().map(|arg0| arg0.to_string()).collect::<Vec<_>>();
-        eval(
+        let eval = eval(
             r#"
-                function applyStyles(self, bottom, top) {
-                    const groups = document.querySelectorAll('.group');            
+                function applyStyles(self, bottom, top, group) {
+                    const groups = document.querySelectorAll('.' + group);            
                     groups.forEach(group => {
                         const prev = group.getAttribute('data-prev');
-                        const selected = group.getAttribute('data-selected');
                         const target = group.querySelector('#scrolling-' + self);
                         const bottomElems = bottom.map((x) => group.querySelector('#scrolling-' + x));
                         const topElems = top.map((x) => group.querySelector('#scrolling-' + x));
@@ -273,12 +284,30 @@ impl Pages {
 
                     });
                 }
-                const [[self], bottom, top] = await dioxus.recv();
-                applyStyles(self, bottom, top);
+                const [[self], [group], bottom, top] = await dioxus.recv();
+                applyStyles(self, bottom, top, group);
             "#,
+        );
+        eval.send(
+            vec![
+                vec![target],
+                vec![Self::GROUP_SELECTOR.to_owned()],
+                bottom,
+                top,
+            ]
+            .into(),
         )
-            .send(vec![vec![target], bottom, top].into())
-            .map_err(|x| anyhow::anyhow!("{x:#?}"))
+        .map_err(|x| anyhow::anyhow!("{x:#?}"))
+    }
+}
+
+impl Scrollable for Pages {
+    const GROUP_SELECTOR: &'static str = "group-pages";
+}
+
+impl Pages {
+    pub fn slide_in_id(&self) -> String {
+        format!("flyinout-{}", self.to_string())
     }
 
     pub fn should_render(&self) -> bool {
@@ -334,7 +363,7 @@ impl Pages {
         eval(
             r#"
                 function applyStyles(dataValue) {
-                    const groups = document.querySelectorAll('.group');            
+                    const groups = document.querySelectorAll('.group-pages');            
                     groups.forEach(group => {
                         const prev = group.getAttribute('data-prev') === dataValue;
                         const selected = group.getAttribute('data-selected') === dataValue;
@@ -458,20 +487,28 @@ fn App() -> Element {
     }
 }
 
+fn scroller_applyer<T: Scrollable + std::fmt::Debug>(
+    pages_scroller: Vec<T>,
+    filterer: impl Fn(&T) -> bool,
+) -> anyhow::Result<()> {
+    let iter = pages_scroller
+        .iter()
+        .enumerate()
+        .filter(|(_, x)| filterer(&*x));
+    for (u, x) in iter {
+        let (left, right) = pages_scroller.split_at(u);
+        x.apply_scroller_animation(&right[1..], left)?;
+    }
+    Ok(())
+}
+
 #[component]
 fn Layout() -> Element {
     use_effect(move || {
         let history = HISTORY.read();
         Pages::DownloadProgress.apply_slide_in().unwrap();
         let pages_scroller = vec![Pages::MainPage, Pages::Explore, Pages::Collections];
-        let iter = pages_scroller
-            .iter()
-            .enumerate()
-            .filter(|(_, x)| x == &&history.active);
-        for (u, x) in iter {
-            let (left, right) = pages_scroller.split_at(u);
-            x.apply_scroller_animation(&right[1..], left).unwrap();
-        }
+        scroller_applyer(pages_scroller, |x| x == &history.active).unwrap();
         for collection in &*STORAGE.collections.read() {
             Pages::collection_display(collection.get_collection_id())
                 .apply_slide_in()
@@ -485,8 +522,8 @@ fn Layout() -> Element {
     let history = HISTORY.read();
     rsx! {
         div {
-            class: "w-screen inline-flex self-stretch relative group flex overflow-hidden",
-            "data-selected": history.active().to_string(),
+            class: "w-screen group-pages flex",
+            "data-selected": history.active.to_string(),
             "data-prev": history.prev_peek().map_or_else(String::new, ToString::to_string),
             onmousedown: move |x| {
                 if let Some(x) = x.data().trigger_button() {
@@ -501,27 +538,33 @@ fn Layout() -> Element {
             SideBar {}
             div {
                 class: "w-full min-h-screen relative *:overflow-scroll",
-                div {
-                    class: "absolute inset-0 z-0 min-h-full",
-                    id: Pages::MainPage.scroller_id(),
-                    LayoutContainer {
-                        MainPage {
+                if Pages::MainPage.should_render() {
+                    div {
+                        class: "absolute inset-0 z-0 min-h-full",
+                        id: Pages::MainPage.scroller_id(),
+                        LayoutContainer {
+                            MainPage {
+                            }
                         }
                     }
                 }
-                div {
-                    class: "absolute inset-0 z-0 min-h-full",
-                    id: Pages::Explore.scroller_id(),
-                    LayoutContainer {
-                        Explore {
+                if Pages::Explore.should_render() {
+                    div {
+                        class: "absolute inset-0 z-0 min-h-full",
+                        id: Pages::Explore.scroller_id(),
+                        LayoutContainer {
+                            Explore {
+                            }
                         }
                     }
                 }
-                div {
-                    class: "absolute inset-0 z-0 min-h-full",
-                    id: Pages::Collections.scroller_id(),
-                    LayoutContainer {
-                        Collections {
+                if Pages::Collections.should_render() {
+                    div {
+                        class: "absolute inset-0 z-0 min-h-full",
+                        id: Pages::Collections.scroller_id(),
+                        LayoutContainer {
+                            Collections {
+                            }
                         }
                     }
                 }
@@ -549,7 +592,7 @@ fn CollectionEditContainer() -> Element {
             div {
                 class: "absolute inset-0 z-0 min-w-full min-h-full",
                 id: Pages::collection_edit(collection_id).slide_in_id(),
-                if Pages::collection_edit(collection_id.clone()).should_render() {
+                    if Pages::collection_edit(collection_id.clone()).should_render() {
                     CollectionEdit {
                         collection_id: collection_id.clone()
                     }
@@ -560,92 +603,149 @@ fn CollectionEditContainer() -> Element {
 }
 
 #[component]
-fn CollectionEdit(collection_id: ReadOnlySignal<CollectionId>) -> Element {
+fn SidebarDisplay(collection_id: ReadOnlySignal<CollectionId>) -> Element {
     let read = collection_id.read();
     let collection = read.get_collection();
-    let _: Signal<Comparison<EditState>> =
-        use_context_provider(|| Signal::new((EditState::Personalization, None)));
     rsx! {
         div {
-            class: "flex w-full bg-deep-background min-h-screen gap-[20px] rounded-[5px] px-[20px] pb-[20px]",
+            class: "flex flex-col w-full",
             div {
-                class: "flex flex-col min-w-[400px] gap-[20px]",
+                class: "flex flex-col p-5 justify-end rounded-t-[50px] w-full h-[250px]",
+                background: format!("radial-gradient(171.48% 102.52% at 0% 100%, #000 0%, rgba(0, 0, 0, 0.00) 100%), url(\"{}\") lightgray 50% / cover no-repeat", DISPLAY_BACKGROUND),
+                {
+                    ContentType::image(collection.picture_path.to_string_lossy().to_string()).css("w-[100px] h-[100px] bg-cover rounded-t-[50px] rounded-bl-[15px] rounded-br-[50px] p-[5px]")
+                }
+            }
+            Button {
+                roundness: Roundness::Bottom,
+                extended_css_class: "bg-background justify-start px-5 pt-[22px]",
+                string_placements: vec![
+                    Contents::new(
+                        vec![
+                            ContentType::text(&collection.display_name).css("text-3xl font-balck"),
+                            ContentType::hint("由我建立•18 分鐘•不久前開啟").css("font-medium text-[15px]")
+                        ],
+                        Alignment::Left
+                    ).css("flex flex-col gap-[15px]")
+                ]
+            }
+        }
+    }
+}
+
+#[component]
+fn EditSidebar(collection_id: ReadOnlySignal<CollectionId>) -> Element {
+    rsx! {
+        div {
+            class: "flex flex-col min-w-[400px] gap-[20px]",
+            SidebarDisplay {
+                collection_id
+            }
+            div {
+                class: "flex flex-col",
+                Button {
+                    roundness: Roundness::Top,
+                    fill_mode: FillMode::Fit,
+                    extended_css_class: "bg-background",
+                    focus_color_change: true,
+                    switcher: EditState::Personalization,
+                    string_placements: vec![
+                        ContentType::text("風格化").align_left(),
+                        ContentType::svg(ARROW_RIGHT).css("svg-[30px]").align_right(),
+                    ]
+                }
+                Button {
+                    roundness: Roundness::None,
+                    extended_css_class: "bg-background",
+                    fill_mode: FillMode::Fit,
+                    focus_color_change: true,
+                    switcher: EditState::DataLog,
+                    string_placements: vec![
+                        ContentType::text("收藏紀錄").align_left(),
+                        ContentType::svg(ARROW_RIGHT).css("svg-[30px]").align_right(),
+                    ]
+                }
+                Button {
+                    roundness: Roundness::None,
+                    extended_css_class: "bg-background",
+                    fill_mode: FillMode::Fit,
+                    focus_color_change: true,
+                    switcher: EditState::Export,
+                    string_placements: vec![
+                        ContentType::text("分享&匯出").align_left(),
+                        ContentType::svg(ARROW_RIGHT).css("svg-[30px]").align_right(),
+                    ]
+                }
+                Button {
+                    roundness: Roundness::None,
+                    extended_css_class: "bg-background",
+                    fill_mode: FillMode::Fit,
+                    focus_color_change: true,
+                    switcher: EditState::Advanced,
+                    string_placements: vec![
+                        ContentType::text("進階選項").align_left(),
+                        ContentType::svg(ARROW_RIGHT).css("svg-[30px]").align_right(),
+                    ]
+                }
+            }
+            div {
+                class: "flex justify-stretch w-full gap-[10px]",
+                Button {
+                    roundness: Roundness::Pill,
+                    onclick: move |_| {
+                        Pages::collection_display(collection_id()).switch_active_to_self();
+                    },
+                    extended_css_class: "flex w-auto min-w-auto justify-center items-center bg-background gap-[15px] pl-[20px] pr-[30px]",
+                    string_placements: vec![
+                        ContentType::svg(UNDO).css("svg-[35px]").align_center(),
+                        ContentType::text("返回頁面").align_center()
+                    ]
+                }
+                Button {
+                    roundness: Roundness::Pill,
+                    extended_css_class: "flex w-auto min-w-auto items-center bg-background gap-[15px] pl-[20px] pr-[30px]",
+                    string_placements: vec![
+                        ContentType::svg(ARROW_LEFT).align_center(),
+                        ContentType::text("返回頁面").align_center()
+                    ]
+                }
+            }
+
+        }
+    }
+}
+
+#[component]
+fn EditTemplate(children: Element, title: Element) -> Element {
+    rsx! {
+        div {
+            class: "flex flex-col w-full min-h-screen relative bg-background px-[30px] pb-[30px] rounded-[30px]",
+            div {
+                class: "bg-background sticky top-0",
                 div {
-                    class: "flex flex-col w-full",
+                    class: "flex flex-col z-10 bg-background container pt-[30px] rounded-b-[30px]",
+                    {title}
                     div {
-                        class: "flex flex-col p-5 justify-end rounded-t-[50px] w-full h-[250px]",
-                        background: format!("radial-gradient(171.48% 102.52% at 0% 100%, #000 0%, rgba(0, 0, 0, 0.00) 100%), url(\"{}\") lightgray 50% / cover no-repeat", DISPLAY_BACKGROUND),
-                        {
-                            ContentType::image(collection.picture_path.to_string_lossy().to_string()).css("w-[100px] h-[100px] bg-cover rounded-t-[50px] rounded-bl-[15px] rounded-br-[50px] p-[5px]")
-                        }
-                    }
-                    Button {
-                        roundness: Roundness::Bottom,
-                        extended_css_class: "bg-background justify-start px-5 pt-[22px]",
-                        string_placements: vec![
-                            Contents::new(
-                                vec![
-                                    ContentType::text(&collection.display_name).css("text-3xl font-balck"),
-                                    ContentType::hint("由我建立•18 分鐘•不久前開啟").css("font-medium text-[15px]")
-                                ],
-                                Alignment::Left
-                            ).css("flex flex-col gap-[15px]")
-                        ]
-                    }
-                }
-                div {
-                    class: "flex flex-col",
-                    Button {
-                        roundness: Roundness::Top,
-                        fill_mode: FillMode::Fit,
-                        extended_css_class: "bg-background",
-                        focus_color_change: true,
-                        switcher: EditState::Personalization,
-                        string_placements: vec![
-                            ContentType::text("風格化").align_left(),
-                            ContentType::svg(ARROW_RIGHT).css("svg-[30px]").align_right(),
-                        ]
-                    }
-                    Button {
-                        roundness: Roundness::None,
-                        extended_css_class: "bg-background",
-                        fill_mode: FillMode::Fit,
-                        focus_color_change: true,
-                        switcher: EditState::Datalog,
-                        string_placements: vec![
-                            ContentType::text("收藏紀錄").align_left(),
-                            ContentType::svg(ARROW_RIGHT).css("svg-[30px]").align_right(),
-                        ]
-                    }
-                }
-                div {
-                    class: "flex justify-stretch w-full gap-[10px]",
-                    Button {
-                        roundness: Roundness::Pill,
-                        onclick: move |_| {
-                            Pages::collection_display(collection_id()).switch_active_to_self();
-                        },
-                        extended_css_class: "flex w-auto min-w-auto justify-center items-center bg-background gap-[15px] pl-[20px] pr-[30px]",
-                        string_placements: vec![
-                            ContentType::svg(UNDO).css("svg-[35px]").align_center(),
-                            ContentType::text("返回頁面").align_center()
-                        ]
-                    }
-                    Button {
-                        roundness: Roundness::Pill,
-                        extended_css_class: "flex w-auto min-w-auto items-center bg-background gap-[15px] pl-[20px] pr-[30px]",
-                        string_placements: vec![
-                            ContentType::svg(ARROW_LEFT).align_center(),
-                            ContentType::text("返回頁面").align_center()
-                        ]
+                        class: "bg-background py-[10px] rounded-t-[30px]",
                     }
                 }
             }
             div {
-                class: "flex flex-col w-full bg-background p-[30px] rounded-[30px]",
+                class: "flex flex-col overflow-scroll z-0 gap-[20px]",
+                {children}
+            }
+        }
+    }
+}
+
+#[component]
+fn Personalization(collection_id: ReadOnlySignal<CollectionId>) -> Element {
+    rsx! {
+        EditTemplate {
+            title: rsx! {
                 Button {
                     roundness: Roundness::None,
-                    extended_css_class: "rounded-[20px] p-[40px]",
+                    extended_css_class: "rounded-[20px] p-[40px] gap-[20px]",
                     string_placements: vec![
                         Contents::new(
                             vec![
@@ -657,7 +757,136 @@ fn CollectionEdit(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                         ContentType::svg(GAME_CONTROLLER).css("svg-[70px]").align_right()
                     ]
                 }
+            },
+            for _ in 0..10 {
+                Button {
+                    roundness: Roundness::Pill,
+                    extended_css_class: "rounded-[20px] p-[40px]",
+                    string_placements: vec![
+                        Contents::new(
+                            vec![
+                                ContentType::text("not").css("font-black text-white text-[40px]"),
+                                ContentType::hint("自訂你的收藏樣式")
+                            ],
+                            Alignment::Left
+                        ).css("flex flex-col gap-[20px]"),
+                        ContentType::svg(GAME_CONTROLLER).css("svg-[70px]").align_right()
+                    ]
+                }
             }
+        }
+    }
+}
+
+#[component]
+fn DataLog(collection_id: ReadOnlySignal<CollectionId>) -> Element {
+    rsx! {
+        EditTemplate {
+            title: rsx! {
+                Button {
+                    roundness: Roundness::None,
+                    extended_css_class: "rounded-[20px] p-[40px]",
+                    string_placements: vec![
+                        Contents::new(
+                            vec![
+                                ContentType::text("收藏紀錄").css("font-black text-white text-[40px]"),
+                                ContentType::hint("查看這個收藏的資訊")
+                            ],
+                            Alignment::Left
+                        ).css("flex flex-col gap-[20px]"),
+                        ContentType::svg(GAME_CONTROLLER).css("svg-[70px]").align_right()
+                    ]
+                }
+            },
+        }
+    }
+}
+
+#[component]
+fn Export(collection_id: ReadOnlySignal<CollectionId>) -> Element {
+    rsx! {
+        EditTemplate {
+            title: rsx! {
+                Button {
+                    roundness: Roundness::None,
+                    extended_css_class: "rounded-[20px] p-[40px]",
+                    string_placements: vec![
+                        Contents::new(
+                            vec![
+                                ContentType::text("分享").css("font-black text-white text-[40px]"),
+                                ContentType::hint("分享你的收藏或是將它匯出至電腦")
+                            ],
+                            Alignment::Left
+                        ).css("flex flex-col gap-[20px]"),
+                        ContentType::svg(GAME_CONTROLLER).css("svg-[70px]").align_right()
+                    ]
+                }
+            },
+        }
+    }
+}
+
+#[component]
+fn Advanced(collection_id: ReadOnlySignal<CollectionId>) -> Element {
+    rsx! {
+        EditTemplate {
+            title: rsx! {
+                Button {
+                    roundness: Roundness::None,
+                    extended_css_class: "rounded-[20px] p-[40px]",
+                    string_placements: vec![
+                        Contents::new(
+                            vec![
+                                ContentType::text("進階選項").css("font-black text-white text-[40px]"),
+                                ContentType::hint("單獨修改此收藏的進階選項")
+                            ],
+                            Alignment::Left
+                        ).css("flex flex-col gap-[20px]"),
+                        ContentType::svg(GAME_CONTROLLER).css("svg-[70px]").align_right()
+                    ]
+                }
+            }
+        }
+    }
+}
+
+#[component]
+fn CollectionEdit(collection_id: ReadOnlySignal<CollectionId>) -> Element {
+    let edit_state: Signal<Comparison<EditState>> =
+        use_context_provider(|| Signal::new((EditState::Personalization, None)));
+    use_effect(move || {
+        let vec = EditState::iter().collect::<Vec<_>>();
+        scroller_applyer(vec, |x| &edit_state.read().0 == x).unwrap();
+    });
+    rsx! {
+        div {
+            class: "flex w-full bg-deep-background group-edit min-h-screen gap-[20px] rounded-[5px] px-[20px] pb-[20px]",
+            "data-prev": edit_state().1.map_or_else(String::new, |x| x.to_string()),
+            EditSidebar { collection_id }
+            div {
+                class: "w-full min-h-screen relative *:overflow-scroll",
+                div {
+                    class: "absolute inset-0 z-0 min-h-full min-w-full",
+                    id: EditState::Personalization.scroller_id(),
+                    Personalization { collection_id }
+                }
+                div {
+                    class: "absolute inset-0 z-0 min-h-full min-w-full",
+                    id: EditState::DataLog.scroller_id(),
+                    DataLog { collection_id  }
+                }
+                div {
+                    class: "absolute inset-0 z-0 min-h-full min-w-full",
+                    id: EditState::Export.scroller_id(),
+                    Export { collection_id  }
+                }
+                div {
+                    class: "absolute inset-0 z-0 min-h-full min-w-full",
+                    id: EditState::Advanced.scroller_id(),
+                    Advanced { collection_id  }
+                }
+            }
+
         }
     }
 }

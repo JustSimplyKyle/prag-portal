@@ -1682,6 +1682,10 @@ input {
   z-index: 0;
 }
 
+.z-10 {
+  z-index: 10;
+}
+
 .z-20 {
   z-index: 20;
 }
@@ -1957,7 +1961,7 @@ input {
 }
 
 .animate-slideDown {
-  animation: slideDown 500ms;
+  animation: slideDown 1000ms;
 }
 
 @keyframes slideLeft {
@@ -1989,7 +1993,7 @@ input {
 }
 
 .animate-slideOutDown {
-  animation: slideOutDown 500ms;
+  animation: slideOutDown 1000ms;
 }
 
 @keyframes slideOutUp {
@@ -2005,7 +2009,7 @@ input {
 }
 
 .animate-slideOutUp {
-  animation: slideOutUp 500ms;
+  animation: slideOutUp 1000ms;
 }
 
 @keyframes slideRight {
@@ -2037,7 +2041,7 @@ input {
 }
 
 .animate-slideUp {
-  animation: slideUp 500ms;
+  animation: slideUp 1000ms;
 }
 
 .resize {
@@ -2315,6 +2319,11 @@ input {
   border-bottom-left-radius: 1.5rem;
 }
 
+.rounded-b-\[30px\] {
+  border-bottom-right-radius: 30px;
+  border-bottom-left-radius: 30px;
+}
+
 .rounded-b-\[5px\] {
   border-bottom-right-radius: 5px;
   border-bottom-left-radius: 5px;
@@ -2328,6 +2337,11 @@ input {
 .rounded-t-\[20px\] {
   border-top-left-radius: 20px;
   border-top-right-radius: 20px;
+}
+
+.rounded-t-\[30px\] {
+  border-top-left-radius: 30px;
+  border-top-right-radius: 30px;
 }
 
 .rounded-t-\[50px\] {
@@ -2497,6 +2511,11 @@ input {
   padding-right: 40px;
 }
 
+.py-\[10px\] {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
 .py-\[12px\] {
   padding-top: 12px;
   padding-bottom: 12px;
@@ -2539,6 +2558,10 @@ input {
   padding-bottom: 25px;
 }
 
+.pb-\[30px\] {
+  padding-bottom: 30px;
+}
+
 .pl-\[15px\] {
   padding-left: 15px;
 }
@@ -2573,6 +2596,10 @@ input {
 
 .pt-\[22px\] {
   padding-top: 22px;
+}
+
+.pt-\[30px\] {
+  padding-top: 30px;
 }
 
 .text-left {
