@@ -30,7 +30,7 @@ pub fn SideBar() -> Element {
 
     let binding = STORAGE.collections.read();
 
-    let collection_preview = binding.iter().take(3);
+    let collection_preview = binding.values().take(3);
 
     let folded_images = rsx! {
         div {
@@ -115,9 +115,9 @@ pub fn SideBar() -> Element {
                         string_placements: folded_images,
                         extended_css_class: "bg-background"
                     }
-                    for collection_id in &*STORAGE.collections.read() {
+                    for collection_id in STORAGE.collections.read().keys().cloned() {
                         SidebarCollectionBlock {
-                            collection_id: collection_id.get_collection_id()
+                            collection_id
                         }
                     }
                 }

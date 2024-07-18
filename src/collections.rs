@@ -21,7 +21,8 @@ pub static BOOKMARK_ADD: &str = manganis::mg!(file("./public/bookmark_add.svg"))
 
 #[component]
 pub fn Collections() -> Element {
-    let collections = (STORAGE.collections)();
+    let read = STORAGE.collections.read();
+    let collection_ids = read.keys().cloned();
     let sender = use_signal(String::new);
     rsx! {
         div {
@@ -113,9 +114,9 @@ pub fn Collections() -> Element {
             }
             div {
                 class: "grid grid-flow-row grid-cols-[repeat(auto-fill,280px)] gap-[20px]",
-                for collection in collections {
+                for collection_id in collection_ids {
                     CollectionBlock {
-                        collection,
+                        collection_id,
                         extended_class: "rounded-[20px]"
                     }
                 }

@@ -1,8 +1,5 @@
 use dioxus::prelude::*;
-use rust_lib::api::shared_resources::{
-    collection::{Collection, CollectionId},
-    entry::STORAGE,
-};
+use rust_lib::api::shared_resources::{collection::CollectionId, entry::STORAGE};
 use strum::{EnumIter, IntoEnumIterator};
 
 use crate::{
@@ -53,12 +50,12 @@ impl_optional_state_switcher!(Pages);
 #[component]
 pub fn CollectionEditContainer() -> Element {
     let binding = STORAGE.collections.read();
-    let collection_ids = binding.iter().map(Collection::get_collection_id);
+    let collection_ids = binding.keys();
     rsx! {
         for collection_id in collection_ids {
             div {
                 class: "absolute inset-0 z-0 min-w-full min-h-full",
-                id: Pages::collection_edit(collection_id).slide_in_id(),
+                id: Pages::collection_edit(collection_id.clone()).slide_in_id(),
                     if Pages::collection_edit(collection_id.clone()).should_render() {
                     CollectionEdit {
                         collection_id: collection_id.clone()

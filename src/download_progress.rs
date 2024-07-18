@@ -1,8 +1,7 @@
 use dioxus::prelude::*;
 
 use rust_lib::api::backend_exclusive::download::Progress;
-use rust_lib::api::shared_resources::collection::Collection;
-use rust_lib::api::shared_resources::entry::STORAGE;
+use rust_lib::api::shared_resources::collection::CollectionId;
 
 use crate::impl_context_switcher;
 use crate::BaseComponents::{
@@ -15,8 +14,12 @@ use rust_lib::api::shared_resources::entry::DOWNLOAD_PROGRESS;
 use strum::EnumIter;
 
 #[component]
-fn ListItem(collection: ReadOnlySignal<Collection>, progress: ReadOnlySignal<Progress>) -> Element {
-    let collection = collection.read();
+fn ListItem(
+    collection_id: ReadOnlySignal<CollectionId>,
+    progress: ReadOnlySignal<Progress>,
+) -> Element {
+    let read = collection_id.read();
+    let collection = read.get_collection();
     let progress = progress.read();
     rsx! {
         Button {
@@ -52,10 +55,11 @@ fn ListItem(collection: ReadOnlySignal<Collection>, progress: ReadOnlySignal<Pro
 
 #[component]
 fn FirstProgressView(
-    collection: ReadOnlySignal<Collection>,
+    collection_id: ReadOnlySignal<CollectionId>,
     progress: ReadOnlySignal<Progress>,
 ) -> Element {
-    let collection = collection.read();
+    let read = collection_id.read();
+    let collection = read.get_collection();
     let progress = progress.read();
     rsx! {
         div {
@@ -146,27 +150,22 @@ pub fn DownloadProgress() -> Element {
         .0
         .into_iter()
         .filter(|(_, x)| x.percentages < 100.)
-        .filter_map(|(id, progress)| {
-            (STORAGE.collections)()
-                .into_iter()
-                .find(|c| c.get_collection_id() == id.collection_id)
-                .map(|c| (c, progress))
-        })
+        .map(|(id, progress)| (id.collection_id, progress))
         .peekable();
     rsx! {
         div {
             class: "flex flex-col gap-[20px]",
-            if let Some((collection, progress)) = progress.peek().cloned() {
+            if let Some((collection_id, progress)) = progress.peek().cloned() {
                 FirstProgressView {
-                    collection,
+                    collection_id,
                     progress
                 }
                 ProgressStateBar {
                 }
             }
-            for (collection , progress) in progress {
+            for (collection_id , progress) in progress {
                 ListItem {
-                    collection,
+                    collection_id,
                     progress
                 }
             }

@@ -1,7 +1,6 @@
 use dioxus::prelude::*;
-
 use manganis::ImageAsset;
-use rust_lib::api::shared_resources::{collection::Collection, entry::STORAGE};
+use rust_lib::api::shared_resources::{collection::CollectionId, entry::STORAGE};
 use tailwind_fuse::*;
 
 use crate::{
@@ -35,11 +34,12 @@ pub fn MainPage() -> Element {
 /// Creates a Collection Block with a `280px` square, with a default roundness of `5px`
 #[component]
 pub fn CollectionBlock(
-    collection: Collection,
+    collection_id: ReadOnlySignal<CollectionId>,
     #[props(default = true)] gradient: bool,
     #[props(extends=GlobalAttributes)] attributes: Vec<Attribute>,
     #[props(default)] extended_class: String,
 ) -> Element {
+    let collection = collection_id().get_collection_owned();
     let main_text = collection.display_name.clone();
     let hint = String::from("遊玩中•由我建立");
     let (roundness, extended_class): (Vec<_>, Vec<_>) = extended_class
@@ -276,7 +276,8 @@ fn SuggestionPage() -> Element {
 
 #[component]
 fn CollectionsPage() -> Element {
-    let collections = (STORAGE.collections)();
+    let read = STORAGE.collections.read();
+    let collection_ids = read.keys().cloned();
     rsx! {
         div {
             class: "flex flex-col space-x-0",
@@ -308,9 +309,9 @@ fn CollectionsPage() -> Element {
                 class: ButtonClass::builder().roundness(Roundness::Bottom).with_class("min-w-screen p-0"),
                 div {
                     class: "flex space-x-[3px] overflow-scroll",
-                    for collection in collections {
+                    for collection_id in collection_ids {
                         CollectionBlock {
-                            collection
+                            collection_id
                         }
                     }
                 }

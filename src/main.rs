@@ -16,7 +16,7 @@ use dioxus::html::input_data::MouseButton;
 use manganis::ImageAsset;
 use pages::Pages;
 use rust_lib::api::backend_exclusive::vanilla::version::VersionMetadata;
-use rust_lib::api::shared_resources::collection::{Collection, ModLoader, ModLoaderType};
+use rust_lib::api::shared_resources::collection::{ModLoader, ModLoaderType};
 use scrollable::Scrollable;
 use std::path::PathBuf;
 use tailwind_fuse::*;
@@ -196,7 +196,7 @@ fn App() -> Element {
                     Modal { active: error_active, name: "error_modal", close_on_outer_click: false,
                         div {
                             div { class: "w-full flex flex-col items-center space-y-3",
-                                div { class: "text-red text-2xl font-bold",
+                                div { class: "text-red text-3xl font-black",
                                     "Hmm, something went wrong. Please copy the following error to the developer."
                                 }
                                 Button {
@@ -228,11 +228,11 @@ fn Layout() -> Element {
         Pages::DownloadProgress.apply_slide_in().unwrap();
         let pages_scroller = vec![Pages::MainPage, Pages::Explore, Pages::Collections];
         Pages::scroller_applyer(pages_scroller, |x| x == &history.active).unwrap();
-        for collection in &*STORAGE.collections.read() {
-            Pages::collection_display(collection.get_collection_id())
+        for collection_id in STORAGE.collections.read().keys().cloned() {
+            Pages::collection_display(collection_id.clone())
                 .apply_slide_in()
                 .unwrap();
-            Pages::collection_edit(collection.get_collection_id())
+            Pages::collection_edit(collection_id)
                 .apply_slide_in()
                 .unwrap();
         }
@@ -257,7 +257,7 @@ fn Layout() -> Element {
             SideBar {}
             div {
                 class: "w-full min-h-screen relative *:overflow-scroll",
-                // if Pages::MainPage.should_render() {
+                if Pages::MainPage.should_render() {
                     div {
                         class: "absolute inset-0 z-0 min-h-full",
                         id: Pages::MainPage.scroller_id(),
@@ -266,8 +266,8 @@ fn Layout() -> Element {
                             }
                         }
                     }
-                // }
-                // if Pages::Explore.should_render() {
+                }
+                if Pages::Explore.should_render() {
                     div {
                         class: "absolute inset-0 z-0 min-h-full",
                         id: Pages::Explore.scroller_id(),
@@ -276,8 +276,8 @@ fn Layout() -> Element {
                             }
                         }
                     }
-                // }
-                // if Pages::Collections.should_render() {
+                }
+                if Pages::Collections.should_render() {
                     div {
                         class: "absolute inset-0 z-0 min-h-full",
                         id: Pages::Collections.scroller_id(),
@@ -286,7 +286,7 @@ fn Layout() -> Element {
                             }
                         }
                     }
-                // }
+                }
                 div {
                     class: "absolute inset-0 z-0 min-h-full min-w-full",
                     id: Pages::DownloadProgress.slide_in_id(),
@@ -308,8 +308,8 @@ fn CollectionContainer() -> Element {
         for collection_id in STORAGE
             .collections
             .read()
-            .iter()
-            .map(Collection::get_collection_id)
+            .keys()
+            .cloned()
         {
             div {
                 class: "absolute inset-0 z-0 min-h-full min-w-full",
