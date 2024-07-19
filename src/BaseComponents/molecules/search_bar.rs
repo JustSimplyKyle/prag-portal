@@ -1,6 +1,6 @@
 pub use dioxus::prelude::*;
+use fuzzy_matcher::FuzzyMatcher;
 use itertools::Itertools;
-use nucleo::{Matcher, Utf32Str};
 
 use crate::{
     collections::SEARCH,
@@ -13,20 +13,16 @@ use crate::{
 
 #[component]
 pub fn SearchContainer(search: String, childrens: Vec<(String, Element)>) -> Element {
-    let mut matcher = Matcher::new(nucleo::Config::DEFAULT);
-    let mut buffer_haystack = Vec::new();
-    let mut buffer = Vec::new();
-    let utf32_search = Utf32Str::new(&search, &mut buffer);
+    let matcher = fuzzy_matcher::skim::SkimMatcherV2::default();
     let render = childrens
         .into_iter()
         .map(|(name, x)| {
-            let haystack = Utf32Str::new(&name, &mut buffer_haystack);
-            let score = matcher.fuzzy_match(haystack, utf32_search);
+            let score = matcher.fuzzy_match(&name, &search);
             (score, x)
         })
         .filter_map(|(score, x)| {
             if search == "搜尋" {
-                Some((u16::MAX, x))
+                Some((i64::MAX, x))
             } else {
                 score.map(|score| (score, x))
             }
