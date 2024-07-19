@@ -156,7 +156,7 @@ fn EditSidebarInfographic(collection_id: ReadOnlySignal<CollectionId>) -> Elemen
     let collection = read.get_collection();
     rsx! {
         div {
-            class: "flex flex-col w-full",
+            class: "overflow-x-clip flex flex-col w-full",
             div {
                 class: "flex flex-col p-5 justify-end rounded-t-[50px] w-full min-h-[250px]",
                 background: format!(
@@ -169,12 +169,13 @@ fn EditSidebarInfographic(collection_id: ReadOnlySignal<CollectionId>) -> Elemen
             }
             Button {
                 roundness: Roundness::Bottom,
-                extended_css_class: "bg-background justify-start px-5 pt-[22px] overflow-hidden",
+                clickable: false,
+                extended_css_class: "bg-background overflow-x-clip justify-start px-5 pt-[22px]",
                 string_placements: vec![
                     Contents::new(
                             vec![
                                 ContentType::text(collection.display_name())
-                                    .css("text-3xl font-black text-ellipsis text-wrap"),
+                                    .css("text-3xl font-black min-w-0 text-nowrap overflow-x-clip"),
                                 ContentType::hint("由我建立•18 分鐘•不久前開啟")
                                     .css("font-medium text-[15px]"),
                             ],

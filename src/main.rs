@@ -182,9 +182,6 @@ pub async fn collection_builder(
 #[component]
 fn App() -> Element {
     let error_active = use_signal(|| true);
-    use_future(move || async move {
-        collection_builder(None, "1.20.1").await.unwrap();
-    });
     rsx! {
         div {
             class: "[&_*]:transform-gpu font-['GenSenRounded TW'] bg-deep-background min-h-screen min-w-full font-display leading-normal",
@@ -216,7 +213,7 @@ fn App() -> Element {
                     }
                 } },
                 Layout {
-                
+
                 }
             }
         }
@@ -225,6 +222,8 @@ fn App() -> Element {
 
 #[component]
 fn Layout() -> Element {
+    use_future(|| collection_builder(None, "1.20.1"));
+
     use_effect(move || {
         let history = HISTORY.read();
         Pages::DownloadProgress.apply_slide_in().unwrap();
@@ -257,7 +256,7 @@ fn Layout() -> Element {
                 }
             },
             SideBar {
-            
+
             }
             div {
                 class: "bg-background w-full min-h-screen relative *:overflow-scroll",
@@ -267,7 +266,7 @@ fn Layout() -> Element {
                     if Pages::MainPage.should_render() {
                         LayoutContainer {
                             MainPage {
-                            
+
                             }
                         }
                     }
@@ -278,7 +277,7 @@ fn Layout() -> Element {
                     if Pages::Explore.should_render() {
                         LayoutContainer {
                             Explore {
-                            
+
                             }
                         }
                     }
@@ -289,7 +288,7 @@ fn Layout() -> Element {
                     if Pages::Collections.should_render() {
                         LayoutContainer {
                             Collections {
-                            
+
                             }
                         }
                     }
@@ -299,16 +298,16 @@ fn Layout() -> Element {
                     id: Pages::DownloadProgress.slide_in_id(),
                     LayoutContainer {
                         DownloadProgress {
-                        
+
                         }
                     }
                 }
                 CollectionContainer {
-                
+
                 }
             }
             CollectionEditContainer {
-            
+
             }
         }
     }

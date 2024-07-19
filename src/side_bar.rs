@@ -180,16 +180,16 @@ fn SidebarCollectionBlock(collection_id: ReadOnlySignal<CollectionId>) -> Elemen
         Button {
             roundness: Roundness::None,
             string_placements: vec![
-                ContentType::custom(img_block).align_left(),
+                ContentType::custom(img_block).align_left().css("grow-0 shrink-0"),
                 ContentType::text(collection.display_name().clone())
                     .align_right()
-                    .css("group-aria-busy:hidden"),
+                    .css("flex-none grow-0 shrink-0 group-aria-busy:hidden text-nowrap text-ellipse overflow-x-clip"),
             ],
             switcher: Pages::collection_display(collection.get_collection_id()),
             focus_color_change: false,
             background_image: darken_sidebar_background(&picture_path),
             background_size: "cover",
-            extended_css_class: "bg-background object-cover transition-all delay-[25ms] group-aria-expanded:w-20 group-aria-expanded:min-h-20 group-aria-expanded:p-0"
+            extended_css_class: "bg-background *:min-w-0 object-cover transition-all delay-[25ms] group-aria-expanded:w-20 group-aria-expanded:min-h-20 group-aria-expanded:p-0"
         }
     }
 }
