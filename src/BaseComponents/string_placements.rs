@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use dioxus::prelude::*;
+use dioxus::{prelude::*, CapturedError};
 use dioxus_core::DynamicNode;
 use tailwind_fuse::*;
 

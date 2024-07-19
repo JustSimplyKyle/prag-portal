@@ -2666,6 +2666,11 @@ input {
   color: rgb(255 255 255 / var(--tw-text-opacity));
 }
 
+.text-zinc-800 {
+  --tw-text-opacity: 1;
+  color: rgb(39 39 42 / var(--tw-text-opacity));
+}
+
 .text-opacity-50 {
   --tw-text-opacity: 0.5;
 }
@@ -2897,6 +2902,11 @@ body {
 .aria-selected\:text-black[aria-selected="true"] {
   --tw-text-opacity: 1;
   color: rgb(35 46 61 / var(--tw-text-opacity));
+}
+
+.aria-selected\:text-white[aria-selected="true"] {
+  --tw-text-opacity: 1;
+  color: rgb(255 255 255 / var(--tw-text-opacity));
 }
 
 .aria-\[selected\=false\]\:z-0[aria-selected=false] {

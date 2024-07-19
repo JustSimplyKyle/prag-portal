@@ -26,14 +26,20 @@ fn ListItem(
             roundness: Roundness::Pill,
             string_placements: rsx! {
                 div { class: "justify-self-center w-full flex gap-[15px]",
-                    {ContentType::svg(DRAG_INDICATOR).css("self-center svg-[30px]")},
+                    {ContentType::svg(DRAG_INDICATOR).css("self-center svg-[30px]")}
                     div { class: "w-full flex gap-[20px]",
-                        Image { css: "bg-cover bg-white w-[80px] h-[80px] rounded-[10px]", {collection.picture_path.to_string_lossy().to_string()} }
+                        Image { css: "bg-cover bg-white w-[80px] h-[80px] rounded-[10px]",
+                            {collection.picture_path.to_string_lossy().to_string()}
+                        }
                         div { class: "w-full flex flex-col justify-start gap-[10px]",
                             Text { css: "text-[25px] fond-bold", {collection.display_name.clone()} }
                             div { class: "flex gap-[4px]",
-                                Hint { css: "text-base font-semibold", {format!("{} / {} |", progress.current_size.unwrap_or_default().display_size_from_megabytes(), progress.total_size.unwrap_or_default().display_size_from_megabytes())} }
-                                Text { css: "text-base font-semibold", "{progress.speed.unwrap_or_default().display_size_from_megabytes()}" }
+                                Hint { css: "text-base font-semibold",
+                                    {format!("{} / {} |", progress.current_size.unwrap_or_default().display_size_from_megabytes(), progress.total_size.unwrap_or_default().display_size_from_megabytes())}
+                                }
+                                Text { css: "text-base font-semibold",
+                                    "{progress.speed.unwrap_or_default().display_size_from_megabytes()}"
+                                }
                             }
                             div { class: "w-full h-full flex items-end",
                                 div { class: "rounded-[50px] w-full h-[7px] bg-zinc-800",
@@ -161,6 +167,7 @@ pub fn DownloadProgress() -> Element {
                     progress
                 }
                 ProgressStateBar {
+                
                 }
             }
             for (collection_id , progress) in progress {

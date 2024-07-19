@@ -25,8 +25,10 @@ pub const ARROW_LEFT: &str = manganis::mg!(file("./public/keyboard_arrow_left.sv
 pub fn MainPage() -> Element {
     rsx! {
         SuggestionPage {
+        
         }
         CollectionsPage {
+        
         }
     }
 }
@@ -232,14 +234,14 @@ fn SuggestionPage() -> Element {
                             class: "text-lime-300 text-6xl font-bold font-['GenSenRounded TW'] leading-[78px] tracking-[6px]",
                             "探索  創造"
                             br {
-
+                            
                             }
                         }
                         span {
                             class: "text-white text-6xl font-normal font-['GenSenRounded TW'] leading-[78px] tracking-[6px]",
                             "無窮  無限"
                             br {
-
+                            
                             }
                             "創作  可能"
                         }
@@ -311,6 +313,7 @@ fn CollectionsPage() -> Element {
                     class: "flex space-x-[3px] overflow-scroll",
                     for collection_id in collection_ids {
                         CollectionBlock {
+                            key: "{collection_id.clone()}",
                             collection_id
                         }
                     }

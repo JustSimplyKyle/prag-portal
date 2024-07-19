@@ -80,7 +80,7 @@ pub fn SearchBar(sender: Option<Signal<String>>) -> Element {
                     }
                 }
                 div { class: "flex flex-row-reverse items-baseline",
-                    {ContentType::svg(ARROW_LEFT).css("svg-[20px]")},
+                    {ContentType::svg(ARROW_LEFT).css("svg-[20px]")}
                     {ContentType::svg(SEARCH).css("svg-[30px]")}
                 }
             },

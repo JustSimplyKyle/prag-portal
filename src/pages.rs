@@ -143,12 +143,11 @@ impl Pages {
                             target.style.animation = '';
 
                             if (prev) {
-                                target.style.insetInlineStart = '100dvw';
-                                target.style.zIndex = '100';
-                                target.style.display = 'block';                        
-                                target.style.animation = 'slideRight 500ms';
-                            } else if (selected) {
                                 target.style.zIndex = '50';
+                                target.style.display = 'block';                        
+                            } 
+                            if (selected) {
+                                target.style.zIndex = '100';
                                 target.style.display = 'block';                        
                                 target.style.animation = 'slideLeft 500ms';
                             }

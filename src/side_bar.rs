@@ -30,20 +30,21 @@ pub fn SideBar() -> Element {
 
     let binding = STORAGE.collections.read();
 
-    let collection_preview = binding.values().take(3);
+    let collection_preview = binding.iter().take(3);
 
     let folded_images = rsx! {
         div {
             class: "grid grid-flow-col justify-stretch items-center",
             div {
                 class: "justify-self-start transition-all",
-                {ContentType::svg(HOME).css("hidden group-aria-expanded:block")},
+                {ContentType::svg(HOME).css("hidden group-aria-expanded:block")}
                 div {
                     class: "flex items-center space-x-0",
                     div {
                         class: "flex space-x-[-20px]",
-                        for x in collection_preview {
+                        for (id , x) in collection_preview {
                             div {
+                                key: "{id}",
                                 Image {
                                     css: "z-50 w-10 h-10 object-cover shrink-0 inline-flex justify-center items-center rounded-full border-2 border-zinc-900 group-aria-expanded:hidden",
                                     {x.picture_path.to_string_lossy().to_string()}
@@ -117,6 +118,7 @@ pub fn SideBar() -> Element {
                     }
                     for collection_id in STORAGE.collections.read().keys().cloned() {
                         SidebarCollectionBlock {
+                            key: "{collection_id.clone()}",
                             collection_id
                         }
                     }
@@ -167,8 +169,8 @@ fn SidebarCollectionBlock(collection_id: ReadOnlySignal<CollectionId>) -> Elemen
         div {
             class: "relative transition-all container w-[50px] h-[50px] group-aria-expanded:w-20 group-aria-expanded:h-20 border-2 border-[#2E2E2E] rounded-[15px] group-aria-expanded:rounded-[5px]",
             { ContentType::image(&picture_path)
-            .css("absolute inset-0 transition-all w-full h-full object-cover inline-flex items-center rounded-[15px] group-aria-expanded:rounded-[5px]",)
-            },
+            .css("absolute inset-0 transition-all w-full h-full object-cover inline-flex items-center rounded-[15px] group-aria-expanded:rounded-[5px]")
+            }
             div {
                 class: "absolute inset-x-0 bottom-0 w-3 h-3 bg-[#CCE246] rounded-full"
             }

@@ -226,7 +226,10 @@ fn ModViewer(collection_id: ReadOnlySignal<CollectionId>, search: String) -> Ele
             (
                 x.name.clone(),
                 rsx! {
-                    SubModViewer {collection_id, mods: x  }
+                    SubModViewer {
+                        collection_id,
+                        mods: x
+                    }
                 },
             )
         })
@@ -236,7 +239,7 @@ fn ModViewer(collection_id: ReadOnlySignal<CollectionId>, search: String) -> Ele
             class: "grid grid-flow-row grid-cols-[repeat(auto-fill,273px)] gap-[3px]",
             SearchContainer {
                 search,
-                childrens: mods,
+                childrens: mods
             }
         }
     }

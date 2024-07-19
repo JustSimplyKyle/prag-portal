@@ -106,7 +106,7 @@ pub fn Button(
     attributes.retain(|x| x.name != "class");
     let class = ButtonClass {
         roundness,
-        items_count: string_placements.len().into(),
+        items_count: ItemsCount::AboveOne,
         size,
         fill_mode,
     }

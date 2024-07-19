@@ -190,10 +190,13 @@ fn App() -> Element {
             class: "[&_*]:transform-gpu font-['GenSenRounded TW'] bg-deep-background min-h-screen min-w-full font-display leading-normal",
             {
                 TOP_LEVEL_COMPONENT().into_iter().map(|x| (x.pointer)(x.props))
-            },
+            }
             ErrorBoundary {
                 handle_error: move |error| { rsx! {
-                    Modal { active: error_active, name: "error_modal", close_on_outer_click: false,
+                    Modal {
+                        active: error_active,
+                        name: "error_modal",
+                        close_on_outer_click: false,
                         div {
                             div { class: "w-full flex flex-col items-center space-y-3",
                                 div { class: "text-red text-3xl font-black",
@@ -203,9 +206,7 @@ fn App() -> Element {
                                     roundness: Roundness::Pill,
                                     extended_css_class: "text-[13px] font-bold",
                                     string_placements: rsx! {
-                                        pre {
-                                            "{error:#?}"
-                                        }
+                                        pre { "{error:#?}" }
                                     },
                                     fill_mode: FillMode::Fit,
                                     clickable: false
@@ -215,6 +216,7 @@ fn App() -> Element {
                     }
                 } },
                 Layout {
+                
                 }
             }
         }
@@ -254,35 +256,40 @@ fn Layout() -> Element {
                     }
                 }
             },
-            SideBar {}
+            SideBar {
+            
+            }
             div {
-                class: "w-full min-h-screen relative *:overflow-scroll",
-                if Pages::MainPage.should_render() {
-                    div {
-                        class: "absolute inset-0 z-0 min-h-full",
-                        id: Pages::MainPage.scroller_id(),
+                class: "bg-background w-full min-h-screen relative *:overflow-scroll",
+                div {
+                    class: "absolute inset-0 z-0 min-h-full",
+                    id: Pages::MainPage.scroller_id(),
+                    if Pages::MainPage.should_render() {
                         LayoutContainer {
                             MainPage {
+                            
                             }
                         }
                     }
                 }
-                if Pages::Explore.should_render() {
-                    div {
-                        class: "absolute inset-0 z-0 min-h-full",
-                        id: Pages::Explore.scroller_id(),
+                div {
+                    class: "absolute inset-0 z-0 min-h-full",
+                    id: Pages::Explore.scroller_id(),
+                    if Pages::Explore.should_render() {
                         LayoutContainer {
                             Explore {
+                            
                             }
                         }
                     }
                 }
-                if Pages::Collections.should_render() {
-                    div {
-                        class: "absolute inset-0 z-0 min-h-full",
-                        id: Pages::Collections.scroller_id(),
+                div {
+                    class: "absolute inset-0 z-0 min-h-full",
+                    id: Pages::Collections.scroller_id(),
+                    if Pages::Collections.should_render() {
                         LayoutContainer {
                             Collections {
+                            
                             }
                         }
                     }
@@ -292,12 +299,17 @@ fn Layout() -> Element {
                     id: Pages::DownloadProgress.slide_in_id(),
                     LayoutContainer {
                         DownloadProgress {
+                        
                         }
                     }
                 }
-                CollectionContainer {  }
+                CollectionContainer {
+                
+                }
             }
-            CollectionEditContainer { }
+            CollectionEditContainer {
+            
+            }
         }
     }
 }
@@ -305,12 +317,7 @@ fn Layout() -> Element {
 #[component]
 fn CollectionContainer() -> Element {
     rsx! {
-        for collection_id in STORAGE
-            .collections
-            .read()
-            .keys()
-            .cloned()
-        {
+        for collection_id in STORAGE.collections.read().keys().cloned() {
             div {
                 class: "absolute inset-0 z-0 min-h-full min-w-full",
                 id: Pages::collection_display(collection_id.clone()).slide_in_id(),

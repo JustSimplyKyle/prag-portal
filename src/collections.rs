@@ -116,6 +116,7 @@ pub fn Collections() -> Element {
                 class: "grid grid-flow-row grid-cols-[repeat(auto-fill,280px)] gap-[20px]",
                 for collection_id in collection_ids {
                     CollectionBlock {
+                        key: "{collection_id.clone()}",
                         collection_id,
                         extended_class: "rounded-[20px]"
                     }

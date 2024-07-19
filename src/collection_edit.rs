@@ -50,14 +50,17 @@ impl_optional_state_switcher!(Pages);
 #[component]
 pub fn CollectionEditContainer() -> Element {
     let binding = STORAGE.collections.read();
-    let collection_ids = binding.keys();
+    let collection_ids = binding
+        .keys()
+        .map(|id| (id, Pages::collection_edit(id.clone())));
     rsx! {
-        for collection_id in collection_ids {
+        for (collection_id , page) in collection_ids {
             div {
                 class: "absolute inset-0 z-0 min-w-full min-h-full",
-                id: Pages::collection_edit(collection_id.clone()).slide_in_id(),
-                    if Pages::collection_edit(collection_id.clone()).should_render() {
+                id: page.slide_in_id(),
+                if page.should_render() {
                     CollectionEdit {
+                        key: "{page.slide_in_id()}",
                         collection_id: collection_id.clone()
                     }
                 }
@@ -131,7 +134,7 @@ fn EditSidebar(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                     extended_css_class: "flex w-auto min-w-auto justify-center items-center bg-background gap-[15px] pl-[20px] pr-[30px]",
                     string_placements: vec![
                         ContentType::svg(UNDO).css("svg-[35px]").align_center(),
-                        ContentType::text("返回頁面").align_center()
+                        ContentType::text("返回頁面").align_center(),
                     ]
                 }
                 Button {
@@ -139,11 +142,10 @@ fn EditSidebar(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                     extended_css_class: "flex w-auto min-w-auto items-center bg-background gap-[15px] pl-[20px] pr-[30px]",
                     string_placements: vec![
                         ContentType::svg(ARROW_LEFT).align_center(),
-                        ContentType::text("返回頁面").align_center()
+                        ContentType::text("返回頁面").align_center(),
                     ]
                 }
             }
-
         }
     }
 }
@@ -157,7 +159,10 @@ fn EditSidebarInfographic(collection_id: ReadOnlySignal<CollectionId>) -> Elemen
             class: "flex flex-col w-full",
             div {
                 class: "flex flex-col p-5 justify-end rounded-t-[50px] w-full h-[250px]",
-                background: format!("radial-gradient(171.48% 102.52% at 0% 100%, #000 0%, rgba(0, 0, 0, 0.00) 100%), url(\"{}\") lightgray 50% / cover no-repeat", DISPLAY_BACKGROUND),
+                background: format!(
+                    "radial-gradient(171.48% 102.52% at 0% 100%, #000 0%, rgba(0, 0, 0, 0.00) 100%), url(\"{}\") lightgray 50% / cover no-repeat",
+                    DISPLAY_BACKGROUND,
+                ),
                 {
                     ContentType::image(collection.picture_path.to_string_lossy().to_string()).css("w-[100px] h-[100px] bg-cover rounded-t-[50px] rounded-bl-[15px] rounded-br-[50px] p-[5px]")
                 }
@@ -167,12 +172,15 @@ fn EditSidebarInfographic(collection_id: ReadOnlySignal<CollectionId>) -> Elemen
                 extended_css_class: "bg-background justify-start px-5 pt-[22px]",
                 string_placements: vec![
                     Contents::new(
-                        vec![
-                            ContentType::text(&collection.display_name).css("text-3xl font-balck"),
-                            ContentType::hint("由我建立•18 分鐘•不久前開啟").css("font-medium text-[15px]")
-                        ],
-                        Alignment::Left
-                    ).css("flex flex-col gap-[15px]")
+                            vec![
+                                ContentType::text(&collection.display_name)
+                                    .css("text-3xl font-balck"),
+                                ContentType::hint("由我建立•18 分鐘•不久前開啟")
+                                    .css("font-medium text-[15px]"),
+                            ],
+                            Alignment::Left,
+                        )
+                        .css("flex flex-col gap-[15px]"),
                 ]
             }
         }
@@ -191,31 +199,40 @@ fn CollectionEdit(collection_id: ReadOnlySignal<CollectionId>) -> Element {
         div {
             class: "flex w-full bg-deep-background group-edit min-h-screen gap-[20px] rounded-[5px] px-[20px] pb-[20px]",
             "data-prev": edit_state().1.map_or_else(String::new, |x| x.to_string()),
-            EditSidebar { collection_id }
+            EditSidebar {
+                collection_id
+            }
             div {
                 class: "w-full min-h-screen relative *:overflow-scroll",
                 div {
                     class: "absolute inset-0 z-0 min-h-full min-w-full",
                     id: EditState::Personalization.scroller_id(),
-                    Personalization { collection_id }
+                    Personalization {
+                        collection_id
+                    }
                 }
                 div {
                     class: "absolute inset-0 z-0 min-h-full min-w-full",
                     id: EditState::DataLog.scroller_id(),
-                    DataLog { collection_id  }
+                    DataLog {
+                        collection_id
+                    }
                 }
                 div {
                     class: "absolute inset-0 z-0 min-h-full min-w-full",
                     id: EditState::Export.scroller_id(),
-                    Export { collection_id  }
+                    Export {
+                        collection_id
+                    }
                 }
                 div {
                     class: "absolute inset-0 z-0 min-h-full min-w-full",
                     id: EditState::Advanced.scroller_id(),
-                    Advanced { collection_id  }
+                    Advanced {
+                        collection_id
+                    }
                 }
             }
-
         }
     }
 }
@@ -231,7 +248,7 @@ fn EditTemplate(children: Element, title: Element) -> Element {
                     class: "flex flex-col bg-background pt-[30px] rounded-b-[30px]",
                     {title}
                     div {
-                        class: "bg-background py-[10px] rounded-t-[30px]",
+                        class: "bg-background py-[10px] rounded-t-[30px]"
                     }
                 }
             }
@@ -245,37 +262,45 @@ fn EditTemplate(children: Element, title: Element) -> Element {
 
 #[component]
 fn Personalization(collection_id: ReadOnlySignal<CollectionId>) -> Element {
+    // let read = collection_id.read();
+    // let mut collection = use_signal(|| read.get_mut_collection());
     rsx! {
         EditTemplate {
             title: rsx! {
                 Button {
                     roundness: Roundness::None,
+                    clickable: false,
                     extended_css_class: "rounded-[20px] p-[40px] gap-[20px]",
                     string_placements: vec![
                         Contents::new(
-                            vec![
-                                ContentType::text("風格化").css("font-black text-white text-[40px]"),
-                                ContentType::hint("自訂你的收藏樣式")
-                            ],
-                            Alignment::Left
-                        ).css("flex flex-col gap-[20px]"),
-                        ContentType::svg(GAME_CONTROLLER).css("svg-[70px]").align_right()
+                                vec![
+                                    ContentType::text("風格化")
+                                        .css("font-black text-white text-[40px]"),
+                                    ContentType::hint("自訂你的收藏樣式"),
+                                ],
+                                Alignment::Left,
+                            )
+                            .css("flex flex-col gap-[20px]"),
+                        ContentType::svg(GAME_CONTROLLER).css("svg-[70px]").align_right(),
                     ]
                 }
             },
-            for _ in 0..10 {
+            div {
+                class: "flex flex-col gap-[3px]",
                 Button {
-                    roundness: Roundness::Pill,
-                    extended_css_class: "rounded-[20px] p-[40px]",
+                    roundness: Roundness::Top,
+                    clickable: false,
                     string_placements: vec![
                         Contents::new(
-                            vec![
-                                ContentType::text("not").css("font-black text-white text-[40px]"),
-                                ContentType::hint("自訂你的收藏樣式")
-                            ],
-                            Alignment::Left
-                        ).css("flex flex-col gap-[20px]"),
-                        ContentType::svg(GAME_CONTROLLER).css("svg-[70px]").align_right()
+                                vec![
+                                    ContentType::text("更改名稱"),
+                                    ContentType::hint(
+                                        "名稱將會套用至此收藏的所有顯示位置",
+                                    ),
+                                ],
+                                Alignment::Left,
+                            )
+                            .css("flex flex-col gap-[15px]"),
                     ]
                 }
             }
@@ -293,16 +318,18 @@ fn DataLog(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                     extended_css_class: "rounded-[20px] p-[40px]",
                     string_placements: vec![
                         Contents::new(
-                            vec![
-                                ContentType::text("收藏紀錄").css("font-black text-white text-[40px]"),
-                                ContentType::hint("查看這個收藏的資訊")
-                            ],
-                            Alignment::Left
-                        ).css("flex flex-col gap-[20px]"),
-                        ContentType::svg(GAME_CONTROLLER).css("svg-[70px]").align_right()
+                                vec![
+                                    ContentType::text("收藏紀錄")
+                                        .css("font-black text-white text-[40px]"),
+                                    ContentType::hint("查看這個收藏的資訊"),
+                                ],
+                                Alignment::Left,
+                            )
+                            .css("flex flex-col gap-[20px]"),
+                        ContentType::svg(GAME_CONTROLLER).css("svg-[70px]").align_right(),
                     ]
                 }
-            },
+            }
         }
     }
 }
@@ -317,16 +344,17 @@ fn Export(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                     extended_css_class: "rounded-[20px] p-[40px]",
                     string_placements: vec![
                         Contents::new(
-                            vec![
-                                ContentType::text("分享").css("font-black text-white text-[40px]"),
-                                ContentType::hint("分享你的收藏或是將它匯出至電腦")
-                            ],
-                            Alignment::Left
-                        ).css("flex flex-col gap-[20px]"),
-                        ContentType::svg(GAME_CONTROLLER).css("svg-[70px]").align_right()
+                                vec![
+                                    ContentType::text("分享").css("font-black text-white text-[40px]"),
+                                    ContentType::hint("分享你的收藏或是將它匯出至電腦"),
+                                ],
+                                Alignment::Left,
+                            )
+                            .css("flex flex-col gap-[20px]"),
+                        ContentType::svg(GAME_CONTROLLER).css("svg-[70px]").align_right(),
                     ]
                 }
-            },
+            }
         }
     }
 }
@@ -341,13 +369,15 @@ fn Advanced(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                     extended_css_class: "rounded-[20px] p-[40px]",
                     string_placements: vec![
                         Contents::new(
-                            vec![
-                                ContentType::text("進階選項").css("font-black text-white text-[40px]"),
-                                ContentType::hint("單獨修改此收藏的進階選項")
-                            ],
-                            Alignment::Left
-                        ).css("flex flex-col gap-[20px]"),
-                        ContentType::svg(GAME_CONTROLLER).css("svg-[70px]").align_right()
+                                vec![
+                                    ContentType::text("進階選項")
+                                        .css("font-black text-white text-[40px]"),
+                                    ContentType::hint("單獨修改此收藏的進階選項"),
+                                ],
+                                Alignment::Left,
+                            )
+                            .css("flex flex-col gap-[20px]"),
+                        ContentType::svg(GAME_CONTROLLER).css("svg-[70px]").align_right(),
                     ]
                 }
             }
