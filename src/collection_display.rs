@@ -71,6 +71,7 @@ fn CollectionBackground(
             }
         }
     });
+    let return_to = use_signal(|| HISTORY.peek().prev_peek().cloned());
     let id = collection_id.read();
     let collection = id.get_collection();
     rsx! {
@@ -85,16 +86,16 @@ fn CollectionBackground(
                 )
             }
             div {
-                class: "flex flex-col gap-[35px]",
-                div {
-                    class: "text-white font-black text-[80px] leading-normal capsize",
-                    {collection.display_name.clone()}
+                class: "grow-0 shrink-0 flex flex-col gap-[35px] overflow-x-clip overflow-y-visible",
+                Text {
+                    css: "text-white text-ellipsis text-nowrap overflow-x-clip overflow-y-visible font-black text-[80px]",
+                    {collection.display_name().clone()}
                 }
                 Button {
                     roundness: Roundness::Pill,
                     string_placements: vec![ContentType::svg(UNDO).css("svg-[30px]").align_center()],
                     onclick: move |_| {
-                        if let Some(x) = HISTORY().prev_peek() {
+                        if let Some(x) = return_to() {
                             x.switch_active_to_self();
                         }
                     },
@@ -103,12 +104,12 @@ fn CollectionBackground(
                 }
             }
             div {
-                class: "flex justify-end",
+                class: "grow-0 shrink-0 flex justify-end",
                 div {
                     class: "flex flex-col space-y-[3px] w-full max-w-[250px]",
                     img {
                         class: "w-full h-[250px] rounded-t-[20px] rounded-b-[5px] object-cover",
-                        src: collection.picture_path.to_string_lossy().to_string()
+                        src: collection.picture_path().to_string_lossy().to_string()
                     }
                     div {
                         class: "flex space-x-[3px] min-w-full",
@@ -214,7 +215,7 @@ fn Separator(mut top_position: Signal<f64>, container_height: Option<f64>) -> El
 fn ModViewer(collection_id: ReadOnlySignal<CollectionId>, search: String) -> Element {
     let mods = use_memo(move || {
         let collection = collection_id.read().get_collection_owned();
-        collection.mod_controller.map(move |mut x| {
+        collection.mod_controller_owned().map(move |mut x| {
             x.manager.mods.sort_by_key(|x| x.name.clone());
             x.manager.mods
         })

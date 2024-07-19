@@ -7,7 +7,7 @@ use crate::{
     BaseComponents::{
         atoms::button::{Button, ButtonClass, FillMode, Roundness, Size},
         molecules::switcher::StateSwitcher,
-        string_placements::{Alignment, ContentType, Contents},
+        string_placements::{Alignment, ContentType, Contents, Hint, Text},
     },
     Pages, ARROW_RIGHT,
 };
@@ -25,10 +25,10 @@ pub const ARROW_LEFT: &str = manganis::mg!(file("./public/keyboard_arrow_left.sv
 pub fn MainPage() -> Element {
     rsx! {
         SuggestionPage {
-        
+
         }
         CollectionsPage {
-        
+
         }
     }
 }
@@ -41,9 +41,8 @@ pub fn CollectionBlock(
     #[props(extends=GlobalAttributes)] attributes: Vec<Attribute>,
     #[props(default)] extended_class: String,
 ) -> Element {
-    let collection = collection_id().get_collection_owned();
-    let main_text = collection.display_name.clone();
-    let hint = String::from("遊玩中•由我建立");
+    let id = collection_id();
+    let collection = id.get_collection();
     let (roundness, extended_class): (Vec<_>, Vec<_>) = extended_class
         .split_whitespace()
         .partition(|x| x.contains("rounded"));
@@ -52,13 +51,13 @@ pub fn CollectionBlock(
     for x in roundness {
         img_class = tw_merge!(img_class, x);
     }
-    let picture_path = collection.picture_path.to_string_lossy().to_string();
+    let picture_path = collection.picture_path().to_string_lossy().to_string();
     rsx! {
         div {
             button {
                 class: tw_merge!("relative h-[280px] w-[280px]", extended_class),
                 onclick: move |_| {
-                    Pages::collection_display(collection.get_collection_id())
+                    Pages::collection_display(collection_id())
                         .switch_active_to_self();
                 },
                 ..attributes,
@@ -73,13 +72,13 @@ pub fn CollectionBlock(
                 }
                 div {
                     class: "absolute inset-0 px-5 pt-5 pb-[25px] flex flex-col gap-[15px] *:text-ellipsis overflow-hidden justify-end items-start",
-                    div {
-                        class: "text-3xl leading-normal capsize text-white font-bold",
-                        {main_text}
+                    Text {
+                        css: "text-3xl text-white text-ellipsis text-nowrap font-bold",
+                        {collection.display_name().clone()}
                     }
-                    div {
-                        class: "text-[15px] leading-normal capsize text-white text-opacity-50",
-                        {hint}
+                    Hint {
+                        css: "text-[15px] text-hint text-ellipsis text-nowrap",
+                        "遊玩中•由我建立"
                     }
                 }
             }
@@ -234,14 +233,14 @@ fn SuggestionPage() -> Element {
                             class: "text-lime-300 text-6xl font-bold font-['GenSenRounded TW'] leading-[78px] tracking-[6px]",
                             "探索  創造"
                             br {
-                            
+
                             }
                         }
                         span {
                             class: "text-white text-6xl font-normal font-['GenSenRounded TW'] leading-[78px] tracking-[6px]",
                             "無窮  無限"
                             br {
-                            
+
                             }
                             "創作  可能"
                         }

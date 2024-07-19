@@ -73,7 +73,7 @@ pub fn CollectionEditContainer() -> Element {
 fn EditSidebar(collection_id: ReadOnlySignal<CollectionId>) -> Element {
     rsx! {
         div {
-            class: "flex flex-col min-w-[400px] gap-[20px]",
+            class: "flex flex-col min-w-[400px] max-w-[400px] gap-[20px]",
             EditSidebarInfographic {
                 collection_id
             }
@@ -158,23 +158,23 @@ fn EditSidebarInfographic(collection_id: ReadOnlySignal<CollectionId>) -> Elemen
         div {
             class: "flex flex-col w-full",
             div {
-                class: "flex flex-col p-5 justify-end rounded-t-[50px] w-full h-[250px]",
+                class: "flex flex-col p-5 justify-end rounded-t-[50px] w-full min-h-[250px]",
                 background: format!(
                     "radial-gradient(171.48% 102.52% at 0% 100%, #000 0%, rgba(0, 0, 0, 0.00) 100%), url(\"{}\") lightgray 50% / cover no-repeat",
                     DISPLAY_BACKGROUND,
                 ),
                 {
-                    ContentType::image(collection.picture_path.to_string_lossy().to_string()).css("w-[100px] h-[100px] bg-cover rounded-t-[50px] rounded-bl-[15px] rounded-br-[50px] p-[5px]")
+                    ContentType::image(collection.picture_path().to_string_lossy().to_string()).css("w-[100px] h-[100px] bg-cover rounded-t-[50px] rounded-bl-[15px] rounded-br-[50px] p-[5px]")
                 }
             }
             Button {
                 roundness: Roundness::Bottom,
-                extended_css_class: "bg-background justify-start px-5 pt-[22px]",
+                extended_css_class: "bg-background justify-start px-5 pt-[22px] overflow-hidden",
                 string_placements: vec![
                     Contents::new(
                             vec![
-                                ContentType::text(&collection.display_name)
-                                    .css("text-3xl font-balck"),
+                                ContentType::text(collection.display_name())
+                                    .css("text-3xl font-black text-ellipsis text-wrap"),
                                 ContentType::hint("由我建立•18 分鐘•不久前開啟")
                                     .css("font-medium text-[15px]"),
                             ],
@@ -262,8 +262,9 @@ fn EditTemplate(children: Element, title: Element) -> Element {
 
 #[component]
 fn Personalization(collection_id: ReadOnlySignal<CollectionId>) -> Element {
-    // let read = collection_id.read();
-    // let mut collection = use_signal(|| read.get_mut_collection());
+    let id = collection_id.read();
+    let collection_name = id.get_collection().display_name().clone();
+    let mut input = use_signal(|| None);
     rsx! {
         EditTemplate {
             title: rsx! {
@@ -286,10 +287,12 @@ fn Personalization(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                 }
             },
             div {
-                class: "flex flex-col gap-[3px]",
+                class: "flex flex-col gap-[3px] group",
+                aria_selected: input.read().is_none(),
                 Button {
                     roundness: Roundness::Top,
                     clickable: false,
+                    extended_css_class: "p-[25px]",
                     string_placements: vec![
                         Contents::new(
                                 vec![
@@ -302,6 +305,34 @@ fn Personalization(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                             )
                             .css("flex flex-col gap-[15px]"),
                     ]
+                }
+                Button {
+                    roundness: Roundness::Bottom,
+                    clickable: false,
+                    extended_css_class: "p-[25px] text-white group-aria-selected:text-zinc-800",
+                    string_placements: rsx! {
+                        input {
+                            oninput: move |x| {
+                                let id = collection_id.read();
+                                let mut collection = id.get_mut_collection();
+                                collection.with_mut(|ele| *ele.display_name = x.value()).unwrap();
+                                input.with_mut(|input| {
+                                    if let Some(input) = input {
+                                        *input = x.value();
+                                    } else {
+                                        *input = Some(x.value());
+                                    }
+                                });
+                            },
+                            value: {
+                                if let Some(x) = input() {
+                                    x
+                                } else {
+                                    collection_name
+                                }
+                            },
+                        }
+                    },
                 }
             }
         }

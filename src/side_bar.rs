@@ -47,7 +47,7 @@ pub fn SideBar() -> Element {
                                 key: "{id}",
                                 Image {
                                     css: "z-50 w-10 h-10 object-cover shrink-0 inline-flex justify-center items-center rounded-full border-2 border-zinc-900 group-aria-expanded:hidden",
-                                    {x.picture_path.to_string_lossy().to_string()}
+                                    {x.picture_path().to_string_lossy().to_string()}
                                 }
                             }
                         }
@@ -164,7 +164,7 @@ pub fn SideBar() -> Element {
 fn SidebarCollectionBlock(collection_id: ReadOnlySignal<CollectionId>) -> Element {
     let binding = collection_id.read();
     let collection = binding.get_collection();
-    let picture_path = collection.picture_path.to_string_lossy().to_string();
+    let picture_path = collection.picture_path().to_string_lossy().to_string();
     let img_block = rsx! {
         div {
             class: "relative transition-all container w-[50px] h-[50px] group-aria-expanded:w-20 group-aria-expanded:h-20 border-2 border-[#2E2E2E] rounded-[15px] group-aria-expanded:rounded-[5px]",
@@ -181,7 +181,7 @@ fn SidebarCollectionBlock(collection_id: ReadOnlySignal<CollectionId>) -> Elemen
             roundness: Roundness::None,
             string_placements: vec![
                 ContentType::custom(img_block).align_left(),
-                ContentType::text(collection.display_name.clone())
+                ContentType::text(collection.display_name().clone())
                     .align_right()
                     .css("group-aria-busy:hidden"),
             ],

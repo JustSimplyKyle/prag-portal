@@ -29,10 +29,10 @@ fn ListItem(
                     {ContentType::svg(DRAG_INDICATOR).css("self-center svg-[30px]")}
                     div { class: "w-full flex gap-[20px]",
                         Image { css: "bg-cover bg-white w-[80px] h-[80px] rounded-[10px]",
-                            {collection.picture_path.to_string_lossy().to_string()}
+                            {collection.picture_path().to_string_lossy().to_string()}
                         }
                         div { class: "w-full flex flex-col justify-start gap-[10px]",
-                            Text { css: "text-[25px] fond-bold", {collection.display_name.clone()} }
+                            Text { css: "text-[25px] fond-bold", {collection.display_name().clone()} }
                             div { class: "flex gap-[4px]",
                                 Hint { css: "text-base font-semibold",
                                     {format!("{} / {} |", progress.current_size.unwrap_or_default().display_size_from_megabytes(), progress.total_size.unwrap_or_default().display_size_from_megabytes())}
@@ -72,7 +72,7 @@ fn FirstProgressView(
             class: "w-full h-[350px] p-[30px] rounded-[20px]",
             background: format!(
                 "linear-gradient(88deg, #0E0E0E 14.88%, rgba(14, 14, 14, 0.70) 100%), url('{}') lightgray 50% / cover no-repeat",
-                collection.picture_path.to_string_lossy().to_string(),
+                collection.picture_path().to_string_lossy().to_string(),
             ),
             div {
                 class: "w-full grid grid-flow-col",
@@ -80,7 +80,7 @@ fn FirstProgressView(
                     class: "justify-self-start flex flex-col gap-[20px]",
                     Text {
                         css: "text-[60px] font-black text-white",
-                        {collection.display_name.clone()}
+                        {collection.display_name().clone()}
                     }
                     Hint {
                         css: "font-medium",
@@ -167,7 +167,7 @@ pub fn DownloadProgress() -> Element {
                     progress
                 }
                 ProgressStateBar {
-                
+
                 }
             }
             for (collection_id , progress) in progress {
