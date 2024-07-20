@@ -1,20 +1,27 @@
+use std::{borrow::BorrowMut, path::PathBuf};
+
 use dioxus::prelude::*;
 use rust_lib::api::shared_resources::{collection::CollectionId, entry::STORAGE};
 use strum::{EnumIter, IntoEnumIterator};
+use tailwind_fuse::merge::tw_merge;
 
 use crate::{
     collection_display::{DISPLAY_BACKGROUND, GAME_CONTROLLER, UNDO},
     impl_context_switcher, impl_optional_state_switcher,
-    main_page::ARROW_LEFT,
+    main_page::{ARROW_LEFT, ICON},
     pages::Pages,
     scrollable::Scrollable,
     BaseComponents::{
         atoms::button::{Button, FillMode, Roundness},
         molecules::switcher::{Comparison, StateSwitcher},
-        string_placements::{Alignment, ContentType, Contents},
+        string_placements::{Alignment, ContentType, Contents, Hint, Text},
     },
-    ARROW_RIGHT,
+    ARROW_RIGHT, COLLECTION_PICS,
 };
+
+pub const ADD: &str = manganis::mg!(file("./public/add.svg"));
+pub const HALLWAY: &str = manganis::mg!(file("./public/hallway.svg"));
+pub const PHOTO_LIBRARY: &str = manganis::mg!(file("./public/photo_library.svg"));
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, EnumIter)]
 pub enum EditState {
@@ -152,8 +159,7 @@ fn EditSidebar(collection_id: ReadOnlySignal<CollectionId>) -> Element {
 
 #[component]
 fn EditSidebarInfographic(collection_id: ReadOnlySignal<CollectionId>) -> Element {
-    let read = collection_id.read();
-    let collection = read.get_collection();
+    let collection = collection_id().get_collection();
     rsx! {
         div {
             class: "overflow-x-clip flex flex-col w-full",
@@ -164,7 +170,7 @@ fn EditSidebarInfographic(collection_id: ReadOnlySignal<CollectionId>) -> Elemen
                     DISPLAY_BACKGROUND,
                 ),
                 {
-                    ContentType::image(collection.picture_path().to_string_lossy().to_string()).css("w-[100px] h-[100px] bg-cover rounded-t-[50px] rounded-bl-[15px] rounded-br-[50px] p-[5px]")
+                    ContentType::image(collection.read().picture_path().to_string_lossy().to_string()).css("w-[100px] h-[100px] bg-cover rounded-t-[50px] rounded-bl-[15px] rounded-br-[50px] p-[5px]")
                 }
             }
             Button {
@@ -174,7 +180,7 @@ fn EditSidebarInfographic(collection_id: ReadOnlySignal<CollectionId>) -> Elemen
                 string_placements: vec![
                     Contents::new(
                             vec![
-                                ContentType::text(collection.display_name())
+                                ContentType::text(collection.read().display_name())
                                     .css("text-3xl font-black min-w-0 text-nowrap overflow-x-clip"),
                                 ContentType::hint("由我建立•18 分鐘•不久前開啟")
                                     .css("font-medium text-[15px]"),
@@ -263,9 +269,6 @@ fn EditTemplate(children: Element, title: Element) -> Element {
 
 #[component]
 fn Personalization(collection_id: ReadOnlySignal<CollectionId>) -> Element {
-    let id = collection_id.read();
-    let collection_name = id.get_collection().display_name().clone();
-    let mut input = use_signal(|| None);
     rsx! {
         EditTemplate {
             title: rsx! {
@@ -287,54 +290,222 @@ fn Personalization(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                     ]
                 }
             },
-            div {
-                class: "flex flex-col gap-[3px] group",
-                aria_selected: input.read().is_none(),
-                Button {
-                    roundness: Roundness::Top,
-                    clickable: false,
-                    extended_css_class: "p-[25px]",
-                    string_placements: vec![
-                        Contents::new(
-                                vec![
-                                    ContentType::text("更改名稱"),
-                                    ContentType::hint(
-                                        "名稱將會套用至此收藏的所有顯示位置",
-                                    ),
-                                ],
-                                Alignment::Left,
-                            )
-                            .css("flex flex-col gap-[15px]"),
-                    ]
-                }
-                Button {
-                    roundness: Roundness::Bottom,
-                    clickable: false,
-                    extended_css_class: "p-[25px] text-white group-aria-selected:text-zinc-800",
-                    string_placements: rsx! {
-                        input {
-                            oninput: move |x| {
-                                let id = collection_id.read();
-                                let mut collection = id.get_mut_collection();
-                                collection.with_mut(|ele| *ele.display_name = x.value()).unwrap();
-                                input.with_mut(|input| {
-                                    if let Some(input) = input {
-                                        *input = x.value();
-                                    } else {
-                                        *input = Some(x.value());
-                                    }
-                                });
-                            },
-                            value: {
-                                if let Some(x) = input() {
-                                    x
+            ModifyName { collection_id }
+            ModifyPicture { collection_id }
+        }
+    }
+}
+
+#[component]
+fn ModifyName(collection_id: ReadOnlySignal<CollectionId>) -> Element {
+    let collection = collection_id().get_collection();
+    let mut input = use_signal(|| None);
+    rsx! {
+        div {
+            class: "flex flex-col gap-[3px] group",
+            aria_selected: input.read().is_none(),
+            Button {
+                roundness: Roundness::Top,
+                clickable: false,
+                extended_css_class: "p-[25px]",
+                string_placements: vec![
+                    Contents::new(
+                            vec![
+                                ContentType::text("更改名稱"),
+                                ContentType::hint(
+                                    "名稱將會套用至此收藏的所有顯示位置",
+                                ),
+                            ],
+                            Alignment::Left,
+                        )
+                        .css("flex flex-col gap-[15px]"),
+                ]
+            }
+            Button {
+                roundness: Roundness::Bottom,
+                clickable: false,
+                extended_css_class: "p-[25px] text-white group-aria-selected:text-zinc-800",
+                string_placements: rsx! {
+                    input {
+                        oninput: move |x| {
+                            let mut collection = collection_id().get_mut_collection();
+                            collection.with_mut(|ele| *ele.display_name = x.value()).unwrap();
+                            input.with_mut(|input| {
+                                if let Some(input) = input {
+                                    *input = x.value();
                                 } else {
-                                    collection_name
+                                    *input = Some(x.value());
                                 }
-                            },
-                        }
-                    },
+                            });
+                        },
+                        value: {
+                            if let Some(x) = input() {
+                                x
+                            } else {
+                                collection.read().display_name().clone()
+                            }
+                        },
+                    }
+                },
+            }
+        }
+    }
+}
+
+#[component]
+fn ModifyPicture(collection_id: ReadOnlySignal<CollectionId>) -> Element {
+    let mut active = use_signal(|| "a");
+    let mut change = use_signal(|| false);
+    let collection = collection_id().get_collection();
+    let active_to_collection = use_memo(move || match active() {
+        "a" => COLLECTION_PICS[0].clone(),
+        "b" => COLLECTION_PICS[1].clone(),
+        "c" => COLLECTION_PICS[2].clone(),
+        "d" => COLLECTION_PICS[3].clone(),
+        "e" => COLLECTION_PICS[4].clone(),
+        _ => panic!("impossible"),
+    });
+
+    let mut filename: Signal<Option<String>> = use_signal(|| None);
+
+    use_effect(move || {
+        if change() {
+            let mut collection = collection_id().get_mut_collection();
+            let path = PathBuf::from(active_to_collection().path());
+            collection.with_mut(|x| *x.picture_path = path).unwrap();
+            change.set(false);
+        }
+    });
+    use_effect(move || {
+        if let Some(x) = filename() {
+            if !x.is_empty() {
+                let mut collection = collection_id().get_mut_collection();
+                let path = PathBuf::from(x);
+                collection.with_mut(|x| *x.picture_path = path).unwrap();
+            }
+        }
+    });
+    rsx! {
+        div {
+            class: "flex flex-col gap-[3px] w-full",
+            Button {
+                roundness: Roundness::Top,
+                clickable: false,
+                extended_css_class: "p-[25px]",
+                string_placements: vec![
+                    Contents::new(
+                            vec![
+                                ContentType::text("封面與圖示圖片"),
+                                ContentType::hint(
+                                    "預覽即將套用的圖片，建議使用辨識度較高的圖片",
+                                ),
+                            ],
+                            Alignment::Left,
+                        )
+                        .css("flex flex-col gap-[15px]"),
+                ]
+            }
+            div {
+                class: "flex h-min w-full",
+                div {
+                    class: "transition-all [&_*]:transition-all w-full h-full flex flex-col gap-[3px] group",
+                    "data-active": active(),
+                    Button {
+                        roundness: Roundness::None,
+                        clickable: false,
+                        extended_css_class: "p-[20px]",
+                        string_placements: vec![
+                            ContentType::custom(rsx!{
+                                div {
+                                    class: "flex gap-[20px] items-center",
+                                    {ContentType::svg(HALLWAY).css("svg-[35px]").align_left()}
+                                    div {
+                                        class: "flex flex-col gap-[10px]",
+                                        Text { css: "text-xl", "預設封面圖片" }
+                                        Hint { css: "text-[13px]", "使用Era Connect提供的預設圖片" }
+                                    }
+                                }
+                            }).align_left(),
+                            ContentType::custom(rsx!{
+                                div {
+                                    class: "flex gap-[3px]",
+                                    button {
+                                        onclick: move |_| {
+                                            active.set("a");
+                                            change.set(true);
+                                        },
+                                        {ContentType::image(COLLECTION_PICS[0].to_string()).css("bg-cover w-10 h-10 rounded-full border-2 border-zinc-900 group-data-[active=a]:border-white group-data-[active=a]:w-20")}
+                                    }
+                                    button {
+                                        onclick: move |_| {
+                                            active.set("b");
+                                            change.set(true);
+                                        },
+                                        {ContentType::image(COLLECTION_PICS[1].to_string()).css("bg-cover w-10 h-10 rounded-full border-2 border-zinc-900 group-data-[active=b]:border-white group-data-[active=b]:w-20")}
+                                    }
+                                    button {
+                                        onclick: move |_| {
+                                            active.set("c");
+                                            change.set(true);
+                                        },
+                                        {ContentType::image(COLLECTION_PICS[2].to_string()).css("bg-cover w-10 h-10 rounded-full border-2 border-zinc-900 group-data-[active=c]:border-white group-data-[active=c]:w-20")}
+                                    }
+                                    button {
+                                        onclick: move |_| {
+                                            active.set("d");
+                                            change.set(true);
+                                        },
+                                        {ContentType::image(COLLECTION_PICS[3].to_string()).css("bg-cover w-10 h-10 rounded-full border-2 border-zinc-900 group-data-[active=d]:border-white group-data-[active=d]:w-20")}
+                                    }
+                                    button {
+                                        onclick: move |_| {
+                                            active.set("e");
+                                            change.set(true);
+                                        },
+                                        {ContentType::image(COLLECTION_PICS[4].to_string()).css("bg-cover w-10 h-10 rounded-full border-2 border-zinc-900 group-data-[active=e]:border-white group-data-[active=e]:w-20")}
+                                    }
+                                }
+                            }).align_right()
+                        ]
+                    }
+                    Button {
+                        roundness: Roundness::Bottom,
+                        clickable: false,
+                        extended_css_class: "p-[20px]",
+                        string_placements: vec![
+                            ContentType::custom(rsx!{
+                                div {
+                                    class: "flex gap-[20px] items-center",
+                                    {ContentType::svg(PHOTO_LIBRARY).css("svg-[35px]").align_left()}
+                                    div {
+                                        class: "flex flex-col gap-[10px]",
+                                        Text { css: "text-xl", "從電腦尋找" }
+                                        Hint { css: "text-[13px]", "使用你電腦中的圖片" }
+                                    }
+                                }
+                            }).align_left(),
+                            ContentType::custom(rsx!{
+                                div {
+                                    class: "relative w-10 h-10 p-2.5 bg-zinc-900 rounded-full flex items-center justify-center",
+                                    input {
+                                        r#type: "file",
+                                        class: "absolute inset-0 w-fit h-fit",
+                                        accept: ".png,.jpg,.avif,.heif",
+                                        multiple: false,
+                                        onchange: move |evt| {
+                                            if let Some(files) = evt.files() {
+                                                filename.set(files.files().first().cloned());
+                                            }
+                                        },
+                                        {ContentType::svg(ADD).css("svg-[20px]")}
+                                    }
+                                    {ContentType::svg(ADD).css("svg-[20px]")}
+                                }
+                            }).align_right()
+                        ]
+                    }
                 }
+                {ContentType::image(collection().picture_path().to_string_lossy().to_string()).css("flex-initial bg-cover size-[163px] p-[15px] rounded-[5px]")}
             }
         }
     }

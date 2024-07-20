@@ -162,9 +162,12 @@ pub fn SideBar() -> Element {
 
 #[component]
 fn SidebarCollectionBlock(collection_id: ReadOnlySignal<CollectionId>) -> Element {
-    let binding = collection_id.read();
-    let collection = binding.get_collection();
-    let picture_path = collection.picture_path().to_string_lossy().to_string();
+    let collection = collection_id().get_collection();
+    let picture_path = collection
+        .read()
+        .picture_path()
+        .to_string_lossy()
+        .to_string();
     let img_block = rsx! {
         div {
             class: "relative transition-all container w-[50px] h-[50px] group-aria-expanded:w-20 group-aria-expanded:h-20 border-2 border-[#2E2E2E] rounded-[15px] group-aria-expanded:rounded-[5px]",
@@ -181,11 +184,11 @@ fn SidebarCollectionBlock(collection_id: ReadOnlySignal<CollectionId>) -> Elemen
             roundness: Roundness::None,
             string_placements: vec![
                 ContentType::custom(img_block).align_left().css("grow-0 shrink-0"),
-                ContentType::text(collection.display_name().clone())
+                ContentType::text(collection.read().display_name().clone())
                     .align_right()
                     .css("flex-none grow-0 shrink-0 group-aria-busy:hidden text-nowrap text-ellipse overflow-x-clip"),
             ],
-            switcher: Pages::collection_display(collection.get_collection_id()),
+            switcher: Pages::collection_display(collection.read().get_collection_id()),
             focus_color_change: false,
             background_image: darken_sidebar_background(&picture_path),
             background_size: "cover",

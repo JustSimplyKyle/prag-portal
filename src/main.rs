@@ -15,6 +15,7 @@ use dioxus::desktop::WindowBuilder;
 use dioxus::html::input_data::MouseButton;
 use manganis::ImageAsset;
 use pages::Pages;
+use rand::Rng;
 use rust_lib::api::backend_exclusive::vanilla::version::VersionMetadata;
 use rust_lib::api::shared_resources::collection::{ModLoader, ModLoaderType};
 use scrollable::Scrollable;
@@ -35,14 +36,26 @@ use crate::download_progress::DownloadProgress;
 use crate::main_page::MainPage;
 use crate::side_bar::SideBar;
 
-pub const COLLECTION_PIC: ImageAsset = manganis::mg!(image("./public/pic1.png").preload());
+pub const COLLECTION_PICS: [ImageAsset; 5] = [
+    manganis::mg!(image("./public/first_collection_pic.png").preload()),
+    manganis::mg!(image("./public/second_collection_pic.png").preload()),
+    manganis::mg!(image("./public/third_collection_pic.png").preload()),
+    manganis::mg!(image("./public/forth_collection_pic.png").preload()),
+    manganis::mg!(image("./public/fifth_collection_pic.png").preload()),
+];
+
+fn get_random_collection() -> ImageAsset {
+    let index = rand::thread_rng().gen_range(0..=4);
+    COLLECTION_PICS[index].clone()
+}
+
 pub const HOME: &str = manganis::mg!(file("./public/home.svg"));
 pub const EXPLORE: &str = manganis::mg!(file("./public/explore.svg"));
 pub const SIDEBAR_COLLECTION: &str = manganis::mg!(file("./public/collections.svg"));
 pub const ARROW_RIGHT: &str = manganis::mg!(file("./public/keyboard_arrow_right.svg"));
 pub const SIM_CARD: &str = manganis::mg!(file("./public/sim_card_download.svg"));
 pub const DRAG_INDICATOR: &str = manganis::mg!(file("./public/drag_indicator.svg"));
-pub const TAILWIND_STR_: &str = manganis::mg!(file("./public/tailwind.css"));
+pub const TAILWIND_STR: &str = manganis::mg!(file("./public/tailwind.css"));
 
 /// `(Pages)`: Current active page
 /// `Option<Pages>`: Previous page
@@ -137,11 +150,16 @@ use rust_lib::api::shared_resources::entry::{self, STORAGE};
 fn main() {
     dioxus_logger::init(LevelFilter::Info).expect("failed to init logger");
 
-    let cfg = dioxus::desktop::Config::new().with_window(
-        WindowBuilder::new()
-            .with_decorations(true)
-            .with_inner_size(PhysicalSize::new(1600, 920)),
-    );
+    let cfg = dioxus::desktop::Config::new()
+        .with_window(
+            WindowBuilder::new()
+                .with_decorations(true)
+                .with_inner_size(PhysicalSize::new(1600, 920)),
+        )
+        .with_custom_head(format!(
+            "<link rel=\"stylesheet\" href=\"{}\">",
+            TAILWIND_STR
+        ));
     // .with_menu(DioxusMenu);
     LaunchBuilder::desktop().with_cfg(cfg).launch(App);
 }
@@ -155,7 +173,7 @@ pub async fn collection_builder(
         "新的收藏",
         picture_path
             .into()
-            .unwrap_or_else(|| COLLECTION_PIC.path().into()),
+            .unwrap_or_else(|| get_random_collection().path().into()),
         version,
         ModLoader::new(ModLoaderType::Fabric, None),
         None,

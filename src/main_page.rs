@@ -41,8 +41,7 @@ pub fn CollectionBlock(
     #[props(extends=GlobalAttributes)] attributes: Vec<Attribute>,
     #[props(default)] extended_class: String,
 ) -> Element {
-    let id = collection_id();
-    let collection = id.get_collection();
+    let collection = collection_id().get_collection();
     let (roundness, extended_class): (Vec<_>, Vec<_>) = extended_class
         .split_whitespace()
         .partition(|x| x.contains("rounded"));
@@ -51,7 +50,11 @@ pub fn CollectionBlock(
     for x in roundness {
         img_class = tw_merge!(img_class, x);
     }
-    let picture_path = collection.picture_path().to_string_lossy().to_string();
+    let picture_path = collection
+        .read()
+        .picture_path()
+        .to_string_lossy()
+        .to_string();
     rsx! {
         div {
             button {
@@ -74,7 +77,7 @@ pub fn CollectionBlock(
                     class: "absolute inset-0 px-5 pt-5 pb-[25px] flex flex-col gap-[15px] *:text-ellipsis overflow-hidden justify-end items-start",
                     Text {
                         css: "text-3xl text-white text-ellipsis text-nowrap font-bold",
-                        {collection.display_name().clone()}
+                        {collection.read().display_name().clone()}
                     }
                     Hint {
                         css: "text-[15px] text-hint text-ellipsis text-nowrap",

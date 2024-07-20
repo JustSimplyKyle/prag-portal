@@ -58,7 +58,8 @@ impl Contents {
         }
     }
     pub fn css(mut self, css: impl Into<String>) -> Self {
-        self.css = tw_merge!(self.css, css.into());
+        let css = css.into();
+        self.css = tw_merge!(self.css, css);
         self
     }
     pub fn get_element(self) -> Element {
@@ -129,7 +130,8 @@ impl Content {
 
     // Method to apply additional CSS, modifying existing styling
     pub fn css(mut self, css: impl Into<String>) -> Self {
-        self.css = tw_merge!(self.css, css.into(), "leading-[1.2] capsize");
+        let css = css.into();
+        self.css = tw_merge!(self.css, css, "leading-[1.2] capsize");
         self
     }
 
@@ -326,24 +328,20 @@ impl Alignment {
 }
 #[component]
 pub fn Text(children: Element, css: Option<String>) -> Element {
-    sub_content_builder(ContentType::Text, children, css.unwrap_or_default())
+    sub_content_builder(ContentType::text, children, css.unwrap_or_default())
 }
 
 #[component]
 pub fn Hint(children: Element, css: Option<String>) -> Element {
-    sub_content_builder(ContentType::Hint, children, css.unwrap_or_default())
+    sub_content_builder(ContentType::hint, children, css.unwrap_or_default())
 }
 
 #[component]
 pub fn Image(children: Element, css: Option<String>) -> Element {
-    sub_content_builder(ContentType::Image, children, css.unwrap_or_default())
+    sub_content_builder(ContentType::image, children, css.unwrap_or_default())
 }
 
-fn sub_content_builder(
-    content_type: fn(String) -> ContentType,
-    ele: Element,
-    css: String,
-) -> Element {
+fn sub_content_builder(content_type: fn(String) -> Content, ele: Element, css: String) -> Element {
     let vnode = ele?;
     let dynamic = vnode.dynamic_nodes.first();
     let inplace = vnode.template.get().roots.first();
@@ -359,5 +357,5 @@ fn sub_content_builder(
         }
     };
 
-    Content::new(content_type(text)).css(css).get_element()
+    content_type(text).css(css).get_element()
 }

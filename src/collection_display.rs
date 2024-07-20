@@ -62,18 +62,15 @@ fn CollectionBackground(
         while let Some(action) = rx.next().await {
             match action {
                 Action::Start => {
-                    use_future(move || async move {
-                        let mut collection = collection_id.read().get_mut_collection();
-                        collection.launch_game().await.unwrap();
-                    });
+                    let mut collection = collection_id.read().get_mut_collection();
+                    collection.launch_game().await.unwrap();
                 }
                 Action::Stop => {}
             }
         }
     });
+    let collection = collection_id().get_collection();
     let return_to = use_signal(|| HISTORY.peek().prev_peek().cloned());
-    let id = collection_id.read();
-    let collection = id.get_collection();
     rsx! {
         div {
             onmounted,
@@ -89,7 +86,7 @@ fn CollectionBackground(
                 class: "grow-0 shrink-0 flex flex-col gap-[35px] overflow-x-clip overflow-y-visible",
                 Text {
                     css: "text-white text-ellipsis text-nowrap overflow-x-clip overflow-y-visible font-black text-[80px]",
-                    {collection.display_name().clone()}
+                    {collection.read().display_name().clone()}
                 }
                 Button {
                     roundness: Roundness::Pill,
@@ -109,7 +106,7 @@ fn CollectionBackground(
                     class: "flex flex-col space-y-[3px] w-full max-w-[250px]",
                     img {
                         class: "w-full h-[250px] rounded-t-[20px] rounded-b-[5px] object-cover",
-                        src: collection.picture_path().to_string_lossy().to_string()
+                        src: collection.read().picture_path().to_string_lossy().to_string()
                     }
                     div {
                         class: "flex space-x-[3px] min-w-full",
