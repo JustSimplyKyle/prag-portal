@@ -16,32 +16,6 @@ pub struct ButtonClass {
     pub fill_mode: FillMode,
 }
 
-impl ButtonClass {
-    // automatically roundness correction
-    const fn setup(&self) -> &str {
-        match self.items_count {
-            ItemsCount::One => "",
-            ItemsCount::AboveOne => match self.roundness {
-                Roundness::Top | Roundness::None | Roundness::Bottom => "pr-8",
-                Roundness::Pill => match self.size {
-                    Size::Fat => "",
-                    Size::Medium => "pr-[25px]",
-                    Size::Small => "pr-[5px]",
-                },
-            },
-        }
-    }
-    #[must_use]
-    pub fn to_class(&self) -> String {
-        tw_merge!(IntoTailwindClass::to_class(self), self.setup())
-    }
-    #[must_use]
-    pub fn with_class(&self, string: impl AsRef<str>) -> String {
-        let class = IntoTailwindClass::with_class(self, string);
-        tw_merge!(class, self.setup())
-    }
-}
-
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, TwVariant)]
 pub enum FillMode {
     #[tw(default, class = "min-w-full")]

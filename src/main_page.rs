@@ -173,6 +173,7 @@ fn SuggestionPage() -> Element {
             Button {
                 roundness: Roundness::Pill,
                 size: Size::Small,
+                extended_css_class: "pr-[5px]",
                 fill_mode: FillMode::Fit,
                 string_placements: vec![
                     ContentType::text("建議：快速設定").align_left(),
@@ -186,6 +187,7 @@ fn SuggestionPage() -> Element {
             Button {
                 roundness: Roundness::Pill,
                 fill_mode: FillMode::Fit,
+                extended_css_class: "pr-[5px]",
                 size: Size::Small,
                 string_placements: vec![
                     ContentType::text("建議：更新提醒").align_left(),
