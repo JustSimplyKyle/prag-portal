@@ -832,6 +832,12 @@ input {
   }
 }
 
+.avatar.placeholder > div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 @media (hover:hover) {
   .menu li > *:not(ul, .menu-title, details, .btn):active,
 .menu li > *:not(ul, .menu-title, details, .btn).active,
@@ -1732,11 +1738,6 @@ input {
   display: none;
 }
 
-.size-\[163px\] {
-  width: 163px;
-  height: 163px;
-}
-
 .h-10 {
   height: 2.5rem;
 }
@@ -1819,6 +1820,10 @@ input {
   height: 100vh;
 }
 
+.max-h-\[163px\] {
+  max-height: 163px;
+}
+
 .max-h-\[450px\] {
   max-height: 450px;
 }
@@ -1829,6 +1834,10 @@ input {
 
 .max-h-full {
   max-height: 100%;
+}
+
+.min-h-\[163px\] {
+  min-height: 163px;
 }
 
 .min-h-\[250px\] {
@@ -1920,6 +1929,10 @@ input {
   min-width: 0px;
 }
 
+.min-w-\[163px\] {
+  min-width: 163px;
+}
+
 .min-w-\[400px\] {
   min-width: 400px;
 }
@@ -1931,6 +1944,10 @@ input {
 
 .min-w-full {
   min-width: 100%;
+}
+
+.max-w-\[163px\] {
+  max-width: 163px;
 }
 
 .max-w-\[250px\] {
@@ -2625,10 +2642,6 @@ input {
   padding-left: 20px;
 }
 
-.pr-8 {
-  padding-right: 2rem;
-}
-
 .pr-\[10px\] {
   padding-right: 10px;
 }
@@ -2639,10 +2652,6 @@ input {
 
 .pr-\[30px\] {
   padding-right: 30px;
-}
-
-.pr-\[5px\] {
-  padding-right: 5px;
 }
 
 .pt-5 {

@@ -19,6 +19,7 @@ use rand::Rng;
 use rust_lib::api::backend_exclusive::vanilla::version::VersionMetadata;
 use rust_lib::api::shared_resources::collection::{ModLoader, ModLoaderType};
 use scrollable::Scrollable;
+use std::collections::BTreeMap;
 use std::path::PathBuf;
 use tailwind_fuse::*;
 use BaseComponents::{
@@ -36,17 +37,34 @@ use crate::download_progress::DownloadProgress;
 use crate::main_page::MainPage;
 use crate::side_bar::SideBar;
 
-pub const COLLECTION_PICS: [ImageAsset; 5] = [
-    manganis::mg!(image("./public/first_collection_pic.png").preload()),
-    manganis::mg!(image("./public/second_collection_pic.png").preload()),
-    manganis::mg!(image("./public/third_collection_pic.png").preload()),
-    manganis::mg!(image("./public/forth_collection_pic.png").preload()),
-    manganis::mg!(image("./public/fifth_collection_pic.png").preload()),
-];
+pub const COLLECTION_PICS: GlobalSignal<BTreeMap<&str, ImageAsset>> = GlobalSignal::new(|| {
+    BTreeMap::from([
+        (
+            "a",
+            manganis::mg!(image("./public/first_collection_pic.png").preload()),
+        ),
+        (
+            "b",
+            manganis::mg!(image("./public/second_collection_pic.png").preload()),
+        ),
+        (
+            "c",
+            manganis::mg!(image("./public/third_collection_pic.png").preload()),
+        ),
+        (
+            "d",
+            manganis::mg!(image("./public/forth_collection_pic.png").preload()),
+        ),
+        (
+            "e",
+            manganis::mg!(image("./public/fifth_collection_pic.png").preload()),
+        ),
+    ])
+});
 
 fn get_random_collection() -> ImageAsset {
     let index = rand::thread_rng().gen_range(0..=4);
-    COLLECTION_PICS[index].clone()
+    COLLECTION_PICS.read().values().nth(index).unwrap().clone()
 }
 
 pub const HOME: &str = manganis::mg!(file("./public/home.svg"));

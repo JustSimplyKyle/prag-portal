@@ -354,16 +354,22 @@ fn ModifyName(collection_id: ReadOnlySignal<CollectionId>) -> Element {
 
 #[component]
 fn ModifyPicture(collection_id: ReadOnlySignal<CollectionId>) -> Element {
-    let mut active = use_signal(|| "a");
     let mut change = use_signal(|| false);
     let collection = collection_id().get_collection();
-    let active_to_collection = use_memo(move || match active() {
-        "a" => COLLECTION_PICS[0].clone(),
-        "b" => COLLECTION_PICS[1].clone(),
-        "c" => COLLECTION_PICS[2].clone(),
-        "d" => COLLECTION_PICS[3].clone(),
-        "e" => COLLECTION_PICS[4].clone(),
-        _ => panic!("impossible"),
+    let mut active = use_signal(|| {
+        COLLECTION_PICS
+            .read()
+            .iter()
+            .find(|(_, x)| {
+                x.to_string()
+                    == collection
+                        .read()
+                        .picture_path()
+                        .to_string_lossy()
+                        .to_string()
+            })
+            .map(|x| *x.0)
+            .unwrap_or("a")
     });
 
     let mut filename: Signal<Option<String>> = use_signal(|| None);
@@ -371,7 +377,7 @@ fn ModifyPicture(collection_id: ReadOnlySignal<CollectionId>) -> Element {
     use_effect(move || {
         if change() {
             let mut collection = collection_id().get_mut_collection();
-            let path = PathBuf::from(active_to_collection().path());
+            let path = PathBuf::from(COLLECTION_PICS.read().get(active()).unwrap().to_string());
             collection.with_mut(|x| *x.picture_path = path).unwrap();
             change.set(false);
         }
@@ -434,35 +440,35 @@ fn ModifyPicture(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                                             active.set("a");
                                             change.set(true);
                                         },
-                                        {ContentType::image(COLLECTION_PICS[0].to_string()).css("bg-cover w-10 h-10 rounded-full border-2 border-zinc-900 group-data-[active=a]:border-white group-data-[active=a]:w-20")}
+                                        {ContentType::image(COLLECTION_PICS.read()["a"].to_string()).css("bg-cover w-10 h-10 rounded-full border-2 border-zinc-900 group-data-[active=a]:border-white group-data-[active=a]:w-20")}
                                     }
                                     button {
                                         onclick: move |_| {
                                             active.set("b");
                                             change.set(true);
                                         },
-                                        {ContentType::image(COLLECTION_PICS[1].to_string()).css("bg-cover w-10 h-10 rounded-full border-2 border-zinc-900 group-data-[active=b]:border-white group-data-[active=b]:w-20")}
+                                        {ContentType::image(COLLECTION_PICS.read()["b"].to_string()).css("bg-cover w-10 h-10 rounded-full border-2 border-zinc-900 group-data-[active=b]:border-white group-data-[active=b]:w-20")}
                                     }
                                     button {
                                         onclick: move |_| {
                                             active.set("c");
                                             change.set(true);
                                         },
-                                        {ContentType::image(COLLECTION_PICS[2].to_string()).css("bg-cover w-10 h-10 rounded-full border-2 border-zinc-900 group-data-[active=c]:border-white group-data-[active=c]:w-20")}
+                                        {ContentType::image(COLLECTION_PICS.read()["c"].to_string()).css("bg-cover w-10 h-10 rounded-full border-2 border-zinc-900 group-data-[active=c]:border-white group-data-[active=c]:w-20")}
                                     }
                                     button {
                                         onclick: move |_| {
                                             active.set("d");
                                             change.set(true);
                                         },
-                                        {ContentType::image(COLLECTION_PICS[3].to_string()).css("bg-cover w-10 h-10 rounded-full border-2 border-zinc-900 group-data-[active=d]:border-white group-data-[active=d]:w-20")}
+                                        {ContentType::image(COLLECTION_PICS.read()["d"].to_string()).css("bg-cover w-10 h-10 rounded-full border-2 border-zinc-900 group-data-[active=d]:border-white group-data-[active=d]:w-20")}
                                     }
                                     button {
                                         onclick: move |_| {
                                             active.set("e");
                                             change.set(true);
                                         },
-                                        {ContentType::image(COLLECTION_PICS[4].to_string()).css("bg-cover w-10 h-10 rounded-full border-2 border-zinc-900 group-data-[active=e]:border-white group-data-[active=e]:w-20")}
+                                        {ContentType::image(COLLECTION_PICS.read()["e"].to_string()).css("bg-cover w-10 h-10 rounded-full border-2 border-zinc-900 group-data-[active=e]:border-white group-data-[active=e]:w-20")}
                                     }
                                 }
                             }).align_right()
@@ -489,7 +495,7 @@ fn ModifyPicture(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                                     class: "relative w-10 h-10 p-2.5 bg-zinc-900 rounded-full flex items-center justify-center",
                                     input {
                                         r#type: "file",
-                                        class: "absolute inset-0 w-fit h-fit",
+                                        class: "absolute inset-0",
                                         accept: ".png,.jpg,.avif,.heif",
                                         multiple: false,
                                         onchange: move |evt| {
@@ -497,6 +503,7 @@ fn ModifyPicture(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                                                 filename.set(files.files().first().cloned());
                                             }
                                         },
+                                        placeholder: "",
                                         {ContentType::svg(ADD).css("svg-[20px]")}
                                     }
                                     {ContentType::svg(ADD).css("svg-[20px]")}
@@ -505,7 +512,7 @@ fn ModifyPicture(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                         ]
                     }
                 }
-                {ContentType::image(collection().picture_path().to_string_lossy().to_string()).css("flex-initial bg-cover size-[163px] p-[15px] rounded-[5px]")}
+                {ContentType::image(collection().picture_path().to_string_lossy().to_string()).css("flex-initial bg-cover min-w-[163px] min-h-[163px] max-w-[163px] max-h-[163px] p-[15px] rounded-[5px]")}
             }
         }
     }
