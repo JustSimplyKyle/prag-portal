@@ -1,8 +1,7 @@
 use dioxus::prelude::*;
 
 use rust_lib::api::backend_exclusive::download::Progress;
-use rust_lib::api::shared_resources::collection::Collection;
-use rust_lib::api::shared_resources::entry::STORAGE;
+use rust_lib::api::shared_resources::collection::CollectionId;
 
 use crate::impl_context_switcher;
 use crate::BaseComponents::{
@@ -15,22 +14,31 @@ use rust_lib::api::shared_resources::entry::DOWNLOAD_PROGRESS;
 use strum::EnumIter;
 
 #[component]
-fn ListItem(collection: ReadOnlySignal<Collection>, progress: ReadOnlySignal<Progress>) -> Element {
-    let collection = collection.read();
+fn ListItem(
+    collection_id: ReadOnlySignal<CollectionId>,
+    progress: ReadOnlySignal<Progress>,
+) -> Element {
+    let collection = collection_id().get_collection();
     let progress = progress.read();
     rsx! {
         Button {
             roundness: Roundness::Pill,
             string_placements: rsx! {
                 div { class: "justify-self-center w-full flex gap-[15px]",
-                    {ContentType::svg(DRAG_INDICATOR).css("self-center svg-[30px]")},
+                    {ContentType::svg(DRAG_INDICATOR).css("self-center svg-[30px]")}
                     div { class: "w-full flex gap-[20px]",
-                        Image { css: "bg-cover bg-white w-[80px] h-[80px] rounded-[10px]", {collection.picture_path.to_string_lossy().to_string()} }
+                        Image { css: "bg-cover bg-white w-[80px] h-[80px] rounded-[10px]",
+                            {collection.read().picture_path().to_string_lossy().to_string()}
+                        }
                         div { class: "w-full flex flex-col justify-start gap-[10px]",
-                            Text { css: "text-[25px] fond-bold", {collection.display_name.clone()} }
+                            Text { css: "text-[25px] fond-bold", {collection.read().display_name().clone()} }
                             div { class: "flex gap-[4px]",
-                                Hint { css: "text-base font-semibold", {format!("{} / {} |", progress.current_size.unwrap_or_default().display_size_from_megabytes(), progress.total_size.unwrap_or_default().display_size_from_megabytes())} }
-                                Text { css: "text-base font-semibold", "{progress.speed.unwrap_or_default().display_size_from_megabytes()}" }
+                                Hint { css: "text-base font-semibold",
+                                    {format!("{} / {} |", progress.current_size.unwrap_or_default().display_size_from_megabytes(), progress.total_size.unwrap_or_default().display_size_from_megabytes())}
+                                }
+                                Text { css: "text-base font-semibold",
+                                    "{progress.speed.unwrap_or_default().display_size_from_megabytes()}"
+                                }
                             }
                             div { class: "w-full h-full flex items-end",
                                 div { class: "rounded-[50px] w-full h-[7px] bg-zinc-800",
@@ -52,17 +60,17 @@ fn ListItem(collection: ReadOnlySignal<Collection>, progress: ReadOnlySignal<Pro
 
 #[component]
 fn FirstProgressView(
-    collection: ReadOnlySignal<Collection>,
+    collection_id: ReadOnlySignal<CollectionId>,
     progress: ReadOnlySignal<Progress>,
 ) -> Element {
-    let collection = collection.read();
+    let collection = collection_id().get_collection();
     let progress = progress.read();
     rsx! {
         div {
             class: "w-full h-[350px] p-[30px] rounded-[20px]",
             background: format!(
                 "linear-gradient(88deg, #0E0E0E 14.88%, rgba(14, 14, 14, 0.70) 100%), url('{}') lightgray 50% / cover no-repeat",
-                collection.picture_path.to_string_lossy().to_string(),
+                collection.read().picture_path().to_string_lossy().to_string(),
             ),
             div {
                 class: "w-full grid grid-flow-col",
@@ -70,7 +78,7 @@ fn FirstProgressView(
                     class: "justify-self-start flex flex-col gap-[20px]",
                     Text {
                         css: "text-[60px] font-black text-white",
-                        {collection.display_name.clone()}
+                        {collection.read().display_name().clone()}
                     }
                     Hint {
                         css: "font-medium",
@@ -146,27 +154,23 @@ pub fn DownloadProgress() -> Element {
         .0
         .into_iter()
         .filter(|(_, x)| x.percentages < 100.)
-        .filter_map(|(id, progress)| {
-            (STORAGE.collections)()
-                .into_iter()
-                .find(|c| c.get_collection_id() == id.collection_id)
-                .map(|c| (c, progress))
-        })
+        .map(|(id, progress)| (id.collection_id, progress))
         .peekable();
     rsx! {
         div {
             class: "flex flex-col gap-[20px]",
-            if let Some((collection, progress)) = progress.peek().cloned() {
+            if let Some((collection_id, progress)) = progress.peek().cloned() {
                 FirstProgressView {
-                    collection,
+                    collection_id,
                     progress
                 }
                 ProgressStateBar {
+
                 }
             }
-            for (collection , progress) in progress {
+            for (collection_id , progress) in progress {
                 ListItem {
-                    collection,
+                    collection_id,
                     progress
                 }
             }

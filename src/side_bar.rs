@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use dioxus::prelude::*;
-use rust_lib::api::shared_resources::{collection::Collection, entry::STORAGE};
+use rust_lib::api::shared_resources::{collection::CollectionId, entry::STORAGE};
 
 use crate::{
     BaseComponents::{
@@ -28,6 +28,8 @@ pub fn SideBar() -> Element {
         expanded.toggle();
     };
 
+    let keys = use_context::<Memo<Vec<CollectionId>>>();
+
     let binding = STORAGE.collections.read();
 
     let collection_preview = binding.iter().take(3);
@@ -37,16 +39,17 @@ pub fn SideBar() -> Element {
             class: "grid grid-flow-col justify-stretch items-center",
             div {
                 class: "justify-self-start transition-all",
-                {ContentType::svg(HOME).css("hidden group-aria-expanded:block")},
+                {ContentType::svg(HOME).css("hidden group-aria-expanded:block")}
                 div {
                     class: "flex items-center space-x-0",
                     div {
                         class: "flex space-x-[-20px]",
-                        for x in collection_preview {
+                        for (id , x) in collection_preview {
                             div {
+                                key: "{id}",
                                 Image {
                                     css: "z-50 w-10 h-10 object-cover shrink-0 inline-flex justify-center items-center rounded-full border-2 border-zinc-900 group-aria-expanded:hidden",
-                                    {x.picture_path.to_string_lossy().to_string()}
+                                    {x.picture_path().to_string_lossy().to_string()}
                                 }
                             }
                         }
@@ -115,9 +118,10 @@ pub fn SideBar() -> Element {
                         string_placements: folded_images,
                         extended_css_class: "bg-background"
                     }
-                    for index in 0..STORAGE.collections.len() {
+                    for collection_id in keys() {
                         SidebarCollectionBlock {
-                            collection: STORAGE.collections.signal().map(move |v| &v[index])
+                            key: "{collection_id}",
+                            collection_id
                         }
                     }
                 }
@@ -159,15 +163,19 @@ pub fn SideBar() -> Element {
 }
 
 #[component]
-fn SidebarCollectionBlock(collection: MappedSignal<Collection>) -> Element {
-    let collection = collection.read();
-    let picture_path = collection.picture_path.to_string_lossy().to_string();
+fn SidebarCollectionBlock(collection_id: ReadOnlySignal<CollectionId>) -> Element {
+    let collection = collection_id().get_collection();
+    let picture_path = collection
+        .read()
+        .picture_path()
+        .to_string_lossy()
+        .to_string();
     let img_block = rsx! {
         div {
             class: "relative transition-all container w-[50px] h-[50px] group-aria-expanded:w-20 group-aria-expanded:h-20 border-2 border-[#2E2E2E] rounded-[15px] group-aria-expanded:rounded-[5px]",
             { ContentType::image(&picture_path)
-            .css("absolute inset-0 transition-all w-full h-full object-cover inline-flex items-center rounded-[15px] group-aria-expanded:rounded-[5px]",)
-            },
+            .css("absolute inset-0 transition-all w-full h-full object-cover inline-flex items-center rounded-[15px] group-aria-expanded:rounded-[5px]")
+            }
             div {
                 class: "absolute inset-x-0 bottom-0 w-3 h-3 bg-[#CCE246] rounded-full"
             }
@@ -177,16 +185,16 @@ fn SidebarCollectionBlock(collection: MappedSignal<Collection>) -> Element {
         Button {
             roundness: Roundness::None,
             string_placements: vec![
-                ContentType::custom(img_block).align_left(),
-                ContentType::text(collection.display_name.clone())
+                ContentType::custom(img_block).align_left().css("grow-0 shrink-0"),
+                ContentType::text(collection.read().display_name().clone())
                     .align_right()
-                    .css("group-aria-busy:hidden"),
+                    .css("flex-none grow-0 shrink-0 group-aria-busy:hidden text-nowrap text-ellipse overflow-x-clip"),
             ],
-            switcher: Pages::new_collection_page(collection.get_collection_id()),
+            switcher: Pages::collection_display(collection.read().get_collection_id()),
             focus_color_change: false,
             background_image: darken_sidebar_background(&picture_path),
             background_size: "cover",
-            extended_css_class: "bg-background object-cover transition-all delay-[25ms] group-aria-expanded:w-20 group-aria-expanded:min-h-20 group-aria-expanded:p-0"
+            extended_css_class: "bg-background *:min-w-0 object-cover transition-all delay-[25ms] group-aria-expanded:w-20 group-aria-expanded:min-h-20 group-aria-expanded:p-0"
         }
     }
 }

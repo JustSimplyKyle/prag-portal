@@ -135,8 +135,8 @@ pub trait ToClass {
 /// impl ToClass for ProgressState {
 ///     fn to_class(&self) -> String {
 ///         match self {
-///             ProgressState::Running => "bg-red",
-///             ProgressState::Finished => "bg-blue",
+///             ProgressState::Running => "bg-something",
+///             ProgressState::Finished => "bg-you-know",
 ///         }
 ///         .into()
 ///     }

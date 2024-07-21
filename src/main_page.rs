@@ -1,16 +1,15 @@
 use dioxus::prelude::*;
-
 use manganis::ImageAsset;
-use rust_lib::api::shared_resources::{collection::Collection, entry::STORAGE};
+use rust_lib::api::shared_resources::collection::CollectionId;
 use tailwind_fuse::*;
 
 use crate::{
     BaseComponents::{
         atoms::button::{Button, ButtonClass, FillMode, Roundness, Size},
         molecules::switcher::StateSwitcher,
-        string_placements::{Alignment, ContentType, Contents},
+        string_placements::{Alignment, ContentType, Contents, Hint, Text},
     },
-    Pages,
+    Pages, ARROW_RIGHT,
 };
 
 // pub const COLLECTION_PIC: ImageAsset =
@@ -21,14 +20,15 @@ pub const ICON: &str = manganis::mg!(file("./public/icon.svg"));
 pub const IMG: ImageAsset = manganis::mg!(image("./public/project.png").preload());
 pub const STAR: &str = manganis::mg!(file("./public/award_star.svg"));
 pub const ARROW_LEFT: &str = manganis::mg!(file("./public/keyboard_arrow_left.svg"));
-pub const ARROW_RIGHT: &str = manganis::mg!(file("./public/keyboard_arrow_right.svg"));
 
 #[component]
 pub fn MainPage() -> Element {
     rsx! {
         SuggestionPage {
+
         }
         CollectionsPage {
+
         }
     }
 }
@@ -36,13 +36,12 @@ pub fn MainPage() -> Element {
 /// Creates a Collection Block with a `280px` square, with a default roundness of `5px`
 #[component]
 pub fn CollectionBlock(
-    collection: Collection,
+    collection_id: ReadOnlySignal<CollectionId>,
     #[props(default = true)] gradient: bool,
     #[props(extends=GlobalAttributes)] attributes: Vec<Attribute>,
     #[props(default)] extended_class: String,
 ) -> Element {
-    let main_text = collection.display_name.clone();
-    let hint = String::from("遊玩中•由我建立");
+    let collection = collection_id().get_collection();
     let (roundness, extended_class): (Vec<_>, Vec<_>) = extended_class
         .split_whitespace()
         .partition(|x| x.contains("rounded"));
@@ -51,13 +50,17 @@ pub fn CollectionBlock(
     for x in roundness {
         img_class = tw_merge!(img_class, x);
     }
-    let picture_path = collection.picture_path.to_string_lossy().to_string();
+    let picture_path = collection
+        .read()
+        .picture_path()
+        .to_string_lossy()
+        .to_string();
     rsx! {
         div {
             button {
                 class: tw_merge!("relative h-[280px] w-[280px]", extended_class),
                 onclick: move |_| {
-                    Pages::new_collection_page(collection.get_collection_id())
+                    Pages::collection_display(collection_id())
                         .switch_active_to_self();
                 },
                 ..attributes,
@@ -72,13 +75,13 @@ pub fn CollectionBlock(
                 }
                 div {
                     class: "absolute inset-0 px-5 pt-5 pb-[25px] flex flex-col gap-[15px] *:text-ellipsis overflow-hidden justify-end items-start",
-                    div {
-                        class: "text-3xl leading-normal capsize text-white font-bold",
-                        {main_text}
+                    Text {
+                        css: "text-3xl text-white text-ellipsis text-nowrap font-bold",
+                        {collection.read().display_name().clone()}
                     }
-                    div {
-                        class: "text-[15px] leading-normal capsize text-white text-opacity-50",
-                        {hint}
+                    Hint {
+                        css: "text-[15px] text-hint text-ellipsis text-nowrap",
+                        "遊玩中•由我建立"
                     }
                 }
             }
@@ -170,6 +173,7 @@ fn SuggestionPage() -> Element {
             Button {
                 roundness: Roundness::Pill,
                 size: Size::Small,
+                extended_css_class: "pr-[5px]",
                 fill_mode: FillMode::Fit,
                 string_placements: vec![
                     ContentType::text("建議：快速設定").align_left(),
@@ -183,6 +187,7 @@ fn SuggestionPage() -> Element {
             Button {
                 roundness: Roundness::Pill,
                 fill_mode: FillMode::Fit,
+                extended_css_class: "pr-[5px]",
                 size: Size::Small,
                 string_placements: vec![
                     ContentType::text("建議：更新提醒").align_left(),
@@ -277,7 +282,7 @@ fn SuggestionPage() -> Element {
 
 #[component]
 fn CollectionsPage() -> Element {
-    let collections = (STORAGE.collections)();
+    let keys = use_context::<Memo<Vec<CollectionId>>>();
     rsx! {
         div {
             class: "flex flex-col space-x-0",
@@ -309,9 +314,10 @@ fn CollectionsPage() -> Element {
                 class: ButtonClass::builder().roundness(Roundness::Bottom).with_class("min-w-screen p-0"),
                 div {
                     class: "flex space-x-[3px] overflow-scroll",
-                    for collection in collections {
+                    for collection_id in keys() {
                         CollectionBlock {
-                            collection
+                            key: "{collection_id}",
+                            collection_id
                         }
                     }
                 }
