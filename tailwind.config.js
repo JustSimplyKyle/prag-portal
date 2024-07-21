@@ -89,10 +89,10 @@ module.exports = {
       animation: {
         slideRight: 'slideRight 500ms ease-in-out',
         slideLeft: 'slideLeft 500ms',
-        slideDown: 'slideDown 500ms',
-        slideOutDown: 'slideOutDown 500ms',
-        slideUp: 'slideUp 500ms',
-        slideOutUp: 'slideOutUp 500ms',
+        slideDown: 'slideDown 1000ms',
+        slideOutDown: 'slideOutDown 1000ms',
+        slideUp: 'slideUp 1000ms',
+        slideOutUp: 'slideOutUp 1000ms',
       },
       keyframes: {
         slideRight: {
