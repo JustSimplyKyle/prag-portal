@@ -62,8 +62,10 @@ fn CollectionBackground(
         while let Some(action) = rx.next().await {
             match action {
                 Action::Start => {
-                    let mut collection = collection_id.read().get_mut_collection();
+                    let mut collection = collection_id().get_collection_owned();
                     collection.launch_game().await.unwrap();
+                    let collection_to_replace = &mut *collection_id().get_mut_collection();
+                    let _ = std::mem::replace(collection_to_replace, collection);
                 }
                 Action::Stop => {}
             }
@@ -211,8 +213,8 @@ fn Separator(mut top_position: Signal<f64>, container_height: Option<f64>) -> El
 #[component]
 fn ModViewer(collection_id: ReadOnlySignal<CollectionId>, search: String) -> Element {
     let mods = use_memo(move || {
-        let collection = collection_id.read().get_collection_owned();
-        collection.mod_controller_owned().map(move |mut x| {
+        let collection = collection_id().get_collection();
+        collection().mod_controller().cloned().map(move |mut x| {
             x.manager.mods.sort_by_key(|x| x.name.clone());
             x.manager.mods
         })

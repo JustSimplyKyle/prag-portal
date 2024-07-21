@@ -17,7 +17,7 @@ use manganis::ImageAsset;
 use pages::Pages;
 use rand::Rng;
 use rust_lib::api::backend_exclusive::vanilla::version::VersionMetadata;
-use rust_lib::api::shared_resources::collection::{ModLoader, ModLoaderType};
+use rust_lib::api::shared_resources::collection::{CollectionId, ModLoader, ModLoaderType};
 use scrollable::Scrollable;
 use std::collections::BTreeMap;
 use std::path::PathBuf;
@@ -260,12 +260,16 @@ fn App() -> Element {
 fn Layout() -> Element {
     use_future(|| collection_builder(None, "1.20.1"));
 
+    let keys = use_context_provider(move || {
+        Signal::memo(move || (STORAGE.collections)().into_keys().collect::<Vec<_>>())
+    });
+
     use_effect(move || {
         let history = HISTORY.read();
         Pages::DownloadProgress.apply_slide_in().unwrap();
         let pages_scroller = vec![Pages::MainPage, Pages::Explore, Pages::Collections];
         Pages::scroller_applyer(pages_scroller, |x| x == &history.active).unwrap();
-        for collection_id in STORAGE.collections.read().keys().cloned() {
+        for collection_id in keys() {
             Pages::collection_display(collection_id.clone())
                 .apply_slide_in()
                 .unwrap();
@@ -351,8 +355,9 @@ fn Layout() -> Element {
 
 #[component]
 fn CollectionContainer() -> Element {
+    let keys = use_context::<Memo<Vec<CollectionId>>>();
     rsx! {
-        for collection_id in STORAGE.collections.read().keys().cloned() {
+        for collection_id in keys() {
             div {
                 class: "absolute inset-0 z-0 min-h-full min-w-full",
                 id: Pages::collection_display(collection_id.clone()).slide_in_id(),

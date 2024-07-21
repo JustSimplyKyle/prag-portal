@@ -1,14 +1,13 @@
-use std::{borrow::BorrowMut, path::PathBuf};
+use std::path::PathBuf;
 
 use dioxus::prelude::*;
-use rust_lib::api::shared_resources::{collection::CollectionId, entry::STORAGE};
+use rust_lib::api::shared_resources::collection::CollectionId;
 use strum::{EnumIter, IntoEnumIterator};
-use tailwind_fuse::merge::tw_merge;
 
 use crate::{
     collection_display::{DISPLAY_BACKGROUND, GAME_CONTROLLER, UNDO},
     impl_context_switcher, impl_optional_state_switcher,
-    main_page::{ARROW_LEFT, ICON},
+    main_page::ARROW_LEFT,
     pages::Pages,
     scrollable::Scrollable,
     BaseComponents::{
@@ -56,10 +55,10 @@ impl_optional_state_switcher!(Pages);
 
 #[component]
 pub fn CollectionEditContainer() -> Element {
-    let binding = STORAGE.collections.read();
-    let collection_ids = binding
-        .keys()
-        .map(|id| (id, Pages::collection_edit(id.clone())));
+    let keys = use_context::<Memo<Vec<CollectionId>>>();
+    let collection_ids = keys()
+        .into_iter()
+        .map(|x| (x.clone(), Pages::collection_edit(x)));
     rsx! {
         for (collection_id , page) in collection_ids {
             div {
@@ -369,7 +368,6 @@ fn ModifyPicture(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                         .to_string()
             })
             .map(|x| *x.0)
-            .unwrap_or("a")
     });
 
     let mut filename: Signal<Option<String>> = use_signal(|| None);
@@ -377,9 +375,11 @@ fn ModifyPicture(collection_id: ReadOnlySignal<CollectionId>) -> Element {
     use_effect(move || {
         if change() {
             let mut collection = collection_id().get_mut_collection();
-            let path = PathBuf::from(COLLECTION_PICS.read().get(active()).unwrap().to_string());
-            collection.with_mut(|x| *x.picture_path = path).unwrap();
-            change.set(false);
+            if let Some(x) = active() {
+                let path = PathBuf::from(COLLECTION_PICS.read().get(x).unwrap().to_string());
+                collection.with_mut(|x| *x.picture_path = path).unwrap();
+                change.set(false);
+            }
         }
     });
     use_effect(move || {
@@ -437,35 +437,35 @@ fn ModifyPicture(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                                     class: "flex gap-[3px]",
                                     button {
                                         onclick: move |_| {
-                                            active.set("a");
+                                            active.set(Some("a"));
                                             change.set(true);
                                         },
                                         {ContentType::image(COLLECTION_PICS.read()["a"].to_string()).css("bg-cover w-10 h-10 rounded-full border-2 border-zinc-900 group-data-[active=a]:border-white group-data-[active=a]:w-20")}
                                     }
                                     button {
                                         onclick: move |_| {
-                                            active.set("b");
+                                            active.set(Some("b"));
                                             change.set(true);
                                         },
                                         {ContentType::image(COLLECTION_PICS.read()["b"].to_string()).css("bg-cover w-10 h-10 rounded-full border-2 border-zinc-900 group-data-[active=b]:border-white group-data-[active=b]:w-20")}
                                     }
                                     button {
                                         onclick: move |_| {
-                                            active.set("c");
+                                            active.set(Some("c"));
                                             change.set(true);
                                         },
                                         {ContentType::image(COLLECTION_PICS.read()["c"].to_string()).css("bg-cover w-10 h-10 rounded-full border-2 border-zinc-900 group-data-[active=c]:border-white group-data-[active=c]:w-20")}
                                     }
                                     button {
                                         onclick: move |_| {
-                                            active.set("d");
+                                            active.set(Some("d"));
                                             change.set(true);
                                         },
                                         {ContentType::image(COLLECTION_PICS.read()["d"].to_string()).css("bg-cover w-10 h-10 rounded-full border-2 border-zinc-900 group-data-[active=d]:border-white group-data-[active=d]:w-20")}
                                     }
                                     button {
                                         onclick: move |_| {
-                                            active.set("e");
+                                            active.set(Some("e"));
                                             change.set(true);
                                         },
                                         {ContentType::image(COLLECTION_PICS.read()["e"].to_string()).css("bg-cover w-10 h-10 rounded-full border-2 border-zinc-900 group-data-[active=e]:border-white group-data-[active=e]:w-20")}

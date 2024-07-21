@@ -28,6 +28,8 @@ pub fn SideBar() -> Element {
         expanded.toggle();
     };
 
+    let keys = use_context::<Memo<Vec<CollectionId>>>();
+
     let binding = STORAGE.collections.read();
 
     let collection_preview = binding.iter().take(3);
@@ -116,9 +118,9 @@ pub fn SideBar() -> Element {
                         string_placements: folded_images,
                         extended_css_class: "bg-background"
                     }
-                    for collection_id in STORAGE.collections.read().keys().cloned() {
+                    for collection_id in keys() {
                         SidebarCollectionBlock {
-                            key: "{collection_id.clone()}",
+                            key: "{collection_id}",
                             collection_id
                         }
                     }

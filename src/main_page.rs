@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 use manganis::ImageAsset;
-use rust_lib::api::shared_resources::{collection::CollectionId, entry::STORAGE};
+use rust_lib::api::shared_resources::collection::CollectionId;
 use tailwind_fuse::*;
 
 use crate::{
@@ -282,8 +282,7 @@ fn SuggestionPage() -> Element {
 
 #[component]
 fn CollectionsPage() -> Element {
-    let read = STORAGE.collections.read();
-    let collection_ids = read.keys().cloned();
+    let keys = use_context::<Memo<Vec<CollectionId>>>();
     rsx! {
         div {
             class: "flex flex-col space-x-0",
@@ -315,9 +314,9 @@ fn CollectionsPage() -> Element {
                 class: ButtonClass::builder().roundness(Roundness::Bottom).with_class("min-w-screen p-0"),
                 div {
                     class: "flex space-x-[3px] overflow-scroll",
-                    for collection_id in collection_ids {
+                    for collection_id in keys() {
                         CollectionBlock {
-                            key: "{collection_id.clone()}",
+                            key: "{collection_id}",
                             collection_id
                         }
                     }

@@ -1,5 +1,5 @@
 use dioxus::prelude::*;
-use rust_lib::api::shared_resources::entry::STORAGE;
+use rust_lib::api::shared_resources::collection::CollectionId;
 
 use crate::{
     main_page::{CollectionBlock, STAR},
@@ -21,8 +21,7 @@ pub static BOOKMARK_ADD: &str = manganis::mg!(file("./public/bookmark_add.svg"))
 
 #[component]
 pub fn Collections() -> Element {
-    let read = STORAGE.collections.read();
-    let collection_ids = read.keys().cloned();
+    let keys = use_context::<Memo<Vec<CollectionId>>>();
     let sender = use_signal(String::new);
     rsx! {
         div {
@@ -63,7 +62,7 @@ pub fn Collections() -> Element {
                         fill_mode: FillMode::Fit,
                         size: Size::Medium,
                         string_placements: vec![ContentType::svg(BOOKMARK_ADD).css("svg-[30px]").align_center()],
-                        extended_css_class: "pl-[20px] pr-[25px] h-full"
+                        extended_css_class: "px-[25px] h-full"
                     }
                 }
                 div {
@@ -114,9 +113,9 @@ pub fn Collections() -> Element {
             }
             div {
                 class: "grid grid-flow-row grid-cols-[repeat(auto-fill,280px)] gap-[20px]",
-                for collection_id in collection_ids {
+                for collection_id in keys() {
                     CollectionBlock {
-                        key: "{collection_id.clone()}",
+                        key: "{collection_id}",
                         collection_id,
                         extended_class: "rounded-[20px]"
                     }

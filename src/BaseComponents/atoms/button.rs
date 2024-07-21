@@ -7,11 +7,10 @@ use super::super::{molecules::switcher::StateSwitcher, string_placements::String
 
 #[derive(TwClass, Clone, Copy)]
 #[tw(
-    class = "transition-all ease-in-out drop-shadow-lg duration-300 text-white bg-deep-background items-center"
+    class = "transition-all ease-in-out drop-shadow-lg duration-300 text-white bg-deep-background grid grid-flow-col justify-stretch items-center"
 )]
 pub struct ButtonClass {
     pub roundness: Roundness,
-    pub items_count: ItemsCount,
     pub size: Size,
     pub fill_mode: FillMode,
 }
@@ -32,24 +31,6 @@ pub enum Size {
     Medium,
     #[tw(class = "py-[5px] px-[20px] text-[17px]")]
     Small,
-}
-
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, TwVariant)]
-pub enum ItemsCount {
-    #[tw(class = "flex justify-center items-center")]
-    One,
-    #[tw(default, class = "grid grid-flow-col justify-stretch items-center")]
-    AboveOne,
-}
-
-impl From<usize> for ItemsCount {
-    fn from(value: usize) -> Self {
-        if value == 1 {
-            Self::One
-        } else {
-            Self::AboveOne
-        }
-    }
 }
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, TwVariant)]
@@ -80,7 +61,6 @@ pub fn Button(
     attributes.retain(|x| x.name != "class");
     let class = ButtonClass {
         roundness,
-        items_count: ItemsCount::AboveOne,
         size,
         fill_mode,
     }
