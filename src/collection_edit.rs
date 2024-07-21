@@ -326,16 +326,13 @@ fn ModifyName(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                 extended_css_class: "p-[25px] text-white group-aria-selected:text-zinc-800",
                 string_placements: rsx! {
                     input {
-                        oninput: move |x| {
-                            let mut collection = collection_id().get_mut_collection();
-                            collection.with_mut(|ele| *ele.display_name = x.value()).unwrap();
-                            input.with_mut(|input| {
-                                if let Some(input) = input {
-                                    *input = x.value();
-                                } else {
-                                    *input = Some(x.value());
-                                }
-                            });
+                        oninput: move |x| async move {
+                            input.set(Some(x.value()));
+                            async move {
+                                collection_id().with_mut_collection(|ele| {
+                                    *ele.display_name = x.value()
+                                })
+                            }.await
                         },
                         value: {
                             if let Some(x) = input() {
@@ -374,10 +371,9 @@ fn ModifyPicture(collection_id: ReadOnlySignal<CollectionId>) -> Element {
 
     use_effect(move || {
         if change() {
-            let mut collection = collection_id().get_mut_collection();
             if let Some(x) = active() {
                 let path = PathBuf::from(COLLECTION_PICS.read().get(x).unwrap().to_string());
-                collection.with_mut(|x| *x.picture_path = path).unwrap();
+                collection_id().with_mut_collection(|x| *x.picture_path = path);
                 change.set(false);
             }
         }
@@ -385,9 +381,8 @@ fn ModifyPicture(collection_id: ReadOnlySignal<CollectionId>) -> Element {
     use_effect(move || {
         if let Some(x) = filename() {
             if !x.is_empty() {
-                let mut collection = collection_id().get_mut_collection();
                 let path = PathBuf::from(x);
-                collection.with_mut(|x| *x.picture_path = path).unwrap();
+                collection_id().with_mut_collection(|x| *x.picture_path = path);
             }
         }
     });

@@ -87,8 +87,9 @@ module.exports = {
         'purple': '9747FF',
       },
       animation: {
-        slideRight: 'slideRight 500ms ease-in-out',
+        slideRight: 'slideRight 500ms',
         slideLeft: 'slideLeft 500ms',
+        'scroll-left': 'scrollLeft 10000ms infinite ease-in-out',
         slideDown: 'slideDown 1000ms',
         slideOutDown: 'slideOutDown 1000ms',
         slideUp: 'slideUp 1000ms',
@@ -113,6 +114,14 @@ module.exports = {
           '100%': {
             transform: 'translateX(0%)',
             'animation-timing-function': 'theme(animationTiming.linear)'
+          },
+        },
+        scrollLeft: {
+          '0%': {
+            transform: 'translateX(100%)',
+          },
+          '100%': {
+            transform: 'translateX(-200%)',
           },
         },
         slideDown: {

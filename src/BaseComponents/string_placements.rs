@@ -75,10 +75,20 @@ impl Contents {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Clone, PartialEq)]
 pub struct Content {
     content: ContentType,
     css: String,
+    onmounted: Option<Signal<Option<Event<MountedData>>>>,
+}
+impl std::fmt::Debug for Content {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Content")
+            .field("content", &self.content)
+            .field("css", &self.css)
+            .field("onmounted", &"DEBUG onomunted")
+            .finish()
+    }
 }
 
 impl IntoDynNode for Content {
@@ -93,6 +103,7 @@ impl Content {
         Self {
             content,
             css: String::new(),
+            onmounted: None,
         }
     }
 
@@ -135,6 +146,11 @@ impl Content {
         self
     }
 
+    pub fn onmounted(mut self, signal: Signal<Option<Event<MountedData>>>) -> Self {
+        self.onmounted = Some(signal);
+        self
+    }
+
     pub fn alignment(self, alignment: Alignment) -> Contents {
         Contents::new(vec![self], alignment)
     }
@@ -145,6 +161,11 @@ impl Content {
                 rsx! {
                     div {
                         class: tw_merge!(self.css, "[&_*]:pointer-events-none"),
+                        onmounted: move |x| {
+                            if let Some(mut signal) = self.onmounted {
+                                signal.set(Some(x));
+                            }
+                        },
                         object {
                             id: "mysvg",
                             r#type: "image/svg+xml",
@@ -162,6 +183,11 @@ impl Content {
                     };
                 rsx! {
                     div {
+                        onmounted: move |x| {
+                            if let Some(mut signal) = self.onmounted {
+                                signal.set(Some(x));
+                            }
+                        },
                         class: self.css,
                         background_size,
                         background_position: "center",
@@ -172,6 +198,11 @@ impl Content {
             ContentType::Text(x) | ContentType::Hint(x) => {
                 rsx! {
                     div {
+                        onmounted: move |x| {
+                            if let Some(mut signal) = self.onmounted {
+                                signal.set(Some(x));
+                            }
+                        },
                         class: self.css,
                         { x }
                     }
@@ -213,6 +244,7 @@ impl ContentType {
         Content {
             content: content_type,
             css,
+            onmounted: None,
         }
     }
 
@@ -222,6 +254,7 @@ impl ContentType {
         Content {
             content: content_type,
             css,
+            onmounted: None,
         }
     }
 
@@ -246,6 +279,7 @@ impl ContentType {
         Content {
             content: content_type,
             css,
+            onmounted: None,
         }
     }
 
@@ -270,6 +304,7 @@ impl ContentType {
         Content {
             content: content_type,
             css,
+            onmounted: None,
         }
     }
 
@@ -280,6 +315,7 @@ impl ContentType {
         Content {
             content: content_type,
             css,
+            onmounted: None,
         }
     }
     /// Returns `true` if the content type is [`Svg`].
@@ -327,21 +363,53 @@ impl Alignment {
     }
 }
 #[component]
-pub fn Text(children: Element, css: Option<String>) -> Element {
-    sub_content_builder(ContentType::text, children, css.unwrap_or_default())
+pub fn Text(
+    children: Element,
+    css: Option<String>,
+    onmounted: Option<Signal<Option<MountedEvent>>>,
+) -> Element {
+    sub_content_builder(
+        ContentType::text,
+        children,
+        css.unwrap_or_default(),
+        onmounted,
+    )
 }
 
 #[component]
-pub fn Hint(children: Element, css: Option<String>) -> Element {
-    sub_content_builder(ContentType::hint, children, css.unwrap_or_default())
+pub fn Hint(
+    children: Element,
+    css: Option<String>,
+    onmounted: Option<Signal<Option<MountedEvent>>>,
+) -> Element {
+    sub_content_builder(
+        ContentType::hint,
+        children,
+        css.unwrap_or_default(),
+        onmounted,
+    )
 }
 
 #[component]
-pub fn Image(children: Element, css: Option<String>) -> Element {
-    sub_content_builder(ContentType::image, children, css.unwrap_or_default())
+pub fn Image(
+    children: Element,
+    css: Option<String>,
+    onmounted: Option<Signal<Option<MountedEvent>>>,
+) -> Element {
+    sub_content_builder(
+        ContentType::image,
+        children,
+        css.unwrap_or_default(),
+        onmounted,
+    )
 }
 
-fn sub_content_builder(content_type: fn(String) -> Content, ele: Element, css: String) -> Element {
+fn sub_content_builder(
+    content_type: fn(String) -> Content,
+    ele: Element,
+    css: String,
+    onmounted: Option<Signal<Option<MountedEvent>>>,
+) -> Element {
     let vnode = ele?;
     let dynamic = vnode.dynamic_nodes.first();
     let inplace = vnode.template.get().roots.first();
@@ -357,5 +425,9 @@ fn sub_content_builder(content_type: fn(String) -> Content, ele: Element, css: S
         }
     };
 
-    content_type(text).css(css).get_element()
+    if let Some(x) = onmounted {
+        content_type(text).css(css).onmounted(x).get_element()
+    } else {
+        content_type(text).css(css).get_element()
+    }
 }

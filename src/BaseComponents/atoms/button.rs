@@ -43,6 +43,8 @@ pub enum Roundness {
     Bottom,
     #[tw(class = "rounded-full")]
     Pill,
+    #[tw(class = "rounded-[30px]")]
+    Squircle,
 }
 
 #[component]

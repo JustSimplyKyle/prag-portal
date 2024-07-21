@@ -1738,6 +1738,11 @@ input {
   display: none;
 }
 
+.size-\[280px\] {
+  width: 280px;
+  height: 280px;
+}
+
 .h-10 {
   height: 2.5rem;
 }
@@ -1760,10 +1765,6 @@ input {
 
 .h-\[25px\] {
   height: 25px;
-}
-
-.h-\[280px\] {
-  height: 280px;
 }
 
 .h-\[30px\] {
@@ -1844,6 +1845,10 @@ input {
   min-height: 250px;
 }
 
+.min-h-\[280px\] {
+  min-height: 280px;
+}
+
 .min-h-dvh {
   min-height: 100dvh;
 }
@@ -1882,10 +1887,6 @@ input {
 
 .w-\[273px\] {
   width: 273px;
-}
-
-.w-\[280px\] {
-  width: 280px;
 }
 
 .w-\[300px\] {
@@ -1931,6 +1932,10 @@ input {
 
 .min-w-\[163px\] {
   min-width: 163px;
+}
+
+.min-w-\[280px\] {
+  min-width: 280px;
 }
 
 .min-w-\[400px\] {
@@ -2060,7 +2065,7 @@ input {
 }
 
 .animate-slideRight {
-  animation: slideRight 500ms ease-in-out;
+  animation: slideRight 500ms;
 }
 
 @keyframes slideUp {
@@ -2287,10 +2292,6 @@ input {
 
 .justify-self-center {
   justify-self: center;
-}
-
-.overflow-hidden {
-  overflow: hidden;
 }
 
 .overflow-scroll {
@@ -2936,16 +2937,8 @@ body {
   z-index: 10;
 }
 
-.\*\:min-w-0 > * {
-  min-width: 0px;
-}
-
 .\*\:overflow-scroll > * {
   overflow: scroll;
-}
-
-.\*\:text-ellipsis > * {
-  text-overflow: ellipsis;
 }
 
 .hover\:bg-green:hover {
@@ -3025,6 +3018,20 @@ body {
 
 .group[aria-selected="true"] .group-aria-selected\:flex-auto {
   flex: 1 1 auto;
+}
+
+@keyframes scrollLeft {
+  0% {
+    transform: translateX(100%);
+  }
+
+  100% {
+    transform: translateX(-200%);
+  }
+}
+
+.group[aria-selected="true"] .group-aria-selected\:animate-scroll-left {
+  animation: scrollLeft 10000ms infinite ease-in-out;
 }
 
 .group[aria-selected="true"] .group-aria-selected\:border-4 {

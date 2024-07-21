@@ -4,10 +4,11 @@ use dioxus::prelude::*;
 use rust_lib::api::shared_resources::{collection::CollectionId, entry::STORAGE};
 
 use crate::{
+    text_scroller::use_text_scroller,
     BaseComponents::{
         atoms::button::{Button, Roundness},
         molecules::switcher::StateSwitcher,
-        string_placements::{ContentType, Image, Text},
+        string_placements::{Alignment, ContentType, Contents, Image, Text},
     },
     Pages, ARROW_RIGHT, EXPLORE, HISTORY, HOME, SIDEBAR_COLLECTION, SIM_CARD,
 };
@@ -79,7 +80,7 @@ pub fn SideBar() -> Element {
                 div {
                     class: "flex flex-col space-y-1",
                     Button {
-                        roundness: Roundness::Top,
+                        roundness: Roundness::Squircle,
                         string_placements: vec![
                             ContentType::svg(HOME).align_left(),
                             ContentType::text("首頁").css("group-aria-busy:hidden").align_right(),
@@ -89,7 +90,7 @@ pub fn SideBar() -> Element {
                         extended_css_class: "bg-background group-aria-expanded:pr-5"
                     }
                     Button {
-                        roundness: Roundness::None,
+                        roundness: Roundness::Squircle,
                         string_placements: vec![
                             ContentType::svg(EXPLORE).align_left(),
                             ContentType::text("探索").css("group-aria-busy:hidden").align_right(),
@@ -99,7 +100,7 @@ pub fn SideBar() -> Element {
                         extended_css_class: "bg-background group-aria-expanded:pr-5"
                     }
                     Button {
-                        roundness: Roundness::Bottom,
+                        roundness: Roundness::Squircle,
                         string_placements: vec![
                             ContentType::svg(SIDEBAR_COLLECTION).align_left(),
                             ContentType::text("收藏庫").css("group-aria-busy:hidden").align_right(),
@@ -114,7 +115,7 @@ pub fn SideBar() -> Element {
                 div {
                     class: "flex flex-col flex-nowrap overflow-scroll max-h-[451px] space-y-1",
                     Button {
-                        roundness: Roundness::Top,
+                        roundness: Roundness::Squircle,
                         string_placements: folded_images,
                         extended_css_class: "bg-background"
                     }
@@ -170,6 +171,7 @@ fn SidebarCollectionBlock(collection_id: ReadOnlySignal<CollectionId>) -> Elemen
         .picture_path()
         .to_string_lossy()
         .to_string();
+    let display_name = collection.read().display_name().clone();
     let img_block = rsx! {
         div {
             class: "relative transition-all container w-[50px] h-[50px] group-aria-expanded:w-20 group-aria-expanded:h-20 border-2 border-[#2E2E2E] rounded-[15px] group-aria-expanded:rounded-[5px]",
@@ -181,20 +183,32 @@ fn SidebarCollectionBlock(collection_id: ReadOnlySignal<CollectionId>) -> Elemen
             }
         }
     };
+
+    let (element, status) = use_text_scroller();
+
     rsx! {
-        Button {
-            roundness: Roundness::None,
-            string_placements: vec![
-                ContentType::custom(img_block).align_left().css("grow-0 shrink-0"),
-                ContentType::text(collection.read().display_name().clone())
-                    .align_right()
-                    .css("flex-none grow-0 shrink-0 group-aria-busy:hidden text-nowrap text-ellipse overflow-x-clip"),
-            ],
-            switcher: Pages::collection_display(collection.read().get_collection_id()),
-            focus_color_change: false,
-            background_image: darken_sidebar_background(&picture_path),
-            background_size: "cover",
-            extended_css_class: "bg-background *:min-w-0 object-cover transition-all delay-[25ms] group-aria-expanded:w-20 group-aria-expanded:min-h-20 group-aria-expanded:p-0"
+        div {
+            class: "group",
+            aria_selected: status(),
+            Button {
+                roundness: Roundness::Squircle,
+                string_placements: vec![
+                    ContentType::custom(img_block).align_left(),
+                    Contents::new(
+                        vec![
+                            ContentType::text(display_name).onmounted(element).css("w-full group-aria-selected:animate-scroll-left font-medium"),
+                            ContentType::svg(ARROW_RIGHT).css("min-w-0 z-0 svg-[30px]")
+                        ],
+                        Alignment::Right
+                    )
+                    .css("w-full items-center group-aria-busy:hidden text-nowrap text-ellipse overflow-x-clip"),
+                ],
+                switcher: Pages::collection_display(collection_id()),
+                focus_color_change: false,
+                // background_image: darken_sidebar_background(&picture_path),
+                background_size: "cover",
+                extended_css_class: "bg-background gap-[15px] p-[15px] object-cover transition-all delay-[25ms] group-aria-expanded:w-20 group-aria-expanded:min-h-20 group-aria-expanded:p-0"
+            }
         }
     }
 }

@@ -64,7 +64,8 @@ fn CollectionBackground(
                 Action::Start => {
                     let mut collection = collection_id().get_collection_owned();
                     collection.launch_game().await.unwrap();
-                    let collection_to_replace = &mut *collection_id().get_mut_collection();
+                    let collection_to_replace =
+                        &mut *collection_id().try_get_mut_collection().unwrap();
                     let _ = std::mem::replace(collection_to_replace, collection);
                 }
                 Action::Stop => {}

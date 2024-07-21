@@ -4,6 +4,7 @@ use rust_lib::api::shared_resources::collection::CollectionId;
 use tailwind_fuse::*;
 
 use crate::{
+    text_scroller::use_text_scroller,
     BaseComponents::{
         atoms::button::{Button, ButtonClass, FillMode, Roundness, Size},
         molecules::switcher::StateSwitcher,
@@ -55,10 +56,12 @@ pub fn CollectionBlock(
         .picture_path()
         .to_string_lossy()
         .to_string();
+    let (onmounted, status) = use_text_scroller();
     rsx! {
         div {
             button {
-                class: tw_merge!("relative h-[280px] w-[280px]", extended_class),
+                class: tw_merge!("group relative size-[280px] min-w-[280px] min-h-[280px]", extended_class),
+                aria_selected: status(),
                 onclick: move |_| {
                     Pages::collection_display(collection_id())
                         .switch_active_to_self();
@@ -74,9 +77,10 @@ pub fn CollectionBlock(
                     }
                 }
                 div {
-                    class: "absolute inset-0 px-5 pt-5 pb-[25px] flex flex-col gap-[15px] *:text-ellipsis overflow-hidden justify-end items-start",
+                    class: "w-full absolute inset-0 px-5 pt-5 pb-[25px] flex flex-col gap-[15px] justify-end items-start overflow-x-clip",
                     Text {
-                        css: "text-3xl text-white text-ellipsis text-nowrap font-bold",
+                        css: "group-aria-selected:animate-scroll-left w-full text-3xl text-white text-nowrap font-bold text-left",
+                        onmounted,
                         {collection.read().display_name().clone()}
                     }
                     Hint {

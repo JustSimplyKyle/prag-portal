@@ -8,11 +8,13 @@ pub mod main_page;
 pub mod pages;
 pub mod scrollable;
 pub mod side_bar;
+pub mod text_scroller;
 
 use collection_edit::CollectionEditContainer;
 use dioxus::desktop::tao::dpi::PhysicalSize;
 use dioxus::desktop::WindowBuilder;
 use dioxus::html::input_data::MouseButton;
+use dioxus_logger::tracing::Level;
 use manganis::ImageAsset;
 use pages::Pages;
 use rand::Rng;
@@ -29,7 +31,6 @@ use BaseComponents::{
 };
 
 use dioxus::prelude::*;
-use log::LevelFilter;
 
 use crate::collection_display::CollectionDisplay;
 use crate::collections::Collections;
@@ -166,7 +167,7 @@ impl History {
 use rust_lib::api::shared_resources::entry::{self, STORAGE};
 
 fn main() {
-    dioxus_logger::init(LevelFilter::Info).expect("failed to init logger");
+    dioxus_logger::init(Level::DEBUG).expect("failed to init logger");
 
     let cfg = dioxus::desktop::Config::new()
         .with_window(
