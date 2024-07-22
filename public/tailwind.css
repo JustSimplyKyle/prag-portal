@@ -832,13 +832,12 @@ input {
   }
 }
 
-.avatar.placeholder > div {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 @media (hover:hover) {
+  .label a:hover {
+    --tw-text-opacity: 1;
+    color: var(--fallback-bc,oklch(var(--bc)/var(--tw-text-opacity)));
+  }
+
   .menu li > *:not(ul, .menu-title, details, .btn):active,
 .menu li > *:not(ul, .menu-title, details, .btn).active,
 .menu li > details > summary:active {
@@ -847,6 +846,19 @@ input {
     --tw-text-opacity: 1;
     color: var(--fallback-nc,oklch(var(--nc)/var(--tw-text-opacity)));
   }
+}
+
+.label {
+  display: flex;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
 }
 
 .input {
@@ -1043,6 +1055,11 @@ input {
   border-top-width: 2px;
   --tw-bg-opacity: 1;
   background-color: var(--fallback-b1,oklch(var(--b1)/var(--tw-bg-opacity)));
+}
+
+.btm-nav > * .label {
+  font-size: 1rem;
+  line-height: 1.5rem;
 }
 
 @keyframes button-pop {
@@ -2302,10 +2319,6 @@ input {
   overflow-x: clip;
 }
 
-.overflow-y-visible {
-  overflow-y: visible;
-}
-
 .overflow-x-scroll {
   overflow-x: scroll;
 }
@@ -3025,8 +3038,12 @@ body {
     transform: translateX(100%);
   }
 
-  100% {
+  50% {
     transform: translateX(-200%);
+  }
+
+  100% {
+    transform: translateX(100%);
   }
 }
 

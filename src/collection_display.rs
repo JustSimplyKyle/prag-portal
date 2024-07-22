@@ -10,6 +10,7 @@ use tokio_stream::StreamExt;
 
 use crate::{
     impl_context_switcher,
+    text_scroller::use_text_scroller,
     BaseComponents::{
         atoms::{
             button::{Button, FillMode, Roundness, Size},
@@ -72,6 +73,8 @@ fn CollectionBackground(
             }
         }
     });
+    let (text_onmounted, status) = use_text_scroller();
+    let mut onhover = use_signal(|| false);
     let collection = collection_id().get_collection();
     let return_to = use_signal(|| HISTORY.peek().prev_peek().cloned());
     rsx! {
@@ -86,9 +89,17 @@ fn CollectionBackground(
                 )
             }
             div {
-                class: "grow-0 shrink-0 flex flex-col gap-[35px] overflow-x-clip overflow-y-visible",
+                class: "flex flex-col gap-[35px] overflow-x-clip group",
+                onmouseover: move |_| {
+                    onhover.set(true);
+                },
+                onmouseleave: move |_| {
+                    onhover.set(false);
+                },
+                aria_selected: status() && onhover(),
                 Text {
-                    css: "text-white text-ellipsis text-nowrap overflow-x-clip overflow-y-visible font-black text-[80px]",
+                    onmounted: text_onmounted,
+                    css: "text-white w-full group-aria-selected:animate-scroll-left text-nowrap font-black text-[80px]",
                     {collection.read().display_name().clone()}
                 }
                 Button {

@@ -22,6 +22,7 @@ use rust_lib::api::backend_exclusive::vanilla::version::VersionMetadata;
 use rust_lib::api::shared_resources::collection::{CollectionId, ModLoader, ModLoaderType};
 use scrollable::Scrollable;
 use std::collections::BTreeMap;
+use std::ops::Deref;
 use std::path::PathBuf;
 use tailwind_fuse::*;
 use BaseComponents::{
@@ -30,7 +31,7 @@ use BaseComponents::{
     string_placements::ContentType,
 };
 
-use dioxus::prelude::*;
+use dioxus::{prelude::*, CapturedError};
 
 use crate::collection_display::CollectionDisplay;
 use crate::collections::Collections;
@@ -254,6 +255,29 @@ fn App() -> Element {
                 }
             }
         }
+    }
+}
+
+pub trait IntoRenderError {
+    fn into_render_error(self) -> RenderError;
+}
+
+impl IntoRenderError for anyhow::Error {
+    fn into_render_error(self) -> RenderError {
+        use std::error::Error;
+        let boxed_error: Box<dyn Error + Send + Sync> = Box::from(self);
+        let leaked_error: &'static (dyn Error + Send + Sync) = Box::leak(boxed_error);
+        RenderError::Aborted(CapturedError::from(leaked_error))
+    }
+}
+
+pub trait RefIntoRenderError {
+    fn into_render_error(&'static self) -> RenderError;
+}
+
+impl RefIntoRenderError for anyhow::Error {
+    fn into_render_error(&'static self) -> RenderError {
+        RenderError::Aborted(CapturedError::from(self.deref()))
     }
 }
 

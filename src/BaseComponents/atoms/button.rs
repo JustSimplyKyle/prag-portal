@@ -55,6 +55,8 @@ pub fn Button(
     #[props(into)] switcher: Option<Rc<dyn StateSwitcher>>,
     #[props(default = true)] clickable: bool,
     #[props(into)] onclick: Option<EventHandler>,
+    #[props(into)] onmouseover: Option<EventHandler>,
+    #[props(into)] onmouseleave: Option<EventHandler>,
     #[props(extends = GlobalAttributes, extends = div)] mut attributes: Vec<Attribute>,
     #[props(default)] size: Size,
     #[props(default)] fill_mode: FillMode,
@@ -92,6 +94,16 @@ pub fn Button(
                     x(());
                 } else if let Some(x) = &mut switcher {
                     x.switch_active_to_self();
+                }
+            },
+            onmouseover: move |_| {
+                if let Some(x) = onmouseover {
+                    x(());
+                }
+            },
+            onmouseleave: move |_| {
+                if let Some(x) = onmouseleave {
+                    x(());
                 }
             },
             ..attributes,

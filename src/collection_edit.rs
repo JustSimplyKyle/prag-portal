@@ -10,6 +10,7 @@ use crate::{
     main_page::ARROW_LEFT,
     pages::Pages,
     scrollable::Scrollable,
+    text_scroller::use_text_scroller,
     BaseComponents::{
         atoms::button::{Button, FillMode, Roundness},
         molecules::switcher::{Comparison, StateSwitcher},
@@ -158,10 +159,13 @@ fn EditSidebar(collection_id: ReadOnlySignal<CollectionId>) -> Element {
 
 #[component]
 fn EditSidebarInfographic(collection_id: ReadOnlySignal<CollectionId>) -> Element {
+    let (onmounted, status) = use_text_scroller();
+    let mut onhover = use_signal(|| false);
     let collection = collection_id().get_collection();
     rsx! {
         div {
-            class: "overflow-x-clip flex flex-col w-full",
+            class: "group flex flex-col w-full",
+            aria_selected: status() && onhover(),
             div {
                 class: "flex flex-col p-5 justify-end rounded-t-[50px] w-full min-h-[250px]",
                 background: format!(
@@ -173,6 +177,12 @@ fn EditSidebarInfographic(collection_id: ReadOnlySignal<CollectionId>) -> Elemen
                 }
             }
             Button {
+                onmouseover: move |_| {
+                    onhover.set(true);
+                },
+                onmouseleave: move |_| {
+                    onhover.set(false);
+                },
                 roundness: Roundness::Bottom,
                 clickable: false,
                 extended_css_class: "bg-background overflow-x-clip justify-start px-5 pt-[22px]",
@@ -180,7 +190,8 @@ fn EditSidebarInfographic(collection_id: ReadOnlySignal<CollectionId>) -> Elemen
                     Contents::new(
                             vec![
                                 ContentType::text(collection.read().display_name())
-                                    .css("text-3xl font-black min-w-0 text-nowrap overflow-x-clip"),
+                                    .onmounted(onmounted)
+                                    .css("text-3xl font-black w-full group-aria-selected:animate-scroll-left text-nowrap"),
                                 ContentType::hint("由我建立•18 分鐘•不久前開啟")
                                     .css("font-medium text-[15px]"),
                             ],
@@ -486,11 +497,12 @@ fn ModifyPicture(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                                 }
                             }).align_left(),
                             ContentType::custom(rsx!{
-                                div {
+                                label {
                                     class: "relative w-10 h-10 p-2.5 bg-zinc-900 rounded-full flex items-center justify-center",
+                                    role: "button",
                                     input {
                                         r#type: "file",
-                                        class: "absolute inset-0",
+                                        class: "hidden",
                                         accept: ".png,.jpg,.avif,.heif",
                                         multiple: false,
                                         onchange: move |evt| {
@@ -498,8 +510,6 @@ fn ModifyPicture(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                                                 filename.set(files.files().first().cloned());
                                             }
                                         },
-                                        placeholder: "",
-                                        {ContentType::svg(ADD).css("svg-[20px]")}
                                     }
                                     {ContentType::svg(ADD).css("svg-[20px]")}
                                 }

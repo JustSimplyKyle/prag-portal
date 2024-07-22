@@ -80,6 +80,7 @@ pub struct Content {
     content: ContentType,
     css: String,
     onmounted: Option<Signal<Option<Event<MountedData>>>>,
+    onmouseover: Option<EventHandler>,
 }
 impl std::fmt::Debug for Content {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -104,6 +105,7 @@ impl Content {
             content,
             css: String::new(),
             onmounted: None,
+            onmouseover: None,
         }
     }
 
@@ -151,6 +153,12 @@ impl Content {
         self
     }
 
+    pub fn onmouseover(mut self, closure: impl FnMut(()) + 'static) -> Self {
+        let p = Callback::new(closure);
+        self.onmouseover = Some(p);
+        self
+    }
+
     pub fn alignment(self, alignment: Alignment) -> Contents {
         Contents::new(vec![self], alignment)
     }
@@ -164,6 +172,11 @@ impl Content {
                         onmounted: move |x| {
                             if let Some(mut signal) = self.onmounted {
                                 signal.set(Some(x));
+                            }
+                        },
+                        onmouseover: move |_| {
+                            if let Some(x) = self.onmouseover {
+                                x(());
                             }
                         },
                         object {
@@ -245,6 +258,7 @@ impl ContentType {
             content: content_type,
             css,
             onmounted: None,
+            onmouseover: None,
         }
     }
 
@@ -255,6 +269,7 @@ impl ContentType {
             content: content_type,
             css,
             onmounted: None,
+            onmouseover: None,
         }
     }
 
@@ -280,6 +295,7 @@ impl ContentType {
             content: content_type,
             css,
             onmounted: None,
+            onmouseover: None,
         }
     }
 
@@ -305,6 +321,7 @@ impl ContentType {
             content: content_type,
             css,
             onmounted: None,
+            onmouseover: None,
         }
     }
 
@@ -316,6 +333,7 @@ impl ContentType {
             content: content_type,
             css,
             onmounted: None,
+            onmouseover: None,
         }
     }
     /// Returns `true` if the content type is [`Svg`].

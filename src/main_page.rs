@@ -57,11 +57,18 @@ pub fn CollectionBlock(
         .to_string_lossy()
         .to_string();
     let (onmounted, status) = use_text_scroller();
+    let mut onhover = use_signal(|| false);
     rsx! {
         div {
             button {
                 class: tw_merge!("group relative size-[280px] min-w-[280px] min-h-[280px]", extended_class),
-                aria_selected: status(),
+                onmouseover: move |_| {
+                    onhover.set(true);
+                },
+                onmouseleave: move |_| {
+                    onhover.set(false);
+                },
+                aria_selected: status() && onhover(),
                 onclick: move |_| {
                     Pages::collection_display(collection_id())
                         .switch_active_to_self();

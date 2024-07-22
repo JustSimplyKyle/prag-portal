@@ -6,7 +6,7 @@ use rust_lib::api::shared_resources::{collection::CollectionId, entry::STORAGE};
 use crate::{
     text_scroller::use_text_scroller,
     BaseComponents::{
-        atoms::button::{Button, Roundness},
+        atoms::button::{Button, ButtonPropsBuilder, Roundness},
         molecules::switcher::StateSwitcher,
         string_placements::{Alignment, ContentType, Contents, Image, Text},
     },
@@ -184,14 +184,22 @@ fn SidebarCollectionBlock(collection_id: ReadOnlySignal<CollectionId>) -> Elemen
         }
     };
 
+    let mut onhover = use_signal(|| false);
+
     let (element, status) = use_text_scroller();
 
     rsx! {
         div {
             class: "group",
-            aria_selected: status(),
+            aria_selected: status() && onhover(),
             Button {
                 roundness: Roundness::Squircle,
+                onmouseover: move |_| {
+                    onhover.set(true);
+                },
+                onmouseleave: move |_| {
+                    onhover.set(false);
+                },
                 string_placements: vec![
                     ContentType::custom(img_block).align_left(),
                     Contents::new(
