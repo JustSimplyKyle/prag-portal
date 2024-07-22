@@ -52,6 +52,7 @@ pub fn Button(
     roundness: Roundness,
     #[props(into)] string_placements: StringPlacements,
     #[props(default)] extended_css_class: String,
+    #[props(default)] style: String,
     #[props(into)] switcher: Option<Rc<dyn StateSwitcher>>,
     #[props(default = true)] clickable: bool,
     #[props(into)] onclick: Option<EventHandler>,
@@ -78,6 +79,7 @@ pub fn Button(
     rsx! {
         div {
             class,
+            style,
             role: if clickable { "button" } else { "" },
             aria_selected: {
                 if let Some(x) = switcher.as_ref() {

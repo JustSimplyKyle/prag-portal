@@ -16,7 +16,7 @@ use crate::{
         molecules::switcher::{Comparison, StateSwitcher},
         string_placements::{Alignment, ContentType, Contents, Hint, Text},
     },
-    ARROW_RIGHT, COLLECTION_PICS,
+    ThrowResource, ARROW_RIGHT, COLLECTION_PICS,
 };
 
 pub const ADD: &str = manganis::mg!(file("./public/add.svg"));
@@ -159,7 +159,7 @@ fn EditSidebar(collection_id: ReadOnlySignal<CollectionId>) -> Element {
 
 #[component]
 fn EditSidebarInfographic(collection_id: ReadOnlySignal<CollectionId>) -> Element {
-    let (onmounted, status) = use_text_scroller();
+    let (onmounted, status, style) = use_text_scroller();
     let mut onhover = use_signal(|| false);
     let collection = collection_id().get_collection();
     rsx! {
@@ -191,7 +191,8 @@ fn EditSidebarInfographic(collection_id: ReadOnlySignal<CollectionId>) -> Elemen
                             vec![
                                 ContentType::text(collection.read().display_name())
                                     .onmounted(onmounted)
-                                    .css("text-3xl font-black w-full group-aria-selected:animate-scroll-left text-nowrap"),
+                                    .style(dbg!(style()))
+                                    .css("text-3xl font-black w-full group-aria-selected:animate-scroll-left overflow-x-clip text-nowrap"),
                                 ContentType::hint("由我建立•18 分鐘•不久前開啟")
                                     .css("font-medium text-[15px]"),
                             ],
@@ -208,10 +209,11 @@ fn EditSidebarInfographic(collection_id: ReadOnlySignal<CollectionId>) -> Elemen
 fn CollectionEdit(collection_id: ReadOnlySignal<CollectionId>) -> Element {
     let edit_state: Signal<Comparison<EditState>> =
         use_context_provider(|| Signal::new((EditState::Personalization, None)));
-    use_effect(move || {
+    use_resource(move || async move {
         let vec = EditState::iter().collect::<Vec<_>>();
-        EditState::scroller_applyer(vec, |x| &edit_state.read().0 == x).unwrap();
-    });
+        EditState::scroller_applyer(vec, |x| &edit_state.read().0 == x)
+    })
+    .throw()?;
     rsx! {
         div {
             class: "flex w-full bg-deep-background group-edit min-h-screen gap-[20px] rounded-[5px] px-[20px] pb-[20px]",
@@ -339,11 +341,10 @@ fn ModifyName(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                     input {
                         oninput: move |x| async move {
                             input.set(Some(x.value()));
-                            async move {
-                                collection_id().with_mut_collection(|ele| {
-                                    *ele.display_name = x.value()
-                                })
-                            }.await
+                            collection_id().with_mut_collection(|ele| {
+                                *ele.display_name = x.value()
+                            })
+                            .unwrap();
                         },
                         value: {
                             if let Some(x) = input() {
@@ -380,23 +381,27 @@ fn ModifyPicture(collection_id: ReadOnlySignal<CollectionId>) -> Element {
 
     let mut filename: Signal<Option<String>> = use_signal(|| None);
 
-    use_effect(move || {
+    use_resource(move || async move {
         if change() {
             if let Some(x) = active() {
                 let path = PathBuf::from(COLLECTION_PICS.read().get(x).unwrap().to_string());
-                collection_id().with_mut_collection(|x| *x.picture_path = path);
+                collection_id().with_mut_collection(|x| *x.picture_path = path)?;
                 change.set(false);
             }
         }
-    });
-    use_effect(move || {
+        Ok(())
+    })
+    .throw()?;
+    use_resource(move || async move {
         if let Some(x) = filename() {
             if !x.is_empty() {
                 let path = PathBuf::from(x);
-                collection_id().with_mut_collection(|x| *x.picture_path = path);
+                collection_id().with_mut_collection(|x| *x.picture_path = path)?;
             }
         }
-    });
+        Ok(())
+    })
+    .throw()?;
     rsx! {
         div {
             class: "flex flex-col gap-[3px] w-full",

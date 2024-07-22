@@ -79,6 +79,7 @@ impl Contents {
 pub struct Content {
     content: ContentType,
     css: String,
+    style: String,
     onmounted: Option<Signal<Option<Event<MountedData>>>>,
     onmouseover: Option<EventHandler>,
 }
@@ -104,6 +105,7 @@ impl Content {
         Self {
             content,
             css: String::new(),
+            style: String::new(),
             onmounted: None,
             onmouseover: None,
         }
@@ -148,6 +150,12 @@ impl Content {
         self
     }
 
+    pub fn style(mut self, style: impl Into<String>) -> Self {
+        let style = style.into();
+        self.style = style;
+        self
+    }
+
     pub fn onmounted(mut self, signal: Signal<Option<Event<MountedData>>>) -> Self {
         self.onmounted = Some(signal);
         self
@@ -169,6 +177,7 @@ impl Content {
                 rsx! {
                     div {
                         class: tw_merge!(self.css, "[&_*]:pointer-events-none"),
+                        style: self.style,
                         onmounted: move |x| {
                             if let Some(mut signal) = self.onmounted {
                                 signal.set(Some(x));
@@ -202,6 +211,7 @@ impl Content {
                             }
                         },
                         class: self.css,
+                        style: self.style,
                         background_size,
                         background_position: "center",
                         background_image: format!("url(\'{}\')", x)
@@ -211,6 +221,7 @@ impl Content {
             ContentType::Text(x) | ContentType::Hint(x) => {
                 rsx! {
                     div {
+                        style: self.style,
                         onmounted: move |x| {
                             if let Some(mut signal) = self.onmounted {
                                 signal.set(Some(x));
@@ -257,6 +268,7 @@ impl ContentType {
         Content {
             content: content_type,
             css,
+            style: String::new(),
             onmounted: None,
             onmouseover: None,
         }
@@ -268,6 +280,7 @@ impl ContentType {
         Content {
             content: content_type,
             css,
+            style: String::new(),
             onmounted: None,
             onmouseover: None,
         }
@@ -294,6 +307,7 @@ impl ContentType {
         Content {
             content: content_type,
             css,
+            style: String::new(),
             onmounted: None,
             onmouseover: None,
         }
@@ -320,6 +334,7 @@ impl ContentType {
         Content {
             content: content_type,
             css,
+            style: String::new(),
             onmounted: None,
             onmouseover: None,
         }
@@ -332,6 +347,7 @@ impl ContentType {
         Content {
             content: content_type,
             css,
+            style: String::new(),
             onmounted: None,
             onmouseover: None,
         }
@@ -384,12 +400,14 @@ impl Alignment {
 pub fn Text(
     children: Element,
     css: Option<String>,
+    #[props(into)] style: Option<String>,
     onmounted: Option<Signal<Option<MountedEvent>>>,
 ) -> Element {
     sub_content_builder(
         ContentType::text,
         children,
         css.unwrap_or_default(),
+        style.unwrap_or_default(),
         onmounted,
     )
 }
@@ -398,12 +416,14 @@ pub fn Text(
 pub fn Hint(
     children: Element,
     css: Option<String>,
+    style: Option<String>,
     onmounted: Option<Signal<Option<MountedEvent>>>,
 ) -> Element {
     sub_content_builder(
         ContentType::hint,
         children,
         css.unwrap_or_default(),
+        style.unwrap_or_default(),
         onmounted,
     )
 }
@@ -412,12 +432,14 @@ pub fn Hint(
 pub fn Image(
     children: Element,
     css: Option<String>,
+    style: Option<String>,
     onmounted: Option<Signal<Option<MountedEvent>>>,
 ) -> Element {
     sub_content_builder(
         ContentType::image,
         children,
         css.unwrap_or_default(),
+        style.unwrap_or_default(),
         onmounted,
     )
 }
@@ -426,6 +448,7 @@ fn sub_content_builder(
     content_type: fn(String) -> Content,
     ele: Element,
     css: String,
+    style: String,
     onmounted: Option<Signal<Option<MountedEvent>>>,
 ) -> Element {
     let vnode = ele?;
@@ -444,7 +467,11 @@ fn sub_content_builder(
     };
 
     if let Some(x) = onmounted {
-        content_type(text).css(css).onmounted(x).get_element()
+        content_type(text)
+            .css(css)
+            .onmounted(x)
+            .style(style)
+            .get_element()
     } else {
         content_type(text).css(css).get_element()
     }

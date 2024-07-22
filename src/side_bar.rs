@@ -186,7 +186,7 @@ fn SidebarCollectionBlock(collection_id: ReadOnlySignal<CollectionId>) -> Elemen
 
     let mut onhover = use_signal(|| false);
 
-    let (element, status) = use_text_scroller();
+    let (element, status, style) = use_text_scroller();
 
     rsx! {
         div {
@@ -204,7 +204,7 @@ fn SidebarCollectionBlock(collection_id: ReadOnlySignal<CollectionId>) -> Elemen
                     ContentType::custom(img_block).align_left(),
                     Contents::new(
                         vec![
-                            ContentType::text(display_name).onmounted(element).css("w-full group-aria-selected:animate-scroll-left font-medium"),
+                            ContentType::text(display_name).onmounted(element).style(style()).css("w-full group-aria-selected:animate-scroll-left font-medium"),
                             ContentType::svg(ARROW_RIGHT).css("min-w-0 z-0 svg-[30px]")
                         ],
                         Alignment::Right

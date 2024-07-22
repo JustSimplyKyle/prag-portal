@@ -73,7 +73,7 @@ fn CollectionBackground(
             }
         }
     });
-    let (text_onmounted, status) = use_text_scroller();
+    let (text_onmounted, status, style) = use_text_scroller();
     let mut onhover = use_signal(|| false);
     let collection = collection_id().get_collection();
     let return_to = use_signal(|| HISTORY.peek().prev_peek().cloned());
@@ -99,7 +99,8 @@ fn CollectionBackground(
                 aria_selected: status() && onhover(),
                 Text {
                     onmounted: text_onmounted,
-                    css: "text-white w-full group-aria-selected:animate-scroll-left text-nowrap font-black text-[80px]",
+                    style: style(),
+                    css: "text-white w-full text-ellipsis group-aria-selected:text-clip group-aria-selected:animate-scroll-left text-nowrap font-black text-[80px]",
                     {collection.read().display_name().clone()}
                 }
                 Button {

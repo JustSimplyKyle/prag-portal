@@ -56,7 +56,7 @@ pub fn CollectionBlock(
         .picture_path()
         .to_string_lossy()
         .to_string();
-    let (onmounted, status) = use_text_scroller();
+    let (onmounted, status, style) = use_text_scroller();
     let mut onhover = use_signal(|| false);
     rsx! {
         div {
@@ -87,6 +87,7 @@ pub fn CollectionBlock(
                     class: "w-full absolute inset-0 px-5 pt-5 pb-[25px] flex flex-col gap-[15px] justify-end items-start overflow-x-clip",
                     Text {
                         css: "group-aria-selected:animate-scroll-left w-full text-3xl text-white text-nowrap font-bold text-left",
+                        style: style(),
                         onmounted,
                         {collection.read().display_name().clone()}
                     }

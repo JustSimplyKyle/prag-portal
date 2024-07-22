@@ -3035,20 +3035,24 @@ body {
 
 @keyframes scrollLeft {
   0% {
-    transform: translateX(100%);
+    transform: translateX(var(--from-width));
   }
 
   50% {
-    transform: translateX(-200%);
+    transform: translateX(var(--to-width));
   }
 
   100% {
-    transform: translateX(100%);
+    transform: translateX(var(--from-width));
   }
 }
 
 .group[aria-selected="true"] .group-aria-selected\:animate-scroll-left {
   animation: scrollLeft 10000ms infinite ease-in-out;
+}
+
+.group[aria-selected="true"] .group-aria-selected\:text-clip {
+  text-overflow: clip;
 }
 
 .group[aria-selected="true"] .group-aria-selected\:border-4 {

@@ -14,7 +14,7 @@ use collection_edit::CollectionEditContainer;
 use dioxus::desktop::tao::dpi::PhysicalSize;
 use dioxus::desktop::WindowBuilder;
 use dioxus::html::input_data::MouseButton;
-use dioxus_logger::tracing::Level;
+use dioxus_logger::tracing::{info, Level};
 use manganis::ImageAsset;
 use pages::Pages;
 use rand::Rng;
@@ -199,6 +199,7 @@ pub async fn collection_builder(
         None,
     )
     .await?;
+    info!("Adding mods...");
     collection
         .add_multiple_modrinth_mod(
             vec![
@@ -214,7 +215,9 @@ pub async fn collection_builder(
             None,
         )
         .await?;
-    collection.download_mods().await
+    collection.download_mods().await?;
+    info!("Finishi downloading mods");
+    Ok(())
 }
 
 #[component]
@@ -272,37 +275,49 @@ impl IntoRenderError for anyhow::Error {
 }
 
 pub trait RefIntoRenderError {
-    fn into_render_error(&'static self) -> RenderError;
+    fn into_render_error(&self) -> RenderError;
 }
 
 impl RefIntoRenderError for anyhow::Error {
-    fn into_render_error(&'static self) -> RenderError {
-        RenderError::Aborted(CapturedError::from(self.deref()))
+    fn into_render_error(&self) -> RenderError {
+        RenderError::Aborted(CapturedError::from_display(self.to_string()))
+    }
+}
+
+pub trait ThrowResource<T> {
+    fn throw(&self) -> Result<Option<T>, RenderError>;
+}
+
+impl<T: Clone> ThrowResource<T> for Resource<Result<T, anyhow::Error>> {
+    fn throw(&self) -> Result<Option<T>, RenderError> {
+        let binding = self.read();
+        let transpose = binding.as_ref().map(|x| x.as_ref()).transpose();
+        transpose
+            .map_err(RefIntoRenderError::into_render_error)
+            .map(|x| x.cloned())
     }
 }
 
 #[component]
 fn Layout() -> Element {
-    use_future(|| collection_builder(None, "1.20.1"));
+    use_resource(|| collection_builder(None, "1.20.1")).throw()?;
 
     let keys = use_context_provider(move || {
         Signal::memo(move || (STORAGE.collections)().into_keys().collect::<Vec<_>>())
     });
 
-    use_effect(move || {
+    use_resource(move || async move {
         let history = HISTORY.read();
-        Pages::DownloadProgress.apply_slide_in().unwrap();
+        Pages::DownloadProgress.apply_slide_in()?;
         let pages_scroller = vec![Pages::MainPage, Pages::Explore, Pages::Collections];
-        Pages::scroller_applyer(pages_scroller, |x| x == &history.active).unwrap();
+        Pages::scroller_applyer(pages_scroller, |x| x == &history.active)?;
         for collection_id in keys() {
-            Pages::collection_display(collection_id.clone())
-                .apply_slide_in()
-                .unwrap();
-            Pages::collection_edit(collection_id)
-                .apply_slide_in()
-                .unwrap();
+            Pages::collection_display(collection_id.clone()).apply_slide_in()?;
+            Pages::collection_edit(collection_id).apply_slide_in()?;
         }
-    });
+        Ok(())
+    })
+    .throw()?;
 
     let history = HISTORY.read();
     rsx! {

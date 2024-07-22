@@ -118,10 +118,13 @@ module.exports = {
         },
         scrollLeft: {
           '0%': {
-            transform: 'translateX(100%)',
+            transform: 'translateX(var(--from-width))',
+          },
+          '50%': {
+            transform: 'translateX(var(--to-width))',
           },
           '100%': {
-            transform: 'translateX(-200%)',
+            transform: 'translateX(var(--from-width))',
           },
         },
         slideDown: {
