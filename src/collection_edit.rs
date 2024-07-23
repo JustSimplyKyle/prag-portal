@@ -11,12 +11,13 @@ use crate::{
     pages::Pages,
     scrollable::Scrollable,
     text_scroller::use_text_scroller,
+    use_error_handler,
     BaseComponents::{
         atoms::button::{Button, FillMode, Roundness},
         molecules::switcher::{Comparison, StateSwitcher},
         string_placements::{Alignment, ContentType, Contents, Hint, Text},
     },
-    ThrowResource, ARROW_RIGHT, COLLECTION_PICS,
+    ARROW_RIGHT, COLLECTION_PICS,
 };
 
 pub const ADD: &str = manganis::mg!(file("./public/add.svg"));
@@ -209,11 +210,12 @@ fn EditSidebarInfographic(collection_id: ReadOnlySignal<CollectionId>) -> Elemen
 fn CollectionEdit(collection_id: ReadOnlySignal<CollectionId>) -> Element {
     let edit_state: Signal<Comparison<EditState>> =
         use_context_provider(|| Signal::new((EditState::Personalization, None)));
-    use_resource(move || async move {
+    let mut error_handler = use_error_handler();
+    use_effect(move || {
         let vec = EditState::iter().collect::<Vec<_>>();
-        EditState::scroller_applyer(vec, |x| &edit_state.read().0 == x)
-    })
-    .throw()?;
+        let error = EditState::scroller_applyer(vec, |x| &edit_state.read().0 == x);
+        error_handler.set(Some(error));
+    });
     rsx! {
         div {
             class: "flex w-full bg-deep-background group-edit min-h-screen gap-[20px] rounded-[5px] px-[20px] pb-[20px]",
@@ -381,27 +383,34 @@ fn ModifyPicture(collection_id: ReadOnlySignal<CollectionId>) -> Element {
 
     let mut filename: Signal<Option<String>> = use_signal(|| None);
 
-    use_resource(move || async move {
-        if change() {
-            if let Some(x) = active() {
-                let path = PathBuf::from(COLLECTION_PICS.read().get(x).unwrap().to_string());
-                collection_id().with_mut_collection(|x| *x.picture_path = path)?;
-                change.set(false);
+    let mut error = use_error_handler();
+
+    use_effect(move || {
+        let mut binding = || {
+            if change() {
+                if let Some(x) = active() {
+                    let path = PathBuf::from(COLLECTION_PICS.read().get(x).unwrap().to_string());
+                    collection_id().with_mut_collection(|x| *x.picture_path = path)?;
+                    change.set(false);
+                }
             }
-        }
-        Ok(())
-    })
-    .throw()?;
-    use_resource(move || async move {
-        if let Some(x) = filename() {
-            if !x.is_empty() {
-                let path = PathBuf::from(x);
-                collection_id().with_mut_collection(|x| *x.picture_path = path)?;
+            Ok(())
+        };
+        error.set(Some(binding()));
+    });
+
+    use_effect(move || {
+        let binding = || {
+            if let Some(x) = filename() {
+                if !x.is_empty() {
+                    let path = PathBuf::from(x);
+                    collection_id().with_mut_collection(|x| *x.picture_path = path)?;
+                }
             }
-        }
-        Ok(())
-    })
-    .throw()?;
+            Ok(())
+        };
+        error.set(Some(binding()));
+    });
     rsx! {
         div {
             class: "flex flex-col gap-[3px] w-full",

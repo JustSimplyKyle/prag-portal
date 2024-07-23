@@ -22,7 +22,6 @@ use rust_lib::api::backend_exclusive::vanilla::version::VersionMetadata;
 use rust_lib::api::shared_resources::collection::{CollectionId, ModLoader, ModLoaderType};
 use scrollable::Scrollable;
 use std::collections::BTreeMap;
-use std::ops::Deref;
 use std::path::PathBuf;
 use tailwind_fuse::*;
 use BaseComponents::{
@@ -168,7 +167,7 @@ impl History {
 use rust_lib::api::shared_resources::entry::{self, STORAGE};
 
 fn main() {
-    dioxus_logger::init(Level::DEBUG).expect("failed to init logger");
+    dioxus_logger::init(Level::INFO).expect("failed to init logger");
 
     let cfg = dioxus::desktop::Config::new()
         .with_window(
@@ -298,6 +297,10 @@ impl<T: Clone> ThrowResource<T> for Resource<Result<T, anyhow::Error>> {
     }
 }
 
+pub fn use_error_handler() -> Signal<Option<Result<(), anyhow::Error>>> {
+    use_context::<Signal<Option<Result<(), anyhow::Error>>>>()
+}
+
 #[component]
 fn Layout() -> Element {
     use_resource(|| collection_builder(None, "1.20.1")).throw()?;
@@ -306,23 +309,37 @@ fn Layout() -> Element {
         Signal::memo(move || (STORAGE.collections)().into_keys().collect::<Vec<_>>())
     });
 
-    use_resource(move || async move {
-        let history = HISTORY.read();
-        Pages::DownloadProgress.apply_slide_in()?;
-        let pages_scroller = vec![Pages::MainPage, Pages::Explore, Pages::Collections];
-        Pages::scroller_applyer(pages_scroller, |x| x == &history.active)?;
-        for collection_id in keys() {
-            Pages::collection_display(collection_id.clone()).apply_slide_in()?;
-            Pages::collection_edit(collection_id).apply_slide_in()?;
+    let mut error_handler = use_context_provider(|| Signal::new(None));
+
+    use_effect(move || {
+        let binding = || {
+            let history = HISTORY.read();
+            Pages::DownloadProgress.apply_slide_in()?;
+            let pages_scroller = vec![Pages::MainPage, Pages::Explore, Pages::Collections];
+            Pages::scroller_applyer(pages_scroller, |x| x == &history.active)?;
+            for collection_id in keys() {
+                Pages::collection_display(collection_id.clone()).apply_slide_in()?;
+                Pages::collection_edit(collection_id).apply_slide_in()?;
+            }
+            Ok::<_, anyhow::Error>(())
+        };
+        error_handler.set(Some(binding()));
+    });
+
+    use_memo(move || {
+        if let Some(x) = error_handler.read().as_ref() {
+            return x
+                .as_ref()
+                .cloned()
+                .map_err(RefIntoRenderError::into_render_error);
         }
         Ok(())
-    })
-    .throw()?;
+    })()?;
 
     let history = HISTORY.read();
     rsx! {
         div {
-            class: "w-screen group-pages flex",
+            class: "min-w-screen max-h-screen group-pages flex",
             "data-selected": history.active.to_string(),
             "data-prev": history.prev_peek().map_or_else(String::new, ToString::to_string),
             onmousedown: move |x| {
@@ -339,7 +356,7 @@ fn Layout() -> Element {
 
             }
             div {
-                class: "bg-background w-full min-h-screen relative *:overflow-scroll",
+                class: "bg-background w-full min-h-screen max-h-screen relative *:overflow-scroll",
                 div {
                     class: "absolute inset-0 z-0 min-h-full",
                     id: Pages::MainPage.scroller_id(),
