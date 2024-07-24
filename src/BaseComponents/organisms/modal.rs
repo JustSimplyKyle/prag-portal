@@ -16,7 +16,7 @@ pub fn Modal(
     active: Signal<bool>,
     #[props(default = true)] close_on_outer_click: bool,
 ) -> Element {
-    let props = subModalProps::builder()
+    let props = __sub_modalProps::builder()
         .children(children)
         .active(active)
         .close_on_outer_click(close_on_outer_click)
@@ -26,7 +26,7 @@ pub fn Modal(
         let pointer = ComponentPointer {
             name,
             props,
-            pointer: subModal,
+            pointer: __sub_modal,
         };
         TOP_LEVEL_COMPONENT.write().push(pointer);
     }
@@ -34,8 +34,9 @@ pub fn Modal(
 }
 
 #[component]
+#[doc(hidden)]
 #[deprecated = "DO NOT USE. Use `Modal` instead, this should be private, but Dioxus does not allow it."]
-pub fn subModal(
+pub fn __sub_modal(
     children: Element,
     mut active: Signal<bool>,
     close_on_outer_click: bool,

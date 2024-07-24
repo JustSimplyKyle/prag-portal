@@ -26,7 +26,7 @@ use std::path::PathBuf;
 use tailwind_fuse::*;
 use BaseComponents::{
     atoms::button::{Button, FillMode, Roundness},
-    organisms::modal::{subModalProps, ComponentPointer, Modal},
+    organisms::modal::{ComponentPointer, Modal},
     string_placements::ContentType,
 };
 
@@ -63,7 +63,7 @@ pub const COLLECTION_PICS: GlobalSignal<BTreeMap<&str, ImageAsset>> = GlobalSign
     ])
 });
 
-fn get_random_collection() -> ImageAsset {
+fn get_random_collection_picture() -> ImageAsset {
     let index = rand::thread_rng().gen_range(0..=4);
     COLLECTION_PICS.read().values().nth(index).unwrap().clone()
 }
@@ -79,8 +79,9 @@ pub const TAILWIND_STR: &str = manganis::mg!(file("./public/tailwind.css"));
 /// `(Pages)`: Current active page
 /// `Option<Pages>`: Previous page
 static HISTORY: GlobalSignal<History> = GlobalSignal::new(|| History::new(Pages::MainPage));
-pub static TOP_LEVEL_COMPONENT: GlobalSignal<Vec<ComponentPointer<subModalProps>>> =
-    GlobalSignal::new(Vec::new);
+pub static TOP_LEVEL_COMPONENT: GlobalSignal<
+    Vec<ComponentPointer<crate::BaseComponents::organisms::modal::__sub_modalProps>>,
+> = GlobalSignal::new(Vec::new);
 
 /// `History` is used to keep track of the navigation history in the application.
 /// It contains the following fields:
@@ -192,7 +193,7 @@ pub async fn collection_builder(
         "新的收藏",
         picture_path
             .into()
-            .unwrap_or_else(|| get_random_collection().path().into()),
+            .unwrap_or_else(|| get_random_collection_picture().path().into()),
         version,
         ModLoader::new(ModLoaderType::Fabric, None),
         None,
@@ -215,7 +216,7 @@ pub async fn collection_builder(
         )
         .await?;
     collection.download_mods().await?;
-    info!("Finishi downloading mods");
+    info!("Finished downloading mods");
     Ok(())
 }
 
@@ -224,7 +225,7 @@ fn App() -> Element {
     let error_active = use_signal(|| true);
     rsx! {
         div {
-            class: "[&_*]:transform-gpu font-['GenSenRounded TW'] bg-deep-background min-h-screen min-w-full font-display leading-normal",
+            class: "[&_*]:transform-gpu font-['GenSenRounded TW'] bg-deep-background min-h-screen min-w-scren font-display leading-normal",
             {
                 TOP_LEVEL_COMPONENT().into_iter().map(|x| (x.pointer)(x.props))
             }
@@ -235,7 +236,7 @@ fn App() -> Element {
                         name: "error_modal",
                         close_on_outer_click: false,
                         div {
-                            div { class: "w-full flex flex-col items-center space-y-3",
+                            div { class: "min-w-full flex flex-col items-center space-y-3",
                                 div { class: "text-red text-3xl font-black",
                                     "Hmm, something went wrong. Please copy the following error to the developer."
                                 }
@@ -298,7 +299,7 @@ impl<T: Clone> ThrowResource<T> for Resource<Result<T, anyhow::Error>> {
 }
 
 pub fn use_error_handler() -> Signal<Option<Result<(), anyhow::Error>>> {
-    use_context::<Signal<Option<Result<(), anyhow::Error>>>>()
+    use_context()
 }
 
 #[component]
@@ -339,7 +340,7 @@ fn Layout() -> Element {
     let history = HISTORY.read();
     rsx! {
         div {
-            class: "min-w-screen max-h-screen group-pages flex",
+            class: "max-w-screen max-h-screen overflow-clip group-pages flex",
             "data-selected": history.active.to_string(),
             "data-prev": history.prev_peek().map_or_else(String::new, ToString::to_string),
             onmousedown: move |x| {
@@ -356,7 +357,7 @@ fn Layout() -> Element {
 
             }
             div {
-                class: "bg-background w-full min-h-screen max-h-screen relative *:overflow-scroll",
+                class: "bg-background w-screen h-screen relative *:overflow-scroll",
                 div {
                     class: "absolute inset-0 z-0 min-h-full",
                     id: Pages::MainPage.scroller_id(),

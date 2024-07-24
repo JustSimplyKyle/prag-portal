@@ -6,7 +6,7 @@ use rust_lib::api::shared_resources::{collection::CollectionId, entry::STORAGE};
 use crate::{
     text_scroller::use_text_scroller,
     BaseComponents::{
-        atoms::button::{Button, ButtonPropsBuilder, Roundness},
+        atoms::button::{Button, Roundness},
         molecules::switcher::StateSwitcher,
         string_placements::{Alignment, ContentType, Contents, Image, Text},
     },
