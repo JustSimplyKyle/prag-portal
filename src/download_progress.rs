@@ -14,12 +14,8 @@ use rust_lib::api::shared_resources::entry::DOWNLOAD_PROGRESS;
 use strum::EnumIter;
 
 #[component]
-fn ListItem(
-    collection_id: ReadOnlySignal<CollectionId>,
-    progress: ReadOnlySignal<Progress>,
-) -> Element {
+fn ListItem(collection_id: ReadOnlySignal<CollectionId>, progress: Progress) -> Element {
     let collection = collection_id().get_collection();
-    let progress = progress.read();
     rsx! {
         Button {
             roundness: Roundness::Pill,
@@ -59,12 +55,8 @@ fn ListItem(
 }
 
 #[component]
-fn FirstProgressView(
-    collection_id: ReadOnlySignal<CollectionId>,
-    progress: ReadOnlySignal<Progress>,
-) -> Element {
+fn FirstProgressView(collection_id: ReadOnlySignal<CollectionId>, progress: Progress) -> Element {
     let collection = collection_id().get_collection();
-    let progress = progress.read();
     rsx! {
         div {
             class: "w-full h-[350px] p-[30px] rounded-[20px]",
@@ -150,25 +142,25 @@ fn ProgressStateBar() -> Element {
 
 #[component]
 pub fn DownloadProgress() -> Element {
-    let mut progress = DOWNLOAD_PROGRESS()
+    let progress = DOWNLOAD_PROGRESS()
         .0
         .into_iter()
         .filter(|(_, x)| x.percentages < 100.)
         .map(|(id, progress)| (id.collection_id, progress))
-        .peekable();
+        .enumerate();
     rsx! {
         div {
             class: "flex flex-col gap-[20px]",
-            if let Some((collection_id, progress)) = progress.peek().cloned() {
-                FirstProgressView {
-                    collection_id,
-                    progress
-                }
-                ProgressStateBar {
+            for (u, (collection_id , progress) ) in progress {
+                if u == 0 {
+                    FirstProgressView {
+                        collection_id: collection_id.clone(),
+                        progress: progress.clone()
+                    }
+                    ProgressStateBar {
 
+                    }
                 }
-            }
-            for (collection_id , progress) in progress {
                 ListItem {
                     collection_id,
                     progress

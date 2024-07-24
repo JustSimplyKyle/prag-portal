@@ -2315,6 +2315,10 @@ input {
   justify-self: center;
 }
 
+.overflow-clip {
+  overflow: clip;
+}
+
 .overflow-scroll {
   overflow: scroll;
 }
