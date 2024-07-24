@@ -2024,17 +2024,27 @@ input {
 @keyframes slideDown {
   0% {
     transform: translateY(-100dvh);
-    animation-timing-function: cubic-bezier(.08,.06,0,1.28);
+    animation-timing-function: cubic-bezier(.17,.67,.14,1.02);
+  }
+
+  50% {
+    transform: translateY(3dvh);
+    animation-timing-function: cubic-bezier(.17,.67,.14,1.02);
+  }
+
+  75% {
+    transform: translateY(0%);
+    animation-timing-function: cubic-bezier(.17,.67,.14,1.02);
   }
 
   100% {
     transform: translateY(0%);
-    animation-timing-function: cubic-bezier(.08,.06,0,1.28);
+    animation-timing-function: cubic-bezier(.17,.67,.14,1.02);
   }
 }
 
 .animate-slideDown {
-  animation: slideDown 1000ms;
+  animation: slideDown 1000ms ease-in-out;
 }
 
 @keyframes slideLeft {
@@ -2056,33 +2066,53 @@ input {
 @keyframes slideOutDown {
   0% {
     transform: translateY(0%);
-    animation-timing-function: cubic-bezier(.08,.06,0,1.28);
+    animation-timing-function: cubic-bezier(.17,.67,.14,1.02);
+  }
+
+  50% {
+    transform: translateY(103dvh);
+    animation-timing-function: cubic-bezier(.17,.67,.14,1.02);
+  }
+
+  75% {
+    transform: translateY(100dvh);
+    animation-timing-function: cubic-bezier(.17,.67,.14,1.02);
   }
 
   100% {
     transform: translateY(100dvh);
-    animation-timing-function: cubic-bezier(.08,.06,0,1.28);
+    animation-timing-function: cubic-bezier(.17,.67,.14,1.02);
   }
 }
 
 .animate-slideOutDown {
-  animation: slideOutDown 1000ms;
+  animation: slideOutDown 1000ms ease-in-out;
 }
 
 @keyframes slideOutUp {
   0% {
     transform: translateY(0%);
-    animation-timing-function: cubic-bezier(.08,.06,0,1.28);
+    animation-timing-function: cubic-bezier(.17,.67,.14,1.02);
+  }
+
+  50% {
+    transform: translateY(-103dvh);
+    animation-timing-function: cubic-bezier(.17,.67,.14,1.02);
+  }
+
+  75% {
+    transform: translateY(-100dvh);
+    animation-timing-function: cubic-bezier(.17,.67,.14,1.02);
   }
 
   100% {
     transform: translateY(-100dvh);
-    animation-timing-function: cubic-bezier(.08,.06,0,1.28);
+    animation-timing-function: cubic-bezier(.17,.67,.14,1.02);
   }
 }
 
 .animate-slideOutUp {
-  animation: slideOutUp 1000ms;
+  animation: slideOutUp 1000ms ease-in-out;
 }
 
 @keyframes slideRight {
@@ -2104,17 +2134,27 @@ input {
 @keyframes slideUp {
   0% {
     transform: translateY(100dvh);
-    animation-timing-function: cubic-bezier(.08,.06,0,1.28);
+    animation-timing-function: cubic-bezier(.17,.67,.14,1.02);
+  }
+
+  50% {
+    transform: translateY(-3dvh);
+    animation-timing-function: cubic-bezier(.17,.67,.14,1.02);
+  }
+
+  75% {
+    transform: translateY(0%);
+    animation-timing-function: cubic-bezier(.17,.67,.14,1.02);
   }
 
   100% {
     transform: translateY(0%);
-    animation-timing-function: cubic-bezier(.08,.06,0,1.28);
+    animation-timing-function: cubic-bezier(.17,.67,.14,1.02);
   }
 }
 
 .animate-slideUp {
-  animation: slideUp 1000ms;
+  animation: slideUp 1000ms ease-in-out;
 }
 
 .resize {

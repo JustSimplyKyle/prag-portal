@@ -21,11 +21,7 @@ pub trait Scrollable: Sized + ToString {
         Ok(())
     }
 
-    fn apply_scroller_animation(
-        &self,
-        bottom: &[Self],
-        top: &[Self],
-    ) -> Result<(), anyhow::Error> {
+    fn apply_scroller_animation(&self, bottom: &[Self], top: &[Self]) -> Result<(), anyhow::Error> {
         let target = self.to_string();
         let bottom = bottom
             .iter()
@@ -60,17 +56,17 @@ pub trait Scrollable: Sized + ToString {
                             const finded_top = top.find((ele) => prev === ele);
                             if (finded_bottom) {
                                 const bottomElem = group.querySelector('#scrolling-' + finded_bottom);
-                                target.style.animation = 'slideDown 1000ms';
+                                target.style.animation = 'slideDown 800ms ease-in-out';
                                 bottomElem.style.display = 'block';
                                 bottomElem.style.zIndex = '10';
-                                bottomElem.style.animation = 'slideOutDown 1000ms';
+                                bottomElem.style.animation = 'slideOutDown 800ms ease-in-out';
                             }
                             else if (finded_top) {
                                 const topElem = group.querySelector('#scrolling-' + finded_top);
-                                target.style.animation = 'slideUp 1000ms';
+                                target.style.animation = 'slideUp 800ms ease-in-out';
                                 topElem.style.display = 'block';
                                 topElem.style.zIndex = '10';
-                                topElem.style.animation = 'slideOutUp 1000ms';
+                                topElem.style.animation = 'slideOutUp 800ms ease-in-out';
                             }
 
                         });

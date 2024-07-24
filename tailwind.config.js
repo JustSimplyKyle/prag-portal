@@ -90,10 +90,10 @@ module.exports = {
         slideRight: 'slideRight 500ms',
         slideLeft: 'slideLeft 500ms',
         'scroll-left': 'scrollLeft 10000ms infinite ease-in-out',
-        slideDown: 'slideDown 1000ms',
-        slideOutDown: 'slideOutDown 1000ms',
-        slideUp: 'slideUp 1000ms',
-        slideOutUp: 'slideOutUp 1000ms',
+        slideDown: 'slideDown 1000ms ease-in-out',
+        slideOutDown: 'slideOutDown 1000ms ease-in-out',
+        slideUp: 'slideUp 1000ms ease-in-out',
+        slideOutUp: 'slideOutUp 1000ms ease-in-out',
       },
       keyframes: {
         slideRight: {
@@ -130,41 +130,73 @@ module.exports = {
         slideDown: {
           '0%': {
             transform: 'translateY(-100dvh)',
-            'animation-timing-function': 'theme(animationTiming.bounce)',
+            'animation-timing-function': 'theme(animationTiming.linear)',
+          },
+          '50%': {
+            transform: 'translateY(3dvh)',
+            'animation-timing-function': 'theme(animationTiming.linear)',
+          },
+          '75%': {
+            transform: 'translateY(0%)',
+            'animation-timing-function': 'theme(animationTiming.linear)',
           },
           '100%': {
             transform: 'translateY(0%)',
-            'animation-timing-function': 'theme(animationTiming.bounce)',
+            'animation-timing-function': 'theme(animationTiming.linear)',
           },
         },
         slideOutDown: {
           '0%': {
             transform: 'translateY(0%)',
-            'animation-timing-function': 'theme(animationTiming.bounce)',
+            'animation-timing-function': 'theme(animationTiming.linear)',
+          },
+          '50%': {
+            transform: 'translateY(103dvh)',
+            'animation-timing-function': 'theme(animationTiming.linear)',
+          },
+          '75%': {
+            transform: 'translateY(100dvh)',
+            'animation-timing-function': 'theme(animationTiming.linear)',
           },
           '100%': {
             transform: 'translateY(100dvh)',
-            'animation-timing-function': 'theme(animationTiming.bounce)',
+            'animation-timing-function': 'theme(animationTiming.linear)',
           },
         },
         slideOutUp: {
           '0%': {
             transform: 'translateY(0%)',
-            'animation-timing-function': 'theme(animationTiming.bounce)',
+            'animation-timing-function': 'theme(animationTiming.linear)',
+          },
+          '50%': {
+            transform: 'translateY(-103dvh)',
+            'animation-timing-function': 'theme(animationTiming.linear)',
+          },
+          '75%': {
+            transform: 'translateY(-100dvh)',
+            'animation-timing-function': 'theme(animationTiming.linear)',
           },
           '100%': {
             transform: 'translateY(-100dvh)',
-            'animation-timing-function': 'theme(animationTiming.bounce)',
+            'animation-timing-function': 'theme(animationTiming.linear)',
           },
         },
         slideUp: {
           '0%': {
             transform: 'translateY(100dvh)',
-            'animation-timing-function': 'theme(animationTiming.bounce)',
+            'animation-timing-function': 'theme(animationTiming.linear)',
+          },
+          '50%': {
+            transform: 'translateY(-3dvh)',
+            'animation-timing-function': 'theme(animationTiming.linear)',
+          },
+          '75%': {
+            transform: 'translateY(0%)',
+            'animation-timing-function': 'theme(animationTiming.linear)',
           },
           '100%': {
             transform: 'translateY(0%)',
-            'animation-timing-function': 'theme(animationTiming.bounce)',
+            'animation-timing-function': 'theme(animationTiming.linear)',
           },
         },
       },
