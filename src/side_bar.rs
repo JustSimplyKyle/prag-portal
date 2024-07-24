@@ -15,7 +15,7 @@ use crate::{
 
 #[component]
 pub fn SideBar() -> Element {
-    let mut expanded = use_signal(|| false);
+    let mut expanded = use_signal(|| true);
     let delayed_expanded = use_resource(move || async move {
         if expanded() {
             tokio::time::sleep(Duration::from_millis(100)).await;
@@ -24,10 +24,6 @@ pub fn SideBar() -> Element {
         }
         expanded()
     });
-    let onclick = move |()| {
-        Pages::Collections.switch_active_to_self();
-        expanded.toggle();
-    };
 
     let keys = use_context::<Memo<Vec<CollectionId>>>();
 
@@ -69,6 +65,13 @@ pub fn SideBar() -> Element {
             }
         }
     };
+    #[derive(derive_more::Display, PartialEq, Eq, Clone, Copy)]
+    enum Selection {
+        MainPage,
+        Explore,
+        Collections,
+    }
+    let mut selected = use_signal(|| Selection::MainPage);
     rsx! {
         div {
             class: "flex flex-col place-content-start mx-5",
@@ -78,37 +81,66 @@ pub fn SideBar() -> Element {
                 aria_busy: !delayed_expanded().unwrap_or(false),
                 // top
                 div {
-                    class: "flex flex-col space-y-1",
+                    class: "[&_*]:transition-all z-10 flex flex-col group/test space-y-1",
+                    aria_selected: selected().to_string(),
                     Button {
                         roundness: Roundness::Squircle,
                         string_placements: vec![
                             ContentType::svg(HOME).align_left(),
                             ContentType::text("首頁").css("group-aria-busy:hidden").align_right(),
                         ],
-                        focus_color_change: true,
+                        onclick: move |_| {
+                            selected.set(Selection::MainPage);
+                        },
                         switcher: Pages::MainPage,
-                        extended_css_class: "bg-background group-aria-expanded:pr-5"
+                        extended_css_class: "
+                        z-0 bg-red text-black invisible h-0 p-0 
+                        group-aria-[selected=MainPage]/test:visible
+                        group-hover/test:visible 
+                        group-aria-[selected=MainPage]/test:h-fit
+                        group-hover/test:h-fit 
+                        group-aria-[selected=MainPage]/test:p-5
+                        group-hover/test:p-5 
+                        group-aria-expanded:pr-5"
                     }
                     Button {
                         roundness: Roundness::Squircle,
+                        onclick: move |_| {
+                            selected.set(Selection::Explore);
+                        },
                         string_placements: vec![
                             ContentType::svg(EXPLORE).align_left(),
                             ContentType::text("探索").css("group-aria-busy:hidden").align_right(),
                         ],
-                        focus_color_change: true,
                         switcher: Pages::Explore,
-                        extended_css_class: "bg-background group-aria-expanded:pr-5"
+                        extended_css_class: "z-0 bg-light-blue text-black invisible h-0 p-0
+                        group-aria-[selected=Explore]/test:visible
+                        group-hover/test:visible 
+                        group-aria-[selected=Explore]/test:h-fit
+                        group-hover/test:h-fit 
+                        group-aria-[selected=Explore]/test:p-5 
+                        group-hover/test:p-5 
+                        group-aria-expanded:pr-5"
                     }
                     Button {
                         roundness: Roundness::Squircle,
+                        onclick: move |_| {
+                            selected.set(Selection::Collections);
+                            expanded.toggle();
+                        },
                         string_placements: vec![
                             ContentType::svg(SIDEBAR_COLLECTION).align_left(),
                             ContentType::text("收藏庫").css("group-aria-busy:hidden").align_right(),
                         ],
                         switcher: Pages::Collections,
-                        onclick,
-                        focus_color_change: true,
-                        extended_css_class: "bg-background group-aria-expanded:pr-5"
+                        extended_css_class: "z-0 bg-green text-black invisible h-0 p-0
+                        group-aria-[selected=Collections]/test:visible
+                        group-hover/test:visible 
+                        group-aria-[selected=Collections]/test:h-fit
+                        group-hover/test:h-fit 
+                        group-aria-[selected=Collections]/test:p-5
+                        group-hover/test:p-5 
+                        group-aria-expanded:pr-5"
                     }
                 }
                 // middle
@@ -184,27 +216,19 @@ fn SidebarCollectionBlock(collection_id: ReadOnlySignal<CollectionId>) -> Elemen
         }
     };
 
-    let mut onhover = use_signal(|| false);
-
     let (element, status, style) = use_text_scroller();
 
     rsx! {
         div {
             class: "group",
-            aria_selected: status() && onhover(),
+            aria_selected: status(),
             Button {
                 roundness: Roundness::Squircle,
-                onmouseover: move |_| {
-                    onhover.set(true);
-                },
-                onmouseleave: move |_| {
-                    onhover.set(false);
-                },
                 string_placements: vec![
                     ContentType::custom(img_block).align_left(),
                     Contents::new(
                         vec![
-                            ContentType::text(display_name).onmounted(element).style(style()).css("w-full group-aria-selected:animate-scroll-left font-medium"),
+                            ContentType::text(display_name).onmounted(element).style(style()).css("w-full group-hover:group-aria-selected:animate-scroll-left font-medium"),
                             ContentType::svg(ARROW_RIGHT).css("min-w-0 z-0 svg-[30px]")
                         ],
                         Alignment::Right

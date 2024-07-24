@@ -74,7 +74,6 @@ fn CollectionBackground(
         }
     });
     let (text_onmounted, status, style) = use_text_scroller();
-    let mut onhover = use_signal(|| false);
     let collection = collection_id().get_collection();
     let return_to = use_signal(|| HISTORY.peek().prev_peek().cloned());
     rsx! {
@@ -90,17 +89,11 @@ fn CollectionBackground(
             }
             div {
                 class: "flex flex-col gap-[35px] overflow-x-clip group",
-                onmouseover: move |_| {
-                    onhover.set(true);
-                },
-                onmouseleave: move |_| {
-                    onhover.set(false);
-                },
-                aria_selected: status() && onhover(),
+                aria_selected: status(),
                 Text {
                     onmounted: text_onmounted,
                     style: style(),
-                    css: "text-white w-full text-ellipsis group-aria-selected:text-clip group-aria-selected:animate-scroll-left text-nowrap font-black text-[80px]",
+                    css: "text-white w-full text-ellipsis group-aria-selected:text-clip group-hover:group-aria-selected:animate-scroll-left text-nowrap font-black text-[80px]",
                     {collection.read().display_name().clone()}
                 }
                 Button {

@@ -161,12 +161,11 @@ fn EditSidebar(collection_id: ReadOnlySignal<CollectionId>) -> Element {
 #[component]
 fn EditSidebarInfographic(collection_id: ReadOnlySignal<CollectionId>) -> Element {
     let (onmounted, status, style) = use_text_scroller();
-    let mut onhover = use_signal(|| false);
     let collection = collection_id().get_collection();
     rsx! {
         div {
             class: "group flex flex-col w-full",
-            aria_selected: status() && onhover(),
+            aria_selected: status(),
             div {
                 class: "flex flex-col p-5 justify-end rounded-t-[50px] w-full min-h-[250px]",
                 background: format!(
@@ -178,12 +177,6 @@ fn EditSidebarInfographic(collection_id: ReadOnlySignal<CollectionId>) -> Elemen
                 }
             }
             Button {
-                onmouseover: move |_| {
-                    onhover.set(true);
-                },
-                onmouseleave: move |_| {
-                    onhover.set(false);
-                },
                 roundness: Roundness::Bottom,
                 clickable: false,
                 extended_css_class: "bg-background overflow-x-clip justify-start px-5 pt-[22px]",
@@ -193,7 +186,7 @@ fn EditSidebarInfographic(collection_id: ReadOnlySignal<CollectionId>) -> Elemen
                                 ContentType::text(collection.read().display_name())
                                     .onmounted(onmounted)
                                     .style(dbg!(style()))
-                                    .css("text-3xl font-black w-full group-aria-selected:animate-scroll-left overflow-x-clip text-nowrap"),
+                                    .css("text-3xl font-black w-full group-hover:group-aria-selected:animate-scroll-left overflow-x-clip text-nowrap"),
                                 ContentType::hint("由我建立•18 分鐘•不久前開啟")
                                     .css("font-medium text-[15px]"),
                             ],

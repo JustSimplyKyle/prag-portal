@@ -57,18 +57,11 @@ pub fn CollectionBlock(
         .to_string_lossy()
         .to_string();
     let (onmounted, status, style) = use_text_scroller();
-    let mut onhover = use_signal(|| false);
     rsx! {
         div {
             button {
                 class: tw_merge!("group relative size-[280px] min-w-[280px] min-h-[280px]", extended_class),
-                onmouseover: move |_| {
-                    onhover.set(true);
-                },
-                onmouseleave: move |_| {
-                    onhover.set(false);
-                },
-                aria_selected: status() && onhover(),
+                aria_selected: status(),
                 onclick: move |_| {
                     Pages::collection_display(collection_id())
                         .switch_active_to_self();
@@ -86,7 +79,7 @@ pub fn CollectionBlock(
                 div {
                     class: "w-full absolute inset-0 px-5 pt-5 pb-[25px] flex flex-col gap-[15px] justify-end items-start overflow-x-clip",
                     Text {
-                        css: "group-aria-selected:animate-scroll-left w-full text-3xl text-white text-nowrap font-bold text-left",
+                        css: "group-hover:group-aria-selected:animate-scroll-left w-full text-3xl text-white text-nowrap font-bold text-left",
                         style: style(),
                         onmounted,
                         {collection.read().display_name().clone()}

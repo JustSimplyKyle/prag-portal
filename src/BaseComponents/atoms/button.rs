@@ -94,7 +94,8 @@ pub fn Button(
                 }
                 if let Some(x) = onclick {
                     x(());
-                } else if let Some(x) = &mut switcher {
+                }
+                if let Some(x) = &mut switcher {
                     x.switch_active_to_self();
                 }
             },
