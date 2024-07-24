@@ -1660,10 +1660,6 @@ input {
   max-width: 70px;
 }
 
-.invisible {
-  visibility: hidden;
-}
-
 .static {
   position: static;
 }
@@ -1707,10 +1703,6 @@ input {
 
 .z-0 {
   z-index: 0;
-}
-
-.z-10 {
-  z-index: 10;
 }
 
 .z-20 {
@@ -1766,10 +1758,6 @@ input {
 .size-\[280px\] {
   width: 280px;
   height: 280px;
-}
-
-.h-0 {
-  height: 0px;
 }
 
 .h-10 {
@@ -2373,6 +2361,10 @@ input {
 
 .overflow-scroll {
   overflow: scroll;
+}
+
+.overflow-y-hidden {
+  overflow-y: hidden;
 }
 
 .overflow-x-clip {
@@ -3034,22 +3026,21 @@ body {
   overflow: scroll;
 }
 
+.hover\:h-\[250px\]:hover {
+  height: 250px;
+}
+
 .hover\:bg-green:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(205 227 71 / var(--tw-bg-opacity));
 }
 
-.group\/test:hover .group-hover\/test\:visible {
-  visibility: visible;
+.group\/main:hover .group-hover\/main\:top-\[170px\] {
+  top: 170px;
 }
 
-.group\/test:hover .group-hover\/test\:h-fit {
-  height: -moz-fit-content;
-  height: fit-content;
-}
-
-.group\/test:hover .group-hover\/test\:p-5 {
-  padding: 1.25rem;
+.group\/main:hover .group-hover\/main\:top-\[85px\] {
+  top: 85px;
 }
 
 .aria-expanded\:w-\[80px\][aria-expanded="true"] {
@@ -3110,10 +3101,6 @@ body {
   padding: 0px;
 }
 
-.group[aria-expanded="true"] .group-aria-expanded\:pr-5 {
-  padding-right: 1.25rem;
-}
-
 .group[aria-selected="true"] .group-aria-selected\:block {
   display: block;
 }
@@ -3166,43 +3153,16 @@ body {
   animation: scrollLeft 10000ms infinite ease-in-out;
 }
 
-.group\/test[aria-selected=Collections] .group-aria-\[selected\=Collections\]\/test\:visible {
-  visibility: visible;
+.group\/main[aria-selected=Collections] .group-aria-\[selected\=Collections\]\/main\:z-10 {
+  z-index: 10;
 }
 
-.group\/test[aria-selected=Explore] .group-aria-\[selected\=Explore\]\/test\:visible {
-  visibility: visible;
+.group\/main[aria-selected=Explore] .group-aria-\[selected\=Explore\]\/main\:z-10 {
+  z-index: 10;
 }
 
-.group\/test[aria-selected=MainPage] .group-aria-\[selected\=MainPage\]\/test\:visible {
-  visibility: visible;
-}
-
-.group\/test[aria-selected=Collections] .group-aria-\[selected\=Collections\]\/test\:h-fit {
-  height: -moz-fit-content;
-  height: fit-content;
-}
-
-.group\/test[aria-selected=Explore] .group-aria-\[selected\=Explore\]\/test\:h-fit {
-  height: -moz-fit-content;
-  height: fit-content;
-}
-
-.group\/test[aria-selected=MainPage] .group-aria-\[selected\=MainPage\]\/test\:h-fit {
-  height: -moz-fit-content;
-  height: fit-content;
-}
-
-.group\/test[aria-selected=Collections] .group-aria-\[selected\=Collections\]\/test\:p-5 {
-  padding: 1.25rem;
-}
-
-.group\/test[aria-selected=Explore] .group-aria-\[selected\=Explore\]\/test\:p-5 {
-  padding: 1.25rem;
-}
-
-.group\/test[aria-selected=MainPage] .group-aria-\[selected\=MainPage\]\/test\:p-5 {
-  padding: 1.25rem;
+.group\/main[aria-selected=MainPage] .group-aria-\[selected\=MainPage\]\/main\:z-10 {
+  z-index: 10;
 }
 
 .group[aria-busy=false] .group\/active[aria-selected="true"] .group-aria-\[busy\=false\]\:group-aria-selected\/active\:block {
