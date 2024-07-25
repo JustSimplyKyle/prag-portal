@@ -11,13 +11,13 @@ use crate::{
     EXPLORE,
 };
 
-pub static NOTE: &str = manganis::mg!(file("./public/note_stack_add.svg"));
-pub static CROP_FREE: &str = manganis::mg!(file("./public/crop_free.svg"));
-pub static FILTER_LIST: &str = manganis::mg!(file("./public/filter_list.svg"));
-pub static SEARCH: &str = manganis::mg!(file("./public/search.svg"));
-pub static ARROW_DOWN: &str = manganis::mg!(file("./public/arrow_drop_down.svg"));
-pub static BOOKMARK: &str = manganis::mg!(file("./public/bookmark.svg"));
-pub static BOOKMARK_ADD: &str = manganis::mg!(file("./public/bookmark_add.svg"));
+pub static NOTE: &str = manganis::mg!("./public/note_stack_add.svg");
+pub static CROP_FREE: &str = manganis::mg!("./public/crop_free.svg");
+pub static FILTER_LIST: &str = manganis::mg!("./public/filter_list.svg");
+pub static SEARCH: &str = manganis::mg!("./public/search.svg");
+pub static ARROW_DOWN: &str = manganis::mg!("./public/arrow_drop_down.svg");
+pub static BOOKMARK: &str = manganis::mg!("./public/bookmark.svg");
+pub static BOOKMARK_ADD: &str = manganis::mg!("./public/bookmark_add.svg");
 
 #[component]
 pub fn Collections() -> Element {

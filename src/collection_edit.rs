@@ -20,9 +20,9 @@ use crate::{
     ARROW_RIGHT, COLLECTION_PICS,
 };
 
-pub const ADD: &str = manganis::mg!(file("./public/add.svg"));
-pub const HALLWAY: &str = manganis::mg!(file("./public/hallway.svg"));
-pub const PHOTO_LIBRARY: &str = manganis::mg!(file("./public/photo_library.svg"));
+pub const ADD: &str = manganis::mg!("./public/add.svg");
+pub const HALLWAY: &str = manganis::mg!("./public/hallway.svg");
+pub const PHOTO_LIBRARY: &str = manganis::mg!("./public/photo_library.svg");
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, EnumIter)]
 pub enum EditState {

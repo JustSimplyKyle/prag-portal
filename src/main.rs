@@ -68,13 +68,13 @@ fn get_random_collection_picture() -> ImageAsset {
     COLLECTION_PICS.read().values().nth(index).unwrap().clone()
 }
 
-pub const HOME: &str = manganis::mg!(file("./public/home.svg"));
-pub const EXPLORE: &str = manganis::mg!(file("./public/explore.svg"));
-pub const SIDEBAR_COLLECTION: &str = manganis::mg!(file("./public/collections.svg"));
-pub const ARROW_RIGHT: &str = manganis::mg!(file("./public/keyboard_arrow_right.svg"));
-pub const SIM_CARD: &str = manganis::mg!(file("./public/sim_card_download.svg"));
-pub const DRAG_INDICATOR: &str = manganis::mg!(file("./public/drag_indicator.svg"));
-pub const TAILWIND_STR: &str = manganis::mg!(file("./public/tailwind.css"));
+pub const HOME: &str = manganis::mg!("public/home.svg");
+pub const EXPLORE: &str = manganis::mg!("public/explore.svg");
+pub const SIDEBAR_COLLECTION: &str = manganis::mg!("public/collections.svg");
+pub const ARROW_RIGHT: &str = manganis::mg!("public/keyboard_arrow_right.svg");
+pub const SIM_CARD: &str = manganis::mg!("public/sim_card_download.svg");
+pub const DRAG_INDICATOR: &str = manganis::mg!("public/drag_indicator.svg");
+pub const TAILWIND_STR: &str = manganis::mg!("public/tailwind.css");
 
 /// `(Pages)`: Current active page
 /// `Option<Pages>`: Previous page
@@ -170,16 +170,11 @@ use rust_lib::api::shared_resources::entry::{self, STORAGE};
 fn main() {
     dioxus_logger::init(Level::INFO).expect("failed to init logger");
 
-    let cfg = dioxus::desktop::Config::new()
-        .with_window(
-            WindowBuilder::new()
-                .with_decorations(true)
-                .with_inner_size(PhysicalSize::new(1600, 920)),
-        )
-        .with_custom_head(format!(
-            "<link rel=\"stylesheet\" href=\"{}\">",
-            TAILWIND_STR
-        ));
+    let cfg = dioxus::desktop::Config::new().with_window(
+        WindowBuilder::new()
+            .with_decorations(true)
+            .with_inner_size(PhysicalSize::new(1600, 920)),
+    );
     // .with_menu(DioxusMenu);
     LaunchBuilder::desktop().with_cfg(cfg).launch(App);
 }
@@ -224,6 +219,10 @@ pub async fn collection_builder(
 fn App() -> Element {
     let error_active = use_signal(|| true);
     rsx! {
+        head::Link {
+            href: TAILWIND_STR,
+            rel: "stylesheet",
+        }
         div {
             class: "[&_*]:transform-gpu font-['GenSenRounded TW'] bg-deep-background min-h-screen min-w-scren font-display leading-normal",
             {

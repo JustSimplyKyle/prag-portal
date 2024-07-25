@@ -28,15 +28,15 @@ use crate::{
 pub static DISPLAY_BACKGROUND: ImageAsset =
     manganis::mg!(image("./public/cool_image.png").preload());
 
-pub static GAME_CONTROLLER: &str = manganis::mg!(file("./public/stadia_controller.svg"));
-pub static UNARCHIVE: &str = manganis::mg!(file("./public/unarchive.svg"));
-pub static CUBE: &str = manganis::mg!(file("./public/deployed_code.svg"));
-pub static GLOBAL_ASIA: &str = manganis::mg!(file("./public/globe_asia.svg"));
-pub static CIRCLE_JOIN: &str = manganis::mg!(file("./public/join.svg"));
-pub static MOTION_MODE: &str = manganis::mg!(file("./public/motion_mode.svg"));
-pub static DELETE: &str = manganis::mg!(file("./public/delete.svg"));
-pub static UNDO: &str = manganis::mg!(file("./public/undo.svg"));
-pub static HORIZ: &str = manganis::mg!(file("./public/more_horiz.svg"));
+pub static GAME_CONTROLLER: &str = manganis::mg!("./public/stadia_controller.svg");
+pub static UNARCHIVE: &str = manganis::mg!("./public/unarchive.svg");
+pub static CUBE: &str = manganis::mg!("./public/deployed_code.svg");
+pub static GLOBAL_ASIA: &str = manganis::mg!("./public/globe_asia.svg");
+pub static CIRCLE_JOIN: &str = manganis::mg!("./public/join.svg");
+pub static MOTION_MODE: &str = manganis::mg!("./public/motion_mode.svg");
+pub static DELETE: &str = manganis::mg!("./public/delete.svg");
+pub static UNDO: &str = manganis::mg!("./public/undo.svg");
+pub static HORIZ: &str = manganis::mg!("./public/more_horiz.svg");
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, EnumIter)]
 pub(crate) enum CollectionDisplayTopSelection {
@@ -211,7 +211,7 @@ fn Separator(mut top_position: Signal<f64>, container_height: Option<f64>) -> El
                 }
             },
             cursor: "ns-resize",
-            {ContentType::svg(manganis::mg!(file("public/Line 155.svg")))}
+            {ContentType::svg(manganis::mg!("public/Line 155.svg"))}
         }
     }
 }
