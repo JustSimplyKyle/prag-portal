@@ -173,9 +173,9 @@ fn main() {
     let cfg = dioxus::desktop::Config::new().with_window(
         WindowBuilder::new()
             .with_decorations(true)
+            .with_title("Prag Portal")
             .with_inner_size(PhysicalSize::new(1600, 920)),
     );
-    // .with_menu(DioxusMenu);
     LaunchBuilder::desktop().with_cfg(cfg).launch(App);
 }
 
@@ -224,7 +224,7 @@ fn App() -> Element {
             rel: "stylesheet",
         }
         div {
-            class: "[&_*]:transform-gpu font-['GenSenRounded TW'] bg-deep-background min-h-screen min-w-scren font-display leading-normal",
+            class: "[&_*]:transform-gpu font-['GenSenRounded TW'] bg-deep-background h-screen w-screen font-display leading-normal",
             {
                 TOP_LEVEL_COMPONENT().into_iter().map(|x| (x.pointer)(x.props))
             }
