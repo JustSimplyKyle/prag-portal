@@ -170,8 +170,6 @@ pub fn SideBar() -> Element {
                                 if let Some(prev) = prev {
                                     prev.switch_active_to_self();
                                 }
-                            } else {
-                                Pages::DownloadProgress.switch_active_to_self();
                             }
                         }
                     }
