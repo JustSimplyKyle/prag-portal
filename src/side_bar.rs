@@ -57,7 +57,7 @@ pub fn SideBar() -> Element {
                 }
             }
             div {
-                class: "justify-self-end group-aria-busy:hidden",
+                class: "flex justify-self-end group-aria-busy:hidden",
                 Text {
                     css: "text-lime-300",
                     "我的錦集"
@@ -76,12 +76,12 @@ pub fn SideBar() -> Element {
         div {
             class: "flex flex-col place-content-start mx-5",
             div {
-                class: "w-[300px] space-y-5 transition-all ease-linear duration-500 aria-expanded:w-[80px] group",
+                class: "transition-all w-[300px] space-y-5 transition-all ease-linear duration-500 aria-expanded:w-[80px] group",
                 aria_expanded: !expanded(),
                 aria_busy: !delayed_expanded().unwrap_or(false),
                 // top
                 div {
-                    class: "[&_*]:transition-all z-10 flex flex-col group/test space-y-1",
+                    class: "transition-all [&_*]:transition-all relative hover:h-[250px] h-[80px] w-full group/main overflow-y-hidden",
                     aria_selected: selected().to_string(),
                     Button {
                         roundness: Roundness::Squircle,
@@ -93,15 +93,9 @@ pub fn SideBar() -> Element {
                             selected.set(Selection::MainPage);
                         },
                         switcher: Pages::MainPage,
-                        extended_css_class: "
-                        z-0 bg-red text-black invisible h-0 p-0 
-                        group-aria-[selected=MainPage]/test:visible
-                        group-hover/test:visible 
-                        group-aria-[selected=MainPage]/test:h-fit
-                        group-hover/test:h-fit 
-                        group-aria-[selected=MainPage]/test:p-5
-                        group-hover/test:p-5 
-                        group-aria-expanded:pr-5"
+                        extended_css_class: "bg-red absolute h-[80px] top-0 text-black z-0
+                            group-aria-[selected=MainPage]/main:z-10
+                        "
                     }
                     Button {
                         roundness: Roundness::Squircle,
@@ -113,34 +107,26 @@ pub fn SideBar() -> Element {
                             ContentType::text("探索").css("group-aria-busy:hidden").align_right(),
                         ],
                         switcher: Pages::Explore,
-                        extended_css_class: "z-0 bg-light-blue text-black invisible h-0 p-0
-                        group-aria-[selected=Explore]/test:visible
-                        group-hover/test:visible 
-                        group-aria-[selected=Explore]/test:h-fit
-                        group-hover/test:h-fit 
-                        group-aria-[selected=Explore]/test:p-5 
-                        group-hover/test:p-5 
-                        group-aria-expanded:pr-5"
+                        extended_css_class: "bg-light-blue absolute h-[80px] top-0 text-black z-0
+                            group-aria-[selected=Explore]/main:z-10
+                            group-hover/main:top-[85px]
+                        "
                     }
                     Button {
                         roundness: Roundness::Squircle,
                         onclick: move |_| {
                             selected.set(Selection::Collections);
-                            expanded.toggle();
+                            // expanded.toggle();
                         },
                         string_placements: vec![
                             ContentType::svg(SIDEBAR_COLLECTION).align_left(),
                             ContentType::text("收藏庫").css("group-aria-busy:hidden").align_right(),
                         ],
                         switcher: Pages::Collections,
-                        extended_css_class: "z-0 bg-green text-black invisible h-0 p-0
-                        group-aria-[selected=Collections]/test:visible
-                        group-hover/test:visible 
-                        group-aria-[selected=Collections]/test:h-fit
-                        group-hover/test:h-fit 
-                        group-aria-[selected=Collections]/test:p-5
-                        group-hover/test:p-5 
-                        group-aria-expanded:pr-5"
+                        extended_css_class: "bg-green absolute h-[80px] text-black top-0 z-0
+                            group-aria-[selected=Collections]/main:z-10
+                            group-hover/main:top-[170px]
+                        "
                     }
                 }
                 // middle
