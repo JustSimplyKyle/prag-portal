@@ -10,17 +10,25 @@ pub mod scrollable;
 pub mod side_bar;
 pub mod text_scroller;
 
+use builder::collection_builder;
 use collection_edit::CollectionEditContainer;
 use dioxus::desktop::tao::dpi::PhysicalSize;
 use dioxus::desktop::WindowBuilder;
 use dioxus::html::input_data::MouseButton;
 use dioxus_logger::tracing::{info, Level};
+use itertools::Itertools;
 use manganis::ImageAsset;
 use pages::Pages;
 use rand::Rng;
+use rust_lib::api::backend_exclusive::download::DownloadError;
+use rust_lib::api::backend_exclusive::errors::ManifestProcessingError;
+use rust_lib::api::backend_exclusive::storage::storage_loader::StorageError;
 use rust_lib::api::backend_exclusive::vanilla::version::VersionMetadata;
-use rust_lib::api::shared_resources::collection::{CollectionId, ModLoader, ModLoaderType};
+use rust_lib::api::shared_resources::collection::{
+    CollectionError, CollectionId, ModLoader, ModLoaderType,
+};
 use scrollable::Scrollable;
+use snafu::{AsErrorSource, ErrorCompat};
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 use tailwind_fuse::*;
@@ -179,40 +187,73 @@ fn main() {
     LaunchBuilder::desktop().with_cfg(cfg).launch(App);
 }
 
-pub async fn collection_builder(
-    picture_path: impl Into<Option<PathBuf>> + Send,
-    version_id: impl Into<String> + Send,
-) -> anyhow::Result<()> {
-    let version = VersionMetadata::from_id(&version_id.into()).await?;
-    let mut collection = entry::create_collection(
-        "新的收藏",
-        picture_path
-            .into()
-            .unwrap_or_else(|| get_random_collection_picture().path().into()),
-        version,
-        ModLoader::new(ModLoaderType::Fabric, None),
-        None,
-    )
-    .await?;
-    info!("Adding mods...");
-    collection
-        .add_multiple_modrinth_mod(
-            vec![
-                "fabric-api",
-                "sodium",
-                "modmenu",
-                "ferrite-core",
-                "lazydfu",
-                "iris",
-                "indium",
-            ],
-            vec![],
+mod builder {
+    use std::path::PathBuf;
+
+    use dioxus_logger::tracing::info;
+    use rust_lib::api::{
+        backend_exclusive::{errors::ManifestProcessingError, vanilla::version::VersionMetadata},
+        shared_resources::{
+            collection::{CollectionError, ModLoader, ModLoaderType},
+            entry,
+        },
+    };
+    use snafu::prelude::*;
+
+    use crate::get_random_collection_picture;
+
+    #[derive(Snafu, Debug)]
+    pub enum CollectionBuilderError {
+        #[snafu(display("Invalid version id {id}"))]
+        InvalidVersionId { id: String },
+        #[snafu(display("Failed to parse version id {id}"))]
+        VersionIdParsing {
+            id: String,
+            source: ManifestProcessingError,
+        },
+        #[snafu(transparent)]
+        CollectionError { source: CollectionError },
+    }
+
+    pub async fn collection_builder(
+        picture_path: impl Into<Option<PathBuf>> + Send,
+        version_id: impl Into<String> + Send,
+    ) -> Result<(), CollectionBuilderError> {
+        let version_id = version_id.into();
+        let version = VersionMetadata::from_id(&version_id)
+            .await
+            .context(VersionIdParsingSnafu { id: &version_id })?
+            .context(InvalidVersionIdSnafu { id: &version_id })?;
+        let mut collection = entry::create_collection(
+            "新的收藏",
+            picture_path
+                .into()
+                .unwrap_or_else(|| get_random_collection_picture().path().into()),
+            version,
+            ModLoader::new(ModLoaderType::Fabric, None),
             None,
         )
         .await?;
-    collection.download_mods().await?;
-    info!("Finished downloading mods");
-    Ok(())
+        info!("Adding mods...");
+        collection
+            .add_multiple_modrinth_mod(
+                vec![
+                    "fabric-api",
+                    "sodium",
+                    "modmenu",
+                    "ferrite-core",
+                    "lazydfu",
+                    "iris",
+                    "indium",
+                ],
+                vec![],
+                None,
+            )
+            .await?;
+        collection.download_mods().await?;
+        info!("Finished downloading mods");
+        Ok(())
+    }
 }
 
 #[component]
@@ -277,7 +318,7 @@ pub trait RefIntoRenderError {
     fn into_render_error(&self) -> RenderError;
 }
 
-impl RefIntoRenderError for anyhow::Error {
+impl<T: std::fmt::Display> RefIntoRenderError for T {
     fn into_render_error(&self) -> RenderError {
         RenderError::Aborted(CapturedError::from_display(self.to_string()))
     }
@@ -301,9 +342,33 @@ pub fn use_error_handler() -> Signal<Option<Result<(), anyhow::Error>>> {
     use_context()
 }
 
+pub trait ErrorFormatted {
+    fn to_formatted(&self) -> String;
+}
+
+impl<T: std::error::Error + std::fmt::Debug + ErrorCompat + 'static> ErrorFormatted for T {
+    fn to_formatted(&self) -> String {
+        let chain = self
+            .iter_chain()
+            .enumerate()
+            .fold(String::new(), |mut acc, (u, x)| {
+                acc.push_str(&format!("{u}: {x}"));
+                acc.push('\n');
+                acc
+            });
+        format!("display: \n{chain}debug:\n{self:#?}")
+    }
+}
 #[component]
 fn Layout() -> Element {
-    use_resource(|| collection_builder(None, "1.20.1")).throw()?;
+    {
+        let err = use_resource(|| collection_builder(None, "1.20.1"));
+        let read = err.read();
+        let transpose = read.as_ref().map(|x| x.as_ref().cloned()).transpose();
+        if let Err(err) = transpose {
+            return Err(err.to_formatted().into_render_error());
+        }
+    }
 
     let keys = use_context_provider(move || {
         Signal::memo(move || (STORAGE.collections)().into_keys().collect::<Vec<_>>())
