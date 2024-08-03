@@ -46,43 +46,34 @@ use crate::download_progress::DownloadProgress;
 use crate::main_page::MainPage;
 use crate::side_bar::SideBar;
 
-pub const COLLECTION_PICS: GlobalSignal<BTreeMap<&str, ImageAsset>> = GlobalSignal::new(|| {
+const FIRST: ImageAsset = asset!(image("./public/first_collection_pic.png").preload());
+const SECOND: ImageAsset = asset!(image("./public/second_collection_pic.png").preload());
+const THIRD: ImageAsset = asset!(image("./public/third_collection_pic.png").preload());
+const FORTH: ImageAsset = asset!(image("./public/forth_collection_pic.png").preload());
+const FIFTH: ImageAsset = asset!(image("./public/fifth_collection_pic.png").preload());
+
+pub const COLLECTION_PICS: GlobalSignal<BTreeMap<&str, &str>> = GlobalSignal::new(|| {
     BTreeMap::from([
-        (
-            "a",
-            manganis::mg!(image("./public/first_collection_pic.png").preload()),
-        ),
-        (
-            "b",
-            manganis::mg!(image("./public/second_collection_pic.png").preload()),
-        ),
-        (
-            "c",
-            manganis::mg!(image("./public/third_collection_pic.png").preload()),
-        ),
-        (
-            "d",
-            manganis::mg!(image("./public/forth_collection_pic.png").preload()),
-        ),
-        (
-            "e",
-            manganis::mg!(image("./public/fifth_collection_pic.png").preload()),
-        ),
+        ("a", FIRST.path()),
+        ("b", SECOND.path()),
+        ("c", THIRD.path()),
+        ("d", FORTH.path()),
+        ("e", FIFTH.path()),
     ])
 });
 
-fn get_random_collection_picture() -> ImageAsset {
+fn get_random_collection_picture() -> &'static str {
     let index = rand::thread_rng().gen_range(0..=4);
-    COLLECTION_PICS.read().values().nth(index).unwrap().clone()
+    COLLECTION_PICS.read().values().nth(index).unwrap()
 }
 
-pub const HOME: &str = manganis::mg!("public/home.svg");
-pub const EXPLORE: &str = manganis::mg!("public/explore.svg");
-pub const SIDEBAR_COLLECTION: &str = manganis::mg!("public/collections.svg");
-pub const ARROW_RIGHT: &str = manganis::mg!("public/keyboard_arrow_right.svg");
-pub const SIM_CARD: &str = manganis::mg!("public/sim_card_download.svg");
-pub const DRAG_INDICATOR: &str = manganis::mg!("public/drag_indicator.svg");
-pub const TAILWIND_STR: &str = manganis::mg!("public/tailwind.css");
+pub const HOME: &str = asset!("./public/home.svg");
+pub const EXPLORE: &str = asset!("./public/explore.svg");
+pub const SIDEBAR_COLLECTION: &str = asset!("./public/collections.svg");
+pub const ARROW_RIGHT: &str = asset!("./public/keyboard_arrow_right.svg");
+pub const SIM_CARD: &str = asset!("./public/sim_card_download.svg");
+pub const DRAG_INDICATOR: &str = asset!("./public/drag_indicator.svg");
+pub const TAILWIND_STR: &str = asset!("./public/tailwind.css");
 
 /// `(Pages)`: Current active page
 /// `Option<Pages>`: Previous page
@@ -228,7 +219,7 @@ mod builder {
             "新的收藏",
             picture_path
                 .into()
-                .unwrap_or_else(|| get_random_collection_picture().path().into()),
+                .unwrap_or_else(|| get_random_collection_picture().into()),
             version,
             ModLoader::new(ModLoaderType::Fabric, None),
             None,
@@ -265,7 +256,7 @@ fn App() -> Element {
             rel: "stylesheet",
         }
         div {
-            class: "[&_*]:transform-gpu font-['GenSenRounded TW'] bg-deep-background h-screen w-screen font-display leading-normal",
+            class: "[&_*]:transform-gpu bg-deep-background h-screen w-screen font-display leading-normal",
             {
                 TOP_LEVEL_COMPONENT().into_iter().map(|x| (x.pointer)(x.props))
             }
@@ -484,8 +475,8 @@ fn CollectionContainer() -> Element {
                 class: "absolute inset-0 z-0 min-h-full min-w-full",
                 id: Pages::collection_display(collection_id.clone()).slide_in_id(),
                 if Pages::collection_display(collection_id.clone()).should_render() {
-                    LayoutContainer {
-                        extended_class: "p-0",
+                    div {
+                        class: "bg-deep-background min-h-screen rounded-xl min-w-full",
                         CollectionDisplay {
                             collection_id: collection_id.clone()
                         }
