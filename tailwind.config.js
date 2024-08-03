@@ -54,6 +54,7 @@ module.exports = {
   theme: {
     fontFamily: {
       'display': ['GenSenRounded TW'],
+      'english': ['IBM Plex Mono'],
     },
     fontMetrics: {
       'display': {
@@ -61,6 +62,13 @@ module.exports = {
         ascent: 880,
         lineGap: 0,
         descent: -120,
+        unitsPerEm: 1000,
+      },
+      'english': {
+        capHeight: 698,
+        ascent: 1025,
+        lineGap: 0,
+        descent: -275,
         unitsPerEm: 1000,
       }
     },
