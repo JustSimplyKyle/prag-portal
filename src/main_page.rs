@@ -240,14 +240,14 @@ fn SuggestionPage() -> Element {
                     class: "absolute inset-0 z-50 flex justify-center items-center bg-gradient-to-t from-deep-background to-deep-background min-h-full max-h-full rounded-[20px]",
                     div {
                         span {
-                            class: "text-lime-300 text-6xl font-bold font-['GenSenRounded TW'] leading-[78px] tracking-[6px]",
+                            class: "text-lime-300 text-6xl font-bold leading-[78px] tracking-[6px]",
                             "探索  創造"
                             br {
 
                             }
                         }
                         span {
-                            class: "text-white text-6xl font-normal font-['GenSenRounded TW'] leading-[78px] tracking-[6px]",
+                            class: "text-white text-6xl font-normal leading-[78px] tracking-[6px]",
                             "無窮  無限"
                             br {
 
