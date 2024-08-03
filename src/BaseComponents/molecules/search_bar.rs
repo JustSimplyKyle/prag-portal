@@ -12,8 +12,13 @@ use crate::{
 };
 
 #[component]
-pub fn SearchContainer(search: String, childrens: Vec<(String, Element)>) -> Element {
+pub fn FilterSearch(
+    search: ReadOnlySignal<String>,
+    default: String,
+    childrens: Vec<(String, Element)>,
+) -> Element {
     let matcher = fuzzy_matcher::skim::SkimMatcherV2::default();
+    let search = search();
     let render = childrens
         .into_iter()
         .map(|(name, x)| {
@@ -21,7 +26,7 @@ pub fn SearchContainer(search: String, childrens: Vec<(String, Element)>) -> Ele
             (score, x)
         })
         .filter_map(|(score, x)| {
-            if search == "搜尋" {
+            if search == default {
                 Some((i64::MAX, x))
             } else {
                 score.map(|score| (score, x))
