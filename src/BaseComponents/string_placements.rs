@@ -453,18 +453,9 @@ fn sub_content_builder(
 ) -> Element {
     let vnode = ele?;
     let dynamic = vnode.dynamic_nodes.first();
-    let inplace = vnode.template.get().roots.first();
+    let inplace = vnode.template.roots.first();
 
-    let text = match (dynamic, inplace) {
-        (Some(DynamicNode::Text(text)), _) => text.value.clone(),
-        (_, Some(TemplateNode::Text { text })) => (*text).to_string(),
-        _ => {
-            return Err(RenderError::Aborted(
-                CapturedError::from_str("please input only text in a `[Text/Hint/Image]` element")
-                    .unwrap(),
-            ))
-        }
-    };
+    let text = matcher(dynamic, inplace)?;
 
     if let Some(x) = onmounted {
         content_type(text)
@@ -473,6 +464,27 @@ fn sub_content_builder(
             .style(style)
             .get_element()
     } else {
-        content_type(text).css(css).get_element()
+        content_type(text).css(css).style(style).get_element()
     }
+}
+
+fn matcher(
+    dynamic: Option<&DynamicNode>,
+    inplace: Option<&TemplateNode>,
+) -> Result<String, RenderError> {
+    let text = match (dynamic, inplace) {
+        (Some(DynamicNode::Text(text)), _) => text.value.clone(),
+        (_, Some(TemplateNode::Text { text })) => (*text).to_string(),
+        (Some(DynamicNode::Fragment(x)), _) => matcher(
+            x.first().unwrap().dynamic_nodes.first(),
+            x.first().unwrap().template.roots.first(),
+        )?,
+        _ => {
+            return Err(RenderError::Aborted(
+                CapturedError::from_str("please input only text in a `[Text/Hint/Image]` element")
+                    .unwrap(),
+            ));
+        }
+    };
+    Ok(text)
 }
