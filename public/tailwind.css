@@ -1755,6 +1755,10 @@ input {
   top: 0px;
 }
 
+.top-full {
+  top: 100%;
+}
+
 .z-0 {
   z-index: 0;
 }
@@ -1769,6 +1773,10 @@ input {
 
 .z-\[1000\] {
   z-index: 1000;
+}
+
+.z-\[2000\] {
+  z-index: 2000;
 }
 
 .z-\[200\] {
@@ -1879,10 +1887,6 @@ input {
   height: 80px;
 }
 
-.h-\[94\%\] {
-  height: 94%;
-}
-
 .h-fit {
   height: -moz-fit-content;
   height: fit-content;
@@ -1931,6 +1935,10 @@ input {
 
 .min-h-\[280px\] {
   min-height: 280px;
+}
+
+.min-h-\[calc\(100\%-100px\)\] {
+  min-height: calc(100% - 100px);
 }
 
 .min-h-full {
@@ -1983,6 +1991,10 @@ input {
 
 .w-\[50px\] {
   width: 50px;
+}
+
+.w-\[75px\] {
+  width: 75px;
 }
 
 .w-\[80px\] {
@@ -2074,11 +2086,6 @@ input {
 
 .grow-0 {
   flex-grow: 0;
-}
-
-.translate-y-\[106\%\] {
-  --tw-translate-y: 106%;
-  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 
 @keyframes slideDown {
@@ -2433,6 +2440,10 @@ input {
   overflow: scroll;
 }
 
+.overflow-x-hidden {
+  overflow-x: hidden;
+}
+
 .overflow-y-hidden {
   overflow-y: hidden;
 }
@@ -2443,6 +2454,10 @@ input {
 
 .overflow-x-scroll {
   overflow-x: scroll;
+}
+
+.overflow-y-scroll {
+  overflow-y: scroll;
 }
 
 .text-ellipsis {
@@ -2686,6 +2701,11 @@ input {
   padding-right: 40px;
 }
 
+.px-\[50px\] {
+  padding-left: 50px;
+  padding-right: 50px;
+}
+
 .py-\[10px\] {
   padding-top: 10px;
   padding-bottom: 10px;
@@ -2858,6 +2878,12 @@ input {
 
 .filter {
   filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
+}
+
+.backdrop-blur-\[7\.5px\] {
+  --tw-backdrop-blur: blur(7.5px);
+  -webkit-backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
+          backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
 }
 
 .transition-all {

@@ -1,6 +1,7 @@
 use std::ops::Deref;
 
 use dioxus::prelude::*;
+use dioxus_elements::geometry::PixelsRect;
 use manganis::ImageAsset;
 use rust_lib::api::{
     backend_exclusive::mod_management::mods::ModMetadata,
@@ -71,10 +72,10 @@ pub fn ScrollableFootBar(main: Element, footer: Element, bottom: Element) -> Ele
             }
             div {
                 class: "pb-[20px] flex-none sticky top-0 z-[1000]",
-                {footer.clone()}
+                {footer}
             }
             div {
-                class: "flex-none inset-0 h-[94%] absolute translate-y-[106%] z-0",
+                class: "flex-none min-h-[calc(100%-100px)] inset-0 w-full absolute top-full z-0",
                 {bottom}
             }
         }
@@ -90,7 +91,7 @@ fn CollectionBackground(collection_id: ReadOnlySignal<CollectionId>) -> Element 
                     let mut collection = collection_id().get_collection_owned();
                     collection.launch_game().await.unwrap();
                     let collection_to_replace =
-                        &mut *collection_id().try_get_mut_collection().unwrap();
+                        &mut *collection_id().try_get_raw_mut_collection().unwrap();
                     *collection_to_replace = collection;
                 }
                 Action::Stop => {}
@@ -259,7 +260,7 @@ fn CollectionBackground(collection_id: ReadOnlySignal<CollectionId>) -> Element 
             ),
             bottom: rsx!(
                 div {
-                    class: "bg-background min-w-full max-w-full flex flex-col min-h-full",
+                    class: "relative overflow-y-scroll min-w-full max-w-full flex flex-col h-full",
                     if status().0 == CollectionDisplayTopSelection::Mods {
                         ModViewer {
                             collection_id,
@@ -274,11 +275,16 @@ fn CollectionBackground(collection_id: ReadOnlySignal<CollectionId>) -> Element 
 }
 
 #[component]
-pub fn GridRow(items: [Element; 6], #[props(default)] class: String) -> Element {
+pub fn GridRow(
+    items: [Element; 6],
+    #[props(default)] class: String,
+    #[props(extends = div, extends = GlobalAttributes)] attributes: Vec<Attribute>,
+) -> Element {
     let class = tw_merge!("flex items-center gap-[10px]", class);
     rsx! {
         div {
             class,
+            ..attributes,
             div {
                 class: "grow flex items-center w-full gap-[20px]",
                 div {
@@ -352,53 +358,59 @@ fn ModViewer(
         .collect::<Vec<_>>();
     rsx! {
         div {
-            class: "bg-background rounded-[30px] px-[20px]",
+            class: "bg-background rounded-t-[30px] h-full overflow-x-hidden",
             GridRow {
+                class: "w-full rounded-t-[30px] px-[50px] py-[10px] backdrop-blur-[7.5px] sticky top-0 z-[2000]",
+                background: "rgba(25, 25, 25, 0.90)",
                 items: [
                     rsx!(
                         Text {
-                            css: "flex-none inline-flex justify-center w-[80px]",
+                            css: "flex-none inline-flex justify-center w-[80px] text-white text-lg",
                             "圖示"
                         }
                     ),
                     rsx!(
                         Text {
-                            css: "grow w-full py-[10px]",
+                            css: "grow w-full py-[10px] text-white text-lg",
                             "名稱（來源／文件名稱）"
                         }
                     ),
                     rsx!(
                         Text {
-                            css: "flex-none w-[80px] py-[10px]",
+                            css: "flex-none w-[75px] py-[10px] text-white text-lg",
                             "更新"
                         }
                     ),
                     rsx!(
                         Text {
-                            css: "flex-none w-[80px] py-[10px]",
+                            css: "flex-none w-[75px] py-[10px] text-white text-lg",
                             "刪除"
                         }
                     ),
                     rsx!(
                         Text {
-                            css: "flex-none w-[80px] py-[10px]",
+                            css: "flex-none w-[75px] py-[10px] text-white text-lg",
                             "更多"
                         }
                     ),
                     rsx!(
                         Text {
-                            css: "flex-none w-[80px] py-[10px]",
+                            css: "flex-none w-[75px] py-[10px] text-white text-lg",
                             "狀態"
                         }
                     ),
                 ]
             }
+
             div {
-                class: "flex flex-col gap-[5px]",
-                FilterSearch {
-                    search,
-                    default,
-                    childrens: mods,
+                class: "bg-background w-full h-full flex flex-col px-[20px]",
+                div {
+                    class: "flex flex-col gap-[5px]",
+                    FilterSearch {
+                        search,
+                        default,
+                        childrens: mods,
+                    }
                 }
             }
         }
