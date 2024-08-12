@@ -1847,16 +1847,16 @@ input {
   height: 100px;
 }
 
-.h-\[20px\] {
-  height: 20px;
-}
-
 .h-\[25px\] {
   height: 25px;
 }
 
 .h-\[350px\] {
   height: 350px;
+}
+
+.h-\[40px\] {
+  height: 40px;
 }
 
 .h-\[450px\] {
@@ -1965,16 +1965,8 @@ input {
   width: 100px;
 }
 
-.w-\[20px\] {
-  width: 20px;
-}
-
 .w-\[25px\] {
   width: 25px;
-}
-
-.w-\[280px\] {
-  width: 280px;
 }
 
 .w-\[300px\] {
@@ -1983,10 +1975,6 @@ input {
 
 .w-\[450px\] {
   width: 450px;
-}
-
-.w-\[45px\] {
-  width: 45px;
 }
 
 .w-\[50px\] {
@@ -2053,6 +2041,10 @@ input {
 
 .max-w-\[163px\] {
   max-width: 163px;
+}
+
+.max-w-\[280px\] {
+  max-width: 280px;
 }
 
 .max-w-\[400px\] {
@@ -2545,6 +2537,10 @@ input {
   border-width: 2px;
 }
 
+.border-b-\[3px\] {
+  border-bottom-width: 3px;
+}
+
 .border-\[\#2E2E2E\] {
   --tw-border-opacity: 1;
   border-color: rgb(46 46 46 / var(--tw-border-opacity));
@@ -2553,6 +2549,11 @@ input {
 .border-zinc-900 {
   --tw-border-opacity: 1;
   border-color: rgb(24 24 27 / var(--tw-border-opacity));
+}
+
+.border-b-secondary-surface {
+  --tw-border-opacity: 1;
+  border-bottom-color: rgb(47 47 47 / var(--tw-border-opacity));
 }
 
 .bg-\[\#CCE246\] {
@@ -2650,6 +2651,10 @@ input {
 
 .p-8 {
   padding: 2rem;
+}
+
+.p-\[10px\] {
+  padding: 10px;
 }
 
 .p-\[15px\] {
@@ -2985,6 +2990,11 @@ input {
   font-size: 25px;
 }
 
+.text-\[28px\] {
+  --font-size-px: 28;
+  font-size: 28px;
+}
+
 .text-\[35px\] {
   --font-size-px: 35;
   font-size: 35px;
@@ -3162,17 +3172,9 @@ body {
   flex: 1 1 auto;
 }
 
-.group[aria-selected="true"] .group-aria-selected\:border-4 {
-  border-width: 4px;
-}
-
-.group[aria-selected="true"] .group-aria-selected\:border-green {
-  --tw-border-opacity: 1;
-  border-color: rgb(205 227 71 / var(--tw-border-opacity));
-}
-
-.group[aria-selected="true"] .group-aria-selected\:bg-none {
-  background-image: none;
+.group[aria-selected="true"] .group-aria-selected\:bg-white {
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 255 255 / var(--tw-bg-opacity));
 }
 
 .group[aria-selected="true"] .group-aria-selected\:text-zinc-800 {

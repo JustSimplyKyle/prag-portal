@@ -122,7 +122,7 @@ fn CollectionBackground(collection_id: ReadOnlySignal<CollectionId>) -> Element 
                     }
                     Button {
                         roundness: Roundness::Squircle,
-                        extended_css_class: "bg-background pl-[25px] pr-[20px] w-[280px]",
+                        extended_css_class: "bg-background pl-[25px] pr-[20px] min-w-[280px] max-w-[280px]",
                         fill_mode: FillMode::Fit,
                         clickable: false,
                         string_placements: vec![
@@ -133,7 +133,7 @@ fn CollectionBackground(collection_id: ReadOnlySignal<CollectionId>) -> Element 
                                 ],
                                 Alignment::Left,
                             ).css("gap-[5px] align-center"),
-                            ContentType::svg(ARROW_DOWN).css("svg-[40px]").align_right(),
+                            ContentType::svg(asset!("public/arrow_drop_down_40.svg")).css("svg-[40px]").align_right(),
                         ],
                     }
                     Button {
@@ -144,7 +144,7 @@ fn CollectionBackground(collection_id: ReadOnlySignal<CollectionId>) -> Element 
                         string_placements: vec![
                             ContentType::custom(rsx!(
                                 input {
-                                    class: "w-full text-hint leading-[1.2] capsize",
+                                    class: "w-full text-hint font-medium text-xl leading-[1.2] capsize",
                                     onfocusin: move |_| {
                                         if &*value.read() == &default.cloned() {
                                             value.set(String::new());
@@ -358,9 +358,9 @@ fn ModViewer(
         .collect::<Vec<_>>();
     rsx! {
         div {
-            class: "bg-background rounded-t-[30px] h-full overflow-x-hidden",
+            class: "bg-background flex flex-col gap-[20px] rounded-t-[30px] pb-[30px] h-full overflow-x-hidden",
             GridRow {
-                class: "w-full rounded-t-[30px] px-[50px] py-[10px] backdrop-blur-[7.5px] sticky top-0 z-[2000]",
+                class: "w-full border-b-[3px] border-b-secondary-surface rounded-t-[30px] px-[50px] py-[10px] backdrop-blur-[7.5px] sticky top-0 z-[2000]",
                 background: "rgba(25, 25, 25, 0.90)",
                 items: [
                     rsx!(
@@ -403,7 +403,7 @@ fn ModViewer(
             }
 
             div {
-                class: "bg-background w-full h-full flex flex-col px-[20px]",
+                class: "bg-background w-full h-full flex flex-col px-[30px]",
                 div {
                     class: "flex flex-col gap-[5px]",
                     FilterSearch {
@@ -427,14 +427,14 @@ fn SubModViewer(collection_id: ReadOnlySignal<CollectionId>, mods: ModMetadata) 
     });
     let name = rsx!(
         Text {
-            css: "text-white text-3xl font-bold",
+            css: "text-white text-[28px] font-bold font-english",
             {mods.name.clone()}
         }
     );
     let file_name = rsx!(
         if let Some(version) = &mods.mod_version {
             Hint {
-                css: "font-medium text-[15px] font-english",
+                css: "font-medium text-hint text-[15px] font-english",
                 {version.clone()}
             }
         }
