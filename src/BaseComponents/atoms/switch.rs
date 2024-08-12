@@ -4,7 +4,7 @@ use dioxus::prelude::*;
 pub fn Switch(clicked: Signal<bool>, onclick: Option<EventHandler>) -> Element {
     rsx! {
         button {
-            class: "group w-[45px] p-[5px] rounded-full flex justify-start items-center bg-background",
+            class: "group w-[80px] p-[10px] rounded-[10px] flex justify-start items-center bg-background",
             "aria-selected": clicked(),
             onclick: move |_| {
                 clicked.toggle();
@@ -16,7 +16,7 @@ pub fn Switch(clicked: Signal<bool>, onclick: Option<EventHandler>) -> Element {
                 class: "transition-all duration-700 ease-linear flex-none group-aria-selected:flex-auto"
             }
             div {
-                class: "transition-all ease-in-out w-[20px] h-[20px] group-aria-selected:border-4 group-aria-selected:border-green group-aria-selected:bg-none rounded-full bg-secondary-surface"
+                class: "transition-all ease-in-out w-[25px] h-[40px] group-aria-selected:bg-white rounded-[10px] bg-secondary-surface"
             }
         }
     }
