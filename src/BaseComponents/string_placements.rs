@@ -146,7 +146,11 @@ impl Content {
     // Method to apply additional CSS, modifying existing styling
     pub fn css(mut self, css: impl Into<String>) -> Self {
         let css = css.into();
-        self.css = tw_merge!(self.css, css, "leading-[1.2] capsize");
+        if css.contains("font") {
+            self.css = tw_join!(self.css, css, "leading-[1.2] capsize");
+        } else {
+            self.css = tw_merge!(self.css, css, "leading-[1.2] capsize");
+        }
         self
     }
 
