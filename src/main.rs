@@ -15,22 +15,14 @@ use collection_edit::CollectionEditContainer;
 use dioxus::desktop::tao::dpi::PhysicalSize;
 use dioxus::desktop::WindowBuilder;
 use dioxus::html::input_data::MouseButton;
-use dioxus_logger::tracing::{info, Level};
-use itertools::Itertools;
+use dioxus_logger::tracing::Level;
 use manganis::ImageAsset;
 use pages::Pages;
 use rand::Rng;
-use rust_lib::api::backend_exclusive::download::DownloadError;
-use rust_lib::api::backend_exclusive::errors::ManifestProcessingError;
-use rust_lib::api::backend_exclusive::storage::storage_loader::StorageError;
-use rust_lib::api::backend_exclusive::vanilla::version::VersionMetadata;
-use rust_lib::api::shared_resources::collection::{
-    CollectionError, CollectionId, ModLoader, ModLoaderType,
-};
+use rust_lib::api::shared_resources::collection::CollectionId;
 use scrollable::Scrollable;
-use snafu::{AsErrorSource, ErrorCompat};
+use snafu::ErrorCompat;
 use std::collections::BTreeMap;
-use std::path::PathBuf;
 use tailwind_fuse::*;
 use BaseComponents::{
     atoms::button::{Button, FillMode, Roundness},
@@ -164,7 +156,7 @@ impl History {
     }
 }
 
-use rust_lib::api::shared_resources::entry::{self, STORAGE};
+use rust_lib::api::shared_resources::entry::STORAGE;
 
 fn main() {
     dioxus_logger::init(Level::INFO).expect("failed to init logger");

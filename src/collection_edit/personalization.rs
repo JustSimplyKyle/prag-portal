@@ -81,7 +81,7 @@ fn ModifyName(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                         oninput: move |x| async move {
                             input.set(Some(x.value()));
                             collection_id().with_mut_collection(|ele| {
-                                *ele.display_name = x.value()
+                                ele.display_name = x.value()
                             })
                             .unwrap();
                         },
@@ -127,7 +127,7 @@ fn ModifyPicture(collection_id: ReadOnlySignal<CollectionId>) -> Element {
             if change() {
                 if let Some(x) = active() {
                     let path = PathBuf::from(COLLECTION_PICS.read().get(x).unwrap().to_string());
-                    collection_id().with_mut_collection(|x| *x.picture_path = path)?;
+                    collection_id().with_mut_collection(|x| x.picture_path = path)?;
                     change.set(false);
                 }
             }
@@ -141,7 +141,7 @@ fn ModifyPicture(collection_id: ReadOnlySignal<CollectionId>) -> Element {
             if let Some(x) = filename() {
                 if !x.is_empty() {
                     let path = PathBuf::from(x);
-                    collection_id().with_mut_collection(|x| *x.picture_path = path)?;
+                    collection_id().with_mut_collection(|x| x.picture_path = path)?;
                 }
             }
             Ok(())

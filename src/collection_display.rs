@@ -1,25 +1,21 @@
-use std::ops::Deref;
-
-use dioxus::prelude::*;
-use dioxus_elements::geometry::PixelsRect;
+use dioxus::{prelude::*, CapturedError};
 use manganis::ImageAsset;
 use rust_lib::api::{
-    backend_exclusive::mod_management::mods::ModMetadata,
+    backend_exclusive::mod_management::mods::{ModMetadata, Platform},
     shared_resources::collection::CollectionId,
 };
 use strum::EnumIter;
 use tailwind_fuse::tw_merge;
-use tokio_stream::StreamExt;
 
 use crate::{
-    collections::{ARROW_DOWN, SEARCH},
+    collections::SEARCH,
     impl_context_switcher,
-    main_page::{ARROW_LEFT, STAR},
+    main_page::STAR,
     pages::Pages,
     text_scroller::use_text_scroller,
     BaseComponents::{
         atoms::{
-            button::{Button, FillMode, Roundness, Size},
+            button::{Button, FillMode, Roundness},
             switch::Switch,
         },
         molecules::{
@@ -43,6 +39,8 @@ pub static DELETE: &str = asset!("./public/delete.svg");
 pub static UNDO: &str = asset!("./public/undo.svg");
 pub static HORIZ: &str = asset!("./public/more_horiz.svg");
 pub static BRIGHT_LEFT_ARROW: &str = asset!("./public/bright_left_arrow.svg");
+pub static MODRINTH: &str = asset!("./public/modrinth.svg");
+pub static CURSEFORGE: &str = asset!("./public/curseforge.svg");
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, EnumIter)]
 pub(crate) enum CollectionDisplayTopSelection {
@@ -84,23 +82,19 @@ pub fn ScrollableFootBar(main: Element, footer: Element, bottom: Element) -> Ele
 
 #[component]
 fn CollectionBackground(collection_id: ReadOnlySignal<CollectionId>) -> Element {
-    let launch_game = use_coroutine(move |mut rx| async move {
-        while let Some(action) = rx.next().await {
-            match action {
-                Action::Start => {
-                    let mut collection = collection_id().get_collection_owned();
-                    collection.launch_game().await.unwrap();
-                    let collection_to_replace =
-                        &mut *collection_id().try_get_raw_mut_collection().unwrap();
-                    *collection_to_replace = collection;
-                }
-                Action::Stop => {}
-            }
-        }
-    });
+    let launch_game = move || {
+        spawn(async move {
+            let mut collection = collection_id().get_collection_owned();
+            collection.launch_game().await.unwrap();
+            collection_id().replace(collection).unwrap();
+        })
+    };
     let (onmounted, status, style) = use_text_scroller();
     let collection = collection_id().get_collection();
-    let len = collection.with(|x| x.mod_controller().map(|x| x.manager.mods.len()));
+    let len = collection.with(|x| {
+        x.mod_controller()
+            .map(|x| x.manager.mods.iter().filter(|x| x.enabled).count())
+    });
     let mod_loader = collection.read().mod_loader().map(ToString::to_string);
     let status: Signal<Comparison<CollectionDisplayTopSelection>> =
         use_signal(|| (CollectionDisplayTopSelection::Mods, None));
@@ -185,13 +179,13 @@ fn CollectionBackground(collection_id: ReadOnlySignal<CollectionId>) -> Element 
                     }
                     Button {
                         roundness: Roundness::Squircle,
-                        extended_css_class: "bg-background min-w-[150px]",
+                        extended_css_class: "bg-white min-w-[150px]",
                         fill_mode: FillMode::Fit,
-                        string_placements: rsx![
-                            div {
-                                background: "var(--unnamed, linear-gradient(90deg, #C92B460%, #C92B4620%, #9747FF20%, #9747FF40%, #7CAED340%, #7CAED360%, #14AE5C60%, #14AE5C80%, #CDE34780%, #CDE347100%));",
-                                {ContentType::svg(GAME_CONTROLLER).align_center()}
-                            }
+                        onclick: move |_| {
+                            launch_game();
+                        },
+                        string_placements: vec![
+                            {ContentType::svg(GAME_CONTROLLER).align_center()}
                         ],
                     }
                 }
@@ -275,42 +269,46 @@ fn CollectionBackground(collection_id: ReadOnlySignal<CollectionId>) -> Element 
 }
 
 #[component]
-pub fn GridRow(
-    items: [Element; 6],
+pub fn GridRow<const T: usize>(
+    items: [Element; T],
     #[props(default)] class: String,
     #[props(extends = div, extends = GlobalAttributes)] attributes: Vec<Attribute>,
 ) -> Element {
-    let class = tw_merge!("flex items-center gap-[10px]", class);
+    if T < 3 {
+        let err = RenderError::Aborted(CapturedError::from_display("T should be greater than 2"));
+        return Err(err);
+    }
+    let class = tw_merge!("flex items-center gap-[20px]", class);
     rsx! {
         div {
             class,
             ..attributes,
             div {
-                class: "grow flex items-center w-full gap-[20px]",
+                class: "grow flex items-center h-full w-full gap-[20px]",
                 div {
-                    class: "flex-none inline-flex justify-center w-[80px]",
+                    class: "flex-none inline-flex justify-center w-[75px]",
                     {&items[0]}
                 }
                 div {
-                    class: "grow w-full py-[10px]",
-                    {&items[1]}
+                    class: "grow w-full flex items-center gap-[10px]",
+                    div {
+                        class: "grow w-full py-[10px]",
+                        {&items[1]}
+                    }
+                    div {
+                        class: "min-w-[150px] max-w-[150px]",
+                        {&items[2]}
+                    }
                 }
             }
             div {
-                class: "flex-none w-[80px] py-[10px] inline-flex justify-center",
-                {&items[2]}
-            }
-            div {
-                class: "flex-none w-[80px] py-[10px] inline-flex justify-center",
-                {&items[3]}
-            }
-            div {
-                class: "flex-none w-[80px] py-[10px] inline-flex justify-center",
-                {&items[4]}
-            }
-            div {
-                class: "flex-none w-[80px] py-[10px] inline-flex justify-center",
-                {&items[5]}
+                class: "flex items-center h-full gap-[10px]",
+                for i in 3..T {
+                    div {
+                        class: "flex-none w-[75px] py-[10px] inline-flex justify-center items-center",
+                        {&items[i]}
+                    }
+                }
             }
         }
     }
@@ -360,42 +358,48 @@ fn ModViewer(
         div {
             class: "bg-background flex flex-col gap-[20px] rounded-t-[30px] pb-[30px] h-full overflow-x-hidden",
             GridRow {
-                class: "w-full border-b-[3px] border-b-secondary-surface rounded-t-[30px] px-[50px] py-[10px] backdrop-blur-[7.5px] sticky top-0 z-[2000]",
+                class: "w-full border-b-[3px] border-b-secondary-surface rounded-t-[30px] h-[70px] px-[50px] py-[10px] backdrop-blur-[7.5px] sticky top-0 z-[2000]",
                 background: "rgba(25, 25, 25, 0.90)",
                 items: [
                     rsx!(
                         Text {
-                            css: "flex-none inline-flex justify-center w-[80px] text-white text-lg",
+                            css: "flex-none inline-flex justify-center w-[80px] text-white text-lg h-full",
                             "圖示"
                         }
                     ),
                     rsx!(
                         Text {
-                            css: "grow w-full py-[10px] text-white text-lg",
+                            css: "text-white text-lg h-full",
                             "名稱（來源／文件名稱）"
                         }
                     ),
                     rsx!(
                         Text {
-                            css: "flex-none w-[75px] py-[10px] text-white text-lg",
+                            css: "text-white text-lg h-full",
+                            "作者"
+                        }
+                    ),
+                    rsx!(
+                        Text {
+                            css: "text-white text-lg h-full",
                             "更新"
                         }
                     ),
                     rsx!(
                         Text {
-                            css: "flex-none w-[75px] py-[10px] text-white text-lg",
+                            css: "text-white text-lg h-full",
                             "刪除"
                         }
                     ),
                     rsx!(
                         Text {
-                            css: "flex-none w-[75px] py-[10px] text-white text-lg",
+                            css: "text-white text-lg h-full",
                             "更多"
                         }
                     ),
                     rsx!(
                         Text {
-                            css: "flex-none w-[75px] py-[10px] text-white text-lg",
+                            css: "text-white text-lg h-full",
                             "狀態"
                         }
                     ),
@@ -418,25 +422,69 @@ fn ModViewer(
 }
 
 #[component]
-fn SubModViewer(collection_id: ReadOnlySignal<CollectionId>, mods: ModMetadata) -> Element {
-    let clicked = use_signal(|| false);
-    let icon = rsx!(if let Some(icon) = mods.icon_url.as_ref() {
+fn SubModViewer(
+    collection_id: ReadOnlySignal<CollectionId>,
+    mods: ReadOnlySignal<ModMetadata>,
+) -> Element {
+    let clicked = use_signal(|| mods.read().enabled);
+    use_effect(move || {
+        let clicked = clicked();
+        let id = collection_id();
+        spawn(async move {
+            let mut collection = id.get_collection_owned();
+            let manager = &mut collection.mod_controller.as_mut().unwrap().manager;
+            let modify = manager
+                .mods
+                .iter_mut()
+                .find(|x| &**x == &*mods.read())
+                .unwrap();
+
+            if clicked {
+                modify.enable().await.unwrap();
+            } else {
+                modify.disable().await.unwrap();
+            }
+
+            id.replace(collection).unwrap();
+        });
+    });
+    let icon = rsx!(if let Some(icon) = mods.read().icon_url.as_ref() {
         {
             ContentType::image(icon.to_string()).css("size-[80px] rounded-[15px]")
         }
     });
     let name = rsx!(
-        Text {
-            css: "text-white text-[28px] font-bold font-english",
-            {mods.name.clone()}
+        div {
+            class: "flex gap-[7px]",
+            Text {
+                css: "text-white text-[28px] font-bold font-english",
+                {mods.read().name.clone()}
+            }
+            div {
+                class: "w-[40px] bg-background inline-flex items-center justify-center h-[30px] px-[10px] rounded-[30px]",
+                {
+                    ContentType::svg(
+                        match mods.read().platform() {
+                            Platform::Modrinth => MODRINTH,
+                            Platform::Curseforge => CURSEFORGE
+                        })
+                    .get_element()
+                }
+            }
         }
     );
     let file_name = rsx!(
-        if let Some(version) = &mods.mod_version {
+        if let Some(version) = &mods.read().mod_version {
             Hint {
                 css: "font-medium text-hint text-[15px] font-english",
                 {version.clone()}
             }
+        }
+    );
+    let author = rsx!(
+        Hint {
+            css: "text-[15px] font-english",
+            {mods.read().authors.join(", ")}
         }
     );
     let upgrade = rsx!(Button {
@@ -465,9 +513,7 @@ fn SubModViewer(collection_id: ReadOnlySignal<CollectionId>, mods: ModMetadata) 
         GridRow {
             class: "bg-deep-background items-center rounded-[20px] p-[20px]",
             items: [
-                rsx!(
-                    {icon}
-                ),
+                icon,
                 rsx!(
                     div {
                         class: "flex flex-col justify-center gap-[15px]",
@@ -475,18 +521,11 @@ fn SubModViewer(collection_id: ReadOnlySignal<CollectionId>, mods: ModMetadata) 
                         {file_name}
                     }
                 ),
-                rsx!(
-                    {upgrade}
-                ),
-                rsx!(
-                    {delete}
-                ),
-                rsx!(
-                    {more}
-                ),
-                rsx!(
-                    {status}
-                ),
+                author,
+                upgrade,
+                delete,
+                more,
+                status
             ]
         }
     }

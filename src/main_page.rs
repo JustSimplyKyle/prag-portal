@@ -78,11 +78,14 @@ pub fn CollectionBlock(
                 }
                 div {
                     class: "w-full absolute inset-0 px-5 pt-5 pb-[25px] flex flex-col gap-[15px] justify-end items-start overflow-x-clip",
-                    Text {
-                        css: "group-hover:group-aria-selected:animate-scroll-left w-full text-3xl text-white text-nowrap font-bold text-left",
-                        style: style(),
-                        onmounted,
-                        {collection.read().display_name().clone()}
+                    div {
+                        class: "font-bold",
+                        Text {
+                            css: "group-hover:group-aria-selected:animate-scroll-left w-full text-3xl text-white text-nowrap text-left",
+                            style: style(),
+                            onmounted,
+                            {collection.read().display_name().clone()}
+                        }
                     }
                     Hint {
                         css: "text-[15px] text-hint text-ellipsis text-nowrap",

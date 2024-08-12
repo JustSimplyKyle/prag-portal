@@ -88,7 +88,6 @@ impl std::fmt::Debug for Content {
         f.debug_struct("Content")
             .field("content", &self.content)
             .field("css", &self.css)
-            .field("onmounted", &"DEBUG onomunted")
             .finish()
     }
 }
