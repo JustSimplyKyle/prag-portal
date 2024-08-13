@@ -146,9 +146,9 @@ impl Content {
     pub fn css(mut self, css: impl Into<String>) -> Self {
         let css = css.into();
         if css.contains("font") {
-            self.css = tw_join!(self.css, css, "leading-[normal] capsize");
+            self.css = tw_join!(self.css, css, "leading-[1.2] capsize");
         } else {
-            self.css = tw_merge!(self.css, css, "leading-[normal] capsize");
+            self.css = tw_merge!(self.css, css, "leading-[1.2] capsize");
         }
         self
     }
@@ -306,7 +306,7 @@ impl ContentType {
     #[must_use]
     pub fn text(string: impl Into<String>) -> Content {
         let content_type = Self::Text(string.into());
-        let css = String::from("text-[1em] leading-[normal] capsize");
+        let css = String::from("text-[1em] leading-[1.2] capsize");
         Content {
             content: content_type,
             css,
@@ -333,7 +333,7 @@ impl ContentType {
     #[must_use]
     pub fn hint(string: impl Into<String>) -> Content {
         let content_type = Self::Hint(string.into());
-        let css = String::from("text-[17px] text-hint leading-[normal] capsize");
+        let css = String::from("text-[17px] text-hint leading-[1.2] capsize");
         Content {
             content: content_type,
             css,
