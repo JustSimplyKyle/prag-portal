@@ -132,7 +132,7 @@ fn CollectionBackground(collection_id: ReadOnlySignal<CollectionId>) -> Element 
                     }
                     Button {
                         roundness: Roundness::Squircle,
-                        extended_css_class: "bg-background min-w-[545px] w-full",
+                        extended_css_class: "bg-background min-w-fit w-full",
                         fill_mode: FillMode::Fit,
                         clickable: false,
                         string_placements: vec![
@@ -193,9 +193,10 @@ fn CollectionBackground(collection_id: ReadOnlySignal<CollectionId>) -> Element 
             main: rsx!(
                 div {
                     class: "rounded-[30px] w-full h-full p-[40px] grid grid-flow-col justify-stretch items-end",
+                    background_color: "#191919",
                     background: format!(
-                        "radial-gradient(198.55% 100% at 50% 0%, rgba(25, 25, 25, 0.00) 0%, #191919 82.94%), url(\'{}\') lightgray 50% / cover no-repeat",
-                        DISPLAY_BACKGROUND,
+                        "linear-gradient(145deg, rgba(25, 25, 25, 0.00) 18.18%, #191919 88.98%), url(\'{}\') lightgray 50% / cover no-repeat",
+                        DISPLAY_BACKGROUND
                     ),
                     div {
                         class: "justify-self-start flex flex-col gap-[35px]",
@@ -246,9 +247,23 @@ fn CollectionBackground(collection_id: ReadOnlySignal<CollectionId>) -> Element 
                             }
                         }
                     }
-                    img {
-                        class: "justify-self-end rounded-[30px] size-[280px] object-cover",
-                        src: collection.read().picture_path().to_string_lossy().to_string()
+                    div {
+                        class: "max-xl:hidden justify-self-end flex h-fit",
+                        img {
+                            class: "rounded-l-[30px] shadow size-[280px] object-cover",
+                            src: collection.read().picture_path().to_string_lossy().to_string()
+                        }
+                        div {
+                            class: "rounded-r-[30px] grid grid-flow-row justify-center items-stretch bg-deep-background pt-[25px] pb-[50px] gap-[15px]",
+                            div {
+                                class: "self-start justify-self-center inline-flex items-center justify-center w-[35px]",
+                                {ContentType::svg(asset!("./public/big_modrinth.svg"))}
+                            }
+                            div {
+                                class: "capsize leading-[normal] self-end text-3xl text-hint -rotate-90 font-english italic font-bold uppercase",
+                                "forge"
+                            }
+                        }
                     }
                 }
             ),

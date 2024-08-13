@@ -1981,6 +1981,10 @@ input {
   width: 300px;
 }
 
+.w-\[35px\] {
+  width: 35px;
+}
+
 .w-\[40px\] {
   width: 40px;
 }
@@ -2038,10 +2042,6 @@ input {
   min-width: 400px;
 }
 
-.min-w-\[545px\] {
-  min-width: 545px;
-}
-
 .min-w-fit {
   min-width: -moz-fit-content;
   min-width: fit-content;
@@ -2094,6 +2094,11 @@ input {
 
 .grow-0 {
   flex-grow: 0;
+}
+
+.-rotate-90 {
+  --tw-rotate: -90deg;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 
 @keyframes slideDown {
@@ -2420,6 +2425,14 @@ input {
   margin-bottom: calc(20px * var(--tw-space-y-reverse));
 }
 
+.self-start {
+  align-self: flex-start;
+}
+
+.self-end {
+  align-self: flex-end;
+}
+
 .self-center {
   align-self: center;
 }
@@ -2524,6 +2537,16 @@ input {
 .rounded-b-\[30px\] {
   border-bottom-right-radius: 30px;
   border-bottom-left-radius: 30px;
+}
+
+.rounded-l-\[30px\] {
+  border-top-left-radius: 30px;
+  border-bottom-left-radius: 30px;
+}
+
+.rounded-r-\[30px\] {
+  border-top-right-radius: 30px;
+  border-bottom-right-radius: 30px;
 }
 
 .rounded-t-3xl {
@@ -2778,6 +2801,10 @@ input {
   padding-bottom: 30px;
 }
 
+.pb-\[50px\] {
+  padding-bottom: 50px;
+}
+
 .pl-\[15px\] {
   padding-left: 15px;
 }
@@ -2822,6 +2849,10 @@ input {
   padding-top: 22px;
 }
 
+.pt-\[25px\] {
+  padding-top: 25px;
+}
+
 .pt-\[30px\] {
   padding-top: 30px;
 }
@@ -2860,6 +2891,14 @@ input {
 
 .font-semibold {
   font-weight: 600;
+}
+
+.uppercase {
+  text-transform: uppercase;
+}
+
+.italic {
+  font-style: italic;
 }
 
 .tracking-\[6px\] {
@@ -3076,6 +3115,11 @@ input {
   line-height: 78px;
 }
 
+.leading-\[normal\] {
+  --line-height-offset: calc((((var(--line-height-scale) * var(--font-size-px)) - NaN) / 2) / var(--font-size-px));
+  line-height: normal;
+}
+
 .leading-normal {
   --line-height-offset: calc((((var(--line-height-scale) * var(--font-size-px)) - calc(1.5 * var(--font-size-px))) / 2) / var(--font-size-px));
   line-height: 1.5;
@@ -3284,6 +3328,12 @@ body {
 .group[data-active=e] .group-data-\[active\=e\]\:border-white {
   --tw-border-opacity: 1;
   border-color: rgb(255 255 255 / var(--tw-border-opacity));
+}
+
+@media not all and (min-width: 1280px) {
+  .max-xl\:hidden {
+    display: none;
+  }
 }
 
 @media (min-width: 1024px) {
