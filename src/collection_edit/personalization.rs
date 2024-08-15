@@ -50,7 +50,16 @@ pub fn Personalization(collection_id: ReadOnlySignal<CollectionId>) -> Element {
 #[component]
 fn ModifyName(collection_id: ReadOnlySignal<CollectionId>) -> Element {
     let collection = collection_id().get_collection();
-    let mut input = use_signal(|| None);
+    let mut input: Signal<Option<String>> = use_signal(|| None);
+    use_effect(move || {
+        if let Some(x) = &*input.read() {
+            collection_id()
+                .with_mut_collection(|ele| {
+                    ele.display_name = x.clone();
+                })
+                .unwrap();
+        }
+    });
     rsx! {
         div {
             class: "flex flex-col gap-[3px] group",
@@ -78,12 +87,8 @@ fn ModifyName(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                 extended_css_class: "p-[25px] text-white group-aria-selected:text-zinc-800",
                 string_placements: rsx! {
                     input {
-                        oninput: move |x| async move {
+                        oninput: move |x| {
                             input.set(Some(x.value()));
-                            collection_id().with_mut_collection(|ele| {
-                                ele.display_name = x.value()
-                            })
-                            .unwrap();
                         },
                         value: {
                             if let Some(x) = input() {

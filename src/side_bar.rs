@@ -46,7 +46,7 @@ pub fn SideBar() -> Element {
                                 key: "{id}",
                                 Image {
                                     css: "z-50 w-10 h-10 object-cover shrink-0 inline-flex justify-center items-center rounded-full border-2 border-zinc-900 group-aria-expanded:hidden",
-                                    {x.picture_path().to_string_lossy().to_string()}
+                                    {x.read().picture_path().to_string_lossy().to_string()}
                                 }
                             }
                         }

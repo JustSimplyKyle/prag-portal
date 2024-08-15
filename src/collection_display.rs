@@ -93,7 +93,7 @@ fn Footer(
     });
     let launch_game = move || {
         spawn(async move {
-            let mut collection = collection_id().get_collection_owned();
+            let mut collection = collection_id().get_collection()();
             collection.launch_game().await.unwrap();
             collection_id().replace(collection).unwrap();
         })
@@ -465,7 +465,7 @@ fn SubModViewer(
         let clicked = clicked();
         let id = collection_id();
         spawn(async move {
-            let mut collection = id.get_collection_owned();
+            let mut collection = id.get_collection()();
             let manager = &mut collection.mod_controller.as_mut().unwrap().manager;
             let modify = manager
                 .mods
