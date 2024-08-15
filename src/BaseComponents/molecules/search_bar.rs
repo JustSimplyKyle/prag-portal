@@ -12,7 +12,7 @@ use crate::{
 };
 
 #[component]
-pub fn FilterSearch(
+pub fn FuzzyFilterer(
     search: ReadOnlySignal<String>,
     default: String,
     childrens: Vec<(String, Element)>,

@@ -306,7 +306,7 @@ impl ContentType {
     #[must_use]
     pub fn text(string: impl Into<String>) -> Content {
         let content_type = Self::Text(string.into());
-        let css = String::from("text-[1em] leading-[1.2] capsize");
+        let css = String::from("leading-[1.2] capsize");
         Content {
             content: content_type,
             css,

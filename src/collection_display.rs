@@ -19,7 +19,7 @@ use crate::{
             switch::Switch,
         },
         molecules::{
-            search_bar::{FilterSearch, SearchBar},
+            search_bar::{FuzzyFilterer, SearchBar},
             switcher::{Comparison, StateSwitcher, StateSwitcherSelectionBar, ToClass},
         },
         string_placements::{Alignment, ContentType, Contents, Hint, StringPlacements, Text},
@@ -81,7 +81,16 @@ pub fn ScrollableFootBar(main: Element, footer: Element, bottom: Element) -> Ele
 }
 
 #[component]
-fn CollectionBackground(collection_id: ReadOnlySignal<CollectionId>) -> Element {
+fn Footer(
+    collection_id: ReadOnlySignal<CollectionId>,
+    search: Signal<String>,
+    default: CopyValue<String>,
+) -> Element {
+    let collection = collection_id().get_collection();
+    let len = collection.with(|x| {
+        x.mod_controller()
+            .map(|x| x.manager.mods.iter().filter(|x| x.enabled).count())
+    });
     let launch_game = move || {
         spawn(async move {
             let mut collection = collection_id().get_collection_owned();
@@ -89,196 +98,217 @@ fn CollectionBackground(collection_id: ReadOnlySignal<CollectionId>) -> Element 
             collection_id().replace(collection).unwrap();
         })
     };
-    let (onmounted, status, style) = use_text_scroller();
+
+    rsx! {
+        div {
+            class: "bg-deep-background *:py-[15px] flex gap-[5px] h-fit w-full",
+            Button {
+                roundness: Roundness::Squircle,
+                extended_css_class: "bg-background",
+                fill_mode: FillMode::Fit,
+                clickable: false,
+                string_placements: vec![
+                    ContentType::svg(BRIGHT_LEFT_ARROW).css("svg-[40px]").align_center(),
+                ],
+            }
+            Button {
+                roundness: Roundness::Squircle,
+                extended_css_class: "bg-background pl-[25px] pr-[20px] min-w-[280px] max-w-[280px]",
+                fill_mode: FillMode::Fit,
+                clickable: false,
+                string_placements: vec![
+                    Contents::new(
+                        vec![
+                            ContentType::text("模組").css("font-medium"),
+                            ContentType::text(format!("({})", len.unwrap_or_default())).css("text-hint font-english font-medium"),
+                        ],
+                        Alignment::Left,
+                    ).css("gap-[5px] align-center"),
+                    ContentType::svg(asset!("public/arrow_drop_down_40.svg")).css("svg-[40px]").align_right(),
+                ],
+            }
+            Button {
+                roundness: Roundness::Squircle,
+                extended_css_class: "bg-background min-w-fit w-full",
+                fill_mode: FillMode::Fit,
+                clickable: false,
+                string_placements: vec![
+                    ContentType::custom(rsx!(
+                        input {
+                            class: "w-full text-hint font-medium text-xl leading-[1.2] capsize",
+                            onfocusin: move |_| {
+                                if &*search.read() == &default.cloned() {
+                                    search.set(String::new());
+                                }
+                            },
+                            onfocusout: move |_| {
+                                search.set(default.cloned());
+                            },
+                            oninput: move |x| {
+                                search.set(x.value());
+                            },
+                            value: search(),
+                        }
+                    ))
+                    .align_left()
+                    .css("grow min-w-full justify-self-stretch"),
+                    ContentType::svg(SEARCH).css("shrink-0").align_right(),
+                ],
+            }
+            Button {
+                roundness: Roundness::Squircle,
+                extended_css_class: "bg-background",
+                fill_mode: FillMode::Fit,
+                onclick: move |_| {
+                    Pages::collection_edit(collection_id()).switch_active_to_self();
+                },
+                string_placements: vec![
+                    ContentType::svg(HORIZ).align_center(),
+                ],
+            }
+            Button {
+                roundness: Roundness::Squircle,
+                extended_css_class: "bg-background",
+                fill_mode: FillMode::Fit,
+                string_placements: vec![
+                    ContentType::svg(STAR).css("svg-[40px]").align_center(),
+                ],
+            }
+            Button {
+                roundness: Roundness::Squircle,
+                extended_css_class: "bg-white min-w-[150px]",
+                fill_mode: FillMode::Fit,
+                onclick: move |_| {
+                    launch_game();
+                },
+                string_placements: vec![
+                    {ContentType::svg(GAME_CONTROLLER).align_center()}
+                ],
+            }
+        }
+    }
+}
+
+#[component]
+fn Content(collection_id: ReadOnlySignal<CollectionId>) -> Element {
     let collection = collection_id().get_collection();
-    let len = collection.with(|x| {
-        x.mod_controller()
-            .map(|x| x.manager.mods.iter().filter(|x| x.enabled).count())
-    });
-    let mod_loader = collection.read().mod_loader().map(ToString::to_string);
+    let mod_loader = CopyValue::new(collection.read().mod_loader().map(ToString::to_string));
+    rsx! {
+        div {
+            class: "rounded-[30px] w-full h-full p-[40px] grid grid-flow-col justify-stretch items-end",
+            background_color: "#191919",
+            background: format!(
+                "linear-gradient(145deg, rgba(25, 25, 25, 0.00) 18.18%, #191919 88.98%), url(\'{}\') lightgray 50% / cover no-repeat",
+                DISPLAY_BACKGROUND
+            ),
+            div {
+                class: "justify-self-start flex flex-col gap-[35px]",
+                div {
+                    class: "flex flex-col gap-[25px]",
+                    Text {
+                        css: "text-[80px] font-black text-white",
+                        {collection.read().display_name().clone()}
+                    }
+                    div {
+                        class: "text-white text-[25px] font-english [&_*]:font-english font-bold leading-[1.2] capsize",
+                        "Minecraft {collection.read().minecraft_version().id}"
+                    }
+                }
+                div {
+                    class: "flex gap-[10px]",
+                    if let Some(loader) = &*mod_loader.read() {
+                        Button {
+                            fill_mode: FillMode::Fit,
+                            extended_css_class: "bg-white text-black pl-[20px] pr-[26px] py-[13px]",
+                            roundness: Roundness::Pill,
+                            clickable: false,
+                            string_placements: vec![
+                                ContentType::svg(GAME_CONTROLLER).css("svg-[30px]").align_left(),
+                                ContentType::text(loader).css("loader font-english font-bold").align_right()
+                            ],
+                        }
+                    }
+                    Button {
+                        fill_mode: FillMode::Fit,
+                        extended_css_class: "bg-white text-black pl-[20px] pr-[26px] py-[13px]",
+                        roundness: Roundness::Pill,
+                        clickable: false,
+                        string_placements: vec![
+                            ContentType::svg(GAME_CONTROLLER).css("svg-[30px]").align_left(),
+                            ContentType::text("由我建立").align_right()
+                        ],
+                    }
+                    Button {
+                        fill_mode: FillMode::Fit,
+                        extended_css_class: "bg-white text-black pl-[20px] pr-[26px] py-[13px]",
+                        roundness: Roundness::Pill,
+                        clickable: false,
+                        string_placements: vec![
+                            ContentType::svg(GAME_CONTROLLER).css("svg-[30px]").align_left(),
+                            ContentType::text("我的錦集").align_right()
+                        ],
+                    }
+                }
+            }
+            div {
+                class: "max-xl:hidden justify-self-end flex h-fit",
+                img {
+                    class: "rounded-l-[30px] shadow size-[280px] object-cover",
+                    src: collection.read().picture_path().to_string_lossy().to_string()
+                }
+                div {
+                    class: "rounded-r-[30px] grid grid-flow-row justify-center items-stretch bg-deep-background pt-[25px] pb-[25px] gap-[15px]",
+                    div {
+                        class: "self-start justify-self-center inline-flex items-center justify-center w-[35px]",
+                        {ContentType::svg(asset!("./public/big_forge.svg"))}
+                    }
+                    Text {
+                        css: "self-end [writing-mode:vertical-rl] rotate-180 inline-flex items-center w-20 text-3xl text-hint font-english italic font-bold uppercase",
+                        if let Some(loader) = &*mod_loader.read() {
+                            {loader.clone()}
+                        } else {
+                            "vanilla"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[component]
+pub fn CollectionDisplay(collection_id: ReadOnlySignal<CollectionId>) -> Element {
     let status: Signal<Comparison<CollectionDisplayTopSelection>> =
         use_signal(|| (CollectionDisplayTopSelection::Mods, None));
+
     let default = CopyValue::new(String::from("搜尋合集中的內容"));
-    let mut value = use_signal(|| default.cloned());
+    let search = use_signal(|| default.cloned());
     rsx! {
-        ScrollableFootBar {
-            footer: rsx!(
-                div {
-                    class: "bg-deep-background *:py-[15px] flex gap-[5px] h-fit w-full",
-                    Button {
-                        roundness: Roundness::Squircle,
-                        extended_css_class: "bg-background",
-                        fill_mode: FillMode::Fit,
-                        clickable: false,
-                        string_placements: vec![
-                            ContentType::svg(BRIGHT_LEFT_ARROW).css("svg-[40px]").align_center(),
-                        ],
-                    }
-                    Button {
-                        roundness: Roundness::Squircle,
-                        extended_css_class: "bg-background pl-[25px] pr-[20px] min-w-[280px] max-w-[280px]",
-                        fill_mode: FillMode::Fit,
-                        clickable: false,
-                        string_placements: vec![
-                            Contents::new(
-                                vec![
-                                    ContentType::text("模組").css("font-medium"),
-                                    ContentType::text(format!("({})", len.unwrap_or_default())).css("text-hint font-english font-medium"),
-                                ],
-                                Alignment::Left,
-                            ).css("gap-[5px] align-center"),
-                            ContentType::svg(asset!("public/arrow_drop_down_40.svg")).css("svg-[40px]").align_right(),
-                        ],
-                    }
-                    Button {
-                        roundness: Roundness::Squircle,
-                        extended_css_class: "bg-background min-w-fit w-full",
-                        fill_mode: FillMode::Fit,
-                        clickable: false,
-                        string_placements: vec![
-                            ContentType::custom(rsx!(
-                                input {
-                                    class: "w-full text-hint font-medium text-xl leading-[1.2] capsize",
-                                    onfocusin: move |_| {
-                                        if &*value.read() == &default.cloned() {
-                                            value.set(String::new());
-                                        }
-                                    },
-                                    onfocusout: move |_| {
-                                        value.set(default.cloned());
-                                    },
-                                    oninput: move |x| {
-                                        value.set(x.value());
-                                    },
-                                    value: value(),
-                                }
-                            ))
-                            .align_left()
-                            .css("grow min-w-full justify-self-stretch"),
-                            ContentType::svg(SEARCH).css("shrink-0").align_right(),
-                        ],
-                    }
-                    Button {
-                        roundness: Roundness::Squircle,
-                        extended_css_class: "bg-background",
-                        fill_mode: FillMode::Fit,
-                        onclick: move |_| {
-                            Pages::collection_edit(collection_id()).switch_active_to_self();
-                        },
-                        string_placements: vec![
-                            ContentType::svg(HORIZ).align_center(),
-                        ],
-                    }
-                    Button {
-                        roundness: Roundness::Squircle,
-                        extended_css_class: "bg-background",
-                        fill_mode: FillMode::Fit,
-                        string_placements: vec![
-                            ContentType::svg(STAR).css("svg-[40px]").align_center(),
-                        ],
-                    }
-                    Button {
-                        roundness: Roundness::Squircle,
-                        extended_css_class: "bg-white min-w-[150px]",
-                        fill_mode: FillMode::Fit,
-                        onclick: move |_| {
-                            launch_game();
-                        },
-                        string_placements: vec![
-                            {ContentType::svg(GAME_CONTROLLER).align_center()}
-                        ],
-                    }
-                }
-            ),
-            main: rsx!(
-                div {
-                    class: "rounded-[30px] w-full h-full p-[40px] grid grid-flow-col justify-stretch items-end",
-                    background_color: "#191919",
-                    background: format!(
-                        "linear-gradient(145deg, rgba(25, 25, 25, 0.00) 18.18%, #191919 88.98%), url(\'{}\') lightgray 50% / cover no-repeat",
-                        DISPLAY_BACKGROUND
-                    ),
+        div {
+            class: "mr-[20px] w-full h-full",
+            ScrollableFootBar {
+                footer: rsx!(Footer { collection_id, search, default }),
+                main: rsx!(Content { collection_id, }),
+                bottom: rsx!(
                     div {
-                        class: "justify-self-start flex flex-col gap-[35px]",
-                        div {
-                            class: "flex flex-col gap-[25px]",
-                            Text {
-                                css: "text-[80px] font-black text-white",
-                                {collection.read().display_name().clone()}
+                        class: "relative overflow-y-scroll min-w-full max-w-full flex flex-col h-full",
+                        match status().0 {
+                            CollectionDisplayTopSelection::Mods => {
+                                rsx!(ModViewer { collection_id, default, search: search() })
+                            },
+                            CollectionDisplayTopSelection::World => {
+                                rsx!(ModViewer { collection_id, default, search: search() })
                             }
-                            div {
-                                class: "text-white text-[25px] font-english [&_*]:font-english font-bold leading-[1.2] capsize",
-                                "Minecraft {collection.read().minecraft_version().id}"
-                            }
-                        }
-                        div {
-                            class: "flex gap-[10px]",
-                            if let Some(loader) = mod_loader {
-                                Button {
-                                    fill_mode: FillMode::Fit,
-                                    extended_css_class: "bg-white text-black pl-[20px] pr-[26px] py-[13px]",
-                                    roundness: Roundness::Pill,
-                                    clickable: false,
-                                    string_placements: vec![
-                                        ContentType::svg(GAME_CONTROLLER).css("svg-[30px]").align_left(),
-                                        ContentType::text(loader).css("loader font-english font-bold").align_right()
-                                    ],
-                                }
-                            }
-                            Button {
-                                fill_mode: FillMode::Fit,
-                                extended_css_class: "bg-white text-black pl-[20px] pr-[26px] py-[13px]",
-                                roundness: Roundness::Pill,
-                                clickable: false,
-                                string_placements: vec![
-                                    ContentType::svg(GAME_CONTROLLER).css("svg-[30px]").align_left(),
-                                    ContentType::text("由我建立").align_right()
-                                ],
-                            }
-                            Button {
-                                fill_mode: FillMode::Fit,
-                                extended_css_class: "bg-white text-black pl-[20px] pr-[26px] py-[13px]",
-                                roundness: Roundness::Pill,
-                                clickable: false,
-                                string_placements: vec![
-                                    ContentType::svg(GAME_CONTROLLER).css("svg-[30px]").align_left(),
-                                    ContentType::text("我的錦集").align_right()
-                                ],
-                            }
+                            CollectionDisplayTopSelection::ResourcePack => {
+                                rsx!(ModViewer { collection_id, default, search: search() })
+                            },
+                            CollectionDisplayTopSelection::ShaderPacks => {
+                                rsx!(ModViewer { collection_id, default, search: search() })
+                            },
                         }
                     }
-                    div {
-                        class: "max-xl:hidden justify-self-end flex h-fit",
-                        img {
-                            class: "rounded-l-[30px] shadow size-[280px] object-cover",
-                            src: collection.read().picture_path().to_string_lossy().to_string()
-                        }
-                        div {
-                            class: "rounded-r-[30px] grid grid-flow-row justify-center items-stretch bg-deep-background pt-[25px] pb-[50px] gap-[15px]",
-                            div {
-                                class: "self-start justify-self-center inline-flex items-center justify-center w-[35px]",
-                                {ContentType::svg(asset!("./public/big_modrinth.svg"))}
-                            }
-                            div {
-                                class: "capsize leading-[normal] self-end text-3xl text-hint -rotate-90 font-english italic font-bold uppercase",
-                                "forge"
-                            }
-                        }
-                    }
-                }
-            ),
-            bottom: rsx!(
-                div {
-                    class: "relative overflow-y-scroll min-w-full max-w-full flex flex-col h-full",
-                    if status().0 == CollectionDisplayTopSelection::Mods {
-                        ModViewer {
-                            collection_id,
-                            default,
-                            search: value()
-                        }
-                    }
-                }
-            ),
+                ),
+            }
         }
     }
 }
@@ -330,18 +360,6 @@ pub fn GridRow<const T: usize>(
 }
 
 #[component]
-pub fn CollectionDisplay(collection_id: ReadOnlySignal<CollectionId>) -> Element {
-    rsx! {
-        div {
-            class: "mr-[20px] relative w-full h-full flex flex-col",
-            CollectionBackground {
-                collection_id,
-            }
-        }
-    }
-}
-
-#[component]
 fn ModViewer(
     collection_id: ReadOnlySignal<CollectionId>,
     search: ReadOnlySignal<String>,
@@ -349,7 +367,8 @@ fn ModViewer(
 ) -> Element {
     let mods = use_memo(move || {
         let collection = collection_id().get_collection();
-        collection().mod_controller().cloned().map(move |mut x| {
+        let binding = collection.read();
+        binding.mod_controller().cloned().map(move |mut x| {
             x.manager.mods.sort_by_key(|x| x.name.clone());
             x.manager.mods
         })
@@ -425,7 +444,7 @@ fn ModViewer(
                 class: "bg-background w-full h-full flex flex-col px-[30px]",
                 div {
                     class: "flex flex-col gap-[5px]",
-                    FilterSearch {
+                    FuzzyFilterer {
                         search,
                         default,
                         childrens: mods,
@@ -542,72 +561,6 @@ fn SubModViewer(
                 more,
                 status
             ]
-        }
-    }
-}
-
-impl From<CollectionDisplayTopSelection> for StringPlacements {
-    fn from(value: CollectionDisplayTopSelection) -> Self {
-        use CollectionDisplayTopSelection as T;
-        match value {
-            T::Mods => vec![
-                ContentType::svg(CUBE).css("svg-[30px]").align_left(),
-                ContentType::text("模組").align_right(),
-            ],
-            T::World => vec![
-                ContentType::svg(GLOBAL_ASIA).css("svg-[30px]").align_left(),
-                ContentType::text("世界").align_right(),
-            ],
-            T::ResourcePack => vec![
-                ContentType::svg(CIRCLE_JOIN).css("svg-[30px]").align_left(),
-                ContentType::text("資源包").align_right(),
-            ],
-            T::ShaderPacks => vec![
-                ContentType::svg(MOTION_MODE).css("svg-[30px]").align_left(),
-                ContentType::text("光影包").align_right(),
-            ],
-        }
-        .into()
-    }
-}
-
-impl ToClass for CollectionDisplayTopSelection {
-    fn to_class(&self) -> String {
-        String::from("pl-[20px] pr-[25px] py-[12px]")
-    }
-}
-
-#[component]
-fn SelectionBar(
-    sender: Signal<String>,
-    status: Signal<Comparison<CollectionDisplayTopSelection>>,
-) -> Element {
-    rsx! {
-        div {
-            class: "grid grid-flow-col items-stretch",
-            StateSwitcherSelectionBar {
-                class: "justify-start",
-                signal: status,
-                default_state: CollectionDisplayTopSelection::Mods
-            }
-            div {
-                class: "justify-end flex items-center space-x-[7px]",
-                SearchBar {
-                    sender
-                }
-                Button {
-                    roundness: Roundness::Pill,
-                    string_placements: vec![ContentType::svg(EXPLORE).css("svg-[25px]").align_center()],
-                    fill_mode: FillMode::Fit,
-                    extended_css_class: "px-[25px]"
-                }
-                Button {
-                    roundness: Roundness::Pill,
-                    string_placements: vec![ContentType::text("F").css("w-[25px] h-[25px]").align_center()],
-                    fill_mode: FillMode::Fit,
-                    extended_css_class: "px-[25px]"
-                }
-            }
         }
     }
 }
