@@ -38,11 +38,11 @@ use crate::download_progress::DownloadProgress;
 use crate::main_page::MainPage;
 use crate::side_bar::SideBar;
 
-const FIRST: ImageAsset = asset!(image("./public/first_collection_pic.png").preload());
-const SECOND: ImageAsset = asset!(image("./public/second_collection_pic.png").preload());
-const THIRD: ImageAsset = asset!(image("./public/third_collection_pic.png").preload());
-const FORTH: ImageAsset = asset!(image("./public/forth_collection_pic.png").preload());
-const FIFTH: ImageAsset = asset!(image("./public/fifth_collection_pic.png").preload());
+const FIRST: ImageAsset = asset!(image("./public/first_collection_pic.png"));
+const SECOND: ImageAsset = asset!(image("./public/second_collection_pic.png"));
+const THIRD: ImageAsset = asset!(image("./public/third_collection_pic.png"));
+const FORTH: ImageAsset = asset!(image("./public/forth_collection_pic.png"));
+const FIFTH: ImageAsset = asset!(image("./public/fifth_collection_pic.png"));
 
 pub const COLLECTION_PICS: GlobalSignal<BTreeMap<&str, &str>> = GlobalSignal::new(|| {
     BTreeMap::from([

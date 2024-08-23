@@ -12,22 +12,20 @@ use crate::{
     impl_context_switcher,
     main_page::STAR,
     pages::Pages,
-    text_scroller::use_text_scroller,
     BaseComponents::{
         atoms::{
             button::{Button, FillMode, Roundness},
             switch::Switch,
         },
         molecules::{
-            search_bar::{FuzzyFilterer, SearchBar},
-            switcher::{Comparison, StateSwitcher, StateSwitcherSelectionBar, ToClass},
+            search_bar::FuzzyFilterer,
+            switcher::{Comparison, StateSwitcher},
         },
-        string_placements::{Alignment, ContentType, Contents, Hint, StringPlacements, Text},
+        string_placements::{Alignment, ContentType, Contents, Hint, Text},
     },
-    EXPLORE,
 };
 
-pub static DISPLAY_BACKGROUND: ImageAsset = asset!(image("./public/cool_image.png").preload());
+pub static DISPLAY_BACKGROUND: ImageAsset = asset!(image("./public/cool_image.png"));
 
 pub static GAME_CONTROLLER: &str = asset!("./public/stadia_controller.svg");
 pub static UNARCHIVE: &str = asset!("./public/unarchive.svg");
