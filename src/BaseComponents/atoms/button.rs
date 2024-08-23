@@ -49,7 +49,7 @@ pub enum Roundness {
 
 #[component]
 pub fn Button(
-    roundness: Roundness,
+    roundness: Option<Roundness>,
     #[props(into)] string_placements: StringPlacements,
     #[props(default)] extended_css_class: String,
     #[props(default)] style: String,
@@ -63,6 +63,7 @@ pub fn Button(
     #[props(default)] fill_mode: FillMode,
     #[props(default = false)] focus_color_change: bool,
 ) -> Element {
+    let roundness = roundness.unwrap_or(Roundness::None);
     attributes.retain(|x| x.name != "class");
     let class = ButtonClass {
         roundness,
