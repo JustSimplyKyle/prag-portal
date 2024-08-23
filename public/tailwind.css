@@ -1743,12 +1743,28 @@ input {
   right: 0px;
 }
 
+.-left-\[300px\] {
+  left: -300px;
+}
+
+.-right-\[400px\] {
+  right: -400px;
+}
+
 .bottom-0 {
   bottom: 0px;
 }
 
 .left-0 {
   left: 0px;
+}
+
+.left-\[200px\] {
+  left: 200px;
+}
+
+.left-\[300px\] {
+  left: 300px;
 }
 
 .top-0 {
@@ -1761,6 +1777,10 @@ input {
 
 .z-0 {
   z-index: 0;
+}
+
+.z-10 {
+  z-index: 10;
 }
 
 .z-20 {
@@ -1837,6 +1857,10 @@ input {
 
 .h-10 {
   height: 2.5rem;
+}
+
+.h-20 {
+  height: 5rem;
 }
 
 .h-3 {
@@ -2001,6 +2025,14 @@ input {
   width: 80px;
 }
 
+.w-\[900px\] {
+  width: 900px;
+}
+
+.w-\[96\.66666px\] {
+  width: 96.66666px;
+}
+
 .w-auto {
   width: auto;
 }
@@ -2038,6 +2070,10 @@ input {
   min-width: 400px;
 }
 
+.min-w-\[96\.66666px\] {
+  min-width: 96.66666px;
+}
+
 .min-w-fit {
   min-width: -moz-fit-content;
   min-width: fit-content;
@@ -2063,6 +2099,10 @@ input {
   max-width: 400px;
 }
 
+.max-w-\[96\.66666px\] {
+  max-width: 96.66666px;
+}
+
 .max-w-fit {
   max-width: -moz-fit-content;
   max-width: fit-content;
@@ -2078,6 +2118,10 @@ input {
 
 .flex-none {
   flex: none;
+}
+
+.shrink {
+  flex-shrink: 1;
 }
 
 .shrink-0 {
@@ -2459,12 +2503,12 @@ input {
   overflow-x: hidden;
 }
 
-.overflow-y-hidden {
-  overflow-y: hidden;
-}
-
 .overflow-x-clip {
   overflow-x: clip;
+}
+
+.overflow-y-clip {
+  overflow-y: clip;
 }
 
 .overflow-x-scroll {
@@ -2602,21 +2646,6 @@ input {
 .bg-deep-background {
   --tw-bg-opacity: 1;
   background-color: rgb(14 14 14 / var(--tw-bg-opacity));
-}
-
-.bg-green {
-  --tw-bg-opacity: 1;
-  background-color: rgb(205 227 71 / var(--tw-bg-opacity));
-}
-
-.bg-light-blue {
-  --tw-bg-opacity: 1;
-  background-color: rgb(124 174 211 / var(--tw-bg-opacity));
-}
-
-.bg-red {
-  --tw-bg-opacity: 1;
-  background-color: rgb(201 43 69 / var(--tw-bg-opacity));
 }
 
 .bg-secondary-surface {
@@ -3134,25 +3163,21 @@ body {
   padding-bottom: 15px;
 }
 
-.hover\:h-\[250px\]:hover {
-  height: 250px;
-}
-
 .hover\:bg-green:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(205 227 71 / var(--tw-bg-opacity));
 }
 
-.group\/main:hover .group-hover\/main\:top-\[170px\] {
-  top: 170px;
+.group\/main:hover .group-hover\/main\:-right-\[300px\] {
+  right: -300px;
 }
 
-.group\/main:hover .group-hover\/main\:top-\[85px\] {
-  top: 85px;
+.group\/main:hover .group-hover\/main\:left-\[300px\] {
+  left: 300px;
 }
 
-.aria-expanded\:w-\[80px\][aria-expanded="true"] {
-  width: 80px;
+.group\/main:hover .group-hover\/main\:justify-center {
+  justify-content: center;
 }
 
 .aria-selected\:w-\[300px\][aria-selected="true"] {
@@ -3249,16 +3274,71 @@ body {
   animation: scrollLeft 10000ms infinite ease-in-out;
 }
 
-.group\/main[aria-selected=Collections] .group-aria-\[selected\=Collections\]\/main\:z-10 {
-  z-index: 10;
+.group\/main[aria-busy=true] .group-aria-\[busy\=true\]\/main\:hidden {
+  display: none;
 }
 
-.group\/main[aria-selected=Explore] .group-aria-\[selected\=Explore\]\/main\:z-10 {
-  z-index: 10;
+.group\/main:not(:hover)[aria-selected=Collections] .group-\[\&\:not\(\:hover\)\]\/main\:group-aria-\[selected\=Collections\]\/main\:-right-\[300px\] {
+  right: -300px;
 }
 
-.group\/main[aria-selected=MainPage] .group-aria-\[selected\=MainPage\]\/main\:z-10 {
-  z-index: 10;
+.group\/main:not(:hover)[aria-selected=Collections] .group-\[\&\:not\(\:hover\)\]\/main\:group-aria-\[selected\=Collections\]\/main\:left-\[100px\] {
+  left: 100px;
+}
+
+.group\/main:not(:hover)[aria-selected=MainPage] .group-\[\&\:not\(\:hover\)\]\/main\:group-aria-\[selected\=MainPage\]\/main\:left-\[300px\] {
+  left: 300px;
+}
+
+.group\/main:not(:hover)[aria-selected=MainPage] .group-\[\&\:not\(\:hover\)\]\/main\:group-aria-\[selected\=MainPage\]\/main\:left-\[600px\] {
+  left: 600px;
+}
+
+.group\/main:not(:hover)[aria-selected=Explore] .group-\[\&\:not\(\:hover\)\]\/main\:group-aria-\[selected\=Explore\]\/main\:w-0 {
+  width: 0px;
+}
+
+.group\/main:not(:hover)[aria-selected=MainPage] .group-\[\&\:not\(\:hover\)\]\/main\:group-aria-\[selected\=MainPage\]\/main\:w-0 {
+  width: 0px;
+}
+
+.group\/main:not(:hover)[aria-selected=Collections] .group-\[\&\:not\(\:hover\)\]\/main\:group-aria-\[selected\=Collections\]\/main\:min-w-\[300px\] {
+  min-width: 300px;
+}
+
+.group\/main:not(:hover)[aria-selected=Explore] .group-\[\&\:not\(\:hover\)\]\/main\:group-aria-\[selected\=Explore\]\/main\:min-w-\[300px\] {
+  min-width: 300px;
+}
+
+.group\/main:not(:hover)[aria-selected=MainPage] .group-\[\&\:not\(\:hover\)\]\/main\:group-aria-\[selected\=MainPage\]\/main\:min-w-\[300px\] {
+  min-width: 300px;
+}
+
+.group\/main:not(:hover)[aria-selected=Collections] .group-\[\&\:not\(\:hover\)\]\/main\:group-aria-\[selected\=Collections\]\/main\:max-w-\[300px\] {
+  max-width: 300px;
+}
+
+.group\/main:not(:hover)[aria-selected=Explore] .group-\[\&\:not\(\:hover\)\]\/main\:group-aria-\[selected\=Explore\]\/main\:max-w-\[300px\] {
+  max-width: 300px;
+}
+
+.group\/main:not(:hover)[aria-selected=MainPage] .group-\[\&\:not\(\:hover\)\]\/main\:group-aria-\[selected\=MainPage\]\/main\:max-w-\[300px\] {
+  max-width: 300px;
+}
+
+.group\/main:not(:hover)[aria-selected=Collections] .group-\[\&\:not\(\:hover\)\]\/main\:group-aria-\[selected\=Collections\]\/main\:bg-green {
+  --tw-bg-opacity: 1;
+  background-color: rgb(205 227 71 / var(--tw-bg-opacity));
+}
+
+.group\/main:not(:hover)[aria-selected=Explore] .group-\[\&\:not\(\:hover\)\]\/main\:group-aria-\[selected\=Explore\]\/main\:bg-light-blue {
+  --tw-bg-opacity: 1;
+  background-color: rgb(124 174 211 / var(--tw-bg-opacity));
+}
+
+.group\/main:not(:hover)[aria-selected=MainPage] .group-\[\&\:not\(\:hover\)\]\/main\:group-aria-\[selected\=MainPage\]\/main\:bg-red {
+  --tw-bg-opacity: 1;
+  background-color: rgb(201 43 69 / var(--tw-bg-opacity));
 }
 
 .group[aria-busy=false] .group\/active[aria-selected="true"] .group-aria-\[busy\=false\]\:group-aria-selected\/active\:block {
@@ -3344,6 +3424,19 @@ body {
   .xl\:\*\:justify-center > * {
     justify-content: center;
   }
+}
+
+.\[\&_\#mysvg_path\]\:\!fill-current #mysvg path {
+  fill: currentColor !important;
+}
+
+.\[\&_\#mysvg_path\]\:\!fill-red #mysvg path {
+  fill: #C92B45 !important;
+}
+
+.\[\&_\#mysvg_path\]\:\!text-red #mysvg path {
+  --tw-text-opacity: 1 !important;
+  color: rgb(201 43 69 / var(--tw-text-opacity)) !important;
 }
 
 .\[\&_\*\]\:pointer-events-none * {

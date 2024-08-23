@@ -15,16 +15,6 @@ use crate::{
 
 #[component]
 pub fn SideBar() -> Element {
-    let mut expanded = use_signal(|| true);
-    let delayed_expanded = use_resource(move || async move {
-        if expanded() {
-            tokio::time::sleep(Duration::from_millis(100)).await;
-        } else {
-            // tokio::time::sleep(Duration::from_millis(100)).await;
-        }
-        expanded()
-    });
-
     let keys = use_context::<Memo<Vec<CollectionId>>>();
 
     let binding = STORAGE.collections.read();
@@ -71,62 +61,107 @@ pub fn SideBar() -> Element {
         Explore,
         Collections,
     }
+    let mut clicked = use_signal(|| false);
+    let delayed = use_resource(move || async move {
+        tokio::time::sleep(Duration::from_millis(100)).await;
+        clicked()
+    });
     let mut selected = use_signal(|| Selection::MainPage);
     rsx! {
         div {
             class: "flex flex-col place-content-start mx-5",
             div {
-                class: "transition-all w-[300px] space-y-5 transition-all ease-linear duration-500 aria-expanded:w-[80px] group",
-                aria_expanded: !expanded(),
-                aria_busy: !delayed_expanded().unwrap_or(false),
+                class: "transition-all w-[300px] relative space-y-5 ease-linear duration-500 group",
                 // top
                 div {
-                    class: "transition-all [&_*]:transition-all relative hover:h-[250px] h-[80px] w-full group/main overflow-y-hidden",
+                    class: "h-20 relative group/main overflow-x-clip overflow-y-clip",
+                    onmouseover: move |_| {
+                        clicked.set(true);
+                    },
+                    onmouseleave: move |_| {
+                        clicked.set(false);
+                    },
+                    aria_busy: delayed().unwrap_or(false),
                     aria_selected: selected().to_string(),
-                    Button {
-                        roundness: Roundness::Squircle,
-                        string_placements: vec![
-                            ContentType::svg(HOME).align_left(),
-                            ContentType::text("首頁").css("group-aria-busy:hidden").align_right(),
-                        ],
-                        onclick: move |_| {
-                            selected.set(Selection::MainPage);
-                        },
-                        switcher: Pages::MainPage,
-                        extended_css_class: "bg-red absolute h-[80px] top-0 text-black z-0
-                            group-aria-[selected=MainPage]/main:z-10
-                        "
-                    }
-                    Button {
-                        roundness: Roundness::Squircle,
-                        onclick: move |_| {
-                            selected.set(Selection::Explore);
-                        },
-                        string_placements: vec![
-                            ContentType::svg(EXPLORE).align_left(),
-                            ContentType::text("探索").css("group-aria-busy:hidden").align_right(),
-                        ],
-                        switcher: Pages::Explore,
-                        extended_css_class: "bg-light-blue absolute h-[80px] top-0 text-black z-0
-                            group-aria-[selected=Explore]/main:z-10
-                            group-hover/main:top-[85px]
-                        "
-                    }
-                    Button {
-                        roundness: Roundness::Squircle,
-                        onclick: move |_| {
-                            selected.set(Selection::Collections);
-                            // expanded.toggle();
-                        },
-                        string_placements: vec![
-                            ContentType::svg(SIDEBAR_COLLECTION).align_left(),
-                            ContentType::text("收藏庫").css("group-aria-busy:hidden").align_right(),
-                        ],
-                        switcher: Pages::Collections,
-                        extended_css_class: "bg-green absolute h-[80px] text-black top-0 z-0
-                            group-aria-[selected=Collections]/main:z-10
-                            group-hover/main:top-[170px]
-                        "
+                    div {
+                        class: "h-20 w-full absolute -left-[300px] w-[900px] relative",
+                        Button {
+                            roundness: Roundness::Squircle,
+                            string_placements: vec![
+                                ContentType::svg(HOME).css("[&_#mysvg_path]:!fill-current [&_#mysvg_path]:!text-red [&_#mysvg_path]:!fill-red").align_left(),
+                                ContentType::text("首頁").css("group-aria-[busy=true]/main:hidden").align_right(),
+                            ],
+                            onclick: move |_| {
+                                selected.set(Selection::MainPage);
+                            },
+                            switcher: Pages::MainPage,
+                            extended_css_class: "z-10 bg-background text-black absolute left-[200px] transition-all [&_*]:transition-all
+                                min-w-[96.66666px] max-w-[96.66666px]
+                                group-hover/main:left-[300px]
+                                group-hover/main:justify-center
+
+                                group-[&:not(:hover)]/main:group-aria-[selected=MainPage]/main:bg-red  
+                                group-[&:not(:hover)]/main:group-aria-[selected=MainPage]/main:min-w-[300px] 
+                                group-[&:not(:hover)]/main:group-aria-[selected=MainPage]/main:max-w-[300px] 
+                                group-[&:not(:hover)]/main:group-aria-[selected=MainPage]/main:left-[300px] 
+                            "
+                        }
+                        div {
+                            class: "transition-all absolute z-0 flex left-[300px] gap-[5px] w-[300px]
+                                group-[&:not(:hover)]/main:group-aria-[selected=MainPage]/main:left-[600px]
+                                group-[&:not(:hover)]/main:group-aria-[selected=Collections]/main:left-[100px]
+                            ",
+                            div {
+                                class: "transition-all grow shrink w-[96.66666px]
+                                group-[&:not(:hover)]/main:group-aria-[selected=MainPage]/main:w-0
+                                group-[&:not(:hover)]/main:group-aria-[selected=Explore]/main:w-0
+                                ",
+                            }
+                            Button {
+                                roundness: Roundness::Squircle,
+                                onclick: move |_| {
+                                    selected.set(Selection::Explore);
+                                },
+                                string_placements: vec![
+                                    ContentType::svg(EXPLORE).align_left(),
+                                    ContentType::text("探索").css("group-aria-[busy=true]/main:hidden").align_right(),
+                                ],
+                                switcher: Pages::Explore,
+                                extended_css_class: "bg-background text-black grow transition-all [&_*]:transition-all
+                                    min-w-[96.66666px] max-w-[96.66666px]
+                                    group-hover/main:justify-center
+                                    group-[&:not(:hover)]/main:group-aria-[selected=Explore]/main:bg-light-blue 
+                                    group-[&:not(:hover)]/main:group-aria-[selected=Explore]/main:min-w-[300px] 
+                                    group-[&:not(:hover)]/main:group-aria-[selected=Explore]/main:max-w-[300px] 
+                                "
+                            }
+                            div {
+                                class: "grow shrink w-[96.66666px]
+                                group-[&:not(:hover)]/main:group-aria-[selected=Explore]/main:w-0
+                                ",
+                            }
+                        }
+                        Button {
+                            roundness: Roundness::Squircle,
+                            onclick: move |_| {
+                                selected.set(Selection::Collections);
+                                // expanded.toggle();
+                            },
+                            string_placements: vec![
+                                ContentType::svg(SIDEBAR_COLLECTION).align_left(),
+                                ContentType::text("收藏庫").css("group-aria-[busy=true]/main:hidden").align_right(),
+                            ],
+                            switcher: Pages::Collections,
+                            extended_css_class: "z-10 bg-background text-black absolute -right-[400px] transition-all [&_*]:transition-all
+                                min-w-[96.66666px] max-w-[96.66666px]
+                                group-hover/main:-right-[300px]
+                                group-hover/main:justify-center
+                                group-[&:not(:hover)]/main:group-aria-[selected=Collections]/main:min-w-[300px] 
+                                group-[&:not(:hover)]/main:group-aria-[selected=Collections]/main:bg-green 
+                                group-[&:not(:hover)]/main:group-aria-[selected=Collections]/main:max-w-[300px] 
+                                group-[&:not(:hover)]/main:group-aria-[selected=Collections]/main:-right-[300px] 
+                            "
+                        }
                     }
                 }
                 // middle
