@@ -1747,8 +1747,8 @@ input {
   left: -300px;
 }
 
-.-right-\[400px\] {
-  right: -400px;
+.-right-\[300px\] {
+  right: -300px;
 }
 
 .bottom-0 {
@@ -1757,10 +1757,6 @@ input {
 
 .left-0 {
   left: 0px;
-}
-
-.left-\[200px\] {
-  left: 200px;
 }
 
 .left-\[300px\] {
@@ -2984,10 +2980,6 @@ input {
   transition-duration: 300ms;
 }
 
-.duration-500 {
-  transition-duration: 500ms;
-}
-
 .duration-700 {
   transition-duration: 700ms;
 }
@@ -3163,21 +3155,27 @@ body {
   padding-bottom: 15px;
 }
 
+.hover\:min-w-\[300px\]:hover {
+  min-width: 300px;
+}
+
+.hover\:max-w-\[300px\]:hover {
+  max-width: 300px;
+}
+
 .hover\:bg-green:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(205 227 71 / var(--tw-bg-opacity));
 }
 
-.group\/main:hover .group-hover\/main\:-right-\[300px\] {
-  right: -300px;
+.hover\:bg-light-blue:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(124 174 211 / var(--tw-bg-opacity));
 }
 
-.group\/main:hover .group-hover\/main\:left-\[300px\] {
-  left: 300px;
-}
-
-.group\/main:hover .group-hover\/main\:justify-center {
-  justify-content: center;
+.hover\:bg-red:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(201 43 69 / var(--tw-bg-opacity));
 }
 
 .aria-selected\:w-\[300px\][aria-selected="true"] {
@@ -3274,75 +3272,43 @@ body {
   animation: scrollLeft 10000ms infinite ease-in-out;
 }
 
-.group\/main[aria-busy=true] .group-aria-\[busy\=true\]\/main\:hidden {
-  display: none;
-}
-
-.group\/main:not(:hover)[aria-selected=Collections] .group-\[\&\:not\(\:hover\)\]\/main\:group-aria-\[selected\=Collections\]\/main\:-right-\[300px\] {
-  right: -300px;
-}
-
-.group\/main:not(:hover)[aria-selected=Collections] .group-\[\&\:not\(\:hover\)\]\/main\:group-aria-\[selected\=Collections\]\/main\:left-\[100px\] {
-  left: 100px;
-}
-
-.group\/main:not(:hover)[aria-selected=MainPage] .group-\[\&\:not\(\:hover\)\]\/main\:group-aria-\[selected\=MainPage\]\/main\:left-\[300px\] {
-  left: 300px;
-}
-
-.group\/main:not(:hover)[aria-selected=MainPage] .group-\[\&\:not\(\:hover\)\]\/main\:group-aria-\[selected\=MainPage\]\/main\:left-\[600px\] {
-  left: 600px;
-}
-
-.group\/main:not(:hover)[aria-selected=Explore] .group-\[\&\:not\(\:hover\)\]\/main\:group-aria-\[selected\=Explore\]\/main\:w-0 {
-  width: 0px;
-}
-
-.group\/main:not(:hover)[aria-selected=MainPage] .group-\[\&\:not\(\:hover\)\]\/main\:group-aria-\[selected\=MainPage\]\/main\:w-0 {
-  width: 0px;
-}
-
-.group\/main:not(:hover)[aria-selected=Collections] .group-\[\&\:not\(\:hover\)\]\/main\:group-aria-\[selected\=Collections\]\/main\:min-w-\[300px\] {
-  min-width: 300px;
-}
-
-.group\/main:not(:hover)[aria-selected=Explore] .group-\[\&\:not\(\:hover\)\]\/main\:group-aria-\[selected\=Explore\]\/main\:min-w-\[300px\] {
-  min-width: 300px;
-}
-
-.group\/main:not(:hover)[aria-selected=MainPage] .group-\[\&\:not\(\:hover\)\]\/main\:group-aria-\[selected\=MainPage\]\/main\:min-w-\[300px\] {
-  min-width: 300px;
-}
-
-.group\/main:not(:hover)[aria-selected=Collections] .group-\[\&\:not\(\:hover\)\]\/main\:group-aria-\[selected\=Collections\]\/main\:max-w-\[300px\] {
-  max-width: 300px;
-}
-
-.group\/main:not(:hover)[aria-selected=Explore] .group-\[\&\:not\(\:hover\)\]\/main\:group-aria-\[selected\=Explore\]\/main\:max-w-\[300px\] {
-  max-width: 300px;
-}
-
-.group\/main:not(:hover)[aria-selected=MainPage] .group-\[\&\:not\(\:hover\)\]\/main\:group-aria-\[selected\=MainPage\]\/main\:max-w-\[300px\] {
-  max-width: 300px;
-}
-
-.group\/main:not(:hover)[aria-selected=Collections] .group-\[\&\:not\(\:hover\)\]\/main\:group-aria-\[selected\=Collections\]\/main\:bg-green {
+.group\/main[aria-selected=collections] .group-aria-\[selected\=collections\]\/main\:bg-green {
   --tw-bg-opacity: 1;
   background-color: rgb(205 227 71 / var(--tw-bg-opacity));
 }
 
-.group\/main:not(:hover)[aria-selected=Explore] .group-\[\&\:not\(\:hover\)\]\/main\:group-aria-\[selected\=Explore\]\/main\:bg-light-blue {
+.group\/main[aria-selected=explore] .group-aria-\[selected\=explore\]\/main\:bg-light-blue {
   --tw-bg-opacity: 1;
   background-color: rgb(124 174 211 / var(--tw-bg-opacity));
 }
 
-.group\/main:not(:hover)[aria-selected=MainPage] .group-\[\&\:not\(\:hover\)\]\/main\:group-aria-\[selected\=MainPage\]\/main\:bg-red {
+.group\/main[aria-selected=main-page] .group-aria-\[selected\=main-page\]\/main\:bg-red {
   --tw-bg-opacity: 1;
   background-color: rgb(201 43 69 / var(--tw-bg-opacity));
 }
 
+.group\/main:hover[aria-selected=explore] .group-hover\/main\:group-aria-\[selected\=explore\]\/main\:min-w-\[300px\] {
+  min-width: 300px;
+}
+
+.group\/main:hover[aria-selected=explore] .group-hover\/main\:group-aria-\[selected\=explore\]\/main\:max-w-\[300px\] {
+  max-width: 300px;
+}
+
 .group[aria-busy=false] .group\/active[aria-selected="true"] .group-aria-\[busy\=false\]\:group-aria-selected\/active\:block {
   display: block;
+}
+
+.group\/main[data-collections=false] .group-data-\[collections\=false\]\/main\:hidden {
+  display: none;
+}
+
+.group\/main[data-explore=false] .group-data-\[explore\=false\]\/main\:hidden {
+  display: none;
+}
+
+.group\/main[data-main-page=false] .group-data-\[main-page\=false\]\/main\:hidden {
+  display: none;
 }
 
 .group[data-active=a] .group-data-\[active\=a\]\:w-20 {
@@ -3426,17 +3392,32 @@ body {
   }
 }
 
-.\[\&_\#mysvg_path\]\:\!fill-current #mysvg path {
-  fill: currentColor !important;
+.\[\&\:not\(\:hover\)\]\:justify-center:not(:hover) {
+  justify-content: center;
 }
 
-.\[\&_\#mysvg_path\]\:\!fill-red #mysvg path {
-  fill: #C92B45 !important;
+.group\/main:hover[data-collections=true] .\[\&\:not\(\:hover\)\]\:group-hover\/main\:group-data-\[collections\=true\]\/main\:left-0:not(:hover) {
+  left: 0px;
 }
 
-.\[\&_\#mysvg_path\]\:\!text-red #mysvg path {
-  --tw-text-opacity: 1 !important;
-  color: rgb(201 43 69 / var(--tw-text-opacity)) !important;
+.group\/main:hover[data-collections=true] .\[\&\:not\(\:hover\)\]\:group-hover\/main\:group-data-\[collections\=true\]\/main\:left-\[200px\]:not(:hover) {
+  left: 200px;
+}
+
+.group\/main:hover[data-explore=true] .\[\&\:not\(\:hover\)\]\:group-hover\/main\:group-data-\[explore\=true\]\/main\:-right-\[400px\]:not(:hover) {
+  right: -400px;
+}
+
+.group\/main:hover[data-explore=true] .\[\&\:not\(\:hover\)\]\:group-hover\/main\:group-data-\[explore\=true\]\/main\:left-\[200px\]:not(:hover) {
+  left: 200px;
+}
+
+.group\/main:hover[data-main-page=true] .\[\&\:not\(\:hover\)\]\:group-hover\/main\:group-data-\[main-page\=true\]\/main\:-right-\[400px\]:not(:hover) {
+  right: -400px;
+}
+
+.group\/main:hover[data-main-page=true] .\[\&\:not\(\:hover\)\]\:group-hover\/main\:group-data-\[main-page\=true\]\/main\:left-\[600px\]:not(:hover) {
+  left: 600px;
 }
 
 .\[\&_\*\]\:pointer-events-none * {
@@ -3451,6 +3432,14 @@ body {
   transition-property: all;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
+}
+
+.\[\&_\*\]\:duration-150 * {
+  transition-duration: 150ms;
+}
+
+.\[\&_\*\]\:ease-linear * {
+  transition-timing-function: cubic-bezier(.17,.67,.14,1.02);
 }
 
 .\[\&_\*\]\:font-english * {

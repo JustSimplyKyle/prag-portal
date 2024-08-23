@@ -55,111 +55,115 @@ pub fn SideBar() -> Element {
             }
         }
     };
-    #[derive(derive_more::Display, PartialEq, Eq, Clone, Copy)]
-    enum Selection {
-        MainPage,
-        Explore,
-        Collections,
-    }
-    let mut clicked = use_signal(|| false);
-    let delayed = use_resource(move || async move {
-        tokio::time::sleep(Duration::from_millis(100)).await;
-        clicked()
+    let selected = use_memo(|| HISTORY.read().active.to_string());
+    use_effect(move || {
+        dbg!(selected());
     });
-    let mut selected = use_signal(|| Selection::MainPage);
+    let mut main_page_hover = use_signal(|| false);
+    let mut explore_hover = use_signal(|| false);
+    let mut collections_hover = use_signal(|| false);
     rsx! {
         div {
             class: "flex flex-col place-content-start mx-5",
             div {
-                class: "transition-all w-[300px] relative space-y-5 ease-linear duration-500 group",
+                class: "transition-all w-[300px] relative space-y-5 ease-linear [&_*]:ease-linear [&_*]:duration-150 group",
                 // top
                 div {
                     class: "h-20 relative group/main overflow-x-clip overflow-y-clip",
-                    onmouseover: move |_| {
-                        clicked.set(true);
-                    },
-                    onmouseleave: move |_| {
-                        clicked.set(false);
-                    },
-                    aria_busy: delayed().unwrap_or(false),
+                    "data-main-page": main_page_hover(),
+                    "data-explore": explore_hover(),
+                    "data-collections": collections_hover(),
                     aria_selected: selected().to_string(),
                     div {
                         class: "h-20 w-full absolute -left-[300px] w-[900px] relative",
                         Button {
                             roundness: Roundness::Squircle,
                             string_placements: vec![
-                                ContentType::svg(HOME).css("[&_#mysvg_path]:!fill-current [&_#mysvg_path]:!text-red [&_#mysvg_path]:!fill-red").align_left(),
-                                ContentType::text("首頁").css("group-aria-[busy=true]/main:hidden").align_right(),
+                                ContentType::svg(HOME).align_left(),
+                                ContentType::text("首頁").css("group-data-[main-page=false]/main:hidden").align_right(),
                             ],
-                            onclick: move |_| {
-                                selected.set(Selection::MainPage);
+                            onmouseover: move |_| {
+                                main_page_hover.set(true);
+                            },
+                            onmouseleave: move |_| {
+                                main_page_hover.set(false);
                             },
                             switcher: Pages::MainPage,
-                            extended_css_class: "z-10 bg-background text-black absolute left-[200px] transition-all [&_*]:transition-all
+                            extended_css_class: "z-10 bg-background text-black absolute left-[300px] transition-all [&_*]:transition-all
                                 min-w-[96.66666px] max-w-[96.66666px]
-                                group-hover/main:left-[300px]
-                                group-hover/main:justify-center
+                                [&:not(:hover)]:justify-center
+                                hover:bg-red
+                                hover:min-w-[300px] 
+                                hover:max-w-[300px] 
 
-                                group-[&:not(:hover)]/main:group-aria-[selected=MainPage]/main:bg-red  
-                                group-[&:not(:hover)]/main:group-aria-[selected=MainPage]/main:min-w-[300px] 
-                                group-[&:not(:hover)]/main:group-aria-[selected=MainPage]/main:max-w-[300px] 
-                                group-[&:not(:hover)]/main:group-aria-[selected=MainPage]/main:left-[300px] 
+                                group-aria-[selected=main-page]/main:bg-red  
+                                [&:not(:hover)]:group-hover/main:group-data-[collections=true]/main:left-[200px] 
+                                [&:not(:hover)]:group-hover/main:group-data-[explore=true]/main:left-[200px] 
                             "
                         }
                         div {
                             class: "transition-all absolute z-0 flex left-[300px] gap-[5px] w-[300px]
-                                group-[&:not(:hover)]/main:group-aria-[selected=MainPage]/main:left-[600px]
-                                group-[&:not(:hover)]/main:group-aria-[selected=Collections]/main:left-[100px]
+                                [&:not(:hover)]:group-hover/main:group-data-[main-page=true]/main:left-[600px] 
+                                [&:not(:hover)]:group-hover/main:group-data-[collections=true]/main:left-0 
                             ",
                             div {
                                 class: "transition-all grow shrink w-[96.66666px]
-                                group-[&:not(:hover)]/main:group-aria-[selected=MainPage]/main:w-0
-                                group-[&:not(:hover)]/main:group-aria-[selected=Explore]/main:w-0
                                 ",
                             }
                             Button {
                                 roundness: Roundness::Squircle,
-                                onclick: move |_| {
-                                    selected.set(Selection::Explore);
-                                },
                                 string_placements: vec![
                                     ContentType::svg(EXPLORE).align_left(),
-                                    ContentType::text("探索").css("group-aria-[busy=true]/main:hidden").align_right(),
+                                    ContentType::text("探索").css("group-data-[explore=false]/main:hidden").align_right(),
                                 ],
+                                onmouseover: move |_| {
+                                    explore_hover.set(true);
+                                },
+                                onmouseleave: move |_| {
+                                    explore_hover.set(false);
+                                },
                                 switcher: Pages::Explore,
                                 extended_css_class: "bg-background text-black grow transition-all [&_*]:transition-all
                                     min-w-[96.66666px] max-w-[96.66666px]
-                                    group-hover/main:justify-center
-                                    group-[&:not(:hover)]/main:group-aria-[selected=Explore]/main:bg-light-blue 
-                                    group-[&:not(:hover)]/main:group-aria-[selected=Explore]/main:min-w-[300px] 
-                                    group-[&:not(:hover)]/main:group-aria-[selected=Explore]/main:max-w-[300px] 
+                                    [&:not(:hover)]:justify-center
+                                    hover:bg-light-blue
+                                    hover:min-w-[300px] 
+                                    hover:max-w-[300px] 
+
+                                    group-aria-[selected=explore]/main:bg-light-blue 
+                                    group-hover/main:group-aria-[selected=explore]/main:min-w-[300px] 
+                                    group-hover/main:group-aria-[selected=explore]/main:max-w-[300px] 
                                 "
                             }
                             div {
                                 class: "grow shrink w-[96.66666px]
-                                group-[&:not(:hover)]/main:group-aria-[selected=Explore]/main:w-0
                                 ",
                             }
                         }
                         Button {
                             roundness: Roundness::Squircle,
-                            onclick: move |_| {
-                                selected.set(Selection::Collections);
-                                // expanded.toggle();
-                            },
                             string_placements: vec![
                                 ContentType::svg(SIDEBAR_COLLECTION).align_left(),
-                                ContentType::text("收藏庫").css("group-aria-[busy=true]/main:hidden").align_right(),
+                                ContentType::text("收藏庫").css("group-data-[collections=false]/main:hidden").align_right(),
                             ],
+                            onmouseover: move |_| {
+                                collections_hover.set(true);
+                            },
+                            onmouseleave: move |_| {
+                                collections_hover.set(false);
+                            },
                             switcher: Pages::Collections,
-                            extended_css_class: "z-10 bg-background text-black absolute -right-[400px] transition-all [&_*]:transition-all
+                            extended_css_class: "z-10 bg-background text-black absolute -right-[300px] transition-all [&_*]:transition-all
                                 min-w-[96.66666px] max-w-[96.66666px]
-                                group-hover/main:-right-[300px]
-                                group-hover/main:justify-center
-                                group-[&:not(:hover)]/main:group-aria-[selected=Collections]/main:min-w-[300px] 
-                                group-[&:not(:hover)]/main:group-aria-[selected=Collections]/main:bg-green 
-                                group-[&:not(:hover)]/main:group-aria-[selected=Collections]/main:max-w-[300px] 
-                                group-[&:not(:hover)]/main:group-aria-[selected=Collections]/main:-right-[300px] 
+
+                                hover:bg-green
+                                [&:not(:hover)]:justify-center
+
+                                group-aria-[selected=collections]/main:bg-green 
+                                hover:min-w-[300px] 
+                                hover:max-w-[300px] 
+                                [&:not(:hover)]:group-hover/main:group-data-[main-page=true]/main:-right-[400px] 
+                                [&:not(:hover)]:group-hover/main:group-data-[explore=true]/main:-right-[400px] 
                             "
                         }
                     }
