@@ -1007,11 +1007,6 @@ input {
   }
 }
 
-.link {
-  cursor: pointer;
-  text-decoration-line: underline;
-}
-
 .modal {
   pointer-events: none;
   position: fixed;
@@ -1204,16 +1199,6 @@ input {
   margin-top: 0px;
   margin-bottom: 0px;
   margin-inline-start: -1px;
-}
-
-.link:focus {
-  outline: 2px solid transparent;
-  outline-offset: 2px;
-}
-
-.link:focus-visible {
-  outline: 2px solid currentColor;
-  outline-offset: 2px;
 }
 
 .menu li > *:not(ul, .menu-title, details, .btn):active,
@@ -1787,6 +1772,10 @@ input {
   z-index: 50;
 }
 
+.z-\[1000000\] {
+  z-index: 1000000;
+}
+
 .z-\[1000\] {
   z-index: 1000;
 }
@@ -1844,6 +1833,11 @@ input {
 .size-\[280px\] {
   width: 280px;
   height: 280px;
+}
+
+.size-\[45px\] {
+  width: 45px;
+  height: 45px;
 }
 
 .size-\[80px\] {
@@ -1987,6 +1981,10 @@ input {
 
 .w-\[100px\] {
   width: 100px;
+}
+
+.w-\[210px\] {
+  width: 210px;
 }
 
 .w-\[25px\] {
@@ -2313,10 +2311,6 @@ input {
   align-content: space-evenly;
 }
 
-.items-start {
-  align-items: flex-start;
-}
-
 .items-end {
   align-items: flex-end;
 }
@@ -2487,6 +2481,10 @@ input {
   justify-self: stretch;
 }
 
+.overflow-hidden {
+  overflow: hidden;
+}
+
 .overflow-clip {
   overflow: clip;
 }
@@ -2505,6 +2503,10 @@ input {
 
 .overflow-y-clip {
   overflow-y: clip;
+}
+
+.overflow-y-visible {
+  overflow-y: visible;
 }
 
 .overflow-x-scroll {
@@ -2602,6 +2604,10 @@ input {
   border-bottom-right-radius: 50px;
 }
 
+.border {
+  border-width: 1px;
+}
+
 .border-0 {
   border-width: 0px;
 }
@@ -2617,6 +2623,11 @@ input {
 .border-\[\#2E2E2E\] {
   --tw-border-opacity: 1;
   border-color: rgb(46 46 46 / var(--tw-border-opacity));
+}
+
+.border-surface {
+  --tw-border-opacity: 1;
+  border-color: rgb(30 30 30 / var(--tw-border-opacity));
 }
 
 .border-zinc-900 {
@@ -2787,6 +2798,11 @@ input {
 .py-\[13px\] {
   padding-top: 13px;
   padding-bottom: 13px;
+}
+
+.py-\[15px\] {
+  padding-top: 15px;
+  padding-bottom: 15px;
 }
 
 .py-\[35px\] {
@@ -3041,6 +3057,11 @@ input {
   font-size: 15px;
 }
 
+.text-\[16px\] {
+  --font-size-px: 16;
+  font-size: 16px;
+}
+
 .text-\[17px\] {
   --font-size-px: 17;
   font-size: 17px;
@@ -3144,6 +3165,10 @@ body {
 
 .\*\:z-10 > * {
   z-index: 10;
+}
+
+.\*\:justify-self-start > * {
+  justify-self: start;
 }
 
 .\*\:overflow-scroll > * {
@@ -3308,6 +3333,10 @@ body {
 }
 
 .group\/main[data-main-page=false] .group-data-\[main-page\=false\]\/main\:hidden {
+  display: none;
+}
+
+.group[data-onclick=false] .group-data-\[onclick\=false\]\:hidden {
   display: none;
 }
 

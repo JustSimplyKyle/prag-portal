@@ -217,33 +217,38 @@ fn Content(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                     if let Some(loader) = &*mod_loader.read() {
                         Button {
                             fill_mode: FillMode::Fit,
-                            extended_css_class: "bg-white text-black pl-[20px] pr-[26px] py-[13px]",
+                            extended_css_class: "bg-white pl-[20px] pr-[26px] py-[13px]",
                             roundness: Roundness::Pill,
                             clickable: false,
                             string_placements: vec![
                                 ContentType::svg(GAME_CONTROLLER).css("svg-[30px]").align_left(),
-                                ContentType::text(loader).css("loader font-english font-bold").align_right()
+                                ContentType::custom(rsx!(
+                                    div {
+                                        class: "font-english text-black font-bold leading-[1.2] capsize",
+                                        {loader.clone()}
+                                    }
+                                )).align_right(),
                             ],
                         }
                     }
                     Button {
                         fill_mode: FillMode::Fit,
-                        extended_css_class: "bg-white text-black pl-[20px] pr-[26px] py-[13px]",
+                        extended_css_class: "bg-white pl-[20px] pr-[26px] py-[13px]",
                         roundness: Roundness::Pill,
                         clickable: false,
                         string_placements: vec![
                             ContentType::svg(GAME_CONTROLLER).css("svg-[30px]").align_left(),
-                            ContentType::text("由我建立").align_right()
+                            ContentType::text("由我建立").css("text-black").align_right()
                         ],
                     }
                     Button {
                         fill_mode: FillMode::Fit,
-                        extended_css_class: "bg-white text-black pl-[20px] pr-[26px] py-[13px]",
+                        extended_css_class: "bg-white  pl-[20px] pr-[26px] py-[13px]",
                         roundness: Roundness::Pill,
                         clickable: false,
                         string_placements: vec![
                             ContentType::svg(GAME_CONTROLLER).css("svg-[30px]").align_left(),
-                            ContentType::text("我的錦集").align_right()
+                            ContentType::text("我的錦集").css("text-black").align_right()
                         ],
                     }
                 }

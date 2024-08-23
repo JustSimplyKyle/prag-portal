@@ -56,9 +56,6 @@ pub fn SideBar() -> Element {
         }
     };
     let selected = use_memo(|| HISTORY.read().active.to_string());
-    use_effect(move || {
-        dbg!(selected());
-    });
     let mut main_page_hover = use_signal(|| false);
     let mut explore_hover = use_signal(|| false);
     let mut collections_hover = use_signal(|| false);
@@ -80,7 +77,7 @@ pub fn SideBar() -> Element {
                             roundness: Roundness::Squircle,
                             string_placements: vec![
                                 ContentType::svg(HOME).align_left(),
-                                ContentType::text("首頁").css("group-data-[main-page=false]/main:hidden").align_right(),
+                                ContentType::text("首頁").css("text-black group-data-[main-page=false]/main:hidden").align_right(),
                             ],
                             onmouseover: move |_| {
                                 main_page_hover.set(true);
@@ -114,7 +111,7 @@ pub fn SideBar() -> Element {
                                 roundness: Roundness::Squircle,
                                 string_placements: vec![
                                     ContentType::svg(EXPLORE).align_left(),
-                                    ContentType::text("探索").css("group-data-[explore=false]/main:hidden").align_right(),
+                                    ContentType::text("探索").css("text-black group-data-[explore=false]/main:hidden").align_right(),
                                 ],
                                 onmouseover: move |_| {
                                     explore_hover.set(true);
@@ -144,7 +141,7 @@ pub fn SideBar() -> Element {
                             roundness: Roundness::Squircle,
                             string_placements: vec![
                                 ContentType::svg(SIDEBAR_COLLECTION).align_left(),
-                                ContentType::text("收藏庫").css("group-data-[collections=false]/main:hidden").align_right(),
+                                ContentType::text("收藏庫").css("text-black group-data-[collections=false]/main:hidden").align_right(),
                             ],
                             onmouseover: move |_| {
                                 collections_hover.set(true);

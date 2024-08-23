@@ -4,6 +4,7 @@ use rust_lib::api::shared_resources::collection::CollectionId;
 use tailwind_fuse::*;
 
 use crate::{
+    collections::CollectionContext,
     text_scroller::use_text_scroller,
     BaseComponents::{
         atoms::button::{Button, ButtonClass, FillMode, Roundness, Size},
@@ -18,7 +19,7 @@ use crate::{
 pub const BLOCK: &str = manganis::mg!("./public/block.svg");
 pub const EXPAND_CONTENT: &str = manganis::mg!("./public/expand_content.svg");
 pub const ICON: &str = manganis::mg!("./public/icon.svg");
-pub const IMG: ImageAsset = manganis::mg!(image("./public/project.png").preload());
+pub const IMG: ImageAsset = manganis::mg!(image("./public/project.png"));
 pub const STAR: &str = manganis::mg!("./public/award_star.svg");
 pub const ARROW_LEFT: &str = manganis::mg!("./public/keyboard_arrow_left.svg");
 
@@ -57,35 +58,65 @@ pub fn CollectionBlock(
         .to_string_lossy()
         .to_string();
     let (onmounted, status, style) = use_text_scroller();
+    let mut menu_visibility = use_signal(|| false);
     rsx! {
-        div {
-            button {
-                class: tw_merge!("group relative size-[280px] min-w-[280px] min-h-[280px]", extended_class),
-                aria_selected: status(),
-                onclick: move |_| {
-                    Pages::collection_display(collection_id())
-                        .switch_active_to_self();
-                },
-                ..attributes,
-                img {
-                    class: img_class,
-                    src: picture_path
+        button {
+            class: tw_merge!("group relative size-[280px] max-w-[280px] min-w-[280px] min-h-[280px]", extended_class),
+            aria_selected: status(),
+            onclick: move |_| {
+                Pages::collection_display(collection_id())
+                    .switch_active_to_self();
+            },
+            ..attributes,
+            img {
+                class: img_class,
+                src: picture_path
+            }
+            if gradient {
+                div {
+                    class: "absolute inset-0 bg-gradient-to-t from-deep-background to-23%"
                 }
-                if gradient {
+            }
+            div {
+                class: "absolute inset-0 px-5 pt-5 pb-[25px] grid grid-flow-row *:justify-self-start justify-stretch items-stretch",
+                div {
+                    class: "self-start w-full grid grid-flow-col z-10 justify-stretch gap-[7px]",
                     div {
-                        class: "absolute inset-0 bg-gradient-to-t from-deep-background to-23%"
+                        class: "justify-self-start bg-white size-[45px]",
+                        "A"
+                    }
+                    div {
+                        class: "justify-self-start bg-white size-[45px]",
+                        "B"
+                    }
+                    div {
+                        class: "justify-self-end bg-white size-[45px]",
+                        "C"
+                    }
+                    div {
+                        class: "justify-self-end group bg-white z-10 relative size-[45px]",
+                        "data-onclick": menu_visibility(),
+                        onclick: move |x| {
+                            x.stop_propagation();
+                            menu_visibility.set(true);
+                        },
+                        onpointerleave: move |_| {
+                            menu_visibility.set(false);
+                        },
+                        "D"
+                        div {
+                            class: "group-data-[onclick=false]:hidden",
+                            CollectionContext {}
+                        }
                     }
                 }
                 div {
-                    class: "w-full absolute inset-0 px-5 pt-5 pb-[25px] flex flex-col gap-[15px] justify-end items-start overflow-x-clip",
-                    div {
-                        class: "font-bold",
-                        Text {
-                            css: "group-hover:group-aria-selected:animate-scroll-left w-full text-3xl text-white text-nowrap text-left",
-                            style: style(),
-                            onmounted,
-                            {collection.read().display_name().clone()}
-                        }
+                    class: "self-end grid grid-flow-row items-stretch *:justify-self-start justify-start gap-[15px]",
+                    Text {
+                        css: "group-hover:group-aria-selected:animate-scroll-left w-full text-3xl text-white text-nowrap text-left font-bold overflow-x-clip",
+                        style: style(),
+                        onmounted,
+                        {collection.read().display_name().clone()}
                     }
                     Hint {
                         css: "text-[15px] text-hint text-ellipsis text-nowrap",

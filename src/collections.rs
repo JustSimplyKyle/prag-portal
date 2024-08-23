@@ -5,8 +5,11 @@ use crate::{
     main_page::{CollectionBlock, STAR},
     BaseComponents::{
         atoms::button::{Button, FillMode, Roundness, Size},
-        molecules::search_bar::SearchBar,
-        string_placements::{Alignment, ContentType, Contents},
+        molecules::{
+            context_menu::{self, ContextMenu},
+            search_bar::SearchBar,
+        },
+        string_placements::{Alignment, ContentType, Contents, Hint, Text},
     },
     EXPLORE,
 };
@@ -20,25 +23,96 @@ pub static BOOKMARK: &str = manganis::mg!("./public/bookmark.svg");
 pub static BOOKMARK_ADD: &str = manganis::mg!("./public/bookmark_add.svg");
 
 #[component]
+pub fn CollectionContext() -> Element {
+    use context_menu::Direction::DownRightEdge;
+    let extended_css_class = "bg-background pl-[15px] py-[15px] pr-[20px] gap-[10px]";
+    let text = "text-[16px] font-medium";
+    rsx! {
+        ContextMenu {
+            direction: DownRightEdge,
+            div {
+                class: "relative overflow-hidden flex bg-background flex-col items-center",
+                Button {
+                    extended_css_class,
+                    string_placements: vec![
+                        ContentType::text("H").align_left(),
+                        ContentType::hint("開始遊戲").css(text).align_left()
+                    ]
+                }
+                Button {
+                    extended_css_class,
+                    string_placements: vec![
+                        ContentType::text("H").align_left(),
+                        ContentType::hint("更改資料夾").css(text).align_left()
+                    ]
+                }
+                Button {
+                    extended_css_class,
+                    string_placements: vec![
+                        ContentType::text("H").align_left(),
+                        ContentType::hint("檢視詳情").css(text).align_left()
+                    ]
+                }
+                Button {
+                    extended_css_class,
+                    string_placements: vec![
+                        ContentType::text("H").align_left(),
+                        ContentType::hint("風格化選項").css(text).align_left()
+                    ]
+                }
+                Button {
+                    extended_css_class,
+                    string_placements: vec![
+                        ContentType::text("H").align_left(),
+                        ContentType::hint("瀏覽本機資料夾").css(text).align_left()
+                    ]
+                }
+                Button {
+                    extended_css_class,
+                    string_placements: vec![
+                        ContentType::text("H").align_left(),
+                        ContentType::hint("匯出/分享合集").css(text).align_left()
+                    ]
+                }
+                Button {
+                    extended_css_class,
+                    string_placements: vec![
+                        ContentType::text("H").align_left(),
+                        ContentType::hint("複製合集").css(text).align_left()
+                    ]
+                }
+                Button {
+                    extended_css_class,
+                    string_placements: vec![
+                        ContentType::text("H").align_left(),
+                        ContentType::hint("刪除合集").css(text).align_left()
+                    ]
+                }
+            }
+        }
+    }
+}
+
+#[component]
 pub fn Collections() -> Element {
     let keys = use_context::<Memo<Vec<CollectionId>>>();
+    let binding = keys.read();
+    let keys_iter = binding.iter().zip((0..keys.len()).rev());
     let sender = use_signal(String::new);
     rsx! {
         div {
-            class: "flex flex-col space-y-[10px]",
+            class: "flex z-10 flex-col space-y-[10px]",
             div {
                 class: "grid grid-flow-col justify-stretch items-center h-[55px]",
                 div {
                     class: "flex h-full items-center space-x-[10px]",
-                    Button {
-                        roundness: Roundness::Pill,
-                        fill_mode: FillMode::Fit,
-                        size: Size::Medium,
-                        string_placements: vec![
-                            ContentType::svg(EXPLORE).css("svg-[30px]").align_left(),
-                            ContentType::text("全部").align_right(),
-                        ],
-                        extended_css_class: "pl-[20px] pr-[25px] h-full"
+                    div {
+                        class: "relative z-10 py-[10px] pl-[20px] pr-[25px] bg-deep-background p-0 rounded-full w-fit grid grid-flow-col items-center justify-stretch",
+                        {ContentType::svg(EXPLORE).css("justify-self-start svg-[30px]")}
+                        Text {
+                            css: "justify-self-end text-lg",
+                            "全部"
+                        }
                     }
                     Button {
                         roundness: Roundness::Pill,
@@ -112,12 +186,12 @@ pub fn Collections() -> Element {
                 }
             }
             div {
-                class: "grid grid-flow-row grid-cols-[repeat(auto-fill,280px)] gap-[20px]",
-                for collection_id in keys() {
+                class: "grid grid-flow-row grid-cols-[repeat(auto-fill,280px)] gap-[20px] overflow-y-visible",
+                for (collection_id, i) in keys_iter {
                     CollectionBlock {
-                        key: "{collection_id}",
-                        collection_id,
-                        extended_class: "rounded-[20px]"
+                        collection_id: collection_id.clone(),
+                        style: "z-index:{i}",
+                        extended_class: "rounded-[20px] overflow-y-visible",
                     }
                 }
             }
@@ -138,7 +212,7 @@ pub fn Collections() -> Element {
                         .css("flex flex-col gap-[15px]"),
                     ContentType::text("F").align_right(),
                 ],
-                extended_css_class: "rounded-[20px] px-[40px] py-[50px]",
+                extended_css_class: "z-0 rounded-[20px] px-[40px] py-[50px]",
                 size: Size::Fat,
                 clickable: false
             }
