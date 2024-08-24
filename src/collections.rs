@@ -190,7 +190,7 @@ pub fn Collections() -> Element {
                 for (collection_id, i) in keys_iter {
                     CollectionBlock {
                         collection_id: collection_id.clone(),
-                        style: "z-index:{i}",
+                        z_index: "{i}",
                         extended_class: "rounded-[20px] overflow-y-visible",
                     }
                 }

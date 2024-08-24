@@ -40,7 +40,7 @@ pub fn MainPage() -> Element {
 pub fn CollectionBlock(
     collection_id: ReadOnlySignal<CollectionId>,
     #[props(default = true)] gradient: bool,
-    #[props(default)] style: String,
+    #[props(default)] z_index: String,
     #[props(default)] extended_class: String,
 ) -> Element {
     let collection = collection_id().get_collection();
@@ -54,8 +54,8 @@ pub fn CollectionBlock(
     rsx! {
         button {
             class: tw_merge!("size-[280px] max-w-[280px] min-w-[280px] min-h-[280px]", extended_class),
+            style: "z-index:{z_index}; background: radial-gradient(273.29% 100% at 0% 100%, #0E0E0E 22.75%, rgba(14, 14, 14, 0.00) 100%), url('{picture_path}') lightgray 50% / cover no-repeat;",
             aria_selected: status(),
-            background: "radial-gradient(273.29% 100% at 0% 100%, #0E0E0E 22.75%, rgba(14, 14, 14, 0.00) 100%), url('{picture_path}') lightgray 50% / cover no-repeat",
             onclick: move |_| {
                 Pages::collection_display(collection_id())
                     .switch_active_to_self();
