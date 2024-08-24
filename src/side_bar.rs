@@ -1,5 +1,3 @@
-use std::time::Duration;
-
 use dioxus::prelude::*;
 use rust_lib::api::shared_resources::{collection::CollectionId, entry::STORAGE};
 
@@ -15,11 +13,9 @@ use crate::{
 
 #[component]
 pub fn SideBar() -> Element {
-    let keys = use_context::<Memo<Vec<CollectionId>>>();
-
     let binding = STORAGE.collections.read();
 
-    let collection_preview = binding.iter().take(3);
+    let collection_preview = binding.values().take(3);
 
     let folded_images = rsx! {
         div {
@@ -31,9 +27,8 @@ pub fn SideBar() -> Element {
                     class: "flex items-center space-x-0",
                     div {
                         class: "flex space-x-[-20px]",
-                        for (id , x) in collection_preview {
+                        for x in collection_preview {
                             div {
-                                key: "{id}",
                                 Image {
                                     css: "z-50 w-10 h-10 object-cover shrink-0 inline-flex justify-center items-center rounded-full border-2 border-zinc-900 group-aria-expanded:hidden",
                                     {x.read().picture_path().to_string_lossy().to_string()}
@@ -173,9 +168,8 @@ pub fn SideBar() -> Element {
                         string_placements: folded_images,
                         extended_css_class: "bg-background"
                     }
-                    for collection_id in keys() {
+                    for collection_id in STORAGE.collections.read().keys().cloned() {
                         SidebarCollectionBlock {
-                            key: "{collection_id}",
                             collection_id
                         }
                     }
@@ -263,8 +257,4 @@ fn SidebarCollectionBlock(collection_id: ReadOnlySignal<CollectionId>) -> Elemen
             }
         }
     }
-}
-
-fn darken_sidebar_background(s: &impl ToString) -> String {
-    format!("linear-gradient(to right, rgba(25, 25, 25, 0.8) 0%, rgba(25, 25, 25, 1) 68%, rgba(25, 25, 25, 1) 100%),url(\"{}\")", s.to_string())
 }

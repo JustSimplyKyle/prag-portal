@@ -1,7 +1,5 @@
 use dioxus::prelude::*;
 
-use crate::BaseComponents::string_placements::Hint;
-
 #[derive(PartialEq, Clone, Copy)]
 pub enum Direction {
     DownRightEdge,

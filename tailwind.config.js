@@ -84,6 +84,7 @@ module.exports = {
       colors: {
         'white': '#FFFFFF',
         'secondary-surface': '#2F2F2F',
+        'surface': '#1E1E1E',
         'hint': '#4F4F4F',
         'deep-background': '#0E0E0E',
         'background': '#191919',

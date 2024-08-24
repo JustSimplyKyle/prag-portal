@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 use manganis::ImageAsset;
-use rust_lib::api::shared_resources::collection::CollectionId;
+use rust_lib::api::shared_resources::{collection::CollectionId, entry::STORAGE};
 use tailwind_fuse::*;
 
 use crate::{
@@ -40,18 +40,10 @@ pub fn MainPage() -> Element {
 pub fn CollectionBlock(
     collection_id: ReadOnlySignal<CollectionId>,
     #[props(default = true)] gradient: bool,
-    #[props(extends=GlobalAttributes)] attributes: Vec<Attribute>,
+    #[props(default)] style: String,
     #[props(default)] extended_class: String,
 ) -> Element {
     let collection = collection_id().get_collection();
-    let (roundness, extended_class): (Vec<_>, Vec<_>) = extended_class
-        .split_whitespace()
-        .partition(|x| x.contains("rounded"));
-    let extended_class = extended_class.join(" ");
-    let mut img_class = String::from("h-full w-full object-cover rounded-[5px]");
-    for x in roundness {
-        img_class = tw_merge!(img_class, x);
-    }
     let picture_path = collection
         .read()
         .picture_path()
@@ -61,22 +53,13 @@ pub fn CollectionBlock(
     let mut menu_visibility = use_signal(|| false);
     rsx! {
         button {
-            class: tw_merge!("group relative size-[280px] max-w-[280px] min-w-[280px] min-h-[280px]", extended_class),
+            class: tw_merge!("size-[280px] max-w-[280px] min-w-[280px] min-h-[280px]", extended_class),
             aria_selected: status(),
+            background: "radial-gradient(273.29% 100% at 0% 100%, #0E0E0E 22.75%, rgba(14, 14, 14, 0.00) 100%), url('{picture_path}') lightgray 50% / cover no-repeat",
             onclick: move |_| {
                 Pages::collection_display(collection_id())
                     .switch_active_to_self();
             },
-            ..attributes,
-            img {
-                class: img_class,
-                src: picture_path
-            }
-            if gradient {
-                div {
-                    class: "absolute inset-0 bg-gradient-to-t from-deep-background to-23%"
-                }
-            }
             div {
                 class: "absolute inset-0 px-5 pt-5 pb-[25px] grid grid-flow-row *:justify-self-start justify-stretch items-stretch",
                 div {
@@ -321,7 +304,6 @@ fn SuggestionPage() -> Element {
 
 #[component]
 fn CollectionsPage() -> Element {
-    let keys = use_context::<Memo<Vec<CollectionId>>>();
     rsx! {
         div {
             class: "flex flex-col space-x-0",
@@ -353,9 +335,8 @@ fn CollectionsPage() -> Element {
                 class: ButtonClass::builder().roundness(Roundness::Bottom).with_class("min-w-screen p-0"),
                 div {
                     class: "flex space-x-[3px] overflow-scroll",
-                    for collection_id in keys() {
+                    for collection_id in STORAGE.collections.read().keys().cloned() {
                         CollectionBlock {
-                            key: "{collection_id}",
                             collection_id
                         }
                     }

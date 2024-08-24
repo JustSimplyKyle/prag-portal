@@ -3,7 +3,7 @@ pub mod sidebar;
 
 use dioxus::prelude::*;
 use personalization::Personalization;
-use rust_lib::api::shared_resources::collection::CollectionId;
+use rust_lib::api::shared_resources::{collection::CollectionId, entry::STORAGE};
 use sidebar::EditSidebar;
 use strum::{EnumIter, IntoEnumIterator};
 
@@ -53,10 +53,11 @@ impl_optional_state_switcher!(Pages);
 
 #[component]
 pub fn CollectionEditContainer() -> Element {
-    let keys = use_context::<Memo<Vec<CollectionId>>>();
-    let collection_ids = keys()
+    let binding = STORAGE.collections.read();
+    let collection_ids = binding
+        .keys()
         .into_iter()
-        .map(|x| (x.clone(), Pages::collection_edit(x)));
+        .map(|x| (x.clone(), Pages::collection_edit(x.clone())));
     rsx! {
         for (collection_id , page) in collection_ids {
             div {

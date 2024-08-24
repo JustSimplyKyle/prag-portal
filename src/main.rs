@@ -19,7 +19,6 @@ use dioxus_logger::tracing::Level;
 use manganis::ImageAsset;
 use pages::Pages;
 use rand::Rng;
-use rust_lib::api::shared_resources::collection::CollectionId;
 use scrollable::Scrollable;
 use snafu::ErrorCompat;
 use std::collections::BTreeMap;
@@ -353,10 +352,6 @@ fn Layout() -> Element {
         }
     }
 
-    let keys = use_context_provider(move || {
-        Signal::memo(move || (STORAGE.collections)().into_keys().collect::<Vec<_>>())
-    });
-
     let mut error_handler = use_context_provider(|| Signal::new(None));
 
     use_effect(move || {
@@ -365,9 +360,9 @@ fn Layout() -> Element {
             Pages::DownloadProgress.apply_slide_in()?;
             let pages_scroller = vec![Pages::MainPage, Pages::Explore, Pages::Collections];
             Pages::scroller_applyer(pages_scroller, |x| x == &history.active)?;
-            for collection_id in keys() {
+            for collection_id in STORAGE.collections.read().keys() {
                 Pages::collection_display(collection_id.clone()).apply_slide_in()?;
-                Pages::collection_edit(collection_id).apply_slide_in()?;
+                Pages::collection_edit(collection_id.clone()).apply_slide_in()?;
             }
             Ok::<_, anyhow::Error>(())
         };
@@ -460,9 +455,8 @@ fn Layout() -> Element {
 
 #[component]
 fn CollectionContainer() -> Element {
-    let keys = use_context::<Memo<Vec<CollectionId>>>();
     rsx! {
-        for collection_id in keys() {
+        for collection_id in STORAGE.collections.read().keys() {
             div {
                 class: "absolute inset-0 z-0 min-h-full min-w-full",
                 id: Pages::collection_display(collection_id.clone()).slide_in_id(),

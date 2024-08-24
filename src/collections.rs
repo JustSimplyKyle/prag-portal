@@ -1,5 +1,5 @@
 use dioxus::prelude::*;
-use rust_lib::api::shared_resources::collection::CollectionId;
+use rust_lib::api::shared_resources::entry::STORAGE;
 
 use crate::{
     main_page::{CollectionBlock, STAR},
@@ -9,7 +9,7 @@ use crate::{
             context_menu::{self, ContextMenu},
             search_bar::SearchBar,
         },
-        string_placements::{Alignment, ContentType, Contents, Hint, Text},
+        string_placements::{Alignment, ContentType, Contents, Text},
     },
     EXPLORE,
 };
@@ -95,9 +95,9 @@ pub fn CollectionContext() -> Element {
 
 #[component]
 pub fn Collections() -> Element {
-    let keys = use_context::<Memo<Vec<CollectionId>>>();
-    let binding = keys.read();
-    let keys_iter = binding.iter().zip((0..keys.len()).rev());
+    let read = STORAGE.collections.read();
+    let keys = read.keys();
+    let keys_iter = keys.clone().zip((0..keys.len()).rev());
     let sender = use_signal(String::new);
     rsx! {
         div {
