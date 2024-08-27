@@ -1,23 +1,23 @@
 use std::time::Duration;
 
 use dioxus::prelude::*;
-use dioxus_logger::tracing::info;
+use dioxus_logger::tracing::debug;
 
 pub fn use_text_scroller() -> (Signal<Option<MountedEvent>>, Signal<bool>, Signal<String>) {
     let mounted = use_signal(|| None);
     let mut status = use_signal(|| false);
     let mut style = use_signal(String::new);
     use_effect(move || {
-        let _ = mounted();
-        info!("mounted changed");
+        let _ = mounted.read();
+        debug!("mounted changed");
     });
     use_effect(move || {
-        let _ = status();
-        info!("status changed");
+        let status = status();
+        debug!("status changed: {status}");
     });
     use_effect(move || {
-        let _ = style();
-        info!("style changed");
+        let style = style.read();
+        debug!("style changed: {style}");
     });
     use_future(move || async move {
         loop {

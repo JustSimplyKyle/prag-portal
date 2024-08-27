@@ -357,12 +357,12 @@ fn Layout() -> Element {
     use_effect(move || {
         let binding = || {
             let history = HISTORY.read();
-            Pages::DownloadProgress.apply_slide_in()?;
+            Pages::DownloadProgress.apply_slide_in();
             let pages_scroller = vec![Pages::MainPage, Pages::Explore, Pages::Collections];
             Pages::scroller_applyer(pages_scroller, |x| x == &history.active)?;
             for collection_id in STORAGE.collections.read().keys() {
-                Pages::collection_display(collection_id.clone()).apply_slide_in()?;
-                Pages::collection_edit(collection_id.clone()).apply_slide_in()?;
+                Pages::collection_display(collection_id.clone()).apply_slide_in();
+                Pages::collection_edit(collection_id.clone()).apply_slide_in();
             }
             Ok::<_, anyhow::Error>(())
         };
@@ -403,34 +403,26 @@ fn Layout() -> Element {
                 div {
                     class: "absolute inset-0 z-0 min-h-full",
                     id: Pages::MainPage.scroller_id(),
-                    if Pages::MainPage.should_render() {
-                        LayoutContainer {
-                            MainPage {
+                    LayoutContainer {
+                        MainPage {
 
-                            }
                         }
                     }
                 }
                 div {
                     class: "absolute inset-0 z-0 min-h-full",
                     id: Pages::Explore.scroller_id(),
-                    if Pages::Explore.should_render() {
-                        LayoutContainer {
-                            Explore {
+                    LayoutContainer {
+                        Explore {
 
-                            }
                         }
                     }
                 }
                 div {
                     class: "absolute inset-0 z-0 min-h-full",
                     id: Pages::Collections.scroller_id(),
-                    if Pages::Collections.should_render() {
-                        LayoutContainer {
-                            Collections {
+                    Collections {
 
-                            }
-                        }
                     }
                 }
                 div {
@@ -474,14 +466,13 @@ fn CollectionContainer() -> Element {
 }
 
 /// Does dynmaic rendering
-/// do not wrap the children in another div
 #[component]
 fn LayoutContainer(children: Element, #[props(default)] extended_class: String) -> Element {
     rsx! {
         div {
-            class: tw_merge!("bg-background min-h-screen rounded-xl p-8 min-w-full", extended_class),
+            class: tw_merge!("bg-deep-background min-h-screen min-w-full", extended_class),
             div {
-                class: "flex flex-col space-y-[20px] transition-all xl:items-center xl:*:justify-center xl:*:max-w-[1180px] xl:*:w-full",
+                class: "flex flex-col transition-all xl:items-center xl:*:justify-center xl:*:max-w-[1240px] xl:*:w-full",
                 {children}
             }
         }

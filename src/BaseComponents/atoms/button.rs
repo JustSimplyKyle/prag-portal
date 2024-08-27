@@ -21,6 +21,8 @@ pub enum FillMode {
     Fill,
     #[tw(class = "min-w-fit space-x-2.5")]
     Fit,
+    #[tw(class = "")]
+    None,
 }
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, TwVariant)]

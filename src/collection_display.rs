@@ -18,7 +18,7 @@ use crate::{
             switch::Switch,
         },
         molecules::{
-            search_bar::FuzzyFilterer,
+            search_bar::{FuzzyFilterer, SearchBar},
             switcher::{Comparison, StateSwitcher},
         },
         string_placements::{Alignment, ContentType, Contents, Hint, Text},
@@ -82,7 +82,7 @@ pub fn ScrollableFootBar(main: Element, footer: Element, bottom: Element) -> Ele
 fn Footer(
     collection_id: ReadOnlySignal<CollectionId>,
     search: Signal<String>,
-    default: CopyValue<String>,
+    default: String,
 ) -> Element {
     let collection = collection_id().get_collection();
     let len = collection.with(|x| {
@@ -125,33 +125,9 @@ fn Footer(
                     ContentType::svg(asset!("public/arrow_drop_down_40.svg")).css("svg-[40px]").align_right(),
                 ],
             }
-            Button {
-                roundness: Roundness::Squircle,
-                extended_css_class: "bg-background min-w-fit w-full",
-                fill_mode: FillMode::Fit,
-                clickable: false,
-                string_placements: vec![
-                    ContentType::custom(rsx!(
-                        input {
-                            class: "w-full text-hint font-medium text-xl leading-[1.2] capsize",
-                            onfocusin: move |_| {
-                                if &*search.read() == &default.cloned() {
-                                    search.set(String::new());
-                                }
-                            },
-                            onfocusout: move |_| {
-                                search.set(default.cloned());
-                            },
-                            oninput: move |x| {
-                                search.set(x.value());
-                            },
-                            value: search(),
-                        }
-                    ))
-                    .align_left()
-                    .css("grow min-w-full justify-self-stretch"),
-                    ContentType::svg(SEARCH).css("shrink-0").align_right(),
-                ],
+            SearchBar {
+                search,
+                default,
             }
             Button {
                 roundness: Roundness::Squircle,
@@ -459,22 +435,17 @@ fn ModViewer(
 }
 
 #[component]
-fn SubModViewer(
-    collection_id: ReadOnlySignal<CollectionId>,
-    mods: ReadOnlySignal<ModMetadata>,
-) -> Element {
-    let clicked = use_signal(|| mods.read().enabled);
+fn SubModViewer(collection_id: ReadOnlySignal<CollectionId>, mods: ModMetadata) -> Element {
+    let clicked = use_signal(|| mods.enabled);
+    let mods_clone = mods.clone();
     use_effect(move || {
+        let mods = mods_clone.clone();
         let clicked = clicked();
         let id = collection_id();
         spawn(async move {
             let mut collection = id.get_collection()();
             let manager = &mut collection.mod_controller.as_mut().unwrap().manager;
-            let modify = manager
-                .mods
-                .iter_mut()
-                .find(|x| &**x == &*mods.read())
-                .unwrap();
+            let modify = manager.mods.iter_mut().find(|x| &**x == &mods).unwrap();
 
             if clicked {
                 modify.enable().await.unwrap();
@@ -485,7 +456,7 @@ fn SubModViewer(
             id.replace(collection).unwrap();
         });
     });
-    let icon = rsx!(if let Some(icon) = mods.read().icon_url.as_ref() {
+    let icon = rsx!(if let Some(icon) = mods.icon_url.as_ref() {
         {
             ContentType::image(icon.to_string()).css("size-[80px] rounded-[15px]")
         }
@@ -495,13 +466,13 @@ fn SubModViewer(
             class: "flex gap-[7px]",
             Text {
                 css: "text-white text-[28px] font-bold font-english",
-                {mods.read().name.clone()}
+                {mods.name.clone()}
             }
             div {
                 class: "w-[40px] bg-background inline-flex items-center justify-center h-[30px] px-[10px] rounded-[30px]",
                 {
                     ContentType::svg(
-                        match mods.read().platform() {
+                        match mods.platform() {
                             Platform::Modrinth => MODRINTH,
                             Platform::Curseforge => CURSEFORGE
                         })
@@ -511,7 +482,7 @@ fn SubModViewer(
         }
     );
     let file_name = rsx!(
-        if let Some(version) = &mods.read().mod_version {
+        if let Some(version) = &mods.mod_version {
             Hint {
                 css: "font-medium text-hint text-[15px] font-english",
                 {version.clone()}
@@ -521,7 +492,7 @@ fn SubModViewer(
     let author = rsx!(
         Hint {
             css: "text-[15px] font-english",
-            {mods.read().authors.join(", ")}
+            {mods.authors.join(", ")}
         }
     );
     let upgrade = rsx!(Button {

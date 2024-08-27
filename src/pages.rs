@@ -1,6 +1,11 @@
-use std::hash::{DefaultHasher, Hash, Hasher};
+use std::{
+    hash::{DefaultHasher, Hash, Hasher},
+    rc::Rc,
+};
 
 use dioxus::prelude::*;
+use dioxus_logger::tracing::warn;
+use document::eval_provider;
 use rust_lib::api::shared_resources::collection::CollectionId;
 
 use crate::{scrollable::Scrollable, BaseComponents::molecules::switcher::StateSwitcher, HISTORY};
@@ -126,39 +131,44 @@ impl Pages {
     ///     }
     /// }
     /// ```
-    pub fn apply_slide_in(&self) -> anyhow::Result<()> {
-        eval(
-            r#"
-                    function applyStyles(dataValue) {
-                        const groups = document.querySelectorAll('.group-pages');            
-                        groups.forEach(group => {
-                            const prev = group.getAttribute('data-prev') === dataValue;
-                            const selected = group.getAttribute('data-selected') === dataValue;
-                            const target = group.querySelector('#flyinout-' + dataValue);
+    pub fn apply_slide_in(self) {
+        let function = r#"
+            function applyStyles(dataValue) {
+                const groups = document.querySelectorAll('.group-pages');            
+                groups.forEach(group => {
+                    const prev = group.getAttribute('data-prev') === dataValue;
+                    const selected = group.getAttribute('data-selected') === dataValue;
+                    const target = group.querySelector('#flyinout-' + dataValue);
 
-                            // Reset styles first
-                            target.style.insetInlineStart = '';
-                            target.style.zIndex = '0';
-                            target.style.display = 'none';
-                            target.style.animation = '';
+                    // Reset styles first
+                    target.style.insetInlineStart = '';
+                    target.style.zIndex = '0';
+                    target.style.display = 'none';
+                    target.style.animation = '';
 
-                            if (selected) {
-                                target.style.zIndex = '100';
-                                target.style.display = 'block';                        
-                                target.style.animation = 'slideLeft 500ms';
-                            }
-                            if (prev) {
-                                target.style.insetInlineStart = '100dvw';
-                                target.style.zIndex = '51';
-                                target.style.display = 'block';                        
-                                target.style.animation = 'slideRight 500ms';
-                            } 
-                        });
+                    if (selected) {
+                        target.style.zIndex = '100';
+                        target.style.display = 'block';                        
+                        target.style.animation = 'slideLeft 500ms';
                     }
-                    applyStyles(await dioxus.recv());
-                "#,
-        )
-        .send(self.to_string().into())
-        .map_err(|x| anyhow::anyhow!("{x:?}"))
+                    if (prev) {
+                        target.style.insetInlineStart = '100dvw';
+                        target.style.zIndex = '51';
+                        target.style.display = 'block';                        
+                        target.style.animation = 'slideRight 500ms';
+                    } 
+                });
+            }
+        "#;
+        if let Err(x) = eval(&format!(
+            " {function}
+                  applyStyles(\"{}\");
+                ",
+            self.to_string()
+        ))
+        .send(().into())
+        {
+            warn!("Javascript Error: {x}");
+        }
     }
 }
