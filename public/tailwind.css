@@ -1753,10 +1753,6 @@ input {
   bottom: 0px;
 }
 
-.left-0 {
-  left: 0px;
-}
-
 .left-\[300px\] {
   left: 300px;
 }
@@ -1795,10 +1791,6 @@ input {
 
 .z-\[2000\] {
   z-index: 2000;
-}
-
-.z-\[200\] {
-  z-index: 200;
 }
 
 .col-span-2 {
@@ -1840,6 +1832,11 @@ input {
 
 .hidden {
   display: none;
+}
+
+.size-\[20px\] {
+  width: 20px;
+  height: 20px;
 }
 
 .size-\[280px\] {
@@ -2464,6 +2461,10 @@ input {
   overflow-x: hidden;
 }
 
+.overflow-y-hidden {
+  overflow-y: hidden;
+}
+
 .overflow-x-clip {
   overflow-x: clip;
 }
@@ -2618,6 +2619,10 @@ input {
   background-color: rgb(14 14 14 / var(--tw-bg-opacity));
 }
 
+.bg-deep-background\/80 {
+  background-color: rgb(14 14 14 / 0.8);
+}
+
 .bg-green {
   --tw-bg-opacity: 1;
   background-color: rgb(205 227 71 / var(--tw-bg-opacity));
@@ -2635,10 +2640,6 @@ input {
 .bg-white {
   --tw-bg-opacity: 1;
   background-color: rgb(255 255 255 / var(--tw-bg-opacity));
-}
-
-.bg-white\/30 {
-  background-color: rgb(255 255 255 / 0.3);
 }
 
 .bg-zinc-800 {
@@ -2860,6 +2861,10 @@ input {
   text-align: right;
 }
 
+.font-\[13px\] {
+  font-weight: 13px;
+}
+
 .font-black {
   font-weight: 900;
 }
@@ -2912,9 +2917,18 @@ input {
   color: rgb(201 43 69 / var(--tw-text-opacity));
 }
 
+.text-secondary-text {
+  --tw-text-opacity: 1;
+  color: rgb(125 125 125 / var(--tw-text-opacity));
+}
+
 .text-white {
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity));
+}
+
+.opacity-100 {
+  opacity: 1;
 }
 
 .shadow {
@@ -2936,6 +2950,20 @@ input {
   --tw-backdrop-blur: blur(7.5px);
   -webkit-backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
           backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
+}
+
+.backdrop-opacity-100 {
+  --tw-backdrop-opacity: opacity(1);
+  -webkit-backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
+          backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
+}
+
+.transition {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-backdrop-filter;
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-backdrop-filter;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
 }
 
 .transition-all {
@@ -3036,6 +3064,11 @@ input {
 .text-\[28px\] {
   --font-size-px: 28;
   font-size: 28px;
+}
+
+.text-\[30px\] {
+  --font-size-px: 30;
+  font-size: 30px;
 }
 
 .text-\[35px\] {
@@ -3167,14 +3200,6 @@ body {
 .aria-selected\:text-black[aria-selected="true"] {
   --tw-text-opacity: 1;
   color: rgb(35 46 61 / var(--tw-text-opacity));
-}
-
-.aria-\[selected\=false\]\:z-0[aria-selected=false] {
-  z-index: 0;
-}
-
-.aria-\[selected\=false\]\:hidden[aria-selected=false] {
-  display: none;
 }
 
 .group[aria-busy="true"] .group-aria-busy\:hidden {
@@ -3373,6 +3398,18 @@ body {
   }
 }
 
+.\[\&\:\:backdrop\]\:\!m-0::backdrop {
+  margin: 0px !important;
+}
+
+.\[\&\:\:backdrop\]\:\!border-0::backdrop {
+  border-width: 0px !important;
+}
+
+.\[\&\:\:backdrop\]\:\!p-0::backdrop {
+  padding: 0px !important;
+}
+
 .\[\&\:not\(\:hover\)\]\:justify-center:not(:hover) {
   justify-content: center;
 }
@@ -3430,4 +3467,137 @@ body {
   --line-gap-scale: 0;
   --line-height-scale: 1.3;
   font-family: IBM Plex Mono;
+}
+
+.\[\&_a\]\:text-light-blue a {
+  --tw-text-opacity: 1;
+  color: rgb(124 174 211 / var(--tw-text-opacity));
+}
+
+.\[\&_a\]\:underline a {
+  text-decoration-line: underline;
+}
+
+.\[\&_h1\]\:my-\[12\.5px\] h1 {
+  margin-top: 12.5px;
+  margin-bottom: 12.5px;
+}
+
+.\[\&_h1\]\:font-semibold h1 {
+  font-weight: 600;
+}
+
+.\[\&_h1\]\:text-\[25px\] h1 {
+  --font-size-px: 25;
+  font-size: 25px;
+}
+
+.\[\&_h2\]\:my-\[12\.5px\] h2 {
+  margin-top: 12.5px;
+  margin-bottom: 12.5px;
+}
+
+.\[\&_h2\]\:font-semibold h2 {
+  font-weight: 600;
+}
+
+.\[\&_h2\]\:text-\[20px\] h2 {
+  --font-size-px: 20;
+  font-size: 20px;
+}
+
+.\[\&_h3\]\:my-\[12\.5px\] h3 {
+  margin-top: 12.5px;
+  margin-bottom: 12.5px;
+}
+
+.\[\&_h3\]\:font-semibold h3 {
+  font-weight: 600;
+}
+
+.\[\&_h3\]\:text-\[18px\] h3 {
+  --font-size-px: 18;
+  font-size: 18px;
+}
+
+.\[\&_h4\]\:my-\[12\.5px\] h4 {
+  margin-top: 12.5px;
+  margin-bottom: 12.5px;
+}
+
+.\[\&_h4\]\:font-semibold h4 {
+  font-weight: 600;
+}
+
+.\[\&_h4\]\:text-\[16px\] h4 {
+  --font-size-px: 16;
+  font-size: 16px;
+}
+
+.\[\&_image\]\:my-\[12\.5px\] image {
+  margin-top: 12.5px;
+  margin-bottom: 12.5px;
+}
+
+.\[\&_li\]\:font-medium li {
+  font-weight: 500;
+}
+
+.\[\&_li\]\:text-white li {
+  --tw-text-opacity: 1;
+  color: rgb(255 255 255 / var(--tw-text-opacity));
+}
+
+.\[\&_li\]\:text-\[15px\] li {
+  --font-size-px: 15;
+  font-size: 15px;
+}
+
+.\[\&_li_p\]\:text-white li p {
+  --tw-text-opacity: 1;
+  color: rgb(255 255 255 / var(--tw-text-opacity));
+}
+
+.\[\&_p\]\:font-medium p {
+  font-weight: 500;
+}
+
+.\[\&_p\]\:text-secondary-text p {
+  --tw-text-opacity: 1;
+  color: rgb(125 125 125 / var(--tw-text-opacity));
+}
+
+.\[\&_p\]\:text-\[15px\] p {
+  --font-size-px: 15;
+  font-size: 15px;
+}
+
+.\[\&_strong\]\:text-white strong {
+  --tw-text-opacity: 1;
+  color: rgb(255 255 255 / var(--tw-text-opacity));
+}
+
+.\[\&_ul\]\:my-\[12\.5px\] ul {
+  margin-top: 12.5px;
+  margin-bottom: 12.5px;
+}
+
+.\[\&_ul\]\:list-inside ul {
+  list-style-position: inside;
+}
+
+.\[\&_ul\]\:list-disc ul {
+  list-style-type: disc;
+}
+
+@starting-style {
+  .\[\@starting-style\]\:opacity-0 {
+    opacity: 0;
+  }
+
+  .\[\@starting-style\]\:backdrop-opacity-0 {
+    --tw-backdrop-opacity: opacity(0);
+    -webkit-backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
+            backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
+  }
 }

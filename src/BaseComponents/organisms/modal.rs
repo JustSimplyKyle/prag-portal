@@ -1,70 +1,21 @@
 use dioxus::prelude::*;
 
-use crate::TOP_LEVEL_COMPONENT;
-
-#[derive(Clone)]
-pub struct ComponentPointer<P: Properties> {
-    pub name: String,
-    pub props: P,
-    pub pointer: Component<P>,
-}
-
 #[component]
-pub fn Modal(
-    children: Element,
-    name: String,
-    active: Signal<bool>,
-    #[props(default = true)] close_on_outer_click: bool,
-) -> Element {
-    let props = __sub_modalProps::builder()
-        .children(children)
-        .active(active)
-        .close_on_outer_click(close_on_outer_click)
-        .build();
-    if TOP_LEVEL_COMPONENT().into_iter().all(|x| x.name != name) {
-        #[allow(deprecated)]
-        let pointer = ComponentPointer {
-            name,
-            props,
-            pointer: __sub_modal,
-        };
-        TOP_LEVEL_COMPONENT.write().push(pointer);
-    }
-    Ok(VNode::placeholder())
-}
-
-#[component]
-#[doc(hidden)]
-#[deprecated = "DO NOT USE. Use `Modal` instead, this should be private, but Dioxus does not allow it."]
-pub fn __sub_modal(
-    children: Element,
-    mut active: Signal<bool>,
-    close_on_outer_click: bool,
-) -> Element {
-    let mut modal_hover = use_signal(|| false);
+pub fn Modal(active: Signal<bool>, id: String, children: Element) -> Element {
+    let _id = id.clone();
+    use_effect(move || {
+        if active() {
+            eval(&format!("document.getElementById(\"{_id}\").showModal();"));
+        } else {
+            eval(&format!("document.getElementById(\"{_id}\").close();"));
+        }
+    });
     rsx! {
-        div {
-            class: "contents z-[200] aria-[selected=false]:hidden aria-[selected=false]:z-0 flex justify-center items-center absolute left-0 top-0 w-screen h-screen bg-white/30",
-            "aria-selected": active(),
-            onclick: move |_| {
-                if !modal_hover() && close_on_outer_click {
-                    *active.write() = false;
-                }
-            },
-            div {
-                class: "w-fit h-fit",
-                onmouseenter: move |_| {
-                    if close_on_outer_click {
-                        *modal_hover.write() = true;
-                    }
-                },
-                onmouseleave: move |_| {
-                    if close_on_outer_click {
-                        *modal_hover.write() = false;
-                    }
-                },
-                {children}
-            }
+        dialog {
+            class: "[&::backdrop]:!m-0 [&::backdrop]:!p-0 [&::backdrop]:!border-0 overflow-x-hidden overflow-y-hidden opacity-100 [@starting-style]:opacity-0 backdrop-opacity-100 [@starting-style]:backdrop-opacity-0 bg-deep-background/80 w-screen h-screen overflow-y-scroll",
+            transition: "all 0.7s allow-discrete",
+            id,
+            {children}
         }
     }
 }

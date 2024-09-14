@@ -4,41 +4,33 @@ use itertools::Itertools;
 
 use crate::{
     collections::SEARCH,
-    main_page::ARROW_LEFT,
     BaseComponents::{
         atoms::button::{Button, FillMode, Roundness},
         string_placements::ContentType,
     },
 };
 
-#[component]
-pub fn FuzzyFilterer(
-    search: ReadOnlySignal<String>,
-    default: String,
-    childrens: Vec<(String, Element)>,
-) -> Element {
+pub fn fuzzy_search(
+    search_str: &str,
+    default: &str,
+    childrens: impl IntoIterator<Item = (String, Element)>,
+) -> impl IntoIterator<Item = Element> {
     let matcher = fuzzy_matcher::skim::SkimMatcherV2::default();
-    let search = search();
-    let render = childrens
+    childrens
         .into_iter()
         .map(|(name, x)| {
-            let score = matcher.fuzzy_match(&name, &search);
+            let score = matcher.fuzzy_match(&name, &search_str);
             (score, x)
         })
         .filter_map(|(score, x)| {
-            if search == default {
+            if search_str == default {
                 Some((i64::MAX, x))
             } else {
                 score.map(|score| (score, x))
             }
         })
         .sorted_by_key(|x| std::cmp::Reverse(x.0))
-        .map(|x| x.1);
-    rsx! {
-        for x in render {
-            {x}
-        }
-    }
+        .map(|x| x.1)
 }
 
 #[component]

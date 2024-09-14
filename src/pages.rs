@@ -1,11 +1,7 @@
-use std::{
-    hash::{DefaultHasher, Hash, Hasher},
-    rc::Rc,
-};
+use std::hash::{DefaultHasher, Hash, Hasher};
 
 use dioxus::prelude::*;
 use dioxus_logger::tracing::warn;
-use document::eval_provider;
 use rust_lib::api::shared_resources::collection::CollectionId;
 
 use crate::{scrollable::Scrollable, BaseComponents::molecules::switcher::StateSwitcher, HISTORY};
@@ -83,7 +79,9 @@ impl Pages {
     }
 
     pub fn should_render(&self) -> bool {
-        HISTORY.read().active() == self || HISTORY.read().prev_peek() == Some(self)
+        HISTORY.with(|x| {
+            x.active() == self || x.prev_peek() == Some(self) || x.history().contains(self)
+        })
     }
 
     /// Applies slide-in animations to HTML elements based on data attributes.
@@ -162,8 +160,8 @@ impl Pages {
         "#;
         if let Err(x) = eval(&format!(
             " {function}
-                  applyStyles(\"{}\");
-                ",
+              applyStyles(\"{}\");
+            ",
             self.to_string()
         ))
         .send(().into())

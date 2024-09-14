@@ -1,11 +1,9 @@
 use std::time::Duration;
 
 use dioxus::prelude::*;
-use futures_util::StreamExt;
 use manganis::ImageAsset;
 use rust_lib::api::shared_resources::{collection::CollectionId, entry::STORAGE};
 use tailwind_fuse::*;
-use tokio::sync::mpsc::unbounded_channel;
 
 use crate::{
     collection_display::HORIZ,

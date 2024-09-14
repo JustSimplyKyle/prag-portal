@@ -25,7 +25,7 @@ use std::collections::BTreeMap;
 use tailwind_fuse::*;
 use BaseComponents::{
     atoms::button::{Button, FillMode, Roundness},
-    organisms::modal::{ComponentPointer, Modal},
+    organisms::modal::Modal,
     string_placements::ContentType,
 };
 
@@ -69,9 +69,6 @@ pub const TAILWIND_STR: &str = asset!("./public/tailwind.css");
 /// `(Pages)`: Current active page
 /// `Option<Pages>`: Previous page
 static HISTORY: GlobalSignal<History> = GlobalSignal::new(|| History::new(Pages::MainPage));
-pub static TOP_LEVEL_COMPONENT: GlobalSignal<
-    Vec<ComponentPointer<crate::BaseComponents::organisms::modal::__sub_modalProps>>,
-> = GlobalSignal::new(Vec::new);
 
 /// `History` is used to keep track of the navigation history in the application.
 /// It contains the following fields:
@@ -155,7 +152,7 @@ impl History {
     }
 }
 
-use rust_lib::api::shared_resources::entry::STORAGE;
+use rust_lib::api::shared_resources::{collection::CollectionId, entry::STORAGE};
 
 fn main() {
     dioxus_logger::init(Level::INFO).expect("failed to init logger");
@@ -248,29 +245,28 @@ fn App() -> Element {
         }
         div {
             class: "[&_*]:transform-gpu bg-deep-background h-screen w-screen font-display leading-normal",
-            {
-                TOP_LEVEL_COMPONENT().into_iter().map(|x| (x.pointer)(x.props))
-            }
             ErrorBoundary {
                 handle_error: move |error| { rsx! {
                     Modal {
                         active: error_active,
-                        name: "error_modal",
-                        close_on_outer_click: false,
+                        id: "error_modal",
                         div {
-                            div { class: "min-w-full flex flex-col items-center space-y-3",
+                            class: "flex",
+                            div {
+                                flex_basis: "10%",
+                            }
+                            div { class: "w-full bg-background overflow-x-scroll flex flex-col items-center space-y-3",
+                                flex_basis: "80%",
                                 div { class: "text-red text-3xl font-black",
                                     "Hmm, something went wrong. Please copy the following error to the developer."
                                 }
-                                Button {
-                                    roundness: Roundness::Pill,
-                                    extended_css_class: "text-[13px] font-bold",
-                                    string_placements: rsx! {
-                                        pre { "{error:#?}" }
-                                    },
-                                    fill_mode: FillMode::Fit,
-                                    clickable: false
+                                pre {
+                                    class: "max-w-full overflow-x-scroll font-[13px] font-bold",
+                                    "{error:#?}"
                                 }
+                            }
+                            div {
+                                flex_basis: "10%",
                             }
                         }
                     }
@@ -353,6 +349,7 @@ fn Layout() -> Element {
     }
 
     let mut error_handler = use_context_provider(|| Signal::new(None));
+    let keys = use_keys();
 
     use_effect(move || {
         let binding = || {
@@ -360,7 +357,7 @@ fn Layout() -> Element {
             Pages::DownloadProgress.apply_slide_in();
             let pages_scroller = vec![Pages::MainPage, Pages::Explore, Pages::Collections];
             Pages::scroller_applyer(pages_scroller, |x| x == &history.active)?;
-            for collection_id in STORAGE.collections.read().keys() {
+            for collection_id in keys() {
                 Pages::collection_display(collection_id.clone()).apply_slide_in();
                 Pages::collection_edit(collection_id.clone()).apply_slide_in();
             }
@@ -445,21 +442,37 @@ fn Layout() -> Element {
     }
 }
 
+pub fn use_keys() -> Memo<Vec<CollectionId>> {
+    use_memo(|| STORAGE.collections.read().keys().cloned().collect())
+}
+
 #[component]
 fn CollectionContainer() -> Element {
+    let ids = use_keys();
+    let should_render_ids = ids()
+        .into_iter()
+        .filter(|x| Pages::collection_display(x.clone()).should_render());
     rsx! {
-        for collection_id in STORAGE.collections.read().keys() {
+        for collection_id in should_render_ids {
             div {
                 class: "absolute inset-0 z-0 min-h-full min-w-full",
+                key: "page {collection_id}",
                 id: Pages::collection_display(collection_id.clone()).slide_in_id(),
-                if Pages::collection_display(collection_id.clone()).should_render() {
-                    div {
-                        class: "bg-deep-background min-h-screen rounded-xl min-w-full",
-                        CollectionDisplay {
-                            collection_id: collection_id.clone()
-                        }
-                    }
+                SingleCollectionContainer {
+                    id: collection_id.clone(),
                 }
+            }
+        }
+    }
+}
+
+#[component]
+fn SingleCollectionContainer(id: CollectionId) -> Element {
+    rsx! {
+        div {
+            class: "bg-deep-background min-h-screen rounded-xl min-w-full",
+            CollectionDisplay {
+                collection_id: id
             }
         }
     }

@@ -1,20 +1,16 @@
-use dioxus::prelude::*;
-use rust_lib::api::shared_resources::entry::STORAGE;
-use tailwind_fuse::tw_merge;
-
 use crate::{
-    main_page::{use_delayed_hover, CollectionBlock, STAR},
-    pages::Pages,
+    main_page::CollectionBlock,
     BaseComponents::{
         atoms::button::{Button, FillMode, Roundness, Size},
         molecules::{
             context_menu::{self, ContextMenu},
             search_bar::SearchBar,
         },
-        string_placements::{Alignment, ContentType, Contents, Hint, Text},
+        string_placements::{Alignment, ContentType, Contents, Hint},
     },
-    EXPLORE,
 };
+use dioxus::prelude::*;
+use rust_lib::api::shared_resources::entry::STORAGE;
 
 pub static NOTE: &str = manganis::mg!("./public/note_stack_add.svg");
 pub static CROP_FREE: &str = manganis::mg!("./public/crop_free.svg");
@@ -155,7 +151,7 @@ pub fn Collections() -> Element {
                 grid_template_columns: "repeat(auto-fill,280px)",
                 for (collection_id, i) in keys_iter {
                     CollectionBlock {
-                        fat: rand::Rng::gen::<bool>(&mut rand::thread_rng()),
+                        fat: false,
                         collection_id: collection_id.clone(),
                         z_index: "{i}",
                         extended_class: "rounded-[20px] overflow-y-visible",
