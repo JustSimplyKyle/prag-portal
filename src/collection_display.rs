@@ -10,6 +10,7 @@ use crate::{
     impl_context_switcher,
     main_page::STAR,
     pages::Pages,
+    use_error_handler,
     BaseComponents::{
         atoms::button::{Button, FillMode, Roundness},
         molecules::{
@@ -84,11 +85,16 @@ fn Footer(
         x.mod_controller()
             .map(|x| x.manager.mods.iter().filter(|x| x.enabled).count())
     });
+    let mut error_handler = use_error_handler();
     let launch_game = move || {
         spawn(async move {
             let mut collection = collection_id().get_collection()();
-            collection.launch_game().await.unwrap();
-            collection_id().replace(collection).unwrap();
+            let err = move || async move {
+                collection.launch_game().await?;
+                collection_id().replace(collection)?;
+                Ok(())
+            };
+            error_handler.set(Some(err().await));
         })
     };
 

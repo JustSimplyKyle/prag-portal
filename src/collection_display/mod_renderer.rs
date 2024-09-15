@@ -10,6 +10,7 @@ use tailwind_fuse::tw_merge;
 
 use crate::{
     collection_display::{CURSEFORGE, DELETE, HORIZ, MODRINTH, UNARCHIVE},
+    use_error_handler,
     BaseComponents::{
         atoms::{
             button::{Button, FillMode, Roundness},
@@ -167,32 +168,37 @@ pub fn ModViewer(
 fn use_active_controller(
     clicked: Signal<bool>,
     collection_id: ReadOnlySignal<CollectionId>,
-    mods: ModMetadata,
+    mods: ReadOnlySignal<ModMetadata>,
 ) {
-    let mods = CopyValue::new(mods);
+    let mut error_handler = use_error_handler();
     let _ = use_resource(move || {
         let clicked = clicked();
         let id = collection_id();
         let collection = id.get_collection();
         async move {
-            let mut controller = collection.peek().mod_controller.clone();
-            let manager = &mut controller.as_mut().unwrap().manager;
-            let modify = manager
-                .mods
-                .iter_mut()
-                .find(|x| x.deref() == mods.read().deref())
-                .unwrap();
-
-            if clicked {
-                modify.enable().await.unwrap();
-            } else {
-                modify.disable().await.unwrap();
-            }
-
-            if collection.peek().mod_controller() != controller.as_ref() {
-                id.with_mut_collection(|x| x.mod_controller = controller)
+            let err = || async move {
+                let Some(mut controller) = collection.peek().mod_controller.clone() else {
+                    return Ok(());
+                };
+                let manager = &mut controller.manager;
+                let modify = manager
+                    .mods
+                    .iter_mut()
+                    .find(|x| x.deref() == mods.read().deref())
                     .unwrap();
-            }
+
+                if clicked {
+                    modify.enable().await?;
+                } else {
+                    modify.disable().await?;
+                }
+
+                if collection.peek().mod_controller() != Some(&controller) {
+                    id.with_mut_collection(|x| x.mod_controller = Some(controller))?;
+                }
+                Ok(())
+            };
+            error_handler.set(Some(err().await))
         }
     });
 }
@@ -204,7 +210,7 @@ fn SubModViewer(
 ) -> Element {
     let clicked = use_signal(|| mods.read().enabled);
     let mut dialog = use_signal(|| false);
-    use_active_controller(clicked, collection_id, mods.cloned());
+    use_active_controller(clicked, collection_id, mods);
     let icon = rsx!(if let Some(icon) = mods.read().icon_url.as_ref() {
         {
             ContentType::image(icon.to_string()).css("size-[80px] rounded-[15px]")
@@ -304,7 +310,7 @@ fn ModDetails(
     clicked: Signal<bool>,
     collection_id: ReadOnlySignal<CollectionId>,
 ) -> Element {
-    use_active_controller(clicked, collection_id, mods.cloned());
+    use_active_controller(clicked, collection_id, mods);
 
     let description = markdown_to_html(&mods.read().long_description);
 
