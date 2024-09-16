@@ -380,7 +380,7 @@ fn ModDetails(
                             }
                         }
                         div {
-                            class: "flex gap-[25px] px-[20px]",
+                            class: "flex items-center h-[50px] gap-[25px] px-[20px]",
                             div {
                                 class: "flex w-fit justify-start gap-[7px] items-center",
                                 div {
@@ -408,7 +408,7 @@ fn ModDetails(
                                 }
                                 Hint {
                                     css: "text-[15px] font-english font-medium",
-                                    {mods.read().last_updated.date_naive().to_string()},
+                                    {mods.read().last_updated.date_naive().format("%Y.%m.%d").to_string()},
                                 }
                             }
                             div {
