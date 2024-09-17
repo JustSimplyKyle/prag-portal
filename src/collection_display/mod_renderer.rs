@@ -238,15 +238,15 @@ fn SubModViewer(
     );
     let file_name = rsx!(
         if let Some(version) = &mods.read().mod_version {
-            Hint {
-                css: "font-medium text-hint text-[15px] font-english",
+            Text {
+                css: "font-medium text-secondary-text text-[15px] font-english",
                 {version.clone()}
             }
         }
     );
     let author = rsx!(
-        Hint {
-            css: "text-[15px] font-english",
+        Text {
+            css: "text-[15px] text-secondary-text font-english",
             {mods.read().authors.join(", ")}
         }
     );

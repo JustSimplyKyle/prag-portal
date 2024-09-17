@@ -222,6 +222,7 @@ mod builder {
                     "modmenu",
                     "ferrite-core",
                     "lazydfu",
+                    "create-fabric",
                     "iris",
                     "indium",
                 ],
