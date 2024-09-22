@@ -150,6 +150,7 @@ pub trait ToClass {
 ///     }
 /// }
 /// ```
+#[allow(clippy::multiple_bound_locations)]
 #[component]
 pub fn StateSwitcherSelectionBar<T: 'static + PartialEq>(
     default_state: T,

@@ -1,4 +1,5 @@
 use crate::{
+    builder::component::BuildCollection,
     main_page::CollectionBlock,
     BaseComponents::{
         atoms::button::{Button, FillMode, Roundness, Size},
@@ -6,7 +7,7 @@ use crate::{
             context_menu::{self, ContextMenu},
             search_bar::SearchBar,
         },
-        string_placements::{Alignment, ContentType, Contents, Hint},
+        string_placements::{Alignment, ContentType, Contents},
     },
 };
 use dioxus::prelude::*;
@@ -114,19 +115,22 @@ pub fn Collections() -> Element {
     let keys = read.keys();
     let keys_iter = keys.clone().zip((0..keys.len()).rev());
     let search = use_signal(String::new);
+    let mut create_collection = use_signal(|| false);
     rsx! {
+        BuildCollection {
+            active: create_collection
+        }
         div {
             class: "bg-deep-background flex z-10 flex-col gap-[10px]",
             div {
                 class: "flex gap-[5px]",
                 div {
-                    class: "min-w-[280px] max-w-[280px] flex gap-[5px] rounded-[30px] items-center",
+                    class: "min-w-[280px] bg-background max-w-[280px] flex gap-[5px] rounded-[30px] items-center",
                     div {
-                        class: "flex-0 size-[40px]",
-                        "F"
+                        class: "shrink-0 bg-white size-[40px]",
                     }
-                    Hint {
-                        css: "grow",
+                    div {
+                        class: "grow text-hint trim",
                         "選擇資料夾"
                     }
                     {ContentType::svg(ARROW_DOWN).css("svg-[40px] flex-0")}
@@ -162,6 +166,9 @@ pub fn Collections() -> Element {
         div {
             Button {
                 roundness: Roundness::None,
+                onclick: move |()| {
+                    create_collection.set(true);
+                },
                 string_placements: vec![
                     Contents::new(
                             [

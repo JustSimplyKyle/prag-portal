@@ -34,10 +34,10 @@ impl std::fmt::Display for EditState {
             f,
             "edit-{}",
             match self {
-                EditState::Personalization => "personalization",
-                EditState::DataLog => "datalog",
-                EditState::Export => "export",
-                EditState::Advanced => "advanced",
+                Self::Personalization => "personalization",
+                Self::DataLog => "datalog",
+                Self::Export => "export",
+                Self::Advanced => "advanced",
             }
         )
     }
@@ -56,7 +56,6 @@ pub fn CollectionEditContainer() -> Element {
     let binding = STORAGE.collections.read();
     let collection_ids = binding
         .keys()
-        .into_iter()
         .map(|x| (x.clone(), Pages::collection_edit(x.clone())));
     rsx! {
         for (collection_id , page) in collection_ids {
@@ -66,7 +65,7 @@ pub fn CollectionEditContainer() -> Element {
                 if page.should_render() {
                     CollectionEdit {
                         key: "{page.slide_in_id()}",
-                        collection_id: collection_id.clone()
+                        collection_id
                     }
                 }
             }

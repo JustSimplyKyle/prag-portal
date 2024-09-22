@@ -2,12 +2,16 @@ use dioxus::prelude::*;
 
 #[component]
 pub fn Modal(active: Signal<bool>, id: String, children: Element) -> Element {
-    let _id = id.clone();
+    let id_cloned = id.clone();
     use_effect(move || {
         if active() {
-            eval(&format!("document.getElementById(\"{_id}\").showModal();"));
+            eval(&format!(
+                "document.getElementById(\"{id_cloned}\").showModal();"
+            ));
         } else {
-            eval(&format!("document.getElementById(\"{_id}\").close();"));
+            eval(&format!(
+                "document.getElementById(\"{id_cloned}\").close();"
+            ));
         }
     });
     rsx! {

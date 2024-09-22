@@ -17,7 +17,7 @@ use crate::{
             search_bar::SearchBar,
             switcher::{Comparison, StateSwitcher},
         },
-        string_placements::{Alignment, ContentType, Contents, Text},
+        string_placements::{Alignment, ContentType, Contents},
     },
 };
 
@@ -134,7 +134,7 @@ fn Footer(
                 roundness: Roundness::Squircle,
                 extended_css_class: "bg-background",
                 fill_mode: FillMode::Fit,
-                onclick: move |_| {
+                onclick: move |()| {
                     Pages::collection_edit(collection_id()).switch_active_to_self();
                 },
                 string_placements: vec![
@@ -153,7 +153,7 @@ fn Footer(
                 roundness: Roundness::Squircle,
                 extended_css_class: "bg-white min-w-[150px]",
                 fill_mode: FillMode::Fit,
-                onclick: move |_| {
+                onclick: move |()| {
                     launch_game();
                 },
                 string_placements: vec![
@@ -180,8 +180,8 @@ fn Content(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                 class: "justify-self-start flex flex-col gap-[35px]",
                 div {
                     class: "flex flex-col gap-[25px]",
-                    Text {
-                        css: "text-[80px] font-black text-white",
+                    div {
+                        class: "text-[80px] font-black text-white trim",
                         {collection.read().display_name().clone()}
                     }
                     div {
@@ -242,8 +242,8 @@ fn Content(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                         class: "self-start justify-self-center inline-flex items-center justify-center w-[35px]",
                         {ContentType::svg(asset!("./public/big_forge.svg"))}
                     }
-                    Text {
-                        css: "self-end [writing-mode:vertical-rl] rotate-180 inline-flex items-center w-20 text-3xl text-hint font-english italic font-bold uppercase",
+                    div {
+                        class: "self-end [writing-mode:vertical-rl] rotate-180 inline-flex items-center w-20 text-3xl text-hint font-english italic font-bold uppercase trim",
                         if let Some(loader) = &*mod_loader.read() {
                             {loader.clone()}
                         } else {

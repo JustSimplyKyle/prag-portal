@@ -85,11 +85,7 @@ pub fn Button(
             style,
             role: if clickable { "button" } else { "" },
             aria_selected: {
-                if let Some(x) = switcher.as_ref() {
-                    x.compare()
-                } else {
-                    focus_color_change && clickiness()
-                }
+                switcher.as_ref().map_or_else(|| focus_color_change && clickiness(), |x| x.compare())
             },
             onclick: move |_| {
                 if switcher.is_none() && focus_color_change {

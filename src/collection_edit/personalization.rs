@@ -6,6 +6,7 @@ use std::path::PathBuf;
 
 use dioxus::prelude::*;
 use rust_lib::api::shared_resources::collection::CollectionId;
+use tailwind_fuse::tw_merge;
 
 use crate::{
     collection_display::GAME_CONTROLLER,
@@ -13,7 +14,7 @@ use crate::{
     use_error_handler,
     BaseComponents::{
         atoms::button::{Button, Roundness},
-        string_placements::{Alignment, ContentType, Contents, Hint, Text},
+        string_placements::{Alignment, ContentType, Contents},
     },
     COLLECTION_PICS,
 };
@@ -49,21 +50,9 @@ pub fn Personalization(collection_id: ReadOnlySignal<CollectionId>) -> Element {
 
 #[component]
 fn ModifyName(collection_id: ReadOnlySignal<CollectionId>) -> Element {
-    let collection = collection_id().get_collection();
-    let mut input: Signal<Option<String>> = use_signal(|| None);
-    use_effect(move || {
-        if let Some(x) = &*input.read() {
-            collection_id()
-                .with_mut_collection(|ele| {
-                    ele.display_name = x.clone();
-                })
-                .unwrap();
-        }
-    });
     rsx! {
         div {
-            class: "flex flex-col gap-[3px] group",
-            aria_selected: input.read().is_none(),
+            class: "flex flex-col gap-[3px]",
             Button {
                 roundness: Roundness::Top,
                 clickable: false,
@@ -81,25 +70,44 @@ fn ModifyName(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                         .css("flex flex-col gap-[15px]"),
                 ]
             }
-            Button {
-                roundness: Roundness::Bottom,
-                clickable: false,
-                extended_css_class: "p-[25px] text-white group-aria-selected:text-zinc-800",
-                string_placements: rsx! {
-                    input {
-                        oninput: move |x| {
-                            input.set(Some(x.value()));
-                        },
-                        value: {
-                            if let Some(x) = input() {
-                                x
-                            } else {
-                                collection.read().display_name().clone()
-                            }
-                        },
-                    }
-                },
+            CollectionNameEdit {
+                collection_id,
+                class: "bg-deep-background rounded-b-3xl"
             }
+        }
+    }
+}
+
+#[component]
+pub fn CollectionNameEdit(
+    collection_id: ReadOnlySignal<CollectionId>,
+    custom_input: Option<Signal<Option<String>>>,
+    #[props(default)] class: String,
+) -> Element {
+    let input = use_signal(|| None);
+    let mut input = custom_input.unwrap_or(input);
+    let mut error_handler = use_error_handler();
+    use_effect(move || {
+        if let Some(x) = input() {
+            let err = collection_id()
+                .with_mut_collection(|ele| {
+                    ele.display_name = x;
+                })
+                .map_err(Into::into);
+
+            error_handler.set(Some(err));
+        }
+    });
+    rsx! {
+        input {
+            aria_selected: input.read().is_none(),
+            class: tw_merge!("p-[25px] text-white aria-selected:text-zinc-800 text-[20px]", class),
+            oninput: move |x| {
+                input.set(Some(x.value()));
+            },
+            value: {
+                input().map_or_else(|| collection_id().get_collection().read().display_name().clone(), |x| x)
+            },
         }
     }
 }
@@ -112,14 +120,7 @@ fn ModifyPicture(collection_id: ReadOnlySignal<CollectionId>) -> Element {
         COLLECTION_PICS
             .read()
             .iter()
-            .find(|(_, x)| {
-                x.to_string()
-                    == collection
-                        .read()
-                        .picture_path()
-                        .to_string_lossy()
-                        .to_string()
-            })
+            .find(|(_, x)| **x == collection.read().picture_path().to_string_lossy())
             .map(|x| *x.0)
     });
 
@@ -131,7 +132,8 @@ fn ModifyPicture(collection_id: ReadOnlySignal<CollectionId>) -> Element {
         let mut binding = || {
             if change() {
                 if let Some(x) = active() {
-                    let path = PathBuf::from(COLLECTION_PICS.read().get(x).unwrap().to_string());
+                    #[allow(clippy::unwrap_used)]
+                    let path = PathBuf::from(COLLECTION_PICS.read().get(x).unwrap().to_owned());
                     collection_id().with_mut_collection(|x| x.picture_path = path)?;
                     change.set(false);
                 }
@@ -189,8 +191,8 @@ fn ModifyPicture(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                                     {ContentType::svg(HALLWAY).css("svg-[35px]").align_left()}
                                     div {
                                         class: "flex flex-col gap-[10px]",
-                                        Text { css: "text-xl", "預設封面圖片" }
-                                        Hint { css: "text-[13px]", "使用Era Connect提供的預設圖片" }
+                                        div { class: "text-xl trim", "預設封面圖片" }
+                                        div { class: "text-[13px] text-secondary-text trim", "使用Era Connect提供的預設圖片" }
                                     }
                                 }
                             }).align_left(),
@@ -202,35 +204,35 @@ fn ModifyPicture(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                                             active.set(Some("a"));
                                             change.set(true);
                                         },
-                                        {ContentType::image(COLLECTION_PICS.read()["a"].to_string()).css("bg-cover w-10 h-10 rounded-full border-2 border-zinc-900 group-data-[active=a]:border-white group-data-[active=a]:w-20")}
+                                        {ContentType::image(COLLECTION_PICS.read()["a"].to_owned()).css("bg-cover w-10 h-10 rounded-full border-2 border-zinc-900 group-data-[active=a]:border-white group-data-[active=a]:w-20")}
                                     }
                                     button {
                                         onclick: move |_| {
                                             active.set(Some("b"));
                                             change.set(true);
                                         },
-                                        {ContentType::image(COLLECTION_PICS.read()["b"].to_string()).css("bg-cover w-10 h-10 rounded-full border-2 border-zinc-900 group-data-[active=b]:border-white group-data-[active=b]:w-20")}
+                                        {ContentType::image(COLLECTION_PICS.read()["b"].to_owned()).css("bg-cover w-10 h-10 rounded-full border-2 border-zinc-900 group-data-[active=b]:border-white group-data-[active=b]:w-20")}
                                     }
                                     button {
                                         onclick: move |_| {
                                             active.set(Some("c"));
                                             change.set(true);
                                         },
-                                        {ContentType::image(COLLECTION_PICS.read()["c"].to_string()).css("bg-cover w-10 h-10 rounded-full border-2 border-zinc-900 group-data-[active=c]:border-white group-data-[active=c]:w-20")}
+                                        {ContentType::image(COLLECTION_PICS.read()["c"].to_owned()).css("bg-cover w-10 h-10 rounded-full border-2 border-zinc-900 group-data-[active=c]:border-white group-data-[active=c]:w-20")}
                                     }
                                     button {
                                         onclick: move |_| {
                                             active.set(Some("d"));
                                             change.set(true);
                                         },
-                                        {ContentType::image(COLLECTION_PICS.read()["d"].to_string()).css("bg-cover w-10 h-10 rounded-full border-2 border-zinc-900 group-data-[active=d]:border-white group-data-[active=d]:w-20")}
+                                        {ContentType::image(COLLECTION_PICS.read()["d"].to_owned()).css("bg-cover w-10 h-10 rounded-full border-2 border-zinc-900 group-data-[active=d]:border-white group-data-[active=d]:w-20")}
                                     }
                                     button {
                                         onclick: move |_| {
                                             active.set(Some("e"));
                                             change.set(true);
                                         },
-                                        {ContentType::image(COLLECTION_PICS.read()["e"].to_string()).css("bg-cover w-10 h-10 rounded-full border-2 border-zinc-900 group-data-[active=e]:border-white group-data-[active=e]:w-20")}
+                                        {ContentType::image(COLLECTION_PICS.read()["e"].to_owned()).css("bg-cover w-10 h-10 rounded-full border-2 border-zinc-900 group-data-[active=e]:border-white group-data-[active=e]:w-20")}
                                     }
                                 }
                             }).align_right()
@@ -247,8 +249,8 @@ fn ModifyPicture(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                                     {ContentType::svg(PHOTO_LIBRARY).css("svg-[35px]").align_left()}
                                     div {
                                         class: "flex flex-col gap-[10px]",
-                                        Text { css: "text-xl", "從電腦尋找" }
-                                        Hint { css: "text-[13px]", "使用你電腦中的圖片" }
+                                        div { class: "text-xl trim", "從電腦尋找" }
+                                        div { class: "text-[13px] text-secondary-text trim", "使用你電腦中的圖片" }
                                     }
                                 }
                             }).align_left(),

@@ -21,8 +21,6 @@ const animationPlugin = plugin(function({ matchComponents, theme, e }) {
 });
 
 const svgPlugin = plugin(function({ matchComponents, theme, e }) {
-  /// the first two arguments is, when it being selected, and its animation
-  /// the last two argument is, when it selects the target, and its animation
     matchComponents(
     {
         "svg": (value) => {
@@ -86,6 +84,7 @@ module.exports = {
         'secondary-surface': '#2F2F2F',
         'surface': '#1E1E1E',
         'hint': '#4F4F4F',
+        'secondary': '#7D7D7D',
         'secondary-text': '#7D7D7D',
         'deep-background': '#0E0E0E',
         'background': '#191919',

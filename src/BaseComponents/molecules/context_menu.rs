@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 use tailwind_fuse::tw_merge;
 
-#[derive(PartialEq, Clone, Copy)]
+#[derive(PartialEq, Eq, Clone, Copy)]
 pub enum Direction {
     DownRightEdge,
     DownLeftEdge,

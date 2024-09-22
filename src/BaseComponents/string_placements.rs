@@ -57,11 +57,15 @@ impl Contents {
             alignment,
         }
     }
+
+    #[must_use]
     pub fn css(mut self, css: impl Into<String>) -> Self {
         let css = css.into();
         self.css = tw_merge!(self.css, css);
         self
     }
+
+    #[allow(clippy::missing_errors_doc)]
     pub fn get_element(self) -> Element {
         let alignment_class = self.alignment.get_alignment_class();
         rsx! {
@@ -83,6 +87,8 @@ pub struct Content {
     onmounted: Option<Signal<Option<Event<MountedData>>>>,
     onmouseover: Option<EventHandler>,
 }
+
+#[allow(clippy::missing_fields_in_debug)]
 impl std::fmt::Debug for Content {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Content")
@@ -99,8 +105,8 @@ impl IntoDynNode for Content {
 }
 
 impl Content {
-    // Constructor for ease of creation
-    pub fn new(content: ContentType) -> Self {
+    #[must_use]
+    pub const fn new(content: ContentType) -> Self {
         Self {
             content,
             css: String::new(),
@@ -143,6 +149,7 @@ impl Content {
     }
 
     // Method to apply additional CSS, modifying existing styling
+    #[must_use]
     pub fn css(mut self, css: impl Into<String>) -> Self {
         let css = css.into();
         if css.contains("font") {
@@ -153,17 +160,20 @@ impl Content {
         self
     }
 
+    #[must_use]
     pub fn style(mut self, style: impl Into<String>) -> Self {
         let style = style.into();
         self.style = style;
         self
     }
 
-    pub fn onmounted(mut self, signal: Signal<Option<Event<MountedData>>>) -> Self {
+    #[must_use]
+    pub const fn onmounted(mut self, signal: Signal<Option<Event<MountedData>>>) -> Self {
         self.onmounted = Some(signal);
         self
     }
 
+    #[must_use]
     pub fn onmouseover(mut self, closure: impl FnMut(()) + 'static) -> Self {
         let p = Callback::new(closure);
         self.onmouseover = Some(p);
@@ -174,6 +184,7 @@ impl Content {
         Contents::new(vec![self], alignment)
     }
 
+    #[allow(clippy::missing_errors_doc)]
     pub fn get_element(self) -> Element {
         match self.content {
             ContentType::Svg(x) => {
@@ -389,6 +400,7 @@ pub enum Alignment {
 }
 
 impl Alignment {
+    #[must_use]
     pub fn get_alignment_class(&self) -> String {
         match self {
             Self::Left => "text-left justify-self-start flex",
@@ -399,38 +411,6 @@ impl Alignment {
         .into()
     }
 }
-#[component]
-pub fn Text(
-    children: Element,
-    css: Option<String>,
-    #[props(into)] style: Option<String>,
-    onmounted: Option<Signal<Option<MountedEvent>>>,
-) -> Element {
-    sub_content_builder(
-        ContentType::text,
-        children,
-        css.unwrap_or_default(),
-        style.unwrap_or_default(),
-        onmounted,
-    )
-}
-
-#[component]
-pub fn Hint(
-    children: Element,
-    css: Option<String>,
-    style: Option<String>,
-    onmounted: Option<Signal<Option<MountedEvent>>>,
-) -> Element {
-    sub_content_builder(
-        ContentType::hint,
-        children,
-        css.unwrap_or_default(),
-        style.unwrap_or_default(),
-        onmounted,
-    )
-}
-
 #[component]
 pub fn Image(
     children: Element,
@@ -471,13 +451,14 @@ fn sub_content_builder(
     }
 }
 
+#[allow(clippy::unwrap_used)]
 fn matcher(
     dynamic: Option<&DynamicNode>,
     inplace: Option<&TemplateNode>,
 ) -> Result<String, RenderError> {
     let text = match (dynamic, inplace) {
         (Some(DynamicNode::Text(text)), _) => text.value.clone(),
-        (_, Some(TemplateNode::Text { text })) => (*text).to_string(),
+        (_, Some(TemplateNode::Text { text })) => (*text).to_owned(),
         (Some(DynamicNode::Fragment(x)), _) => matcher(
             x.first().unwrap().dynamic_nodes.first(),
             x.first().unwrap().template.roots.first(),

@@ -1,6 +1,7 @@
 pub mod button;
 pub mod switch;
 
+#[must_use]
 pub fn markdown_to_html(s: &str) -> String {
     let parser = pulldown_cmark::Parser::new(s);
     let mut string = String::new();

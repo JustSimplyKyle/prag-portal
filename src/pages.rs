@@ -51,7 +51,7 @@ impl ToString for Pages {
                 let mut hasher = DefaultHasher::new();
                 id.hash(&mut hasher);
                 let hash = hasher.finish();
-                format!("collection-page-{}-{hash}", state.to_string())
+                format!("collection-page-{state}-{hash}")
             }
         }
     }
@@ -62,15 +62,20 @@ impl Scrollable for Pages {
 }
 
 impl Pages {
+    #[must_use]
     pub fn slide_in_id(&self) -> String {
         format!("flyinout-{}", self.to_string())
     }
+
+    #[must_use]
     pub const fn collection_display(id: CollectionId) -> Self {
         Self::CollectionPage {
             id,
             state: CollectionPageState::Display,
         }
     }
+
+    #[must_use]
     pub const fn collection_edit(id: CollectionId) -> Self {
         Self::CollectionPage {
             id,
@@ -78,6 +83,7 @@ impl Pages {
         }
     }
 
+    #[must_use]
     pub fn should_render(&self) -> bool {
         HISTORY.with(|x| {
             x.active() == self || x.prev_peek() == Some(self) || x.history().contains(self)
@@ -130,7 +136,7 @@ impl Pages {
     /// }
     /// ```
     pub fn apply_slide_in(self) {
-        let function = r#"
+        let function = r"
             function applyStyles(dataValue) {
                 const groups = document.querySelectorAll('.group-pages');            
                 groups.forEach(group => {
@@ -157,7 +163,7 @@ impl Pages {
                     } 
                 });
             }
-        "#;
+        ";
         if let Err(x) = eval(&format!(
             " {function}
               applyStyles(\"{}\");

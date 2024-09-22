@@ -19,7 +19,7 @@ use crate::{
         },
         molecules::search_bar::fuzzy_search,
         organisms::{markdown_renderer::RenderTranslatedMarkdown, modal::Modal},
-        string_placements::{ContentType, Hint, Text},
+        string_placements::ContentType,
     },
 };
 
@@ -75,30 +75,15 @@ pub fn ModViewer(
     search: ReadOnlySignal<String>,
     default: String,
 ) -> Element {
-    let mods = use_resource(move || {
+    let mods = use_memo(move || {
         let value = default.clone();
         let collection = collection_id().get_collection();
-        async move {
-            let binding = collection.read();
-            let mods = binding
-                .mod_controller()
-                .into_iter()
-                .flat_map(move |x| x.manager.mods.clone().into_iter())
-                .map(|x| {
-                    (
-                        x.name.clone(),
-                        rsx! {
-                            SubModViewer {
-                                collection_id,
-                                mods: x,
-                            }
-                        },
-                    )
-                });
-            fuzzy_search(search.read().deref(), &value, mods)
-                .into_iter()
-                .collect::<Vec<_>>()
-        }
+        let binding = collection.read();
+        let mods = binding
+            .mod_controller()
+            .into_iter()
+            .flat_map(move |x| x.manager.mods.clone().into_iter());
+        fuzzy_search(&search.read(), &value, mods, |x| &x.name).collect::<Vec<_>>()
     });
     rsx! {
         div {
@@ -108,44 +93,44 @@ pub fn ModViewer(
                 background: "rgba(25, 25, 25, 0.90)",
                 items: [
                     rsx!(
-                        Text {
-                            css: "flex-none inline-flex justify-center w-[80px] text-white text-lg h-full",
+                        div {
+                            class: "flex-none inline-flex justify-center w-[80px] text-white text-lg h-full trim",
                             "圖示"
                         }
                     ),
                     rsx!(
-                        Text {
-                            css: "text-white text-lg h-full",
+                        div {
+                            class: "text-white text-lg h-full trim",
                             "名稱（來源／文件名稱）"
                         }
                     ),
                     rsx!(
-                        Text {
-                            css: "text-white text-lg h-full",
+                        div {
+                            class: "text-white text-lg h-full trim",
                             "作者"
                         }
                     ),
                     rsx!(
-                        Text {
-                            css: "text-white text-lg h-full",
+                        div {
+                            class: "text-white text-lg h-full trim",
                             "更新"
                         }
                     ),
                     rsx!(
-                        Text {
-                            css: "text-white text-lg h-full",
+                        div {
+                            class: "text-white text-lg h-full trim",
                             "刪除"
                         }
                     ),
                     rsx!(
-                        Text {
-                            css: "text-white text-lg h-full",
+                        div {
+                            class: "text-white text-lg h-full trim",
                             "更多"
                         }
                     ),
                     rsx!(
-                        Text {
-                            css: "text-white text-lg h-full",
+                        div {
+                            class: "text-white text-lg h-full trim",
                             "狀態"
                         }
                     ),
@@ -156,8 +141,11 @@ pub fn ModViewer(
                 class: "bg-background w-full h-full flex flex-col px-[30px]",
                 div {
                     class: "flex flex-col gap-[5px]",
-                    for ele in mods().into_iter().flatten() {
-                        {ele}
+                    for ele in mods() {
+                        SubModViewer {
+                            collection_id,
+                            mods: ele
+                        }
                     }
                 }
             }
@@ -181,6 +169,7 @@ fn use_active_controller(
                     return Ok(());
                 };
                 let manager = &mut controller.manager;
+                #[allow(clippy::unwrap_used)]
                 let modify = manager
                     .mods
                     .iter_mut()
@@ -198,7 +187,7 @@ fn use_active_controller(
                 }
                 Ok(())
             };
-            error_handler.set(Some(err().await))
+            error_handler.set(Some(err().await));
         }
     });
 }
@@ -219,8 +208,8 @@ fn SubModViewer(
     let name = rsx!(
         div {
             class: "flex gap-[7px]",
-            Text {
-                css: "text-white text-[28px] font-bold font-english",
+            div {
+                class: "text-white text-[28px] font-bold font-english trim",
                 {mods.read().name.clone()}
             }
             div {
@@ -238,15 +227,15 @@ fn SubModViewer(
     );
     let file_name = rsx!(
         if let Some(version) = &mods.read().mod_version {
-            Text {
-                css: "font-medium text-secondary-text text-[15px] font-english",
+            div {
+                class: "font-medium text-secondary-text text-[15px] font-english trim",
                 {version.clone()}
             }
         }
     );
     let author = rsx!(
-        Text {
-            css: "text-[15px] text-secondary-text font-english",
+        div {
+            class: "text-[15px] text-secondary-text font-english trim",
             {mods.read().authors.join(", ")}
         }
     );
@@ -361,12 +350,12 @@ fn ModDetails(
                                 }
                                 div {
                                     class: "grow flex flex-col justify-center gap-[15px]",
-                                    Text {
-                                        css: "text-[30px] font-english font-bold",
+                                    div {
+                                        class: "text-[30px] font-english font-bold trim",
                                         {mods.read().name.clone()}
                                     }
-                                    Hint {
-                                        css: "text-secondary-text text-[15px] font-medium font-english",
+                                    div {
+                                        class: "text-secondary-text text-[15px] font-medium font-english trim",
                                         {file_paths}
                                     }
                                 }
@@ -386,8 +375,8 @@ fn ModDetails(
                                 div {
                                     class: "bg-white size-[20px]"
                                 }
-                                Hint {
-                                    css: "text-[15px] font-english font-medium",
+                                div {
+                                    class: "text-[15px] font-english font-medium text-hint trim",
                                     {mods.read().authors.join(" ")},
                                 }
                             }
@@ -396,8 +385,8 @@ fn ModDetails(
                                 div {
                                     class: "bg-white size-[20px]"
                                 }
-                                Hint {
-                                    css: "text-[15px] font-english font-medium",
+                                div {
+                                    class: "text-[15px] font-english font-medium text-hint trim",
                                     {mods.read().get_formatted_download_count()},
                                 }
                             }
@@ -406,8 +395,8 @@ fn ModDetails(
                                 div {
                                     class: "bg-white size-[20px]"
                                 }
-                                Hint {
-                                    css: "text-[15px] font-english font-medium",
+                                div {
+                                    class: "text-[15px] font-english font-medium text-hint trim",
                                     {mods.read().last_updated.date_naive().format("%Y.%m.%d").to_string()},
                                 }
                             }
@@ -416,8 +405,8 @@ fn ModDetails(
                                 div {
                                     class: "bg-white size-[20px]"
                                 }
-                                Hint {
-                                    css: "text-[15px] font-english font-medium",
+                                div {
+                                    class: "text-[15px] font-english font-medium text-hint trim",
                                     {size.unwrap_or_default()},
                                 }
                             }

@@ -6,6 +6,12 @@ body {
   scroll-behavior: smooth;
 }
 
+@layer components {
+  .trim {
+    @apply capsize leading-[1.2];
+  }
+}
+
 @layer base {
   html {
     font-family: 'GenSenRounded TW';
@@ -14,6 +20,7 @@ body {
   input {
     all: unset;
   }
+
 
   @font-face {
     font-family: 'GenSenRounded TW';

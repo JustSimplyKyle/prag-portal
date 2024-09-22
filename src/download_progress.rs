@@ -7,7 +7,7 @@ use crate::impl_context_switcher;
 use crate::BaseComponents::{
     atoms::button::{Button, FillMode, Roundness},
     molecules::switcher::{StateSwitcherSelectionBar, ToClass},
-    string_placements::{ContentType, Hint, Image, StringPlacements, Text},
+    string_placements::{ContentType, Image, StringPlacements},
 };
 use crate::DRAG_INDICATOR;
 use rust_lib::api::shared_resources::entry::DOWNLOAD_PROGRESS;
@@ -27,12 +27,12 @@ fn ListItem(collection_id: ReadOnlySignal<CollectionId>, progress: Progress) -> 
                             {collection.read().picture_path().to_string_lossy().to_string()}
                         }
                         div { class: "w-full flex flex-col justify-start gap-[10px]",
-                            Text { css: "text-[25px] fond-bold", {collection.read().display_name().clone()} }
+                            div { class: "text-[25px] fond-bold trim", {collection.read().display_name().clone()} }
                             div { class: "flex gap-[4px]",
-                                Hint { css: "text-base font-semibold",
+                                div { class: "text-base font-semibold text-hint trim",
                                     {format!("{} / {} |", progress.current_size.unwrap_or_default().display_size_from_megabytes(), progress.total_size.unwrap_or_default().display_size_from_megabytes())}
                                 }
-                                Text { css: "text-base font-semibold",
+                                div { class: "text-base font-semibold trim",
                                     "{progress.speed.unwrap_or_default().display_size_from_megabytes()}"
                                 }
                             }
@@ -68,12 +68,12 @@ fn FirstProgressView(collection_id: ReadOnlySignal<CollectionId>, progress: Prog
                 class: "w-full grid grid-flow-col",
                 div {
                     class: "justify-self-start flex flex-col gap-[20px]",
-                    Text {
-                        css: "text-[60px] font-black text-white",
+                    div {
+                        class: "text-[60px] font-black text-white trim",
                         {collection.read().display_name().clone()}
                     }
-                    Hint {
-                        css: "font-medium",
+                    div {
+                        class: "font-medium text-hint trim",
                         {
                             format!("總計 {}/已下載 {}",
                                 progress.total_size.unwrap_or_default().display_size_from_megabytes(),
@@ -84,12 +84,12 @@ fn FirstProgressView(collection_id: ReadOnlySignal<CollectionId>, progress: Prog
                 }
                 div {
                     class: "justify-self-end flex",
-                    Text {
-                        css: "text-[50px] font-bold text-white",
+                    div {
+                        class: "text-[50px] font-bold text-white trim",
                         "{progress.speed.unwrap_or_default().display_size_from_megabytes()}"
                     }
-                    Hint {
-                        css: "text-[50px] font-bold",
+                    div {
+                        class: "text-[50px] font-bold trim",
                         "/s"
                     }
                 }

@@ -26,13 +26,13 @@ pub fn use_text_scroller() -> (Signal<Option<MountedEvent>>, Signal<bool>, Signa
                 let client = ele.get_client_rect().await.unwrap().width().round();
                 let scroll = ele.get_scroll_size().await.unwrap().width.round();
                 if scroll / client != 0. && scroll / client != 1. && !(scroll / client).is_nan() {
-                    let new_style = format!("--from-width:{}px; --to-width:-{}px", client, scroll);
-                    if &*style.peek() != &new_style {
+                    let new_style = format!("--from-width:{client}px; --to-width:-{scroll}px");
+                    if *style.peek() != new_style {
                         style.set(new_style);
                     }
                 }
-                if &*status.peek() != &(scroll > client) {
-                    status.set(scroll > client)
+                if *status.peek() != (scroll > client) {
+                    status.set(scroll > client);
                 }
             }
             tokio::time::sleep(Duration::from_millis(1000)).await;

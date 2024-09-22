@@ -10,16 +10,17 @@ use crate::{
     },
 };
 
-pub fn fuzzy_search(
+pub fn fuzzy_search<T>(
     search_str: &str,
     default: &str,
-    childrens: impl IntoIterator<Item = (String, Element)>,
-) -> impl IntoIterator<Item = Element> {
+    childrens: impl Iterator<Item = T>,
+    element_to_name: fn(&T) -> &str,
+) -> impl Iterator<Item = T> {
     let matcher = fuzzy_matcher::skim::SkimMatcherV2::default();
     childrens
         .into_iter()
-        .map(|(name, x)| {
-            let score = matcher.fuzzy_match(&name, &search_str);
+        .map(|x| {
+            let score = matcher.fuzzy_match(element_to_name(&x), search_str);
             (score, x)
         })
         .filter_map(|(score, x)| {
@@ -47,7 +48,7 @@ pub fn SearchBar(search: Signal<String>, default: String) -> Element {
                     input {
                         class: "w-full text-hint font-medium text-xl leading-[1.2] capsize",
                         onfocusin: move |_| {
-                            if &*search.read() == &default.cloned() {
+                            if *search.read() == *default.read() {
                                 search.set(String::new());
                             }
                         },

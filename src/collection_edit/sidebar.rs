@@ -73,7 +73,7 @@ pub fn EditSidebar(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                 class: "flex justify-stretch w-full gap-[10px]",
                 Button {
                     roundness: Roundness::Pill,
-                    onclick: move |_| {
+                    onclick: move |()| {
                         Pages::collection_display(collection_id()).switch_active_to_self();
                     },
                     extended_css_class: "flex w-auto min-w-auto justify-center items-center bg-background gap-[15px] pl-[20px] pr-[30px]",
@@ -122,7 +122,7 @@ fn EditSidebarInfographic(collection_id: ReadOnlySignal<CollectionId>) -> Elemen
                             vec![
                                 ContentType::text(collection.read().display_name())
                                     .onmounted(onmounted)
-                                    .style(dbg!(style()))
+                                    .style(style())
                                     .css("text-3xl font-black w-full group-hover:group-aria-selected:animate-scroll-left overflow-x-clip text-nowrap"),
                                 ContentType::hint("由我建立•18 分鐘•不久前開啟")
                                     .css("font-medium text-[15px]"),

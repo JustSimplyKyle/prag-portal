@@ -1,5 +1,6 @@
 #![allow(non_snake_case)]
 pub mod BaseComponents;
+pub mod builder;
 pub mod collection_display;
 pub mod collection_edit;
 pub mod collections;
@@ -18,13 +19,13 @@ use dioxus::html::input_data::MouseButton;
 use dioxus_logger::tracing::Level;
 use manganis::ImageAsset;
 use pages::Pages;
-use rand::Rng;
+use rand::seq::IteratorRandom;
 use scrollable::Scrollable;
 use snafu::ErrorCompat;
 use std::collections::BTreeMap;
 use tailwind_fuse::*;
 use BaseComponents::{
-    atoms::button::{Button, FillMode, Roundness},
+    atoms::button::{Button, Roundness},
     organisms::modal::Modal,
     string_placements::ContentType,
 };
@@ -53,9 +54,13 @@ pub const COLLECTION_PICS: GlobalSignal<BTreeMap<&str, &str>> = GlobalSignal::ne
     ])
 });
 
+#[allow(clippy::unwrap_used)]
 fn get_random_collection_picture() -> &'static str {
-    let index = rand::thread_rng().gen_range(0..=4);
-    COLLECTION_PICS.read().values().nth(index).unwrap()
+    COLLECTION_PICS
+        .read()
+        .values()
+        .choose(&mut rand::thread_rng())
+        .unwrap()
 }
 
 pub const HOME: &str = asset!("./public/home.svg");
@@ -75,6 +80,7 @@ static HISTORY: GlobalSignal<History> = GlobalSignal::new(|| History::new(Pages:
 /// * `active`: The current active page.
 /// * `history`: A vector of pages that have been visited.
 /// * `prev_steps`: The number of steps taken back in the history.
+///
 /// Represents a browsing history.
 #[derive(PartialEq, Eq, Clone, Debug)]
 pub struct History {
@@ -96,6 +102,7 @@ impl History {
     /// # Returns
     ///
     /// A new `History` instance.
+    #[must_use]
     pub fn new(page: Pages) -> Self {
         Self {
             active: page.clone(),
@@ -103,12 +110,15 @@ impl History {
             prev_steps: 0,
         }
     }
+    #[must_use]
     pub const fn active(&self) -> &Pages {
         &self.active
     }
+    #[must_use]
     pub const fn history(&self) -> &Vec<Pages> {
         &self.history
     }
+    #[must_use]
     pub fn prev_peek(&self) -> Option<&Pages> {
         if self.prev_steps == 0 {
             self.history.iter().rev().nth(1)
@@ -164,76 +174,6 @@ fn main() {
             .with_inner_size(PhysicalSize::new(1600, 920)),
     );
     LaunchBuilder::desktop().with_cfg(cfg).launch(App);
-}
-
-mod builder {
-    use std::path::PathBuf;
-
-    use dioxus_logger::tracing::info;
-    use rust_lib::api::{
-        backend_exclusive::{errors::ManifestProcessingError, vanilla::version::VersionMetadata},
-        shared_resources::{
-            collection::{CollectionError, ModLoader, ModLoaderType},
-            entry,
-        },
-    };
-    use snafu::prelude::*;
-
-    use crate::get_random_collection_picture;
-
-    #[derive(Snafu, Debug)]
-    pub enum CollectionBuilderError {
-        #[snafu(display("Invalid version id {id}"))]
-        InvalidVersionId { id: String },
-        #[snafu(display("Failed to parse version id {id}"))]
-        VersionIdParsing {
-            id: String,
-            source: ManifestProcessingError,
-        },
-        #[snafu(transparent)]
-        CollectionError { source: CollectionError },
-    }
-
-    pub async fn collection_builder(
-        picture_path: impl Into<Option<PathBuf>> + Send,
-        version_id: impl Into<String> + Send,
-    ) -> Result<(), CollectionBuilderError> {
-        let version_id = version_id.into();
-        let version = VersionMetadata::from_id(&version_id)
-            .await
-            .context(VersionIdParsingSnafu { id: &version_id })?
-            .context(InvalidVersionIdSnafu { id: &version_id })?;
-        let mut collection = entry::create_collection(
-            "新的收藏",
-            picture_path
-                .into()
-                .unwrap_or_else(|| get_random_collection_picture().into()),
-            version,
-            ModLoader::new(ModLoaderType::Fabric, None),
-            None,
-        )
-        .await?;
-        info!("Adding mods...");
-        collection
-            .add_multiple_modrinth_mod(
-                vec![
-                    "fabric-api",
-                    "sodium",
-                    "modmenu",
-                    "ferrite-core",
-                    "lazydfu",
-                    "create-fabric",
-                    "iris",
-                    "indium",
-                ],
-                vec![],
-                None,
-            )
-            .await?;
-        collection.download_mods().await?;
-        info!("Finished downloading mods");
-        Ok(())
-    }
 }
 
 #[component]
@@ -293,12 +233,12 @@ impl IntoRenderError for anyhow::Error {
     }
 }
 
-pub trait RefIntoRenderError {
-    fn into_render_error(&self) -> RenderError;
+pub trait ToRenderError {
+    fn to_render_error(&self) -> RenderError;
 }
 
-impl<T: std::fmt::Display> RefIntoRenderError for T {
-    fn into_render_error(&self) -> RenderError {
+impl<T: std::fmt::Display> ToRenderError for T {
+    fn to_render_error(&self) -> RenderError {
         RenderError::Aborted(CapturedError::from_display(self.to_string()))
     }
 }
@@ -312,11 +252,12 @@ impl<T: Clone> ThrowResource<T> for Resource<Result<T, anyhow::Error>> {
         let binding = self.read();
         let transpose = binding.as_ref().map(|x| x.as_ref()).transpose();
         transpose
-            .map_err(RefIntoRenderError::into_render_error)
+            .map_err(ToRenderError::to_render_error)
             .map(|x| x.cloned())
     }
 }
 
+#[must_use]
 pub fn use_error_handler() -> Signal<Option<Result<(), anyhow::Error>>> {
     use_context()
 }
@@ -345,7 +286,7 @@ fn Layout() -> Element {
         let read = err.read();
         let transpose = read.as_ref().map(|x| x.as_ref().cloned()).transpose();
         if let Err(err) = transpose {
-            return Err(err.to_formatted().into_render_error());
+            return Err(err.to_formatted().to_render_error());
         }
     }
 
@@ -369,10 +310,7 @@ fn Layout() -> Element {
 
     use_memo(move || {
         if let Some(x) = error_handler.read().as_ref() {
-            return x
-                .as_ref()
-                .cloned()
-                .map_err(RefIntoRenderError::into_render_error);
+            return x.as_ref().cloned().map_err(ToRenderError::to_render_error);
         }
         Ok(())
     })()?;
@@ -443,6 +381,7 @@ fn Layout() -> Element {
     }
 }
 
+#[must_use]
 pub fn use_keys() -> Memo<Vec<CollectionId>> {
     use_memo(|| STORAGE.collections.read().keys().cloned().collect())
 }
@@ -458,7 +397,7 @@ fn CollectionContainer() -> Element {
             div {
                 class: "absolute inset-0 z-0 min-h-full min-w-full",
                 key: "page {collection_id}",
-                id: Pages::collection_display(collection_id.clone()).slide_in_id(),
+                id: Pages::collection_display(collection_id).slide_in_id(),
                 SingleCollectionContainer {
                     id: collection_id.clone(),
                 }

@@ -6,7 +6,7 @@ use crate::{
     BaseComponents::{
         atoms::button::{Button, Roundness},
         molecules::switcher::StateSwitcher,
-        string_placements::{Alignment, ContentType, Contents, Image, Text},
+        string_placements::{Alignment, ContentType, Contents, Image},
     },
     Pages, ARROW_RIGHT, EXPLORE, HISTORY, HOME, SIDEBAR_COLLECTION, SIM_CARD,
 };
@@ -43,8 +43,8 @@ pub fn SideBar() -> Element {
             }
             div {
                 class: "flex justify-self-end group-aria-busy:hidden",
-                Text {
-                    css: "text-lime-300",
+                div {
+                    class: "text-lime-300 trim",
                     "我的錦集"
                 }
             }
@@ -65,7 +65,7 @@ pub fn SideBar() -> Element {
                     "data-main-page": main_page_hover(),
                     "data-explore": explore_hover(),
                     "data-collections": collections_hover(),
-                    aria_selected: selected().to_string(),
+                    aria_selected: selected(),
                     div {
                         class: "h-20 w-full absolute -left-[300px] w-[900px] relative",
                         Button {
@@ -74,10 +74,10 @@ pub fn SideBar() -> Element {
                                 ContentType::svg(HOME).align_left(),
                                 ContentType::text("首頁").css("text-black group-data-[main-page=false]/main:hidden").align_right(),
                             ],
-                            onmouseover: move |_| {
+                            onmouseover: move |()| {
                                 main_page_hover.set(true);
                             },
-                            onmouseleave: move |_| {
+                            onmouseleave: move |()| {
                                 main_page_hover.set(false);
                             },
                             switcher: Pages::MainPage,
@@ -108,10 +108,10 @@ pub fn SideBar() -> Element {
                                     ContentType::svg(EXPLORE).align_left(),
                                     ContentType::text("探索").css("text-black group-data-[explore=false]/main:hidden").align_right(),
                                 ],
-                                onmouseover: move |_| {
+                                onmouseover: move |()| {
                                     explore_hover.set(true);
                                 },
-                                onmouseleave: move |_| {
+                                onmouseleave: move |()| {
                                     explore_hover.set(false);
                                 },
                                 switcher: Pages::Explore,
@@ -138,10 +138,10 @@ pub fn SideBar() -> Element {
                                 ContentType::svg(SIDEBAR_COLLECTION).align_left(),
                                 ContentType::text("收藏庫").css("text-black group-data-[collections=false]/main:hidden").align_right(),
                             ],
-                            onmouseover: move |_| {
+                            onmouseover: move |()| {
                                 collections_hover.set(true);
                             },
-                            onmouseleave: move |_| {
+                            onmouseleave: move |()| {
                                 collections_hover.set(false);
                             },
                             switcher: Pages::Collections,

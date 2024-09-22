@@ -6,6 +6,10 @@ pub trait Scrollable: Sized + ToString {
         format!("scrolling-{}", self.to_string())
     }
 
+    /// # Errors
+    ///
+    /// This function will return an error if:
+    /// - The `apply_scroller_animation` method fails for any of the filtered elements.    
     fn scroller_applyer(
         pages_scroller: Vec<Self>,
         filterer: impl Fn(&Self) -> bool,
@@ -13,7 +17,7 @@ pub trait Scrollable: Sized + ToString {
         let iter = pages_scroller
             .iter()
             .enumerate()
-            .filter(|(_, x)| filterer(&*x));
+            .filter(|(_, x)| filterer(x));
         for (u, x) in iter {
             let (left, right) = pages_scroller.split_at(u);
             x.apply_scroller_animation(&right[1..], left)?;
@@ -21,15 +25,18 @@ pub trait Scrollable: Sized + ToString {
         Ok(())
     }
 
+    /// # Errors
+    ///
+    /// This function will return an error if:
+    /// - The JavaScript evaluation fails (e.g., due to invalid JavaScript code).
+    /// - There's an error in sending data to the JavaScript runtime.
+    /// - Any other unexpected error occurs during the JavaScript execution or data transmission.    
     fn apply_scroller_animation(&self, bottom: &[Self], top: &[Self]) -> Result<(), anyhow::Error> {
         let target = self.to_string();
-        let bottom = bottom
-            .iter()
-            .map(|arg0| arg0.to_string())
-            .collect::<Vec<_>>();
-        let top = top.iter().map(|arg0| arg0.to_string()).collect::<Vec<_>>();
+        let bottom = bottom.iter().map(ToString::to_string).collect::<Vec<_>>();
+        let top = top.iter().map(ToString::to_string).collect::<Vec<_>>();
         let eval = eval(
-            r#"
+            r"
                     function applyStyles(self, bottom, top, group) {
                         const groups = document.querySelectorAll('.' + group);            
                         groups.forEach(group => {
@@ -73,7 +80,7 @@ pub trait Scrollable: Sized + ToString {
                     }
                     const [[self], [group], bottom, top] = await dioxus.recv();
                     applyStyles(self, bottom, top, group);
-                "#,
+                ",
         );
         eval.send(
             vec![
