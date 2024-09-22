@@ -1758,6 +1758,11 @@ input {
   right: 0px;
 }
 
+.inset-y-0 {
+  top: 0px;
+  bottom: 0px;
+}
+
 .-left-\[300px\] {
   left: -300px;
 }
@@ -1792,6 +1797,10 @@ input {
 
 .z-20 {
   z-index: 20;
+}
+
+.z-30 {
+  z-index: 30;
 }
 
 .z-50 {
@@ -2653,6 +2662,11 @@ input {
   background-color: inherit;
 }
 
+.bg-orange {
+  --tw-bg-opacity: 1;
+  background-color: rgb(241 100 54 / var(--tw-bg-opacity));
+}
+
 .bg-red {
   --tw-bg-opacity: 1;
   background-color: rgb(201 43 69 / var(--tw-bg-opacity));
@@ -2661,6 +2675,10 @@ input {
 .bg-secondary-surface {
   --tw-bg-opacity: 1;
   background-color: rgb(47 47 47 / var(--tw-bg-opacity));
+}
+
+.bg-transparent {
+  background-color: transparent;
 }
 
 .bg-white {
@@ -2694,6 +2712,10 @@ input {
 
 .bg-cover {
   background-size: cover;
+}
+
+.fill-background {
+  fill: #191919;
 }
 
 .object-cover {
@@ -3364,6 +3386,14 @@ body {
   width: 5rem;
 }
 
+.group[data-selected=Left] .group-data-\[selected\=Left\]\:w-\[30px\] {
+  width: 30px;
+}
+
+.group[data-selected=Right] .group-data-\[selected\=Right\]\:w-\[30px\] {
+  width: 30px;
+}
+
 .group[data-active=a] .group-data-\[active\=a\]\:border-white {
   --tw-border-opacity: 1;
   border-color: rgb(255 255 255 / var(--tw-border-opacity));
@@ -3387,6 +3417,19 @@ body {
 .group[data-active=e] .group-data-\[active\=e\]\:border-white {
   --tw-border-opacity: 1;
   border-color: rgb(255 255 255 / var(--tw-border-opacity));
+}
+
+.group[data-selected=Right] .group-data-\[selected\=Right\]\:bg-green {
+  --tw-bg-opacity: 1;
+  background-color: rgb(205 227 71 / var(--tw-bg-opacity));
+}
+
+.group[data-selected=Left] .group-data-\[selected\=Left\]\:fill-secondary-surface {
+  fill: #2F2F2F;
+}
+
+.group[data-selected=Right] .group-data-\[selected\=Right\]\:fill-secondary-surface {
+  fill: #2F2F2F;
 }
 
 .group[data-visible=false] .group-data-\[visible\=false\]\:opacity-0 {

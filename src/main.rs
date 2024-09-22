@@ -9,6 +9,7 @@ pub mod main_page;
 pub mod pages;
 pub mod scrollable;
 pub mod side_bar;
+pub mod svgs;
 pub mod text_scroller;
 
 use builder::collection_builder;
@@ -23,11 +24,11 @@ use rand::seq::IteratorRandom;
 use scrollable::Scrollable;
 use snafu::ErrorCompat;
 use std::collections::BTreeMap;
+use svgs::{CURSEFORGE_OUTLINE, MODRINTH_OUTLINE};
 use tailwind_fuse::*;
 use BaseComponents::{
-    atoms::button::{Button, Roundness},
+    atoms::switch::{FloatingSwitch, State},
     organisms::modal::Modal,
-    string_placements::ContentType,
 };
 
 use dioxus::{prelude::*, CapturedError};
@@ -434,15 +435,17 @@ fn LayoutContainer(children: Element, #[props(default)] extended_class: String) 
 
 #[component]
 fn Explore() -> Element {
+    let state = use_signal(|| State::Left);
     rsx! {
-        div {
-            Button {
-                roundness: Roundness::Top,
-                string_placements: vec![
-                    ContentType::text("Explore").align_left(),
-                    ContentType::text("thumbsup").align_right(),
-                ]
-            }
+        FloatingSwitch {
+            lhs_width: 80.,
+            lhs: CURSEFORGE_OUTLINE("transition-all fill-background w-[40px] group-data-[selected=Right]:w-[30px] group-data-[selected=Right]:fill-secondary-surface"),
+            lhs_css: "px-[20px] py-[10px]",
+            rhs_width: 80.,
+            rhs: MODRINTH_OUTLINE("transition-all fill-background w-[35px] group-data-[selected=Left]:w-[30px] group-data-[selected=Left]:fill-secondary-surface"),
+            rhs_css: "px-[20px] py-[10px]",
+            class: "h-[80px]",
+            state
         }
     }
 }

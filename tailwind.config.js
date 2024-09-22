@@ -93,7 +93,8 @@ module.exports = {
         'black': "#232E3D",
         'light-blue': '#7CAED3',
         'tinted-yellow': '#D3E950',
-        'purple': '9747FF',
+        'purple': '#9747FF',
+        'orange': '#F16436',
       },
       animation: {
         slideRight: 'slideRight 500ms',
