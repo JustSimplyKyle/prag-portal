@@ -1,7 +1,10 @@
 use std::time::Duration;
 
+use anyhow::anyhow;
 use dioxus::prelude::*;
 use dioxus_logger::tracing::debug;
+
+use crate::use_error_handler;
 
 pub fn use_text_scroller() -> (Signal<Option<MountedEvent>>, Signal<bool>, Signal<String>) {
     let mounted = use_signal(|| None);
@@ -19,21 +22,37 @@ pub fn use_text_scroller() -> (Signal<Option<MountedEvent>>, Signal<bool>, Signa
         let style = style.read();
         debug!("style changed: {style}");
     });
+    let mut error_handler = use_error_handler();
     use_future(move || async move {
         loop {
             let element: Option<MountedEvent> = mounted();
             if let Some(ele) = element {
-                let client = ele.get_client_rect().await.unwrap().width().round();
-                let scroll = ele.get_scroll_size().await.unwrap().width.round();
-                if scroll / client != 0. && scroll / client != 1. && !(scroll / client).is_nan() {
-                    let new_style = format!("--from-width:{client}px; --to-width:-{scroll}px");
-                    if *style.peek() != new_style {
-                        style.set(new_style);
+                let val = async move {
+                    let client = ele
+                        .get_client_rect()
+                        .await
+                        .map_err(|x| anyhow!("{x:#?}"))?
+                        .width()
+                        .round();
+                    let scroll = ele
+                        .get_scroll_size()
+                        .await
+                        .map_err(|x| anyhow!("{x:#?}"))?
+                        .width
+                        .round();
+                    if scroll / client != 0. && scroll / client != 1. && !(scroll / client).is_nan()
+                    {
+                        let new_style = format!("--from-width:{client}px; --to-width:-{scroll}px");
+                        if *style.peek() != new_style {
+                            style.set(new_style);
+                        }
                     }
-                }
-                if *status.peek() != (scroll > client) {
-                    status.set(scroll > client);
-                }
+                    if *status.peek() != (scroll > client) {
+                        status.set(scroll > client);
+                    }
+                    Ok(())
+                };
+                error_handler.set(Some(val.await));
             }
             tokio::time::sleep(Duration::from_millis(1000)).await;
         }

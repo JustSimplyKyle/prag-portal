@@ -30,7 +30,7 @@ pub enum CollectionBuilderError {
 /// This function will return an error if:
 ///
 /// - The provided `version_id` is not a valid Minecraft version ID.
-/// - The `version_id` corresponds to an invalid or unsupported Minecraft version.
+/// - Manifest of `version_id` failed to parse
 /// - An error occurs while creating the collection entry.
 /// - An error occurs while adding mods from Modrinth.
 /// - An error occurs while downloading the mods.
@@ -91,12 +91,15 @@ pub mod component {
                 {title}
             })
         }
+
+        let mut title = use_signal(|| None);
+
         rsx! {
             Modal {
                 active,
                 id,
                 div {
-                    class: "flex w-full border-2 border-surface",
+                    class: "flex w-full border-2 border-surface rounded-[20px]",
                     box_shadow: "10px 10px 30px 0px rgba(0, 0, 0, 0.25)",
                     div {
                         flex_basis: "33.3%",
@@ -129,8 +132,31 @@ pub mod component {
                         }
                         div {
                             class: "flex flex-col bg-deep-background p-[30px] gap-[35px]",
-                            Title {
-                                title: "合集名稱"
+                            div {
+                                class: "flex flex-col gap-[20px]",
+                                Title {
+                                    title: "合集名稱"
+                                }
+                                div {
+                                    class: "flex gap-[5px]",
+                                    input {
+                                        aria_selected: title.read().is_some(),
+                                        class: "bg-background font-medium aria-selected:text-white text-[18px] text-secondary-surface rounded-[20px] w-full px-[20px]",
+                                        oninput: move |x| {
+                                            title.set(Some(x.value()));
+                                        },
+                                        value: title().unwrap_or_else(|| "新的合集".into()),
+                                    }
+                                    button {
+                                        class: "p-[10px] bg-background rounded-[20px] w-[60px] inline-flex justify-center items-center",
+                                        onclick: move |_| {
+                                            title.set(None);
+                                        },
+                                        div {
+                                            class: "bg-white size-[30px]",
+                                        }
+                                    }
+                                }
                             }
                             Title {
                                 title: "封面與背景圖片"

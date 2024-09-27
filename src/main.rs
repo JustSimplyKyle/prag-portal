@@ -24,7 +24,7 @@ use rand::seq::IteratorRandom;
 use scrollable::Scrollable;
 use snafu::ErrorCompat;
 use std::collections::BTreeMap;
-use svgs::{CURSEFORGE_OUTLINE, MODRINTH_OUTLINE};
+use svgs::{CREATE_COLLECTION, CURSEFORGE_OUTLINE, GRASS, MODRINTH_OUTLINE};
 use tailwind_fuse::*;
 use BaseComponents::{
     atoms::switch::{FloatingSwitch, State},
@@ -444,7 +444,18 @@ fn Explore() -> Element {
             rhs_width: 80.,
             rhs: MODRINTH_OUTLINE("transition-all fill-background w-[35px] group-data-[selected=Left]:w-[30px] group-data-[selected=Left]:fill-secondary-surface"),
             rhs_css: "px-[20px] py-[10px]",
+            floater: "bg-orange group-data-[selected=Right]:bg-green",
             class: "h-[80px]",
+            state
+        }
+        FloatingSwitch {
+            lhs_width: 80.,
+            lhs: GRASS(()),
+            lhs_css: "px-[20px] py-[15px]",
+            rhs_width: 120.,
+            rhs: CREATE_COLLECTION(()),
+            rhs_css: "px-[20px] py-[15px]",
+            floater: "bg-secondary-surface",
             state
         }
     }

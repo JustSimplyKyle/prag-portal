@@ -1870,6 +1870,11 @@ input {
   height: 280px;
 }
 
+.size-\[30px\] {
+  width: 30px;
+  height: 30px;
+}
+
 .size-\[40px\] {
   width: 40px;
   height: 40px;
@@ -2045,6 +2050,10 @@ input {
 
 .w-\[50px\] {
   width: 50px;
+}
+
+.w-\[60px\] {
+  width: 60px;
 }
 
 .w-\[75px\] {
@@ -2965,6 +2974,11 @@ input {
   color: rgb(201 43 69 / var(--tw-text-opacity));
 }
 
+.text-secondary-surface {
+  --tw-text-opacity: 1;
+  color: rgb(47 47 47 / var(--tw-text-opacity));
+}
+
 .text-secondary-text {
   --tw-text-opacity: 1;
   color: rgb(125 125 125 / var(--tw-text-opacity));
@@ -3253,6 +3267,11 @@ body {
 .aria-selected\:text-black[aria-selected="true"] {
   --tw-text-opacity: 1;
   color: rgb(35 46 61 / var(--tw-text-opacity));
+}
+
+.aria-selected\:text-white[aria-selected="true"] {
+  --tw-text-opacity: 1;
+  color: rgb(255 255 255 / var(--tw-text-opacity));
 }
 
 .aria-selected\:text-zinc-800[aria-selected="true"] {

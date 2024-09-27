@@ -1,8 +1,12 @@
 use crate::{
     builder::component::BuildCollection,
     main_page::CollectionBlock,
+    svgs::{CREATE_COLLECTION, GRASS},
     BaseComponents::{
-        atoms::button::{Button, FillMode, Roundness, Size},
+        atoms::{
+            button::{Button, FillMode, Roundness, Size},
+            switch::FloatingSwitch,
+        },
         molecules::{
             context_menu::{self, ContextMenu},
             search_bar::SearchBar,
@@ -111,11 +115,19 @@ pub fn CollectionContext(#[props(default)] class: String) -> Element {
 
 #[component]
 pub fn Collections() -> Element {
+    use crate::BaseComponents::atoms::switch::State;
+
     let read = STORAGE.collections.read();
     let keys = read.keys();
     let keys_iter = keys.clone().zip((0..keys.len()).rev());
     let search = use_signal(String::new);
     let mut create_collection = use_signal(|| false);
+    let state = use_signal(|| State::Left);
+    use_effect(move || {
+        if matches!(state(), State::Right) {
+            create_collection.set(true);
+        }
+    });
     rsx! {
         BuildCollection {
             active: create_collection
@@ -147,6 +159,17 @@ pub fn Collections() -> Element {
                         ContentType::svg(ARROW_DOWN).css("svg-[40px]").align_right(),
                     ]
                 }
+                FloatingSwitch {
+                    lhs_width: 80.,
+                    lhs: GRASS(()),
+                    lhs_css: "px-[20px] py-[15px]",
+                    rhs_width: 120.,
+                    rhs: CREATE_COLLECTION(()),
+                    rhs_css: "px-[20px] py-[15px]",
+                    floater: "bg-secondary-surface",
+                    state
+                }
+
             }
             div {
                 class: "justify-center bg-background p-[30px] rounded-[30px] grid grid-flow-row gap-[20px] overflow-y-visible",

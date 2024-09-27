@@ -132,8 +132,7 @@ fn ModifyPicture(collection_id: ReadOnlySignal<CollectionId>) -> Element {
         let mut binding = || {
             if change() {
                 if let Some(x) = active() {
-                    #[allow(clippy::unwrap_used)]
-                    let path = PathBuf::from(COLLECTION_PICS.read().get(x).unwrap().to_owned());
+                    let path = PathBuf::from(COLLECTION_PICS.read()[x].to_owned());
                     collection_id().with_mut_collection(|x| x.picture_path = path)?;
                     change.set(false);
                 }
