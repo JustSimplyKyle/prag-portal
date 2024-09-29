@@ -94,7 +94,9 @@ fn Footer(
                 collection_id().replace(collection)?;
                 Ok(())
             };
-            error_handler.set(Some(err().await));
+            if let Err(err) = err().await {
+                error_handler.set(Err(err));
+            }
         })
     };
 

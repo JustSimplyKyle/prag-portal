@@ -146,7 +146,9 @@ pub fn CollectionBlock(
                                     collection_id().replace(collection)?;
                                     Ok(())
                                 };
-                                error_handler.set(Some(binding.await));
+                                if let Err(err) = binding.await {
+                                    error_handler.set(Err(err));
+                                }
                             },
                             START {}
                         }

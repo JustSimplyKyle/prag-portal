@@ -81,7 +81,9 @@ fn CollectionEdit(collection_id: ReadOnlySignal<CollectionId>) -> Element {
     use_effect(move || {
         let vec = EditState::iter().collect::<Vec<_>>();
         let error = EditState::scroller_applyer(vec, |x| &edit_state.read().0 == x);
-        error_handler.set(Some(error));
+        if let Err(err) = error {
+            error_handler.set(Err(err));
+        }
     });
     rsx! {
         div {

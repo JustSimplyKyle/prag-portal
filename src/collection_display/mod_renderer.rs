@@ -164,7 +164,7 @@ fn use_active_controller(
         let id = collection_id();
         let collection = id.get_collection();
         async move {
-            let err = || async move {
+            let binding = || async move {
                 let Some(mut controller) = collection.peek().mod_controller.clone() else {
                     return Ok(());
                 };
@@ -187,7 +187,9 @@ fn use_active_controller(
                 }
                 Ok(())
             };
-            error_handler.set(Some(err().await));
+            if let Err(x) = binding().await {
+                error_handler.set(Err(x));
+            }
         }
     });
 }
@@ -204,6 +206,9 @@ fn SubModViewer(
         {
             ContentType::image(icon.to_string()).css("size-[80px] rounded-[15px]")
         }
+    });
+    use_effect(move || {
+        println!("{}", dialog());
     });
     let name = rsx!(
         div {

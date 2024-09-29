@@ -245,21 +245,24 @@ impl<T: std::fmt::Display> ToRenderError for T {
 }
 
 pub trait ThrowResource<T> {
-    fn throw(&self) -> Result<Option<T>, RenderError>;
+    fn throw(&mut self);
 }
 
-impl<T: Clone> ThrowResource<T> for Resource<Result<T, anyhow::Error>> {
-    fn throw(&self) -> Result<Option<T>, RenderError> {
-        let binding = self.read();
-        let transpose = binding.as_ref().map(|x| x.as_ref()).transpose();
-        transpose
-            .map_err(ToRenderError::to_render_error)
-            .map(|x| x.cloned())
+impl<P, K: Into<anyhow::Error> + Send + Sync + 'static, T: FnMut() -> Result<P, K>> ThrowResource<T>
+    for T
+{
+    fn throw(&mut self) {
+        if let Err(x) = self() {
+            use std::error::Error;
+            let boxed_error: Box<dyn Error + Send + Sync> = Box::from(x.into());
+            let leaked_error: &'static (dyn Error + Send + Sync) = Box::leak(boxed_error);
+            ScopeId::APP.throw_error(leaked_error);
+        }
     }
 }
 
 #[must_use]
-pub fn use_error_handler() -> Signal<Option<Result<(), anyhow::Error>>> {
+pub fn use_error_handler() -> Signal<Result<(), anyhow::Error>> {
     use_context()
 }
 
@@ -267,7 +270,7 @@ pub trait ErrorFormatted {
     fn to_formatted(&self) -> String;
 }
 
-impl<T: std::error::Error + std::fmt::Debug + ErrorCompat + 'static> ErrorFormatted for T {
+impl<T: std::fmt::Debug + ErrorCompat + 'static + snafu::Error> ErrorFormatted for T {
     fn to_formatted(&self) -> String {
         let chain = self
             .iter_chain()
@@ -280,6 +283,7 @@ impl<T: std::error::Error + std::fmt::Debug + ErrorCompat + 'static> ErrorFormat
         format!("display: \n{chain}debug:\n{self:#?}")
     }
 }
+
 #[component]
 fn Layout() -> Element {
     {
@@ -291,11 +295,12 @@ fn Layout() -> Element {
         }
     }
 
-    let mut error_handler = use_context_provider(|| Signal::new(None));
+    let error_handler: Signal<Result<(), anyhow::Error>> =
+        use_context_provider(|| Signal::new(Ok(())));
     let keys = use_keys();
 
     use_effect(move || {
-        let binding = || {
+        let mut binding = || {
             let history = HISTORY.read();
             Pages::DownloadProgress.apply_slide_in();
             let pages_scroller = vec![Pages::MainPage, Pages::Explore, Pages::Collections];
@@ -306,12 +311,13 @@ fn Layout() -> Element {
             }
             Ok::<_, anyhow::Error>(())
         };
-        error_handler.set(Some(binding()));
+
+        binding.throw();
     });
 
     use_memo(move || {
-        if let Some(x) = error_handler.read().as_ref() {
-            return x.as_ref().cloned().map_err(ToRenderError::to_render_error);
+        if let Err(x) = error_handler.read().as_ref() {
+            return Err(x.to_render_error());
         }
         Ok(())
     })()?;

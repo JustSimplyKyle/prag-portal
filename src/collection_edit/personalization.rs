@@ -16,7 +16,7 @@ use crate::{
         atoms::button::{Button, Roundness},
         string_placements::{Alignment, ContentType, Contents},
     },
-    COLLECTION_PICS,
+    ThrowResource, COLLECTION_PICS,
 };
 
 #[component]
@@ -95,7 +95,9 @@ pub fn CollectionNameEdit(
                 })
                 .map_err(Into::into);
 
-            error_handler.set(Some(err));
+            if let Err(err) = err {
+                error_handler.set(Err(err));
+            }
         }
     });
     rsx! {
@@ -126,8 +128,6 @@ fn ModifyPicture(collection_id: ReadOnlySignal<CollectionId>) -> Element {
 
     let mut filename: Signal<Option<String>> = use_signal(|| None);
 
-    let mut error = use_error_handler();
-
     use_effect(move || {
         let mut binding = || {
             if change() {
@@ -137,22 +137,22 @@ fn ModifyPicture(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                     change.set(false);
                 }
             }
-            Ok(())
+            Ok::<(), anyhow::Error>(())
         };
-        error.set(Some(binding()));
+        binding.throw();
     });
 
     use_effect(move || {
-        let binding = || {
+        let mut binding = || {
             if let Some(x) = filename() {
                 if !x.is_empty() {
                     let path = PathBuf::from(x);
                     collection_id().with_mut_collection(|x| x.picture_path = path)?;
                 }
             }
-            Ok(())
+            Ok::<(), anyhow::Error>(())
         };
-        error.set(Some(binding()));
+        binding.throw();
     });
     rsx! {
         div {

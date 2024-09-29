@@ -1,7 +1,11 @@
 use dioxus::prelude::*;
+use dioxus_logger::tracing::warn;
 
 #[component]
 pub fn RenderTranslatedMarkdown(html: String) -> Element {
+    if html.contains("Create") {
+        println!("{}", &html);
+    }
     rsx! {
         div {
             class: "px-[30px] py-[10px] [&_*]:font-english bg-deep-background

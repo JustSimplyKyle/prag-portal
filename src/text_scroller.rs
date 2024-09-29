@@ -50,9 +50,11 @@ pub fn use_text_scroller() -> (Signal<Option<MountedEvent>>, Signal<bool>, Signa
                     if *status.peek() != (scroll > client) {
                         status.set(scroll > client);
                     }
-                    Ok(())
+                    Ok::<(), anyhow::Error>(())
                 };
-                error_handler.set(Some(val.await));
+                if let Err(err) = val.await {
+                    error_handler.set(Err(err));
+                }
             }
             tokio::time::sleep(Duration::from_millis(1000)).await;
         }
