@@ -1,9 +1,12 @@
 pub mod mod_renderer;
 
 use dioxus::prelude::*;
+use dioxus_logger::tracing::info;
 use manganis::ImageAsset;
 use mod_renderer::ModViewer;
-use rust_lib::api::shared_resources::collection::CollectionId;
+use rust_lib::api::{
+    backend_exclusive::vanilla::launcher::LoggerEvent, shared_resources::collection::CollectionId,
+};
 use strum::EnumIter;
 
 use crate::{
@@ -86,11 +89,16 @@ fn Footer(
             .map(|x| x.manager.mods.iter().filter(|x| x.enabled).count())
     });
     let mut error_handler = use_error_handler();
+    let logs = use_signal_sync(LoggerEvent::default);
+    use_effect(move || {
+        info!("{}", logs.read());
+    });
+
     let launch_game = move || {
         spawn(async move {
             let mut collection = collection_id().get_collection()();
             let err = move || async move {
-                collection.launch_game().await?;
+                collection.launch_game(logs).await?;
                 collection_id().replace(collection)?;
                 Ok(())
             };

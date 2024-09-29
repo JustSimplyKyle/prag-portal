@@ -1,8 +1,12 @@
 use std::time::Duration;
 
 use dioxus::prelude::*;
+use dioxus_logger::tracing::info;
 use manganis::ImageAsset;
-use rust_lib::api::shared_resources::{collection::CollectionId, entry::STORAGE};
+use rust_lib::api::{
+    backend_exclusive::vanilla::launcher::LoggerEvent,
+    shared_resources::{collection::CollectionId, entry::STORAGE},
+};
 use tailwind_fuse::*;
 
 use crate::{
@@ -109,6 +113,12 @@ pub fn CollectionBlock(
 
     let mut error_handler = use_error_handler();
 
+    let log = use_signal_sync(|| LoggerEvent::default());
+
+    use_effect(move || {
+        info!("{}", log.read());
+    });
+
     rsx! {
         button {
             class,
@@ -142,7 +152,7 @@ pub fn CollectionBlock(
                                 x.stop_propagation();
                                 let mut collection = collection_id().get_collection()();
                                 let binding = async move {
-                                    collection.launch_game().await?;
+                                    collection.launch_game(log).await?;
                                     collection_id().replace(collection)?;
                                     Ok(())
                                 };
