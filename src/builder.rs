@@ -83,11 +83,10 @@ pub mod component {
 
     #[component]
     pub fn BuildCollection(active: Signal<bool>) -> Element {
-        let id = use_hook(|| rand::random::<i64>().to_string());
         #[component]
         fn Title(title: String) -> Element {
             rsx!(div {
-                class: "text-[20px] font-normal trim",
+                class: "text-[20px] font-medium trim",
                 {title}
             })
         }
@@ -97,7 +96,6 @@ pub mod component {
         rsx! {
             Modal {
                 active,
-                id,
                 div {
                     class: "flex w-full border-2 border-surface rounded-[20px]",
                     box_shadow: "10px 10px 30px 0px rgba(0, 0, 0, 0.25)",
@@ -158,8 +156,57 @@ pub mod component {
                                     }
                                 }
                             }
-                            Title {
-                                title: "封面與背景圖片"
+                            div {
+                                class: "flex flex-col gap-[20px]",
+                                Title {
+                                    title: "封面與背景圖片"
+                                }
+                                div {
+                                    class: "flex gap-[20px]",
+                                    div {
+                                        class: "flex gap-[5px] grow",
+                                        div {
+                                            class: "bg-white grow min-w-[140px] size-full aspect-square rounded-[20px]",
+                                        }
+                                        div {
+                                            class: "flex flex-col grow w-full gap-[5px]",
+                                            div {
+                                                class: "inline-flex items-center justify-center bg-background w-full h-full p-[10px] rounded-[20px]",
+                                                div {
+                                                    class: "bg-red size-[30px]"
+                                                }
+                                            }
+                                            div {
+                                                class: "inline-flex items-center justify-center bg-background w-full h-full p-[10px] rounded-[20px]",
+                                                div {
+                                                    class: "bg-red size-[30px]"
+                                                }
+                                            }
+                                        }
+                                    }
+                                    div {
+                                        class: "flex gap-[5px] grow",
+                                        div {
+                                            class: "bg-white grow min-h-[140px] h-full rounded-[20px]",
+                                            aspect_ratio: "2/1",
+                                        }
+                                        div {
+                                            class: "flex flex-col grow w-full gap-[5px]",
+                                            div {
+                                                class: "inline-flex items-center justify-center bg-background w-full h-full p-[10px] rounded-[20px]",
+                                                div {
+                                                    class: "bg-red size-[30px]"
+                                                }
+                                            }
+                                            div {
+                                                class: "inline-flex items-center justify-center bg-background w-full h-full p-[10px] rounded-[20px]",
+                                                div {
+                                                    class: "bg-red size-[30px]"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             }
                             Title {
                                 title: "遊戲版本"

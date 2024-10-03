@@ -1860,6 +1860,10 @@ input {
   display: none;
 }
 
+.aspect-square {
+  aspect-ratio: 1 / 1;
+}
+
 .size-\[20px\] {
   width: 20px;
   height: 20px;
@@ -1888,6 +1892,11 @@ input {
 .size-\[80px\] {
   width: 80px;
   height: 80px;
+}
+
+.size-full {
+  width: 100%;
+  height: 100%;
 }
 
 .h-10 {
@@ -1982,6 +1991,10 @@ input {
 
 .max-h-screen {
   max-height: 100vh;
+}
+
+.min-h-\[140px\] {
+  min-height: 140px;
 }
 
 .min-h-\[163px\] {
@@ -2091,6 +2104,10 @@ input {
 
 .min-w-0 {
   min-width: 0px;
+}
+
+.min-w-\[140px\] {
+  min-width: 140px;
 }
 
 .min-w-\[150px\] {

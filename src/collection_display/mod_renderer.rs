@@ -308,11 +308,10 @@ fn ModDetails(
 
     let description = markdown_to_html(&mods.read().long_description);
 
-    let id = format!(
-        "{}-my_dialog-{}",
-        collection_id(),
-        mods.read().project_id.to_string()
-    );
+    if description.contains("Welcome to Create") {
+        println!("{description}");
+        println!("{}", mods.read().long_description);
+    }
 
     let file_paths = mods
         .read()
@@ -332,7 +331,6 @@ fn ModDetails(
     rsx! {
         Modal {
             active,
-            id,
             div {
                 class: "w-full flex justify-center",
                 div {

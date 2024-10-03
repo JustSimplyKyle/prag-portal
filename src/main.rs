@@ -191,7 +191,6 @@ fn App() -> Element {
                 handle_error: move |error| { rsx! {
                     Modal {
                         active: error_active,
-                        id: "error_modal",
                         div {
                             class: "flex",
                             div {
