@@ -1,7 +1,7 @@
 pub mod mod_renderer;
 
 use dioxus::prelude::*;
-use dioxus_logger::tracing::info;
+use dioxus_logger::tracing::{debug, error, info, trace, warn, Level};
 use manganis::ImageAsset;
 use mod_renderer::ModViewer;
 use rust_lib::api::{
@@ -91,7 +91,29 @@ fn Footer(
     let mut error_handler = use_error_handler();
     let logs = use_signal_sync(LoggerEvent::default);
     use_effect(move || {
-        info!("{}", logs.read());
+        let logs = logs.read();
+        let level = *logs.level();
+        let output = format!("[{}] {}", logs.thread(), logs.message().unwrap_or_default());
+
+        drop(logs);
+
+        match level {
+            Level::TRACE => {
+                trace!("{output}");
+            }
+            Level::DEBUG => {
+                debug!("{output}");
+            }
+            Level::INFO => {
+                info!("{output}");
+            }
+            Level::WARN => {
+                warn!("{output}");
+            }
+            Level::ERROR => {
+                error!("{output}");
+            }
+        }
     });
 
     let launch_game = move || {
