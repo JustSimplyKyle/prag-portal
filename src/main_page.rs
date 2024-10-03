@@ -113,7 +113,7 @@ pub fn CollectionBlock(
 
     let mut error_handler = use_error_handler();
 
-    let log = use_signal_sync(|| LoggerEvent::default());
+    let log = use_signal_sync(LoggerEvent::default);
 
     use_effect(move || {
         info!("{}", log.read());
