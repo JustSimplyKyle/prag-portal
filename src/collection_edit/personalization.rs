@@ -130,7 +130,7 @@ fn ModifyPicture(collection_id: ReadOnlySignal<CollectionId>) -> Element {
 
     use_effect(move || {
         let mut binding = || {
-            if change() {
+            if *change.peek() {
                 if let Some(x) = active() {
                     let path = PathBuf::from(COLLECTION_PICS.read()[x].to_owned());
                     collection_id().with_mut_collection(|x| x.picture_path = path)?;
