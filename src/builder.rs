@@ -77,14 +77,24 @@ pub async fn collection_builder(
 }
 
 pub mod component {
+    use std::path::PathBuf;
+
     use dioxus::prelude::*;
+    use rust_lib::api::backend_exclusive::{
+        errors::ManifestProcessingError, vanilla::version::VersionMetadata,
+    };
 
     use crate::{
-        svgs::{self, CLOSE_CROSS, CREATE_COLLECTION, FOLDER_UPLOAD, SHADOW_ADD, UPLOAD_FILE},
+        get_random_collection_picture,
+        svgs::{
+            self, ARROW_DOWN, CLOSE_CROSS, CREATE_COLLECTION, FOLDER_UPLOAD, SHADOW_ADD,
+            UPLOAD_FILE,
+        },
         BaseComponents::{
             atoms::switch::{self, FloatingSwitch},
             organisms::modal::Modal,
         },
+        ErrorFormatted, ToRenderError,
     };
     #[component]
     fn Title(title: String) -> Element {
@@ -152,8 +162,8 @@ pub mod component {
     }
 
     #[component]
-    fn PicturePicker() -> Element {
-        let button  = "inline-flex items-center justify-center bg-background w-full h-full p-[10px] rounded-[20px]";
+    fn PicturePicker(cover_img: Signal<PathBuf>, background_img: Signal<PathBuf>) -> Element {
+        let button  = "inline-flex items-center justify-center bg-background min-w-full max-w-full h-full p-[10px] rounded-[20px]";
         rsx! {
             div {
                 class: "flex flex-col gap-[20px]",
@@ -165,7 +175,8 @@ pub mod component {
                     div {
                         class: "flex gap-[5px] grow",
                         div {
-                            class: "bg-white grow min-w-[140px] size-full aspect-square rounded-[20px]",
+                            class: "grow border-[2px] border-surface min-w-[140px] size-full aspect-square rounded-[20px]",
+                            background: "url(\'{cover_img.read().to_string_lossy()}\') lightgray 50% / cover no-repeat"
                         }
                         div {
                             class: "flex flex-col grow w-full gap-[5px]",
@@ -184,7 +195,8 @@ pub mod component {
                     div {
                         class: "flex gap-[5px] grow",
                         div {
-                            class: "bg-white grow min-h-[140px] h-full rounded-[20px]",
+                            class: "border-[2px] border-surface grow min-h-[140px] h-full rounded-[20px]",
+                            background: "url(\'{background_img.read().to_string_lossy()}\') lightgray 50% / cover no-repeat",
                             aspect_ratio: "2/1",
                         }
                         div {
@@ -237,14 +249,66 @@ pub mod component {
     }
 
     #[component]
+    pub fn GameVersion(
+        selected_version: Resource<Result<VersionMetadata, ManifestProcessingError>>,
+    ) -> Element {
+        let binding = selected_version.read();
+        let current_version = match &*binding {
+            Some(Ok(x)) => x,
+            Some(Err(err)) => {
+                return Err(err.to_formatted().to_render_error());
+            }
+            None => {
+                return VNode::empty();
+            }
+        };
+
+        rsx! {
+            div {
+                class: "flex flex-col gap-[20px]",
+                Title {
+                    title: "遊戲版本"
+                }
+                div {
+                    class: "flex gap-[5px] h-[60px]",
+                    div {
+                        class: "pl-[20px] pr-[15px] bg-background w-full grow grid grid-flow-col justify-stretch items-center rounded-[20px]",
+                        div {
+                            class: "justify-self-start grow trim text-[18px] font-english",
+                            {current_version.id.clone()}
+                        }
+                        ARROW_DOWN {
+                            class: "justify-self-end"
+                        }
+                    }
+                    div {
+                        class: "bg-background min-w-[220px] max-w-[220px] grid grid-flow-col justify-stretch items-center gap-[10px] pl-[20px] pr-[15px] rounded-[20px]",
+                        div {
+                            class: "justify-self-start grow w-full font-display text-[18px] inline-flex items-center font-normal text-secondary trim",
+                            "顯示快照版本"
+                        }
+                        CLOSE_CROSS {
+                            class: "justify-self-end inline-flex justify-center items-center",
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    #[component]
     pub fn BuildCollection(active: Signal<bool>) -> Element {
         let title = use_signal(|| None);
+        let cover_img = use_signal(|| get_random_collection_picture().into());
+        let background_img = use_signal(|| get_random_collection_picture().into());
+
+        let selected_version = use_resource(VersionMetadata::latest_release);
 
         rsx! {
             Modal {
                 active,
                 div {
-                    class: "flex w-full border-2 border-surface rounded-[20px]",
+                    class: "flex min-w-[700px] w-full border-2 border-surface rounded-[20px]",
                     box_shadow: "10px 10px 30px 0px rgba(0, 0, 0, 0.25)",
                     Center {
                         class: "flex flex-col",
@@ -252,9 +316,12 @@ pub mod component {
                         div {
                             class: "flex flex-col bg-deep-background p-[30px] gap-[35px]",
                             SetupName { title }
-                            PicturePicker {  }
-                            Title {
-                                title: "遊戲版本"
+                            PicturePicker {
+                                cover_img,
+                                background_img
+                            }
+                            GameVersion {
+                                selected_version,
                             }
                             Title {
                                 title: "合集名稱"
