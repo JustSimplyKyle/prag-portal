@@ -1864,6 +1864,11 @@ input {
   aspect-ratio: 1 / 1;
 }
 
+.size-\[100px\] {
+  width: 100px;
+  height: 100px;
+}
+
 .size-\[20px\] {
   width: 20px;
   height: 20px;
@@ -2191,8 +2196,17 @@ input {
   flex-grow: 1;
 }
 
+.origin-top {
+  transform-origin: top;
+}
+
 .rotate-180 {
   --tw-rotate: 180deg;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+
+.scale-y-0 {
+  --tw-scale-y: 0;
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 
@@ -3247,8 +3261,21 @@ body {
   scroll-behavior: smooth;
 }
 
+.\*\:z-0 > * {
+  z-index: 0;
+}
+
 .\*\:z-10 > * {
   z-index: 10;
+}
+
+.\*\:z-\[1000\] > * {
+  z-index: 1000;
+}
+
+.\*\:translate-y-0 > * {
+  --tw-translate-y: 0px;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 
 .\*\:justify-self-start > * {
@@ -3262,6 +3289,10 @@ body {
 .\*\:py-\[15px\] > * {
   padding-top: 15px;
   padding-bottom: 15px;
+}
+
+.\*\:opacity-100 > * {
+  opacity: 1;
 }
 
 .hover\:min-w-\[300px\]:hover {
@@ -3441,6 +3472,11 @@ body {
   width: 30px;
 }
 
+.group[data-enabled=true] .group-data-\[enabled\=true\]\:scale-y-100 {
+  --tw-scale-y: 1;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+
 .group[data-active=a] .group-data-\[active\=a\]\:border-white {
   --tw-border-opacity: 1;
   border-color: rgb(255 255 255 / var(--tw-border-opacity));
@@ -3480,6 +3516,10 @@ body {
 }
 
 .group[data-visible=false] .group-data-\[visible\=false\]\:opacity-0 {
+  opacity: 0;
+}
+
+.group[data-enabled=false] .\*\:group-data-\[enabled\=false\]\:opacity-0 > * {
   opacity: 0;
 }
 

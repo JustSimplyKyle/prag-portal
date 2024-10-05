@@ -1,7 +1,4 @@
-use std::time::Duration;
-
 use dioxus::prelude::*;
-use dioxus_logger::tracing::instrument::WithSubscriber;
 
 #[component]
 pub fn Modal(active: Signal<bool>, children: Element) -> Element {

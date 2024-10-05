@@ -28,6 +28,7 @@ use svgs::{CREATE_COLLECTION, CURSEFORGE_OUTLINE, GRASS, MODRINTH_OUTLINE};
 use tailwind_fuse::*;
 use BaseComponents::{
     atoms::switch::{FloatingSwitch, State},
+    molecules::foldables::Foldable,
     organisms::modal::Modal,
 };
 
@@ -265,6 +266,50 @@ pub fn use_error_handler() -> Signal<Result<(), anyhow::Error>> {
     use_context()
 }
 
+pub fn use_mounted() -> Signal<Option<std::rc::Rc<MountedData>>> {
+    use_signal(|| None)
+}
+
+#[derive(Default, Copy, Clone, PartialEq)]
+pub struct Size2D {
+    pub width: f64,
+    pub height: f64,
+}
+
+#[must_use]
+pub fn use_visible_size(mounted: Signal<Option<std::rc::Rc<MountedData>>>) -> Resource<Size2D> {
+    use_resource(move || async move {
+        if let Some(x) = &*mounted.read() {
+            x.get_client_rect()
+                .await
+                .map(|x| Size2D {
+                    width: x.width(),
+                    height: x.height(),
+                })
+                .unwrap_or_default()
+        } else {
+            Size2D::default()
+        }
+    })
+}
+
+#[must_use]
+pub fn use_scroll_size(mounted: Signal<Option<std::rc::Rc<MountedData>>>) -> Resource<Size2D> {
+    use_resource(move || async move {
+        if let Some(x) = &*mounted.read() {
+            x.get_scroll_size()
+                .await
+                .map(|x| Size2D {
+                    width: x.width,
+                    height: x.height,
+                })
+                .unwrap_or_default()
+        } else {
+            Size2D::default()
+        }
+    })
+}
+
 pub trait ErrorFormatted {
     fn to_formatted(&self) -> String;
 }
@@ -441,6 +486,8 @@ fn LayoutContainer(children: Element, #[props(default)] extended_class: String) 
 #[component]
 fn Explore() -> Element {
     let state = use_signal(|| State::Left);
+    let enabled = use_signal(|| false);
+    let enabled2 = use_signal(|| false);
     rsx! {
         FloatingSwitch {
             lhs_width: 80.,
@@ -462,6 +509,55 @@ fn Explore() -> Element {
             rhs_css: "px-[20px] py-[15px]",
             floater: "bg-secondary-surface",
             state
+        }
+        div {
+            class: "flex flex-col bg-background",
+            Foldable {
+                enabled,
+                title: rsx! {
+                    div {
+                        class: "size-[100px]",
+                    }
+                },
+                div {
+                    class: "flex flex-col gap-[20px]",
+                    div {
+                        class: "text-[80px] bg-deep-background",
+                        "ABCDEFG"
+                    }
+                    div {
+                        class: "text-[80px] bg-deep-background",
+                        "HIJKLMNOP"
+                    }
+                    div {
+                        class: "text-[80px] bg-deep-background",
+                        "QRSTUV"
+                    }
+                }
+            }
+            Foldable {
+                enabled: enabled2,
+                title: rsx! {
+                    div {
+                        class: "size-[100px]",
+                    }
+                },
+                div {
+                    class: "flex flex-col gap-[20px]",
+                    div {
+                        class: "text-[80px] bg-deep-background",
+                        "ABCDEFG"
+                    }
+                    div {
+                        class: "text-[80px] bg-deep-background",
+                        "HIJKLMNOP"
+                    }
+                    div {
+                        class: "text-[80px] bg-deep-background",
+                        "QRSTUV"
+                    }
+                }
+            }
         }
     }
 }
