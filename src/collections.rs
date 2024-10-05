@@ -164,7 +164,7 @@ pub fn Collections() -> Element {
                     lhs: GRASS(()),
                     lhs_css: "px-[20px] py-[15px]",
                     rhs_width: 120.,
-                    rhs: CREATE_COLLECTION(()),
+                    rhs: rsx! { CREATE_COLLECTION {} } ,
                     rhs_css: "px-[20px] py-[15px]",
                     floater: "bg-secondary-surface",
                     state

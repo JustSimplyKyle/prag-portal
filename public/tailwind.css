@@ -1874,11 +1874,6 @@ input {
   height: 280px;
 }
 
-.size-\[30px\] {
-  width: 30px;
-  height: 30px;
-}
-
 .size-\[40px\] {
   width: 40px;
   height: 40px;
@@ -2031,10 +2026,6 @@ input {
 
 .w-\[100px\] {
   width: 100px;
-}
-
-.w-\[140px\] {
-  width: 140px;
 }
 
 .w-\[210px\] {
@@ -2691,11 +2682,6 @@ input {
 .bg-orange {
   --tw-bg-opacity: 1;
   background-color: rgb(241 100 54 / var(--tw-bg-opacity));
-}
-
-.bg-red {
-  --tw-bg-opacity: 1;
-  background-color: rgb(201 43 69 / var(--tw-bg-opacity));
 }
 
 .bg-secondary-surface {
@@ -3554,6 +3540,10 @@ body {
 
 .\[\&_\*\]\:transform-gpu * {
   transform: translate3d(var(--tw-translate-x), var(--tw-translate-y), 0) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+
+.\[\&_\*\]\:fill-red * {
+  fill: #C92B45;
 }
 
 .\[\&_\*\]\:transition-all * {

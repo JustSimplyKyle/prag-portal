@@ -41,8 +41,8 @@ pub fn FloatingSwitch(
     rhs: Element,
     #[props(default)] rhs_css: String,
     #[props(default)] class: String,
-    /// example usage `bg-orange group-data-[selected=Right]:bg-green`
     #[props(default)]
+    /// example usage `bg-orange group-data-[selected=Right]:bg-green`
     floater: String,
     mut state: Signal<State>,
 ) -> Element {
@@ -65,7 +65,7 @@ pub fn FloatingSwitch(
                 width: "{width()}px",
             }
             button {
-                class: tw_merge!("z-30 bg-transparent inline-flex justify-center items-center container", lhs_css),
+                class: tw_merge!("z-30 bg-transparent inline-flex justify-center items-center", lhs_css),
                 width: "{lhs_width}px",
                 onclick: move |_| {
                     state.set(State::Left);
@@ -73,7 +73,7 @@ pub fn FloatingSwitch(
                 {lhs}
             }
             button {
-                class: tw_merge!("z-30 bg-transparent inline-flex justify-center items-center container", rhs_css),
+                class: tw_merge!("z-30 bg-transparent inline-flex justify-center items-center", rhs_css),
                 width: "{rhs_width}px",
                 onclick: move |_| {
                     state.set(State::Right);

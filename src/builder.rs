@@ -79,7 +79,13 @@ pub async fn collection_builder(
 pub mod component {
     use dioxus::prelude::*;
 
-    use crate::BaseComponents::organisms::modal::Modal;
+    use crate::{
+        svgs::{self, CLOSE_CROSS, CREATE_COLLECTION, FOLDER_UPLOAD, SHADOW_ADD, UPLOAD_FILE},
+        BaseComponents::{
+            atoms::switch::{self, FloatingSwitch},
+            organisms::modal::Modal,
+        },
+    };
     #[component]
     fn Title(title: String) -> Element {
         rsx!(div {
@@ -90,13 +96,15 @@ pub mod component {
 
     #[component]
     fn Header() -> Element {
+        let state = use_signal(|| switch::State::Left);
         rsx! {
             div {
                 class: "grid grid-flow-col p-[20px] bg-background justify-stretch items-center gap-[25px]",
                 div {
                     class: "justify-self-start flex items-center gap-[25px]",
                     div {
-                        class: "bg-white size-[80px] rounded-[20px]",
+                        class: "inline-flex justify-center items-center size-[80px] bg-white rounded-[20px]",
+                        SHADOW_ADD {}
                     }
                     div {
                         class: "flex flex-col gap-[15px] justify-center",
@@ -110,8 +118,14 @@ pub mod component {
                         }
                     }
                 }
-                div {
-                    class: "justify-self-end bg-red w-[140px]",
+                FloatingSwitch {
+                    class: "justify-self-end h-[60px] bg-deep-background",
+                    lhs_width: 80.,
+                    lhs: rsx! { CREATE_COLLECTION { size: svgs::Size::Medium } },
+                    rhs_width: 60.,
+                    rhs: rsx! { FOLDER_UPLOAD {} },
+                    floater: "bg-secondary-surface",
+                    state
                 }
             }
         }
@@ -157,14 +171,12 @@ pub mod component {
                             class: "flex flex-col grow w-full gap-[5px]",
                             div {
                                 class: button,
-                                div {
-                                    class: "bg-red size-[30px]"
-                                }
+                                UPLOAD_FILE {}
                             }
                             div {
                                 class: button,
-                                div {
-                                    class: "bg-red size-[30px]"
+                                CLOSE_CROSS {
+                                    class: "[&_*]:fill-red"
                                 }
                             }
                         }
@@ -179,14 +191,12 @@ pub mod component {
                             class: "flex flex-col grow w-full gap-[5px]",
                             div {
                                 class: button,
-                                div {
-                                    class: "bg-red size-[30px]"
-                                }
+                                UPLOAD_FILE {}
                             }
                             div {
                                 class: button,
-                                div {
-                                    class: "bg-red size-[30px]"
+                                CLOSE_CROSS {
+                                    class: "[&_*]:fill-red"
                                 }
                             }
                         }
@@ -219,9 +229,7 @@ pub mod component {
                         onclick: move |_| {
                             title.set(None);
                         },
-                        div {
-                            class: "bg-white size-[30px]",
-                        }
+                        CLOSE_CROSS {}
                     }
                 }
             }
