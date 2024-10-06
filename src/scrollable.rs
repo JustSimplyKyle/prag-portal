@@ -63,17 +63,17 @@ pub trait Scrollable: Sized + ToString {
                             const finded_top = top.find((ele) => prev === ele);
                             if (finded_bottom) {
                                 const bottomElem = group.querySelector('#scrolling-' + finded_bottom);
-                                target.style.animation = 'slideDown 800ms ease-in-out';
+                                target.style.animation = 'slideDown 500ms var(--gentle-easing)';
                                 bottomElem.style.display = 'block';
                                 bottomElem.style.zIndex = '10';
-                                bottomElem.style.animation = 'slideOutDown 800ms ease-in-out';
+                                bottomElem.style.animation = 'slideOutDown 500ms var(--gentle-easing)';
                             }
-                            else if (finded_top) {
+                            if (finded_top) {
                                 const topElem = group.querySelector('#scrolling-' + finded_top);
-                                target.style.animation = 'slideUp 800ms ease-in-out';
+                                target.style.animation = 'slideUp 500ms var(--gentle-easing)';
                                 topElem.style.display = 'block';
                                 topElem.style.zIndex = '10';
-                                topElem.style.animation = 'slideOutUp 800ms ease-in-out';
+                                topElem.style.animation = 'slideOutUp 500ms var(--gentle-easing)';
                             }
 
                         });

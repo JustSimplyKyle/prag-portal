@@ -153,13 +153,13 @@ impl Pages {
                     if (selected) {
                         target.style.zIndex = '100';
                         target.style.display = 'block';                        
-                        target.style.animation = 'slideLeft 500ms';
+                        target.style.animation = 'slideLeft 500ms var(--gentle-easing)';
                     }
                     if (prev) {
                         target.style.insetInlineStart = '100dvw';
                         target.style.zIndex = '51';
                         target.style.display = 'block';                        
-                        target.style.animation = 'slideRight 500ms';
+                        target.style.animation = 'slideRight 500ms var(--gentle-easing)';
                     } 
                 });
             }

@@ -58,7 +58,7 @@ pub fn SideBar() -> Element {
         div {
             class: "flex flex-col place-content-start mx-5",
             div {
-                class: "transition-all w-[300px] relative space-y-5 ease-linear [&_*]:ease-linear [&_*]:duration-150 group",
+                class: "transition-all w-[300px] relative space-y-5 ease-slow [&_*]:ease-slow [&_*]:duration-150 group",
                 // top
                 div {
                     class: "h-20 relative group/main overflow-x-clip overflow-y-clip",
@@ -82,7 +82,7 @@ pub fn SideBar() -> Element {
                             },
                             switcher: Pages::MainPage,
                             extended_css_class: "z-10 bg-background text-black absolute left-[300px] transition-all [&_*]:transition-all
-                                min-w-[96.66666px] max-w-[96.66666px]
+                                min-w-[100px] max-w-[100px]
                                 [&:not(:hover)]:justify-center
                                 hover:bg-red
                                 hover:min-w-[300px] 
@@ -99,7 +99,7 @@ pub fn SideBar() -> Element {
                                 [&:not(:hover)]:group-hover/main:group-data-[collections=true]/main:left-0 
                             ",
                             div {
-                                class: "transition-all grow shrink w-[96.66666px]
+                                class: "transition-all grow shrink w-[100px]
                                 ",
                             }
                             Button {
@@ -116,7 +116,7 @@ pub fn SideBar() -> Element {
                                 },
                                 switcher: Pages::Explore,
                                 extended_css_class: "bg-background text-black grow transition-all [&_*]:transition-all
-                                    min-w-[96.66666px] max-w-[96.66666px]
+                                    min-w-[100px] max-w-[100px]
                                     [&:not(:hover)]:justify-center
                                     hover:bg-light-blue
                                     hover:min-w-[300px] 
@@ -128,7 +128,7 @@ pub fn SideBar() -> Element {
                                 "
                             }
                             div {
-                                class: "grow shrink w-[96.66666px]
+                                class: "grow shrink w-[100px]
                                 ",
                             }
                         }

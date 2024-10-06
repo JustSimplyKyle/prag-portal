@@ -266,6 +266,7 @@ pub fn use_error_handler() -> Signal<Result<(), anyhow::Error>> {
     use_context()
 }
 
+#[must_use]
 pub fn use_mounted() -> Signal<Option<std::rc::Rc<MountedData>>> {
     use_signal(|| None)
 }

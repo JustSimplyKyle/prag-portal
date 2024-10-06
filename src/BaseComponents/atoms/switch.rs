@@ -18,10 +18,10 @@ pub fn Switch(
                 }
             },
             div {
-                class: "transition-all duration-700 ease-linear flex-none group-aria-selected:flex-auto"
+                class: "transition-all duration-700 ease-quick duration-500 flex-none group-aria-selected:flex-auto"
             }
             div {
-                class: "transition-all ease-in-out w-[25px] h-[40px] group-aria-selected:bg-white rounded-[10px] bg-secondary-surface"
+                class: "transition-all ease-quick duration-500 w-[25px] h-[40px] group-aria-selected:bg-white rounded-[10px] bg-secondary-surface"
             }
         }
     }
@@ -60,7 +60,7 @@ pub fn FloatingSwitch(
             "data-selected": state().to_string(),
             width: format!("{}px", lhs_width + rhs_width),
             div {
-                class: tw_merge!("z-20 transition-all absolute inset-y-0 rounded-[30px] ", floater),
+                class: tw_merge!("z-20 transition-all ease-quick duration-500 absolute inset-y-0 rounded-[30px] ", floater),
                 left: "{left()}px",
                 width: "{width()}px",
             }

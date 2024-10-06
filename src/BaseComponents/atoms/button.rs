@@ -7,7 +7,7 @@ use super::super::{molecules::switcher::StateSwitcher, string_placements::String
 
 #[derive(TwClass, Clone, Copy)]
 #[tw(
-    class = "transition-all ease-in-out drop-shadow-lg duration-300 text-white bg-deep-background grid grid-flow-col justify-stretch items-center"
+    class = "transition-all ease-gentle drop-shadow-lg duration-300 text-white bg-deep-background grid grid-flow-col justify-stretch items-center"
 )]
 pub struct ButtonClass {
     pub roundness: Roundness,

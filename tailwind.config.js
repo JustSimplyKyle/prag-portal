@@ -48,6 +48,9 @@ module.exports = {
     'animate-slideOutDown',
     'animate-slideUp',
     'animate-slideOutUp',
+    'ease-gentle',
+    'ease-quick',
+    'ease-slow',
   ],
   theme: {
     fontFamily: {
@@ -72,12 +75,17 @@ module.exports = {
     },
     animationTiming: {
       'bounce': 'cubic-bezier(.08,.06,0,1.28)',
-      'linear': 'cubic-bezier(.17,.67,.14,1.02)'
+      'gentle': 'var(--gentle-easing)',
+      'slow': 'var(--slow-easing)',
+      'quick': 'var(--quick-easing)',
+      // 'linear': 'cubic-bezier(.17,.67,.14,1.02)'
     },
     extend: {
       transitionTimingFunction: {
         'bounce': 'theme(animationTiming.bounce)',
-        'linear': 'theme(animationTiming.linear)',
+        'gentle': 'theme(animationTiming.gentle)',
+        'slow': 'theme(animationTiming.slow)',
+        'quick': 'theme(animationTiming.quick)',
       },
       colors: {
         'white': '#FFFFFF',
@@ -100,31 +108,27 @@ module.exports = {
       animation: {
         slideRight: 'slideRight 500ms',
         slideLeft: 'slideLeft 500ms',
-        'scroll-left': 'scrollLeft 10000ms infinite ease-in-out',
-        slideDown: 'slideDown 1000ms ease-in-out',
-        slideOutDown: 'slideOutDown 1000ms ease-in-out',
-        slideUp: 'slideUp 1000ms ease-in-out',
-        slideOutUp: 'slideOutUp 1000ms ease-in-out',
+        'scroll-left': 'scrollLeft 10000ms infinite',
+        slideDown: 'slideDown 1000ms',
+        slideOutDown: 'slideOutDown 1000ms',
+        slideUp: 'slideUp 1000ms',
+        slideOutUp: 'slideOutUp 1000ms',
       },
       keyframes: {
         slideRight: {
           '0%': {
             transform: 'translateX(-100dvw)',
-            'animation-timing-function': 'theme(animationTiming.linear)',
           },
           '100%': {
             transform: 'translateX(0%)',
-            'animation-timing-function': 'theme(animationTiming.linear)'
           },
         },
         slideLeft: {
           '0%': {
             transform: 'translateX(100dvw)',
-            'animation-timing-function': 'theme(animationTiming.linear)'
           },
           '100%': {
             transform: 'translateX(0%)',
-            'animation-timing-function': 'theme(animationTiming.linear)'
           },
         },
         scrollLeft: {
@@ -141,73 +145,33 @@ module.exports = {
         slideDown: {
           '0%': {
             transform: 'translateY(-100dvh)',
-            'animation-timing-function': 'theme(animationTiming.linear)',
-          },
-          '50%': {
-            transform: 'translateY(3dvh)',
-            'animation-timing-function': 'theme(animationTiming.linear)',
-          },
-          '75%': {
-            transform: 'translateY(0%)',
-            'animation-timing-function': 'theme(animationTiming.linear)',
           },
           '100%': {
             transform: 'translateY(0%)',
-            'animation-timing-function': 'theme(animationTiming.linear)',
           },
         },
         slideOutDown: {
           '0%': {
             transform: 'translateY(0%)',
-            'animation-timing-function': 'theme(animationTiming.linear)',
-          },
-          '50%': {
-            transform: 'translateY(103dvh)',
-            'animation-timing-function': 'theme(animationTiming.linear)',
-          },
-          '75%': {
-            transform: 'translateY(100dvh)',
-            'animation-timing-function': 'theme(animationTiming.linear)',
           },
           '100%': {
             transform: 'translateY(100dvh)',
-            'animation-timing-function': 'theme(animationTiming.linear)',
           },
         },
         slideOutUp: {
           '0%': {
             transform: 'translateY(0%)',
-            'animation-timing-function': 'theme(animationTiming.linear)',
-          },
-          '50%': {
-            transform: 'translateY(-103dvh)',
-            'animation-timing-function': 'theme(animationTiming.linear)',
-          },
-          '75%': {
-            transform: 'translateY(-100dvh)',
-            'animation-timing-function': 'theme(animationTiming.linear)',
           },
           '100%': {
             transform: 'translateY(-100dvh)',
-            'animation-timing-function': 'theme(animationTiming.linear)',
           },
         },
         slideUp: {
           '0%': {
             transform: 'translateY(100dvh)',
-            'animation-timing-function': 'theme(animationTiming.linear)',
-          },
-          '50%': {
-            transform: 'translateY(-3dvh)',
-            'animation-timing-function': 'theme(animationTiming.linear)',
-          },
-          '75%': {
-            transform: 'translateY(0%)',
-            'animation-timing-function': 'theme(animationTiming.linear)',
           },
           '100%': {
             transform: 'translateY(0%)',
-            'animation-timing-function': 'theme(animationTiming.linear)',
           },
         },
       },

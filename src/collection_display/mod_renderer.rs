@@ -270,7 +270,7 @@ fn SubModViewer(
     let status = rsx!(Switch { clicked });
     rsx! {
         details::ModDetails {
-            mods: mods.cloned(),
+            mods,
             active: dialog,
             clicked,
             collection_id,

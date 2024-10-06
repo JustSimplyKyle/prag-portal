@@ -642,6 +642,23 @@ html {
   --bc: 74.6477% 0.0216 264.435964;
 }
 
+:root {
+  --slow-easing: linear(0, 0.00489 0.98%, 0.01969 2.04%, 0.08052 4.48%, 0.46927 15.162%,
+        0.56666 18.222%, 0.64971 21.252%, 0.72209 24.402%, 0.7836 27.683%,
+        0.83518 31.143%, 0.8779 34.853%, 0.91414 39.104%, 0.9424 43.814%,
+        0.96368 49.145%, 0.97899 55.356%, 0.9888 62.366%, 0.99496 71.127%, 0.99966);
+  --gentle-easing: linear(0, 0.00651 1.41%, 0.02602 2.91%, 0.05885 4.53%, 0.10605 6.321%,
+        0.20936 9.521%, 0.5577 19.292%, 0.65798 22.512%, 0.74244 25.623%,
+        0.81206 28.643%, 0.87034 31.703%, 0.91827 34.853%, 0.95674 38.154%,
+        0.98593 41.604%, 1.00701 45.315%, 1.02064 49.395%, 1.02739 54.025%,
+        1.02713 60.856%, 1.0069 83.198%, 1.00014);
+  --quick-easing: linear(0, 0.00768 0.88%, 0.03109 1.82%, 0.12697 3.92%, 0.67088 11.771%,
+        0.88117 15.492%, 0.95936 17.352%, 1.01976 19.232%, 1.06396 21.182%,
+        1.09261 23.232%, 1.10239 24.472%, 1.10755 25.783%, 1.10815 27.183%,
+        1.10421 28.713%, 1.08909 31.433%, 1.0383 38.064%, 1.01613 41.534%,
+        0.99923 45.445%, 0.99031 49.585%, 0.98869 55.346%, 1.00084 74.947%, 0.99995);
+}
+
 html {
   font-family: 'GenSenRounded TW';
 }
@@ -2081,10 +2098,6 @@ input {
   width: 900px;
 }
 
-.w-\[96\.66666px\] {
-  width: 96.66666px;
-}
-
 .w-auto {
   width: auto;
 }
@@ -2104,6 +2117,10 @@ input {
 
 .min-w-0 {
   min-width: 0px;
+}
+
+.min-w-\[100px\] {
+  min-width: 100px;
 }
 
 .min-w-\[140px\] {
@@ -2145,6 +2162,10 @@ input {
 
 .min-w-full {
   min-width: 100%;
+}
+
+.max-w-\[100px\] {
+  max-width: 100px;
 }
 
 .max-w-\[150px\] {
@@ -2217,38 +2238,24 @@ input {
 @keyframes slideDown {
   0% {
     transform: translateY(-100dvh);
-    animation-timing-function: cubic-bezier(.17,.67,.14,1.02);
-  }
-
-  50% {
-    transform: translateY(3dvh);
-    animation-timing-function: cubic-bezier(.17,.67,.14,1.02);
-  }
-
-  75% {
-    transform: translateY(0%);
-    animation-timing-function: cubic-bezier(.17,.67,.14,1.02);
   }
 
   100% {
     transform: translateY(0%);
-    animation-timing-function: cubic-bezier(.17,.67,.14,1.02);
   }
 }
 
 .animate-slideDown {
-  animation: slideDown 1000ms ease-in-out;
+  animation: slideDown 1000ms;
 }
 
 @keyframes slideLeft {
   0% {
     transform: translateX(100dvw);
-    animation-timing-function: cubic-bezier(.17,.67,.14,1.02);
   }
 
   100% {
     transform: translateX(0%);
-    animation-timing-function: cubic-bezier(.17,.67,.14,1.02);
   }
 }
 
@@ -2259,64 +2266,38 @@ input {
 @keyframes slideOutDown {
   0% {
     transform: translateY(0%);
-    animation-timing-function: cubic-bezier(.17,.67,.14,1.02);
-  }
-
-  50% {
-    transform: translateY(103dvh);
-    animation-timing-function: cubic-bezier(.17,.67,.14,1.02);
-  }
-
-  75% {
-    transform: translateY(100dvh);
-    animation-timing-function: cubic-bezier(.17,.67,.14,1.02);
   }
 
   100% {
     transform: translateY(100dvh);
-    animation-timing-function: cubic-bezier(.17,.67,.14,1.02);
   }
 }
 
 .animate-slideOutDown {
-  animation: slideOutDown 1000ms ease-in-out;
+  animation: slideOutDown 1000ms;
 }
 
 @keyframes slideOutUp {
   0% {
     transform: translateY(0%);
-    animation-timing-function: cubic-bezier(.17,.67,.14,1.02);
-  }
-
-  50% {
-    transform: translateY(-103dvh);
-    animation-timing-function: cubic-bezier(.17,.67,.14,1.02);
-  }
-
-  75% {
-    transform: translateY(-100dvh);
-    animation-timing-function: cubic-bezier(.17,.67,.14,1.02);
   }
 
   100% {
     transform: translateY(-100dvh);
-    animation-timing-function: cubic-bezier(.17,.67,.14,1.02);
   }
 }
 
 .animate-slideOutUp {
-  animation: slideOutUp 1000ms ease-in-out;
+  animation: slideOutUp 1000ms;
 }
 
 @keyframes slideRight {
   0% {
     transform: translateX(-100dvw);
-    animation-timing-function: cubic-bezier(.17,.67,.14,1.02);
   }
 
   100% {
     transform: translateX(0%);
-    animation-timing-function: cubic-bezier(.17,.67,.14,1.02);
   }
 }
 
@@ -2327,27 +2308,15 @@ input {
 @keyframes slideUp {
   0% {
     transform: translateY(100dvh);
-    animation-timing-function: cubic-bezier(.17,.67,.14,1.02);
-  }
-
-  50% {
-    transform: translateY(-3dvh);
-    animation-timing-function: cubic-bezier(.17,.67,.14,1.02);
-  }
-
-  75% {
-    transform: translateY(0%);
-    animation-timing-function: cubic-bezier(.17,.67,.14,1.02);
   }
 
   100% {
     transform: translateY(0%);
-    animation-timing-function: cubic-bezier(.17,.67,.14,1.02);
   }
 }
 
 .animate-slideUp {
-  animation: slideUp 1000ms ease-in-out;
+  animation: slideUp 1000ms;
 }
 
 .grid-flow-row {
@@ -3088,20 +3057,36 @@ input {
   transition-delay: 25ms;
 }
 
+.duration-200 {
+  transition-duration: 200ms;
+}
+
 .duration-300 {
   transition-duration: 300ms;
+}
+
+.duration-500 {
+  transition-duration: 500ms;
 }
 
 .duration-700 {
   transition-duration: 700ms;
 }
 
+.ease-gentle {
+  transition-timing-function: var(--gentle-easing);
+}
+
 .ease-in-out {
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.ease-linear {
-  transition-timing-function: cubic-bezier(.17,.67,.14,1.02);
+.ease-quick {
+  transition-timing-function: var(--quick-easing);
+}
+
+.ease-slow {
+  transition-timing-function: var(--slow-easing);
 }
 
 .font-display {
@@ -3401,7 +3386,7 @@ body {
 }
 
 .group:hover[aria-selected="true"] .group-hover\:group-aria-selected\:animate-scroll-left {
-  animation: scrollLeft 10000ms infinite ease-in-out;
+  animation: scrollLeft 10000ms infinite;
 }
 
 .group\/main[aria-selected=collections] .group-aria-\[selected\=collections\]\/main\:bg-green {
@@ -3637,8 +3622,8 @@ body {
   transition-duration: 150ms;
 }
 
-.\[\&_\*\]\:ease-linear * {
-  transition-timing-function: cubic-bezier(.17,.67,.14,1.02);
+.\[\&_\*\]\:ease-slow * {
+  transition-timing-function: var(--slow-easing);
 }
 
 .\[\&_\*\]\:font-english * {

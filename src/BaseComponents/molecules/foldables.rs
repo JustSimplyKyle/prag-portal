@@ -11,7 +11,7 @@ pub fn Foldable(mut enabled: Signal<bool>, title: Element, children: Element) ->
     rsx! {
         div {
             "data-enabled": enabled(),
-            class: "group flex flex-col h-fit overflow-y-clip ease-linear transition-all [&_*]:transition-all",
+            class: "group flex flex-col h-fit overflow-y-clip ease-slow duration-200 transition-all [&_*]:transition-all",
             onmounted: move |e| container_mounted.set(Some(e.data)),
             max_height: if enabled() {
                 "{container_size().unwrap_or_default().height}px"
