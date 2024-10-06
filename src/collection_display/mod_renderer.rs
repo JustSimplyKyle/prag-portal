@@ -1,7 +1,8 @@
+mod details;
+
 use std::ops::Deref;
 
 use dioxus::{prelude::*, CapturedError};
-use itertools::Itertools;
 use rust_lib::api::{
     backend_exclusive::mod_management::mods::{ModMetadata, Platform},
     shared_resources::collection::CollectionId,
@@ -14,11 +15,9 @@ use crate::{
     BaseComponents::{
         atoms::{
             button::{Button, FillMode, Roundness},
-            markdown_to_html,
             switch::Switch,
         },
         molecules::search_bar::fuzzy_search,
-        organisms::{markdown_renderer::RenderTranslatedMarkdown, modal::Modal},
         string_placements::ContentType,
     },
 };
@@ -270,7 +269,7 @@ fn SubModViewer(
     });
     let status = rsx!(Switch { clicked });
     rsx! {
-        ModDetails {
+        details::ModDetails {
             mods: mods.cloned(),
             active: dialog,
             clicked,
@@ -293,136 +292,6 @@ fn SubModViewer(
                 more,
                 status
             ]
-        }
-    }
-}
-
-#[component]
-fn ModDetails(
-    mods: ReadOnlySignal<ModMetadata>,
-    active: Signal<bool>,
-    clicked: Signal<bool>,
-    collection_id: ReadOnlySignal<CollectionId>,
-) -> Element {
-    use_active_controller(clicked, collection_id, mods);
-
-    let description = markdown_to_html(&mods.read().long_description);
-
-    if description.contains("Welcome to Create") {
-        println!("{description}");
-        println!("{}", mods.read().long_description);
-    }
-
-    let file_paths = mods
-        .read()
-        .get_filepaths()
-        .into_iter()
-        .flatten()
-        .map(|x| x.display().to_string())
-        .join("\n");
-
-    let file_size = use_resource(move || {
-        let mods = mods();
-        async move { mods.get_formatted_accumlated_size().await }
-    });
-
-    let size = file_size.as_ref().and_then(|x| x.as_ref().ok().cloned());
-
-    rsx! {
-        Modal {
-            active,
-            div {
-                class: "w-full flex justify-center",
-                div {
-                    flex_basis: "10%",
-                }
-                div {
-                    flex_basis: "80%",
-                    div {
-                        class: "flex flex-col w-full bg-background",
-                        box_shadow: "10px 10px 30px 0px rgba(0, 0, 0, 0.25)",
-                        div {
-                            class: "grid grid-flow-col items-center h-fit justify-stretch p-[20px] pr-[30px] rounded-t-[30px] gap-[25px]",
-                            div {
-                                class: "justify-self-start flex gap-[25px] grow",
-                                if let Some(path) = mods.read().get_icon_path() {
-                                    img {
-                                        class: "flex-0 size-[80px]",
-                                        src: path.to_string_lossy().to_string(),
-                                    }
-                                }
-                                div {
-                                    class: "grow flex flex-col justify-center gap-[15px]",
-                                    div {
-                                        class: "text-[30px] font-english font-bold trim",
-                                        {mods.read().name.clone()}
-                                    }
-                                    div {
-                                        class: "text-secondary-text text-[15px] font-medium font-english trim",
-                                        {file_paths}
-                                    }
-                                }
-                            }
-                            div {
-                                class: "justify-self-end",
-                                Switch {
-                                    class: "bg-deep-background",
-                                    clicked,
-                                }
-                            }
-                        }
-                        div {
-                            class: "flex items-center h-[50px] gap-[25px] px-[20px]",
-                            div {
-                                class: "flex w-fit justify-start gap-[7px] items-center",
-                                div {
-                                    class: "bg-white size-[20px]"
-                                }
-                                div {
-                                    class: "text-[15px] font-english font-medium text-hint trim",
-                                    {mods.read().authors.join(" ")},
-                                }
-                            }
-                            div {
-                                class: "flex w-fit justify-start gap-[7px] items-center",
-                                div {
-                                    class: "bg-white size-[20px]"
-                                }
-                                div {
-                                    class: "text-[15px] font-english font-medium text-hint trim",
-                                    {mods.read().get_formatted_download_count()},
-                                }
-                            }
-                            div {
-                                class: "flex w-fit justify-start gap-[7px] items-center",
-                                div {
-                                    class: "bg-white size-[20px]"
-                                }
-                                div {
-                                    class: "text-[15px] font-english font-medium text-hint trim",
-                                    {mods.read().last_updated.date_naive().format("%Y.%m.%d").to_string()},
-                                }
-                            }
-                            div {
-                                class: "flex w-fit justify-start gap-[7px] items-center",
-                                div {
-                                    class: "bg-white size-[20px]"
-                                }
-                                div {
-                                    class: "text-[15px] font-english font-medium text-hint trim",
-                                    {size.unwrap_or_default()},
-                                }
-                            }
-                        }
-                        RenderTranslatedMarkdown {
-                            html: description
-                        }
-                    }
-                }
-                div {
-                    flex_basis: "10%",
-                }
-            }
         }
     }
 }

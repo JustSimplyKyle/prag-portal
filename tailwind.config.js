@@ -95,6 +95,7 @@ module.exports = {
         'tinted-yellow': '#D3E950',
         'purple': '#9747FF',
         'orange': '#F16436',
+        'modrinth': '#1BD96A',
       },
       animation: {
         slideRight: 'slideRight 500ms',

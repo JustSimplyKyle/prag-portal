@@ -491,10 +491,18 @@ fn Explore() -> Element {
     rsx! {
         FloatingSwitch {
             lhs_width: 80.,
-            lhs: CURSEFORGE_OUTLINE("transition-all fill-background w-[40px] group-data-[selected=Right]:w-[30px] group-data-[selected=Right]:fill-secondary-surface"),
+            lhs: rsx! {
+                CURSEFORGE_OUTLINE {
+                    class: "transition-all fill-background w-[40px] group-data-[selected=Right]:w-[30px] group-data-[selected=Right]:fill-secondary-surface"
+                }
+            },
             lhs_css: "px-[20px] py-[10px]",
             rhs_width: 80.,
-            rhs: MODRINTH_OUTLINE("transition-all fill-background w-[35px] group-data-[selected=Left]:w-[30px] group-data-[selected=Left]:fill-secondary-surface"),
+            rhs: rsx! {
+                MODRINTH_OUTLINE {
+                    class: "transition-all fill-background w-[35px] group-data-[selected=Left]:w-[30px] group-data-[selected=Left]:fill-secondary-surface"
+                }
+            },
             rhs_css: "px-[20px] py-[10px]",
             floater: "bg-orange group-data-[selected=Right]:bg-green",
             class: "h-[80px]",

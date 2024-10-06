@@ -2045,6 +2045,10 @@ input {
   width: 300px;
 }
 
+.w-\[30px\] {
+  width: 30px;
+}
+
 .w-\[35px\] {
   width: 35px;
 }
@@ -2760,6 +2764,10 @@ input {
   fill: #191919;
 }
 
+.fill-deep-background {
+  fill: #0E0E0E;
+}
+
 .object-cover {
   -o-object-fit: cover;
      object-fit: cover;
@@ -3273,11 +3281,6 @@ body {
   z-index: 1000;
 }
 
-.\*\:translate-y-0 > * {
-  --tw-translate-y: 0px;
-  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
-}
-
 .\*\:justify-self-start > * {
   justify-self: start;
 }
@@ -3507,8 +3510,21 @@ body {
   background-color: rgb(205 227 71 / var(--tw-bg-opacity));
 }
 
+.group[data-selected=Right] .group-data-\[selected\=Right\]\:bg-modrinth {
+  --tw-bg-opacity: 1;
+  background-color: rgb(27 217 106 / var(--tw-bg-opacity));
+}
+
+.group[data-selected=Left] .group-data-\[selected\=Left\]\:fill-modrinth {
+  fill: #1BD96A;
+}
+
 .group[data-selected=Left] .group-data-\[selected\=Left\]\:fill-secondary-surface {
   fill: #2F2F2F;
+}
+
+.group[data-selected=Right] .group-data-\[selected\=Right\]\:fill-orange {
+  fill: #F16436;
 }
 
 .group[data-selected=Right] .group-data-\[selected\=Right\]\:fill-secondary-surface {

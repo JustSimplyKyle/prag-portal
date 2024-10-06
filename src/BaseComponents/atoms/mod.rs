@@ -1,4 +1,5 @@
 pub mod button;
+pub mod center;
 pub mod switch;
 
 #[must_use]
