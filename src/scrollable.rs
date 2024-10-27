@@ -1,4 +1,4 @@
-use dioxus::events::eval;
+use dioxus::document::eval;
 
 pub trait Scrollable: Sized + ToString {
     const GROUP_SELECTOR: &'static str;
@@ -82,15 +82,12 @@ pub trait Scrollable: Sized + ToString {
                     applyStyles(self, bottom, top, group);
                 ",
         );
-        eval.send(
-            vec![
-                vec![target],
-                vec![Self::GROUP_SELECTOR.to_owned()],
-                bottom,
-                top,
-            ]
-            .into(),
-        )
+        eval.send(vec![
+            vec![target],
+            vec![Self::GROUP_SELECTOR.to_owned()],
+            bottom,
+            top,
+        ])
         .map_err(|x| anyhow::anyhow!("{x:#?}"))
     }
 }

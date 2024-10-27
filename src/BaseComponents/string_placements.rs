@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{path::PathBuf, str::FromStr};
 
 use dioxus::{prelude::*, CapturedError};
 use dioxus_core::DynamicNode;
@@ -228,7 +228,7 @@ impl Content {
                         style: self.style,
                         background_size,
                         background_position: "center",
-                        background_image: format!("url(\'{}\')", x)
+                        background_image: format!("url(\'{}\')", x.display())
                     }
                 }
             }
@@ -253,10 +253,10 @@ impl Content {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum ContentType {
-    Svg(&'static str),
+    Svg(Asset),
     Text(String),
     Hint(String),
-    Image(String),
+    Image(PathBuf),
     Custom(Element),
 }
 
@@ -276,7 +276,7 @@ impl ContentType {
     /// assert_eq!(my_svg, Content::new(ContentType::Svg("my svg")));
     /// ```
     #[must_use]
-    pub fn svg(string: &'static str) -> Content {
+    pub fn svg(string: Asset) -> Content {
         let content_type = Self::Svg(string);
         let css = String::from("flex items-center");
         Content {
@@ -288,7 +288,7 @@ impl ContentType {
         }
     }
 
-    pub fn image(string: impl Into<String>) -> Content {
+    pub fn image(string: impl Into<PathBuf>) -> Content {
         let content_type = Self::Image(string.into());
         let css = String::new();
         Content {

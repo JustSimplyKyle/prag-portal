@@ -18,12 +18,13 @@ use dioxus::desktop::tao::dpi::PhysicalSize;
 use dioxus::desktop::WindowBuilder;
 use dioxus::html::input_data::MouseButton;
 use dioxus_logger::tracing::Level;
+use document::Link;
 use manganis::ImageAsset;
 use pages::Pages;
 use rand::seq::IteratorRandom;
 use scrollable::Scrollable;
 use snafu::ErrorCompat;
-use std::collections::BTreeMap;
+use std::{collections::BTreeMap, path::PathBuf};
 use svgs::{CREATE_COLLECTION, CURSEFORGE_OUTLINE, GRASS, MODRINTH_OUTLINE};
 use tailwind_fuse::*;
 use BaseComponents::{
@@ -40,38 +41,39 @@ use crate::download_progress::DownloadProgress;
 use crate::main_page::MainPage;
 use crate::side_bar::SideBar;
 
-const FIRST: ImageAsset = asset!(image("./public/first_collection_pic.png"));
-const SECOND: ImageAsset = asset!(image("./public/second_collection_pic.png"));
-const THIRD: ImageAsset = asset!(image("./public/third_collection_pic.png"));
-const FORTH: ImageAsset = asset!(image("./public/forth_collection_pic.png"));
-const FIFTH: ImageAsset = asset!(image("./public/fifth_collection_pic.png"));
+const FIRST: ImageAsset = asset!("./public/first_collection_pic.png").image();
+const SECOND: ImageAsset = asset!("./public/second_collection_pic.png").image();
+const THIRD: ImageAsset = asset!("./public/third_collection_pic.png").image();
+const FORTH: ImageAsset = asset!("./public/forth_collection_pic.png").image();
+const FIFTH: ImageAsset = asset!("./public/fifth_collection_pic.png").image();
 
-pub const COLLECTION_PICS: GlobalSignal<BTreeMap<&str, &str>> = GlobalSignal::new(|| {
+pub const COLLECTION_PICS: GlobalSignal<BTreeMap<&str, PathBuf>> = GlobalSignal::new(|| {
     BTreeMap::from([
-        ("a", FIRST.path()),
-        ("b", SECOND.path()),
-        ("c", THIRD.path()),
-        ("d", FORTH.path()),
-        ("e", FIFTH.path()),
+        ("a", FIRST.resolve()),
+        ("b", SECOND.resolve()),
+        ("c", THIRD.resolve()),
+        ("d", FORTH.resolve()),
+        ("e", FIFTH.resolve()),
     ])
 });
 
 #[allow(clippy::unwrap_used)]
-fn get_random_collection_picture() -> &'static str {
+fn get_random_collection_picture() -> PathBuf {
     COLLECTION_PICS
         .read()
         .values()
         .choose(&mut rand::thread_rng())
         .unwrap()
+        .clone()
 }
 
-pub const HOME: &str = asset!("./public/home.svg");
-pub const EXPLORE: &str = asset!("./public/explore.svg");
-pub const SIDEBAR_COLLECTION: &str = asset!("./public/collections.svg");
-pub const ARROW_RIGHT: &str = asset!("./public/keyboard_arrow_right.svg");
-pub const SIM_CARD: &str = asset!("./public/sim_card_download.svg");
-pub const DRAG_INDICATOR: &str = asset!("./public/drag_indicator.svg");
-pub const TAILWIND_STR: &str = asset!("./public/tailwind.css");
+pub const HOME: Asset = asset!("./public/home.svg");
+pub const EXPLORE: Asset = asset!("./public/explore.svg");
+pub const SIDEBAR_COLLECTION: Asset = asset!("./public/collections.svg");
+pub const ARROW_RIGHT: Asset = asset!("./public/keyboard_arrow_right.svg");
+pub const SIM_CARD: Asset = asset!("./public/sim_card_download.svg");
+pub const DRAG_INDICATOR: Asset = asset!("./public/drag_indicator.svg");
+pub const TAILWIND_STR: Asset = asset!("./public/tailwind.css");
 
 /// `(Pages)`: Current active page
 /// `Option<Pages>`: Previous page
@@ -182,7 +184,7 @@ fn main() {
 fn App() -> Element {
     let error_active = use_signal(|| true);
     rsx! {
-        head::Link {
+        Link {
             href: TAILWIND_STR,
             rel: "stylesheet",
         }

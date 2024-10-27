@@ -1,4 +1,5 @@
 use dioxus::prelude::*;
+use document::eval;
 
 #[component]
 pub fn Modal(active: Signal<bool>, children: Element) -> Element {

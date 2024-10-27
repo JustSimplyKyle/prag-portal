@@ -1,6 +1,6 @@
-pub const ADD: &str = manganis::mg!("./public/add.svg");
-pub const HALLWAY: &str = manganis::mg!("./public/hallway.svg");
-pub const PHOTO_LIBRARY: &str = manganis::mg!("./public/photo_library.svg");
+pub const ADD: Asset = manganis::asset!("./public/add.svg");
+pub const HALLWAY: Asset = manganis::asset!("./public/hallway.svg");
+pub const PHOTO_LIBRARY: Asset = manganis::asset!("./public/photo_library.svg");
 
 use std::path::PathBuf;
 
@@ -122,7 +122,7 @@ fn ModifyPicture(collection_id: ReadOnlySignal<CollectionId>) -> Element {
         COLLECTION_PICS
             .read()
             .iter()
-            .find(|(_, x)| **x == collection.read().picture_path().to_string_lossy())
+            .find(|(_, x)| *x == collection.read().picture_path())
             .map(|x| *x.0)
     });
 
@@ -203,35 +203,35 @@ fn ModifyPicture(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                                             active.set(Some("a"));
                                             change.set(true);
                                         },
-                                        {ContentType::image(COLLECTION_PICS.read()["a"].to_owned()).css("bg-cover w-10 h-10 rounded-full border-2 border-zinc-900 group-data-[active=a]:border-white group-data-[active=a]:w-20")}
+                                        {ContentType::image(COLLECTION_PICS.read()["a"].clone()).css("bg-cover w-10 h-10 rounded-full border-2 border-zinc-900 group-data-[active=a]:border-white group-data-[active=a]:w-20")}
                                     }
                                     button {
                                         onclick: move |_| {
                                             active.set(Some("b"));
                                             change.set(true);
                                         },
-                                        {ContentType::image(COLLECTION_PICS.read()["b"].to_owned()).css("bg-cover w-10 h-10 rounded-full border-2 border-zinc-900 group-data-[active=b]:border-white group-data-[active=b]:w-20")}
+                                        {ContentType::image(COLLECTION_PICS.read()["b"].clone()).css("bg-cover w-10 h-10 rounded-full border-2 border-zinc-900 group-data-[active=b]:border-white group-data-[active=b]:w-20")}
                                     }
                                     button {
                                         onclick: move |_| {
                                             active.set(Some("c"));
                                             change.set(true);
                                         },
-                                        {ContentType::image(COLLECTION_PICS.read()["c"].to_owned()).css("bg-cover w-10 h-10 rounded-full border-2 border-zinc-900 group-data-[active=c]:border-white group-data-[active=c]:w-20")}
+                                        {ContentType::image(COLLECTION_PICS.read()["c"].clone()).css("bg-cover w-10 h-10 rounded-full border-2 border-zinc-900 group-data-[active=c]:border-white group-data-[active=c]:w-20")}
                                     }
                                     button {
                                         onclick: move |_| {
                                             active.set(Some("d"));
                                             change.set(true);
                                         },
-                                        {ContentType::image(COLLECTION_PICS.read()["d"].to_owned()).css("bg-cover w-10 h-10 rounded-full border-2 border-zinc-900 group-data-[active=d]:border-white group-data-[active=d]:w-20")}
+                                        {ContentType::image(COLLECTION_PICS.read()["d"].clone()).css("bg-cover w-10 h-10 rounded-full border-2 border-zinc-900 group-data-[active=d]:border-white group-data-[active=d]:w-20")}
                                     }
                                     button {
                                         onclick: move |_| {
                                             active.set(Some("e"));
                                             change.set(true);
                                         },
-                                        {ContentType::image(COLLECTION_PICS.read()["e"].to_owned()).css("bg-cover w-10 h-10 rounded-full border-2 border-zinc-900 group-data-[active=e]:border-white group-data-[active=e]:w-20")}
+                                        {ContentType::image(COLLECTION_PICS.read()["e"].clone()).css("bg-cover w-10 h-10 rounded-full border-2 border-zinc-900 group-data-[active=e]:border-white group-data-[active=e]:w-20")}
                                     }
                                 }
                             }).align_right()

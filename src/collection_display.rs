@@ -24,20 +24,20 @@ use crate::{
     },
 };
 
-pub static DISPLAY_BACKGROUND: ImageAsset = asset!(image("./public/cool_image.png"));
+pub static DISPLAY_BACKGROUND: ImageAsset = asset!("./public/cool_image.png").image();
 
-pub static GAME_CONTROLLER: &str = asset!("./public/stadia_controller.svg");
-pub static UNARCHIVE: &str = asset!("./public/unarchive.svg");
-pub static CUBE: &str = asset!("./public/deployed_code.svg");
-pub static GLOBAL_ASIA: &str = asset!("./public/globe_asia.svg");
-pub static CIRCLE_JOIN: &str = asset!("./public/join.svg");
-pub static MOTION_MODE: &str = asset!("./public/motion_mode.svg");
-pub static DELETE: &str = asset!("./public/delete.svg");
-pub static UNDO: &str = asset!("./public/undo.svg");
-pub static HORIZ: &str = asset!("./public/more_horiz.svg");
-pub static BRIGHT_LEFT_ARROW: &str = asset!("./public/bright_left_arrow.svg");
-pub static MODRINTH: &str = asset!("./public/modrinth.svg");
-pub static CURSEFORGE: &str = asset!("./public/curseforge.svg");
+pub static GAME_CONTROLLER: Asset = asset!("./public/stadia_controller.svg");
+pub static UNARCHIVE: Asset = asset!("./public/unarchive.svg");
+pub static CUBE: Asset = asset!("./public/deployed_code.svg");
+pub static GLOBAL_ASIA: Asset = asset!("./public/globe_asia.svg");
+pub static CIRCLE_JOIN: Asset = asset!("./public/join.svg");
+pub static MOTION_MODE: Asset = asset!("./public/motion_mode.svg");
+pub static DELETE: Asset = asset!("./public/delete.svg");
+pub static UNDO: Asset = asset!("./public/undo.svg");
+pub static HORIZ: Asset = asset!("./public/more_horiz.svg");
+pub static BRIGHT_LEFT_ARROW: Asset = asset!("./public/bright_left_arrow.svg");
+pub static MODRINTH: Asset = asset!("./public/modrinth.svg");
+pub static CURSEFORGE: Asset = asset!("./public/curseforge.svg");
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, EnumIter)]
 pub(crate) enum CollectionDisplayTopSelection {
