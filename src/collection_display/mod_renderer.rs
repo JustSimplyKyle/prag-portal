@@ -74,11 +74,11 @@ pub fn ModViewer(
     search: ReadOnlySignal<String>,
     default: String,
 ) -> Element {
+    let radio = collection_id().use_collection_radio();
     let mods = use_memo(move || {
         let value = default.clone();
-        let collection = collection_id().get_collection();
-        let binding = collection.read();
-        let mods = binding
+        let collection = radio.read();
+        let mods = collection
             .mod_controller()
             .into_iter()
             .flat_map(move |x| x.manager.mods.clone().into_iter());
@@ -157,14 +157,15 @@ fn use_active_controller(
     collection_id: ReadOnlySignal<CollectionId>,
     mods: ReadOnlySignal<ModMetadata>,
 ) {
+    let read_radio = collection_id().use_collection_radio();
+    let mut write_radio = collection_id().use_collection_radio();
     let mut error_handler = use_error_handler();
     let _ = use_resource(move || {
         let clicked = clicked();
-        let id = collection_id();
-        let collection = id.get_collection();
         async move {
             let binding = || async move {
-                let Some(mut controller) = collection.peek().mod_controller.clone() else {
+                let collection = read_radio.read();
+                let Some(mut controller) = collection.mod_controller.clone() else {
                     return Ok(());
                 };
                 let manager = &mut controller.manager;
@@ -181,8 +182,8 @@ fn use_active_controller(
                     modify.disable().await?;
                 }
 
-                if collection.peek().mod_controller() != Some(&controller) {
-                    id.with_mut_collection(|x| x.mod_controller = Some(controller))?;
+                if collection.mod_controller() != Some(&controller) {
+                    write_radio.with_mut(|x| x.mod_controller = Some(controller))?;
                 }
                 Ok(())
             };

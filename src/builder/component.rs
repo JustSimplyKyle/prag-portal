@@ -1,20 +1,23 @@
 use std::path::PathBuf;
 
 use dioxus::prelude::*;
-use rust_lib::api::backend_exclusive::{
-    errors::ManifestProcessingError, vanilla::version::VersionMetadata,
+use rust_lib::api::{
+    backend_exclusive::{errors::ManifestProcessingError, vanilla::version::VersionMetadata},
+    shared_resources::collection::AdvancedOptions,
 };
 
 use crate::{
     get_random_collection_picture,
     svgs::{
-        self, ARROW_DOWN, CLOSE_CROSS, CREATE_COLLECTION, FOLDER_UPLOAD, SHADOW_ADD, UPLOAD_FILE,
+        self, ARROW_DOWN, CLOSE_CROSS, CREATE_COLLECTION, FOLDER_UPLOAD, LINE, SHADOW_ADD,
+        UPLOAD_FILE,
     },
     BaseComponents::{
         atoms::{
             center::Center,
             switch::{self, FloatingSwitch},
         },
+        molecules::foldables::Foldable,
         organisms::modal::Modal,
     },
     ErrorFormatted, ToRenderError,
@@ -187,7 +190,7 @@ pub fn GameVersion(
                 div {
                     class: "bg-background min-w-[220px] max-w-[220px] grid grid-flow-col justify-stretch items-center gap-[10px] pl-[20px] pr-[15px] rounded-[20px]",
                     div {
-                        class: "justify-self-start grow w-full font-display text-[18px] inline-flex items-center font-normal text-secondary trim",
+                        class: "justify-self-start grow w-full font-display text-[18px] font-normal text-secondary",
                         "顯示快照版本"
                     }
                     CLOSE_CROSS {
@@ -200,10 +203,41 @@ pub fn GameVersion(
 }
 
 #[component]
+pub fn AdvancedOption() -> Element {
+    let enabled = use_signal(|| false);
+    rsx! {
+        Foldable {
+            enabled,
+            title: rsx! {
+                div {
+                    class: "w-full flex items-center gap-[15px]",
+                    div {
+                        class: "text-[18px] font-normal min-w-fit text-white group-data-[enabled=false]:text-hint",
+                        "進階選項"
+                    }
+                    LINE {
+                        class: "w-full grow [&_*]:stroke-background group-data-[enabled=true]:[&_*]:stroke-secondary-surface",
+                        stroke_width: "3px",
+                    }
+                    div {
+                        class: "w-fit grow-0",
+                        "進"
+                    }
+                }
+            },
+            div {
+                class: "h-[100px] w-[100px]",
+                "arst"
+            }
+        }
+    }
+}
+
+#[component]
 pub fn BuildCollection(active: Signal<bool>) -> Element {
     let title = use_signal(|| None);
-    let cover_img = use_signal(|| get_random_collection_picture().into());
-    let background_img = use_signal(|| get_random_collection_picture().into());
+    let cover_img = use_signal(get_random_collection_picture);
+    let background_img = use_signal(get_random_collection_picture);
 
     let selected_version = use_resource(VersionMetadata::latest_release);
 
@@ -211,10 +245,11 @@ pub fn BuildCollection(active: Signal<bool>) -> Element {
         Modal {
             active,
             div {
-                class: "flex min-w-[700px] w-full border-2 border-surface rounded-[20px]",
-                box_shadow: "10px 10px 30px 0px rgba(0, 0, 0, 0.25)",
+                class: "flex min-w-[700px] w-full",
                 Center {
-                    class: "flex flex-col",
+                    percentage_center_bias: 80.,
+                    class: "flex flex-col border-2 border-surface rounded-[20px]",
+                    box_shadow: "10px 10px 30px 0px rgba(0, 0, 0, 0.25)",
                     Header {}
                     div {
                         class: "flex flex-col bg-deep-background p-[30px] gap-[35px]",
@@ -226,9 +261,7 @@ pub fn BuildCollection(active: Signal<bool>) -> Element {
                         GameVersion {
                             selected_version,
                         }
-                        Title {
-                            title: "合集名稱"
-                        }
+                        AdvancedOption {}
                     }
                 }
             }

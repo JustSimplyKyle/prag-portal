@@ -78,7 +78,6 @@ module.exports = {
       'gentle': 'var(--gentle-easing)',
       'slow': 'var(--slow-easing)',
       'quick': 'var(--quick-easing)',
-      // 'linear': 'cubic-bezier(.17,.67,.14,1.02)'
     },
     extend: {
       transitionTimingFunction: {

@@ -5,6 +5,7 @@ pub const PHOTO_LIBRARY: Asset = manganis::asset!("./public/photo_library.svg");
 use std::path::PathBuf;
 
 use dioxus::prelude::*;
+use dioxus_logger::tracing::{info, warn};
 use rust_lib::api::shared_resources::collection::CollectionId;
 use tailwind_fuse::tw_merge;
 
@@ -87,10 +88,12 @@ pub fn CollectionNameEdit(
     let input = use_signal(|| None);
     let mut input = custom_input.unwrap_or(input);
     let mut error_handler = use_error_handler();
+    let radio = collection_id().use_collection_radio();
+    let mut write_radio = collection_id().use_collection_radio();
     use_effect(move || {
         if let Some(x) = input() {
-            let err = collection_id()
-                .with_mut_collection(|ele| {
+            let err = write_radio
+                .with_mut(|ele| {
                     ele.display_name = x;
                 })
                 .map_err(Into::into);
@@ -108,7 +111,7 @@ pub fn CollectionNameEdit(
                 input.set(Some(x.value()));
             },
             value: {
-                input().map_or_else(|| collection_id().get_collection().read().display_name().clone(), |x| x)
+                input().map_or_else(|| radio.read().display_name().clone(), |x| x)
             },
         }
     }
@@ -117,12 +120,12 @@ pub fn CollectionNameEdit(
 #[component]
 fn ModifyPicture(collection_id: ReadOnlySignal<CollectionId>) -> Element {
     let mut change = use_signal(|| false);
-    let collection = collection_id().get_collection();
+    let mut radio = collection_id().use_collection_radio();
     let mut active = use_signal(|| {
         COLLECTION_PICS
             .read()
             .iter()
-            .find(|(_, x)| *x == collection.read().picture_path())
+            .find(|(_, x)| *x == radio.read().picture_path())
             .map(|x| *x.0)
     });
 
@@ -130,10 +133,11 @@ fn ModifyPicture(collection_id: ReadOnlySignal<CollectionId>) -> Element {
 
     use_effect(move || {
         let mut binding = || {
-            if *change.peek() {
-                if let Some(x) = active() {
-                    let path = PathBuf::from(COLLECTION_PICS.read()[x].to_owned());
-                    collection_id().with_mut_collection(|x| x.picture_path = path)?;
+            if let Some(x) = active() {
+                if *change.peek() {
+                    let path = COLLECTION_PICS.read()[x].clone();
+                    println!("Changes picture to {path:#?}");
+                    radio.with_mut(|x| x.picture_path = path)?;
                     change.set(false);
                 }
             }
@@ -147,7 +151,7 @@ fn ModifyPicture(collection_id: ReadOnlySignal<CollectionId>) -> Element {
             if let Some(x) = filename() {
                 if !x.is_empty() {
                     let path = PathBuf::from(x);
-                    collection_id().with_mut_collection(|x| x.picture_path = path)?;
+                    radio.with_mut(|x| x.picture_path = path)?;
                 }
             }
             Ok::<(), anyhow::Error>(())
@@ -274,7 +278,7 @@ fn ModifyPicture(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                         ]
                     }
                 }
-                {ContentType::image(collection().picture_path().to_string_lossy().to_string()).css("flex-initial bg-cover min-w-[163px] min-h-[163px] max-w-[163px] max-h-[163px] p-[15px] rounded-[5px]")}
+                {ContentType::image(radio.read().picture_path().to_string_lossy().to_string()).css("flex-initial bg-cover min-w-[163px] min-h-[163px] max-w-[163px] max-h-[163px] p-[15px] rounded-[5px]")}
             }
         }
     }

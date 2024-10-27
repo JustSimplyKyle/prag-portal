@@ -83,11 +83,11 @@ fn Footer(
     search: Signal<String>,
     default: String,
 ) -> Element {
-    let collection = collection_id().get_collection();
-    let len = collection.with(|x| {
-        x.mod_controller()
-            .map(|x| x.manager.mods.iter().filter(|x| x.enabled).count())
-    });
+    let mut radio = collection_id().use_collection_radio();
+    let len = radio
+        .read()
+        .mod_controller()
+        .map(|x| x.manager.mods.iter().filter(|x| x.enabled).count());
     let mut error_handler = use_error_handler();
     let logs = use_signal_sync(LoggerEvent::default);
     use_effect(move || {
@@ -118,10 +118,10 @@ fn Footer(
 
     let launch_game = move || {
         spawn(async move {
-            let mut collection = collection_id().get_collection()();
+            let mut collection = radio.read_owned();
             let err = move || async move {
                 collection.launch_game(logs).await?;
-                collection_id().replace(collection)?;
+                radio.replace(collection)?;
                 Ok(())
             };
             if let Err(err) = err().await {
@@ -198,8 +198,8 @@ fn Footer(
 
 #[component]
 fn Content(collection_id: ReadOnlySignal<CollectionId>) -> Element {
-    let collection = collection_id().get_collection();
-    let mod_loader = CopyValue::new(collection.read().mod_loader().map(ToString::to_string));
+    let radio = collection_id().use_collection_radio();
+    let mod_loader = CopyValue::new(radio.read().mod_loader().map(ToString::to_string));
     rsx! {
         div {
             class: "rounded-[30px] w-full h-full p-[40px] grid grid-flow-col justify-stretch items-end",
@@ -214,11 +214,11 @@ fn Content(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                     class: "flex flex-col gap-[25px]",
                     div {
                         class: "text-[80px] font-black text-white trim",
-                        {collection.read().display_name().clone()}
+                        {radio.read().display_name().clone()}
                     }
                     div {
                         class: "text-white text-[25px] font-english [&_*]:font-english font-bold leading-[1.2] capsize",
-                        "Minecraft {collection.read().minecraft_version().id}"
+                        "Minecraft {radio.read().minecraft_version().id}"
                     }
                 }
                 div {
@@ -266,7 +266,7 @@ fn Content(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                 class: "max-xl:hidden justify-self-end flex h-fit",
                 img {
                     class: "rounded-l-[30px] shadow size-[280px] object-cover",
-                    src: collection.read().picture_path().to_string_lossy().to_string()
+                    src: radio.read().picture_path().to_string_lossy().to_string()
                 }
                 div {
                     class: "rounded-r-[30px] grid grid-flow-row justify-center items-stretch bg-deep-background pt-[25px] pb-[25px] gap-[15px]",

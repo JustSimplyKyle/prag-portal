@@ -15,7 +15,7 @@ use strum::EnumIter;
 
 #[component]
 fn ListItem(collection_id: ReadOnlySignal<CollectionId>, progress: Progress) -> Element {
-    let collection = collection_id().get_collection();
+    let radio = collection_id().use_collection_radio();
     rsx! {
         Button {
             roundness: Roundness::Pill,
@@ -24,10 +24,10 @@ fn ListItem(collection_id: ReadOnlySignal<CollectionId>, progress: Progress) -> 
                     {ContentType::svg(DRAG_INDICATOR).css("self-center svg-[30px]")}
                     div { class: "w-full flex gap-[20px]",
                         Image { css: "bg-cover bg-white w-[80px] h-[80px] rounded-[10px]",
-                            {collection.read().picture_path().to_string_lossy().to_string()}
+                            {radio.read().picture_path().to_string_lossy().to_string()}
                         }
                         div { class: "w-full flex flex-col justify-start gap-[10px]",
-                            div { class: "text-[25px] fond-bold trim", {collection.read().display_name().clone()} }
+                            div { class: "text-[25px] fond-bold trim", {radio.read().display_name().clone()} }
                             div { class: "flex gap-[4px]",
                                 div { class: "text-base font-semibold text-hint trim",
                                     {format!("{} / {} |", progress.current_size.unwrap_or_default().display_size_from_megabytes(), progress.total_size.unwrap_or_default().display_size_from_megabytes())}
@@ -56,13 +56,13 @@ fn ListItem(collection_id: ReadOnlySignal<CollectionId>, progress: Progress) -> 
 
 #[component]
 fn FirstProgressView(collection_id: ReadOnlySignal<CollectionId>, progress: Progress) -> Element {
-    let collection = collection_id().get_collection();
+    let radio = collection_id().use_collection_radio();
     rsx! {
         div {
             class: "w-full h-[350px] p-[30px] rounded-[20px]",
             background: format!(
                 "linear-gradient(88deg, #0E0E0E 14.88%, rgba(14, 14, 14, 0.70) 100%), url('{}') lightgray 50% / cover no-repeat",
-                collection.read().picture_path().to_string_lossy().to_string(),
+                radio.read().picture_path().to_string_lossy().to_string(),
             ),
             div {
                 class: "w-full grid grid-flow-col",
@@ -70,7 +70,7 @@ fn FirstProgressView(collection_id: ReadOnlySignal<CollectionId>, progress: Prog
                     class: "justify-self-start flex flex-col gap-[20px]",
                     div {
                         class: "text-[60px] font-black text-white trim",
-                        {collection.read().display_name().clone()}
+                        {radio.read().display_name().clone()}
                     }
                     div {
                         class: "font-medium text-hint trim",

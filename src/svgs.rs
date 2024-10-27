@@ -72,3 +72,12 @@ pub fn ARROW_DOWN(
          svg { height: "30", xmlns: "http://www.w3.org/2000/svg", "viewBox": "0 0 30 30", width: "30", fill: "none", ..attributes, mask { height: "30", x: "0", style: "mask-type:alpha", "maskUnits": "userSpaceOnUse", y: "0", width: "30", id: "mask0_3518_51746", rect { fill: "#D9D9D9", width: "30", height: "30" } } g { mask: "url(#mask0_3518_51746)", path { d: "M14.3484 17.4619L9.87305 12.9691C9.80367 12.8995 9.75378 12.8268 9.72336 12.7509C9.69294 12.6753 9.67773 12.5994 9.67773 12.5231C9.67773 12.3704 9.73523 12.2321 9.85023 12.1081C9.96503 11.984 10.1145 11.9219 10.2987 11.9219H19.6962C19.8835 11.9219 20.0348 11.985 20.1502 12.1112C20.2656 12.2373 20.3234 12.3811 20.3234 12.5428C20.3234 12.5632 20.2573 12.7057 20.1252 12.9703L15.6527 17.4619C15.5698 17.5448 15.4675 17.6096 15.3459 17.6562C15.2244 17.7029 15.1093 17.7262 15.0005 17.7262C14.8918 17.7262 14.7767 17.7029 14.6552 17.6562C14.5336 17.6096 14.4313 17.5448 14.3484 17.4619Z", fill: "#4F4F4F", } } }
     }
 }
+
+#[component]
+pub fn LINE(
+    #[props(extends = GlobalAttributes, extends = svg)] mut attributes: Vec<Attribute>,
+) -> Element {
+    rsx! {
+         svg { xmlns: "http://www.w3.org/2000/svg", width: "477", "viewBox": "0 0 477 4", height: "4", fill: "none", ..attributes, path { stroke: "#2F2F2F", "stroke-width": "3", d: "M2 2L475 2", "stroke-linecap": "round", "stroke-dasharray": "10 10", } }
+    }
+}

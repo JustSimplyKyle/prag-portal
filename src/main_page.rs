@@ -5,7 +5,10 @@ use dioxus_logger::tracing::info;
 use manganis::ImageAsset;
 use rust_lib::api::{
     backend_exclusive::vanilla::launcher::LoggerEvent,
-    shared_resources::{collection::CollectionId, entry::STORAGE},
+    shared_resources::{
+        collection::{use_collections_radio, CollectionId},
+        entry::STORAGE,
+    },
 };
 use tailwind_fuse::*;
 
@@ -90,12 +93,9 @@ pub fn CollectionBlock(
     #[props(default)] z_index: String,
     #[props(default)] extended_class: String,
 ) -> Element {
-    let collection = collection_id().get_collection();
-    let picture_path = collection
-        .read()
-        .picture_path()
-        .to_string_lossy()
-        .to_string();
+    let radio = collection_id().use_collection_radio();
+    let mut write_radio = collection_id().use_collection_radio();
+    let picture_path = radio.read().picture_path().to_string_lossy().to_string();
     let (mut onmounted, status, style) = use_text_scroller();
     let class = tw_merge!("size-[280px] max-w-[280px] min-w-[280px]", extended_class);
     let class = if fat {
@@ -118,7 +118,6 @@ pub fn CollectionBlock(
     use_effect(move || {
         info!("{}", log.read());
     });
-
     rsx! {
         button {
             class,
@@ -150,10 +149,10 @@ pub fn CollectionBlock(
                             },
                             onclick: move |x| async move {
                                 x.stop_propagation();
-                                let mut collection = collection_id().get_collection()();
+                                let mut collection = radio.read_owned();
                                 let binding = async move {
                                     collection.launch_game(log).await?;
-                                    collection_id().replace(collection)?;
+                                    write_radio.replace(collection)?;
                                     Ok(())
                                 };
                                 if let Err(err) = binding.await {
@@ -191,7 +190,7 @@ pub fn CollectionBlock(
                         onmounted: move |x| {
                             onmounted.set(Some(x));
                         },
-                        {collection.read().display_name().clone()}
+                        {radio.read().display_name().clone()}
                     }
                     div {
                         class: "text-[15px] text-hint text-ellipsis text-nowrap trim",
@@ -396,6 +395,9 @@ fn SuggestionPage() -> Element {
 
 #[component]
 fn CollectionsPage() -> Element {
+    let radio = use_collections_radio();
+    let read = radio.read();
+    let keys = read.0.keys();
     rsx! {
         div {
             class: "flex flex-col space-x-0 overflow-y-visible",
@@ -427,7 +429,7 @@ fn CollectionsPage() -> Element {
                 class: ButtonClass::builder().roundness(Roundness::Bottom).with_class("flex-0 w-full p-0 overflow-y-visible"),
                 div {
                     class: "flex space-x-[3px] overflow-x-scroll overflow-y-visible",
-                    for collection_id in STORAGE.collections.read().keys().cloned() {
+                    for collection_id in keys.cloned() {
                         CollectionBlock {
                             collection_id
                         }

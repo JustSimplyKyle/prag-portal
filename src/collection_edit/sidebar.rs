@@ -98,7 +98,7 @@ pub fn EditSidebar(collection_id: ReadOnlySignal<CollectionId>) -> Element {
 #[component]
 fn EditSidebarInfographic(collection_id: ReadOnlySignal<CollectionId>) -> Element {
     let (onmounted, status, style) = use_text_scroller();
-    let collection = collection_id().get_collection();
+    let radio = collection_id().use_collection_radio();
     rsx! {
         div {
             class: "group flex flex-col w-full",
@@ -110,7 +110,7 @@ fn EditSidebarInfographic(collection_id: ReadOnlySignal<CollectionId>) -> Elemen
                     DISPLAY_BACKGROUND,
                 ),
                 {
-                    ContentType::image(collection.read().picture_path().to_string_lossy().to_string()).css("w-[100px] h-[100px] bg-cover rounded-t-[50px] rounded-bl-[15px] rounded-br-[50px] p-[5px]")
+                    ContentType::image(radio.read().picture_path().to_string_lossy().to_string()).css("w-[100px] h-[100px] bg-cover rounded-t-[50px] rounded-bl-[15px] rounded-br-[50px] p-[5px]")
                 }
             }
             Button {
@@ -120,7 +120,7 @@ fn EditSidebarInfographic(collection_id: ReadOnlySignal<CollectionId>) -> Elemen
                 string_placements: vec![
                     Contents::new(
                             vec![
-                                ContentType::text(collection.read().display_name())
+                                ContentType::text(radio.read().display_name())
                                     .onmounted(onmounted)
                                     .style(style())
                                     .css("text-3xl font-black w-full group-hover:group-aria-selected:animate-scroll-left overflow-x-clip text-nowrap"),

@@ -149,10 +149,10 @@ fn InnerModDetails(
 
     let description = markdown_to_html(&mods.read().long_description);
 
-    if description.contains("Welcome to Create") {
-        println!("{description}");
-        println!("{}", mods.read().long_description);
-    }
+    // if description.contains("Welcome to Create") {
+    //     println!("{description}");
+    //     println!("{}", mods.read().long_description);
+    // }
 
     let file_paths = mods
         .read()

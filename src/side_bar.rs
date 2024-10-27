@@ -1,5 +1,8 @@
 use dioxus::prelude::*;
-use rust_lib::api::shared_resources::{collection::CollectionId, entry::STORAGE};
+use rust_lib::api::shared_resources::{
+    collection::{use_collections_radio, CollectionId},
+    entry::STORAGE,
+};
 
 use crate::{
     text_scroller::use_text_scroller,
@@ -13,9 +16,10 @@ use crate::{
 
 #[component]
 pub fn SideBar() -> Element {
-    let binding = STORAGE.collections.read();
+    let radio = use_collections_radio();
+    let binding = radio.read();
 
-    let collection_preview = binding.values().take(3);
+    let collection_preview = binding.0.values().take(3);
 
     let folded_images = rsx! {
         div {
@@ -31,7 +35,7 @@ pub fn SideBar() -> Element {
                             div {
                                 Image {
                                     css: "z-50 w-10 h-10 object-cover shrink-0 inline-flex justify-center items-center rounded-full border-2 border-zinc-900 group-aria-expanded:hidden",
-                                    {x.read().picture_path().to_string_lossy().to_string()}
+                                    {x.picture_path().to_string_lossy().to_string()}
                                 }
                             }
                         }
@@ -168,7 +172,7 @@ pub fn SideBar() -> Element {
                         string_placements: folded_images,
                         extended_css_class: "bg-background"
                     }
-                    for collection_id in STORAGE.collections.read().keys().cloned() {
+                    for collection_id in binding.0.keys().cloned() {
                         SidebarCollectionBlock {
                             collection_id
                         }
@@ -211,13 +215,10 @@ pub fn SideBar() -> Element {
 
 #[component]
 fn SidebarCollectionBlock(collection_id: ReadOnlySignal<CollectionId>) -> Element {
-    let collection = collection_id().get_collection();
-    let picture_path = collection
-        .read()
-        .picture_path()
-        .to_string_lossy()
-        .to_string();
-    let display_name = collection.read().display_name().clone();
+    let radio = collection_id().use_collection_radio();
+
+    let picture_path = radio.read().picture_path().to_string_lossy().to_string();
+    let display_name = radio.read().display_name().clone();
     let img_block = rsx! {
         div {
             class: "relative transition-all container w-[50px] h-[50px] group-aria-expanded:w-20 group-aria-expanded:h-20 border-2 border-[#2E2E2E] rounded-[15px] group-aria-expanded:rounded-[5px]",

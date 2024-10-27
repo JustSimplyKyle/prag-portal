@@ -6,7 +6,7 @@ use dioxus_logger::tracing::info;
 use rust_lib::api::{
     backend_exclusive::{errors::ManifestProcessingError, vanilla::version::VersionMetadata},
     shared_resources::{
-        collection::{CollectionError, ModLoader, ModLoaderType},
+        collection::{CollectionError, CollectionId, CollectionsRadio, ModLoader, ModLoaderType},
         entry,
     },
 };
@@ -39,41 +39,24 @@ pub enum CollectionBuilderError {
 pub async fn collection_builder(
     picture_path: impl Into<Option<PathBuf>> + Send,
     version_id: impl Into<String> + Send,
-) -> Result<(), CollectionBuilderError> {
+    collections_radio: CollectionsRadio,
+) -> Result<CollectionId, CollectionBuilderError> {
     let version_id = version_id.into();
     let version = VersionMetadata::from_id(&version_id)
         .await
         .context(VersionIdParsingSnafu { id: &version_id })?
         .context(InvalidVersionIdSnafu { id: &version_id })?;
 
-    let mut collection = entry::create_collection(
+    let id = entry::create_collection(
         "新的收藏",
         picture_path
             .into()
-            .unwrap_or_else(|| get_random_collection_picture().into()),
+            .unwrap_or_else(get_random_collection_picture),
         version,
         ModLoader::new(ModLoaderType::Fabric, None),
         None,
+        collections_radio,
     )
     .await?;
-    info!("Adding mods...");
-    collection
-        .add_multiple_modrinth_mod(
-            vec![
-                "fabric-api",
-                "sodium",
-                "modmenu",
-                "ferrite-core",
-                "lazydfu",
-                "create-fabric",
-                "iris",
-                "indium",
-            ],
-            vec![],
-            None,
-        )
-        .await?;
-    collection.download_mods().await?;
-    info!("Finished downloading mods");
-    Ok(())
+    Ok(id)
 }

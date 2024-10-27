@@ -15,7 +15,7 @@ use crate::{
     },
 };
 use dioxus::prelude::*;
-use rust_lib::api::shared_resources::entry::STORAGE;
+use rust_lib::api::shared_resources::{collection::use_collections_radio, entry::STORAGE};
 
 pub static NOTE: Asset = manganis::asset!("./public/note_stack_add.svg");
 pub static CROP_FREE: Asset = manganis::asset!("./public/crop_free.svg");
@@ -117,8 +117,9 @@ pub fn CollectionContext(#[props(default)] class: String) -> Element {
 pub fn Collections() -> Element {
     use crate::BaseComponents::atoms::switch::State;
 
-    let read = STORAGE.collections.read();
-    let keys = read.keys();
+    let radio = use_collections_radio();
+    let read = radio.read();
+    let keys = read.0.keys();
     let keys_iter = keys.clone().zip((0..keys.len()).rev());
     let search = use_signal(String::new);
     let mut create_collection = use_signal(|| false);

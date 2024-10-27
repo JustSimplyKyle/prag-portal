@@ -17,19 +17,18 @@ use collection_edit::CollectionEditContainer;
 use dioxus::desktop::tao::dpi::PhysicalSize;
 use dioxus::desktop::WindowBuilder;
 use dioxus::html::input_data::MouseButton;
-use dioxus_logger::tracing::Level;
-use document::Link;
+use dioxus_logger::tracing::{info, Level};
+use dioxus_radio::hooks::use_init_radio_station;
 use manganis::ImageAsset;
 use pages::Pages;
 use rand::seq::IteratorRandom;
 use scrollable::Scrollable;
 use snafu::ErrorCompat;
-use std::{collections::BTreeMap, path::PathBuf};
+use std::{collections::BTreeMap, path::PathBuf, time::Duration};
 use svgs::{CREATE_COLLECTION, CURSEFORGE_OUTLINE, GRASS, MODRINTH_OUTLINE};
 use tailwind_fuse::*;
 use BaseComponents::{
     atoms::switch::{FloatingSwitch, State},
-    molecules::foldables::Foldable,
     organisms::modal::Modal,
 };
 
@@ -166,7 +165,9 @@ impl History {
     }
 }
 
-use rust_lib::api::shared_resources::{collection::CollectionId, entry::STORAGE};
+use rust_lib::api::shared_resources::collection::{
+    use_collections_radio, Collection, CollectionId, FetchCollectionChannel,
+};
 
 fn main() {
     dioxus_logger::init(Level::INFO).expect("failed to init logger");
@@ -177,17 +178,60 @@ fn main() {
             .with_title("Prag Portal")
             .with_inner_size(PhysicalSize::new(1600, 920)),
     );
-    LaunchBuilder::desktop().with_cfg(cfg).launch(App);
+    LaunchBuilder::desktop().with_cfg(cfg).launch(|| {
+        use rust_lib::api::shared_resources::collection::Collections as C;
+        use_init_radio_station::<C, FetchCollectionChannel>(|| {
+            C(Collection::scan()
+                .unwrap()
+                .into_iter()
+                .flatten()
+                .map(|x| (x.get_collection_id(), x))
+                .collect())
+        });
+        App()
+    });
+}
+
+#[cfg(debug_assertions)]
+#[component]
+fn TailwindSetup() -> Element {
+    let tailwind_config = include_str!("../tailwind.config.js");
+    let input_css = include_str!("../input.css");
+    rsx! {
+
+        document::Script { src: "https://cdn.tailwindcss.com" }
+
+        document::Style {
+            r#type: "text/tailwindcss",
+            {input_css}
+        }
+        document::Link {
+            href: TAILWIND_STR,
+            rel: "stylesheet",
+        }
+
+        document::Script {
+            {tailwind_config}
+        }
+    }
+}
+
+#[cfg(not(debug_assertions))]
+#[component]
+fn TailwindSetup() -> Element {
+    rsx! {
+        document::Link {
+            href: TAILWIND_STR,
+            rel: "stylesheet",
+        }
+    }
 }
 
 #[component]
 fn App() -> Element {
     let error_active = use_signal(|| true);
     rsx! {
-        Link {
-            href: TAILWIND_STR,
-            rel: "stylesheet",
-        }
+        TailwindSetup {}
         div {
             class: "[&_*]:transform-gpu bg-deep-background h-screen w-screen font-display leading-normal",
             ErrorBoundary {
@@ -273,44 +317,64 @@ pub fn use_mounted() -> Signal<Option<std::rc::Rc<MountedData>>> {
     use_signal(|| None)
 }
 
-#[derive(Default, Copy, Clone, PartialEq)]
+#[derive(Debug, Default, Copy, Clone, PartialEq)]
 pub struct Size2D {
     pub width: f64,
     pub height: f64,
 }
 
 #[must_use]
-pub fn use_visible_size(mounted: Signal<Option<std::rc::Rc<MountedData>>>) -> Resource<Size2D> {
-    use_resource(move || async move {
-        if let Some(x) = &*mounted.read() {
-            x.get_client_rect()
-                .await
-                .map(|x| Size2D {
-                    width: x.width(),
-                    height: x.height(),
-                })
-                .unwrap_or_default()
-        } else {
-            Size2D::default()
+pub fn use_visible_size(
+    mounted: Signal<Option<std::rc::Rc<MountedData>>>,
+) -> Signal<Option<Size2D>> {
+    let mut signal = use_signal(|| None);
+    use_future(move || async move {
+        loop {
+            let current_size = if let Some(x) = &*mounted.read() {
+                x.get_client_rect()
+                    .await
+                    .map(|x| Size2D {
+                        width: x.width(),
+                        height: x.height(),
+                    })
+                    .unwrap_or_default()
+            } else {
+                Size2D::default()
+            };
+            if *signal.peek() != Some(current_size) {
+                signal.set(Some(current_size));
+            }
+            tokio::time::sleep(Duration::from_millis(200)).await;
         }
-    })
+    });
+    signal
 }
 
 #[must_use]
-pub fn use_scroll_size(mounted: Signal<Option<std::rc::Rc<MountedData>>>) -> Resource<Size2D> {
-    use_resource(move || async move {
-        if let Some(x) = &*mounted.read() {
-            x.get_scroll_size()
-                .await
-                .map(|x| Size2D {
-                    width: x.width,
-                    height: x.height,
-                })
-                .unwrap_or_default()
-        } else {
-            Size2D::default()
+pub fn use_scroll_size(
+    mounted: Signal<Option<std::rc::Rc<MountedData>>>,
+) -> Signal<Option<Size2D>> {
+    let mut signal = use_signal(|| None);
+    use_future(move || async move {
+        loop {
+            let current_size = if let Some(x) = &*mounted.read() {
+                x.get_scroll_size()
+                    .await
+                    .map(|x| Size2D {
+                        width: x.width,
+                        height: x.height,
+                    })
+                    .unwrap_or_default()
+            } else {
+                Size2D::default()
+            };
+            if *signal.peek() != Some(current_size) {
+                signal.set(Some(current_size));
+            }
+            tokio::time::sleep(Duration::from_millis(200)).await;
         }
-    })
+    });
+    signal
 }
 
 pub trait ErrorFormatted {
@@ -331,19 +395,61 @@ impl<T: std::fmt::Debug + ErrorCompat + 'static + snafu::Error> ErrorFormatted f
     }
 }
 
+fn t_create_collection() -> Result<(), RenderError> {
+    let mut error_handler = use_error_handler();
+    let collections_radio = use_collections_radio();
+
+    let err = use_resource(move || collection_builder(None, "1.20.1", collections_radio));
+
+    let read = err.read();
+    let Some(id) = read
+        .as_ref()
+        .map(|x| x.as_ref().cloned())
+        .transpose()
+        .map_err(|x| x.to_formatted().to_render_error())?
+    else {
+        return Ok(());
+    };
+    let radio = id.use_collection_radio();
+    let mut write_radio = id.use_collection_radio();
+    spawn(async move {
+        info!("Adding mods...");
+        let binding = move || async move {
+            let mut collection = radio.read_owned();
+            collection
+                .add_multiple_modrinth_mod(
+                    vec![
+                        "fabric-api",
+                        "sodium",
+                        "modmenu",
+                        "ferrite-core",
+                        "lazydfu",
+                        "create-fabric",
+                        "iris",
+                        "indium",
+                    ],
+                    vec![],
+                    None,
+                )
+                .await?;
+            collection.download_mods().await?;
+            write_radio.replace(collection)?;
+            Ok(())
+        };
+        error_handler.set(binding().await);
+        info!("Finished downloading mods");
+    });
+
+    Ok(())
+}
+
 #[component]
 fn Layout() -> Element {
-    {
-        let err = use_resource(|| collection_builder(None, "1.20.1"));
-        let read = err.read();
-        let transpose = read.as_ref().map(|x| x.as_ref().cloned()).transpose();
-        if let Err(err) = transpose {
-            return Err(err.to_formatted().to_render_error());
-        }
-    }
-
     let error_handler: Signal<Result<(), anyhow::Error>> =
         use_context_provider(|| Signal::new(Ok(())));
+
+    // t_create_collection()?;
+
     let keys = use_keys();
 
     use_effect(move || {
@@ -353,8 +459,8 @@ fn Layout() -> Element {
             let pages_scroller = vec![Pages::MainPage, Pages::Explore, Pages::Collections];
             Pages::scroller_applyer(pages_scroller, |x| x == &history.active)?;
             for collection_id in keys() {
-                Pages::collection_display(collection_id.clone()).apply_slide_in();
-                Pages::collection_edit(collection_id.clone()).apply_slide_in();
+                Pages::collection_display(collection_id).apply_slide_in();
+                Pages::collection_edit(collection_id).apply_slide_in();
             }
             Ok::<_, anyhow::Error>(())
         };
@@ -389,7 +495,7 @@ fn Layout() -> Element {
 
             }
             div {
-                class: "bg-background w-screen h-screen relative *:overflow-scroll",
+                class: "bg-deep-background w-screen h-screen relative *:overflow-scroll",
                 div {
                     class: "absolute inset-0 z-0 min-h-full",
                     id: Pages::MainPage.scroller_id(),
@@ -436,14 +542,15 @@ fn Layout() -> Element {
 }
 
 #[must_use]
-pub fn use_keys() -> Memo<Vec<CollectionId>> {
-    use_memo(|| STORAGE.collections.read().keys().cloned().collect())
+pub fn use_keys() -> ReadOnlySignal<Vec<CollectionId>> {
+    ReadOnlySignal::new(Signal::new(
+        use_collections_radio().read().0.keys().cloned().collect(),
+    ))
 }
 
 #[component]
 fn CollectionContainer() -> Element {
-    let ids = use_keys();
-    let should_render_ids = ids()
+    let should_render_ids = use_keys()()
         .into_iter()
         .filter(|x| Pages::collection_display(x.clone()).should_render());
     rsx! {
@@ -523,52 +630,52 @@ fn Explore() -> Element {
         }
         div {
             class: "flex flex-col bg-background",
-            Foldable {
-                enabled,
-                title: rsx! {
-                    div {
-                        class: "size-[100px]",
-                    }
-                },
-                div {
-                    class: "flex flex-col gap-[20px]",
-                    div {
-                        class: "text-[80px] bg-deep-background",
-                        "ABCDEFG"
-                    }
-                    div {
-                        class: "text-[80px] bg-deep-background",
-                        "HIJKLMNOP"
-                    }
-                    div {
-                        class: "text-[80px] bg-deep-background",
-                        "QRSTUV"
-                    }
-                }
-            }
-            Foldable {
-                enabled: enabled2,
-                title: rsx! {
-                    div {
-                        class: "size-[100px]",
-                    }
-                },
-                div {
-                    class: "flex flex-col gap-[20px]",
-                    div {
-                        class: "text-[80px] bg-deep-background",
-                        "ABCDEFG"
-                    }
-                    div {
-                        class: "text-[80px] bg-deep-background",
-                        "HIJKLMNOP"
-                    }
-                    div {
-                        class: "text-[80px] bg-deep-background",
-                        "QRSTUV"
-                    }
-                }
-            }
+            // Foldable {
+            //     enabled,
+            //     title: rsx! {
+            //         div {
+            //             class: "size-[100px]",
+            //         }
+            //     },
+            //     div {
+            //         class: "flex flex-col gap-[20px]",
+            //         div {
+            //             class: "text-[80px] bg-deep-background",
+            //             "ABCDEFG"
+            //         }
+            //         div {
+            //             class: "text-[80px] bg-deep-background",
+            //             "HIJKLMNOP"
+            //         }
+            //         div {
+            //             class: "text-[80px] bg-deep-background",
+            //             "QRSTUV"
+            //         }
+            //     }
+            // }
+            // Foldable {
+            //     enabled: enabled2,
+            //     title: rsx! {
+            //         div {
+            //             class: "size-[100px]",
+            //         }
+            //     },
+            //     div {
+            //         class: "flex flex-col gap-[20px]",
+            //         div {
+            //             class: "text-[80px] bg-deep-background",
+            //             "ABCDEFG"
+            //         }
+            //         div {
+            //             class: "text-[80px] bg-deep-background",
+            //             "HIJKLMNOP"
+            //         }
+            //         div {
+            //             class: "text-[80px] bg-deep-background",
+            //             "QRSTUV"
+            //         }
+            //     }
+            // }
         }
     }
 }

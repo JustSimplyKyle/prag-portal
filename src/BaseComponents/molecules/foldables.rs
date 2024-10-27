@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use dioxus::prelude::*;
 
 use crate::{use_mounted, use_scroll_size, use_visible_size};
@@ -12,7 +14,7 @@ pub fn Foldable(mut enabled: Signal<bool>, title: Element, children: Element) ->
         div {
             "data-enabled": enabled(),
             class: "group flex flex-col h-fit overflow-y-clip ease-slow duration-200 transition-all [&_*]:transition-all",
-            onmounted: move |e| container_mounted.set(Some(e.data)),
+            onmounted: move |e| container_mounted.set(Some(e.data())),
             max_height: if enabled() {
                 "{container_size().unwrap_or_default().height}px"
             } else {
@@ -20,8 +22,8 @@ pub fn Foldable(mut enabled: Signal<bool>, title: Element, children: Element) ->
 
             },
             div {
-                class: "container z-[1000] *:z-[1000]",
-                onmounted: move |e| mounted.set(Some(e.data)),
+                class: "container",
+                onmounted: move |e| mounted.set(Some(e.data())),
                 onclick: move |_| {
                     enabled.toggle();
                 },
@@ -30,8 +32,6 @@ pub fn Foldable(mut enabled: Signal<bool>, title: Element, children: Element) ->
             div {
                 class: "
                     scale-y-0 origin-top group-data-[enabled=true]:scale-y-100
-                    z-0
-                    *:z-0
                     *:opacity-100
                     *:group-data-[enabled=false]:opacity-0
                 ",

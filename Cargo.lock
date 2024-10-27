@@ -1314,6 +1314,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "dioxus-radio"
+version = "0.3.0"
+source = "git+https://github.com/JustSimplyKyle/dioxus-radio#caca105816b49a6f84293879b5b162cbd2ae460a"
+dependencies = [
+ "dioxus-lib",
+ "generational-box",
+]
+
+[[package]]
 name = "dioxus-rsx"
 version = "0.6.0-alpha.3"
 source = "git+https://github.com/DioxusLabs/dioxus#a35655a457554e9e37fdbdc85839eededa425581"
@@ -3748,6 +3757,7 @@ dependencies = [
  "derive_more",
  "dioxus",
  "dioxus-logger 0.5.1 (git+https://github.com/DogeDark/dioxus-logger)",
+ "dioxus-radio",
  "futures-util",
  "fuzzy-matcher",
  "itertools 0.13.0",
@@ -4319,6 +4329,7 @@ dependencies = [
  "derive_more",
  "dioxus",
  "dioxus-logger 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "dioxus-radio",
  "dirs",
  "ferinth",
  "fern",
