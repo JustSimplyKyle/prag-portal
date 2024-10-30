@@ -674,7 +674,7 @@ input {
 
   font-weight: 400;
 
-  src: url(/fonts/Geo-Regular.ttf);
+  src: url(fonts/Geo-Regular.ttf);
 }
 
 @font-face {
@@ -684,7 +684,7 @@ input {
 
   font-weight: 500;
 
-  src: url(/fonts/GenSenRounded-M.ttc);
+  src: url(fonts/GenSenRounded-M.ttc);
 }
 
 @font-face {
@@ -694,7 +694,7 @@ input {
 
   font-weight: 700;
 
-  src: url(/fonts/GenSenRounded-B.ttc);
+  src: url(fonts/GenSenRounded-B.ttc);
 }
 
 @font-face {
@@ -704,7 +704,7 @@ input {
 
   font-weight: 800;
 
-  src: url(/fonts/GenSenRounded-H.ttc);
+  src: url(fonts/GenSenRounded-H.ttc);
 }
 
 @font-face {
@@ -714,7 +714,7 @@ input {
 
   font-weight: 400;
 
-  src: url(/fonts/IBM_Plex_Mono/IBMPlexMono-Regular.ttf);
+  src: url(fonts/IBM_Plex_Mono/IBMPlexMono-Regular.ttf);
 }
 
 @font-face {
@@ -724,7 +724,7 @@ input {
 
   font-weight: 500;
 
-  src: url(/fonts/IBM_Plex_Mono/IBMPlexMono-Medium.ttf);
+  src: url(fonts/IBM_Plex_Mono/IBMPlexMono-Medium.ttf);
 }
 
 @font-face {
@@ -734,7 +734,7 @@ input {
 
   font-weight: 700;
 
-  src: url(/fonts/IBM_Plex_Mono/IBMPlexMono-Bold.ttf);
+  src: url(fonts/IBM_Plex_Mono/IBMPlexMono-Bold.ttf);
 }
 
 *, ::before, ::after {
@@ -3075,10 +3075,6 @@ input {
 
 .ease-gentle {
   transition-timing-function: var(--gentle-easing);
-}
-
-.ease-in-out {
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .ease-quick {
