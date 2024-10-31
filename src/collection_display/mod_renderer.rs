@@ -3,6 +3,7 @@ mod details;
 use std::ops::Deref;
 
 use dioxus::{prelude::*, CapturedError};
+use dioxus_logger::tracing::{info, warn};
 use rust_lib::api::{
     backend_exclusive::mod_management::mods::{ModMetadata, Platform},
     shared_resources::collection::CollectionId,
@@ -157,33 +158,36 @@ fn use_active_controller(
     collection_id: ReadOnlySignal<CollectionId>,
     mods: ReadOnlySignal<ModMetadata>,
 ) {
-    let read_radio = collection_id().use_collection_radio();
-    let mut write_radio = collection_id().use_collection_radio();
+    let mut radio = collection_id().use_collection_radio();
     let mut error_handler = use_error_handler();
     let _ = use_resource(move || {
         let clicked = clicked();
         async move {
             let binding = || async move {
-                let collection = read_radio.read();
+                let collection = radio.read_owned();
                 let Some(mut controller) = collection.mod_controller.clone() else {
                     return Ok(());
                 };
                 let manager = &mut controller.manager;
                 #[allow(clippy::unwrap_used)]
-                let modify = manager
+                let mod_metadata = manager
                     .mods
                     .iter_mut()
                     .find(|x| x.deref() == mods.read().deref())
                     .unwrap();
 
+                let enabled = mod_metadata.enabled;
+
                 if clicked {
-                    modify.enable().await?;
+                    info!("Enable mod {}", mods.read().name);
+                    mod_metadata.enable().await?;
                 } else {
-                    modify.disable().await?;
+                    info!("Disable mod {}", mods.read().name);
+                    mod_metadata.disable().await?;
                 }
 
-                if collection.mod_controller() != Some(&controller) {
-                    write_radio.with_mut(|x| x.mod_controller = Some(controller))?;
+                if enabled != mod_metadata.enabled {
+                    radio.with_mut(|x| x.mod_controller = Some(controller))?;
                 }
                 Ok(())
             };

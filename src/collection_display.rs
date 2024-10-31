@@ -84,6 +84,7 @@ fn Footer(
     default: String,
 ) -> Element {
     let mut radio = collection_id().use_collection_radio();
+    info!("footer rerun");
     let len = radio
         .read()
         .mod_controller()
@@ -118,15 +119,15 @@ fn Footer(
 
     let launch_game = move || {
         spawn(async move {
-            let mut collection = radio.read_owned();
-            let err = move || async move {
-                collection.launch_game(logs).await?;
-                radio.replace(collection)?;
-                Ok(())
-            };
-            if let Err(err) = err().await {
-                error_handler.set(Err(err));
-            }
+            radio
+                .with_async_mut(move |mut collection| async move {
+                    if let Err(err) = collection.launch_game(logs).await {
+                        error!("collection throwed {err:?}");
+                    }
+                    collection
+                })
+                .await
+                .unwrap();
         })
     };
 

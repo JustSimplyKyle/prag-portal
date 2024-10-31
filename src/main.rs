@@ -166,7 +166,7 @@ impl History {
 }
 
 use rust_lib::api::shared_resources::collection::{
-    use_collections_radio, Collection, CollectionId, FetchCollectionChannel,
+    use_collections_radio, Collection, CollectionId, CollectionRadioChannel,
 };
 
 fn main() {
@@ -180,7 +180,7 @@ fn main() {
     );
     LaunchBuilder::desktop().with_cfg(cfg).launch(|| {
         use rust_lib::api::shared_resources::collection::Collections as C;
-        use_init_radio_station::<C, FetchCollectionChannel>(|| {
+        use_init_radio_station::<C, CollectionRadioChannel>(|| {
             C(Collection::scan()
                 .unwrap()
                 .into_iter()
@@ -410,33 +410,33 @@ fn t_create_collection() -> Result<(), RenderError> {
     else {
         return Ok(());
     };
-    let radio = id.use_collection_radio();
-    let mut write_radio = id.use_collection_radio();
+    let mut radio = id.use_collection_radio();
     spawn(async move {
         info!("Adding mods...");
-        let binding = move || async move {
-            let mut collection = radio.read_owned();
-            collection
-                .add_multiple_modrinth_mod(
-                    vec![
-                        "fabric-api",
-                        "sodium",
-                        "modmenu",
-                        "ferrite-core",
-                        "lazydfu",
-                        "create-fabric",
-                        "iris",
-                        "indium",
-                    ],
-                    vec![],
-                    None,
-                )
-                .await?;
-            collection.download_mods().await?;
-            write_radio.replace(collection)?;
-            Ok(())
-        };
-        error_handler.set(binding().await);
+        radio
+            .with_async_mut(move |mut collection| async move {
+                collection
+                    .add_multiple_modrinth_mod(
+                        vec![
+                            "fabric-api",
+                            "sodium",
+                            "modmenu",
+                            "ferrite-core",
+                            "lazydfu",
+                            "create-fabric",
+                            "iris",
+                            "indium",
+                        ],
+                        vec![],
+                        None,
+                    )
+                    .await
+                    .unwrap();
+                collection.download_mods().await.unwrap();
+                collection
+            })
+            .await;
+        // error_handler.set(binding().await);
         info!("Finished downloading mods");
     });
 
