@@ -40,11 +40,11 @@ use crate::download_progress::DownloadProgress;
 use crate::main_page::MainPage;
 use crate::side_bar::SideBar;
 
-const FIRST: ImageAsset = asset!("./public/first_collection_pic.png").image();
-const SECOND: ImageAsset = asset!("./public/second_collection_pic.png").image();
-const THIRD: ImageAsset = asset!("./public/third_collection_pic.png").image();
-const FORTH: ImageAsset = asset!("./public/forth_collection_pic.png").image();
-const FIFTH: ImageAsset = asset!("./public/fifth_collection_pic.png").image();
+const FIRST: ImageAsset = asset!("/public/first_collection_pic.png").image();
+const SECOND: ImageAsset = asset!("/public/second_collection_pic.png").image();
+const THIRD: ImageAsset = asset!("/public/third_collection_pic.png").image();
+const FORTH: ImageAsset = asset!("/public/forth_collection_pic.png").image();
+const FIFTH: ImageAsset = asset!("/public/fifth_collection_pic.png").image();
 
 pub const COLLECTION_PICS: GlobalSignal<BTreeMap<&str, PathBuf>> = GlobalSignal::new(|| {
     BTreeMap::from([
@@ -66,13 +66,13 @@ fn get_random_collection_picture() -> PathBuf {
         .clone()
 }
 
-pub const HOME: Asset = asset!("./public/home.svg");
-pub const EXPLORE: Asset = asset!("./public/explore.svg");
-pub const SIDEBAR_COLLECTION: Asset = asset!("./public/collections.svg");
-pub const ARROW_RIGHT: Asset = asset!("./public/keyboard_arrow_right.svg");
-pub const SIM_CARD: Asset = asset!("./public/sim_card_download.svg");
-pub const DRAG_INDICATOR: Asset = asset!("./public/drag_indicator.svg");
-pub const TAILWIND_STR: Asset = asset!("./public/tailwind.css");
+pub const HOME: Asset = asset!("/public/home.svg");
+pub const EXPLORE: Asset = asset!("/public/explore.svg");
+pub const SIDEBAR_COLLECTION: Asset = asset!("/public/collections.svg");
+pub const ARROW_RIGHT: Asset = asset!("/public/keyboard_arrow_right.svg");
+pub const SIM_CARD: Asset = asset!("/public/sim_card_download.svg");
+pub const DRAG_INDICATOR: Asset = asset!("/public/drag_indicator.svg");
+pub const TAILWIND_STR: Asset = asset!("/public/tailwind.css");
 
 /// `(Pages)`: Current active page
 /// `Option<Pages>`: Previous page
@@ -192,31 +192,31 @@ fn main() {
     });
 }
 
-#[cfg(debug_assertions)]
-#[component]
-fn TailwindSetup() -> Element {
-    let tailwind_config = include_str!("../tailwind.config.js");
-    let input_css = include_str!("../input.css");
-    rsx! {
+// #[cfg(debug_assertions)]
+// #[component]
+// fn TailwindSetup() -> Element {
+//     let tailwind_config = include_str!("../tailwind.config.js");
+//     let input_css = include_str!("../input.css");
+//     rsx! {
 
-        document::Script { src: "https://cdn.tailwindcss.com" }
+//         document::Script { src: "https://cdn.tailwindcss.com" }
 
-        document::Style {
-            r#type: "text/tailwindcss",
-            {input_css}
-        }
-        document::Link {
-            href: TAILWIND_STR,
-            rel: "stylesheet",
-        }
+//         document::Style {
+//             r#type: "text/tailwindcss",
+//             {input_css}
+//         }
+//         document::Link {
+//             href: TAILWIND_STR,
+//             rel: "stylesheet",
+//         }
 
-        document::Script {
-            {tailwind_config}
-        }
-    }
-}
+//         document::Script {
+//             {tailwind_config}
+//         }
+//     }
+// }
 
-#[cfg(not(debug_assertions))]
+// #[cfg(not(debug_assertions))]
 #[component]
 fn TailwindSetup() -> Element {
     rsx! {

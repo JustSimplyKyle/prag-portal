@@ -46,50 +46,48 @@ body {
     font-family: 'GenSenRounded TW';
     font-style: normal;
     font-weight: 400;
-    src: url('https://cdn.discordapp.com/attachments/850407770750713859/1299610089170145311/Geo-Regular.ttf?ex=671dd3b6&is=671c8236&hm=62162ea651b43ef02393ad60a7ca76d8084366f10a743ad9813d38dc0ce1b072&');
+    src: url(/fonts/Geo-Regular.ttf);
   }
 
   @font-face {
     font-family: 'GenSenRounded TW';
     font-style: normal;
     font-weight: 500;
-    src: url('https://cdn.discordapp.com/attachments/850407770750713859/1299610089484845109/GenSenRounded-M.ttc?ex=671dd3b6&is=671c8236&hm=036aed6369b7d09b880d53d0f0e6a69af8585c97b2f380fd84c9108befa68159&');
+    src: url(/fonts/GenSenRounded-M.ttc);
   }
-
 
   @font-face {
     font-family: 'GenSenRounded TW';
     font-style: normal;
     font-weight: 700;
-    src: url('https://cdn.discordapp.com/attachments/850407770750713859/1299610090139156531/GenSenRounded-B.ttc?ex=671dd3b7&is=671c8237&hm=9ae59cae2660b32b3b432763e48327e8ab7374baf8bd622fad8cee8189b9ea38&');
+    src: url(/fonts/GenSenRounded-B.ttc);
   }
 
   @font-face {
     font-family: 'GenSenRounded TW';
     font-style: normal;
     font-weight: 800;
-    src: url('https://cdn.discordapp.com/attachments/850407770750713859/1299610090537619476/BaiJamjuree-BoldItalic.ttf?ex=671dd3b7&is=671c8237&hm=3149db8c77906300bb99bfde5e4d5771bf249e19f3485908b34dc1c1d63944ff&');
+    src: url(/fonts/GenSenRounded-H.ttc);
   }
 
   @font-face {
     font-family: 'IBM Plex Mono';
     font-style: normal;
     font-weight: 400;
-    src: url('https://cdn.discordapp.com/attachments/850407770750713859/1299610051148910612/IBMPlexMono-Regular.ttf?ex=671dd3ad&is=671c822d&hm=03df7e569a92b6c9bc27ce111b05eb5c374a6570ae5455c68e18cfd50f723f3d&');
+    src: url(/fonts/IBM_Plex_Mono/IBMPlexMono-Regular.ttf);
   }
 
   @font-face {
     font-family: 'IBM Plex Mono';
     font-style: normal;
     font-weight: 500;
-    src: url('https://cdn.discordapp.com/attachments/850407770750713859/1299610051472003113/IBMPlexMono-Medium.ttf?ex=671dd3ad&is=671c822d&hm=00ef238072ad05036944b5668ba40648d547e58c6e3f08e3a6a71965c49c372f&');
+    src: url(/fonts/IBM_Plex_Mono/IBMPlexMono-Medium.ttf);
   }
-
 
   @font-face {
     font-family: 'IBM Plex Mono';
     font-style: normal;
     font-weight: 700;
-    src: url('https://cdn.discordapp.com/attachments/850407770750713859/1299610051778052137/IBMPlexMono-Bold.ttf?ex=671dd3ad&is=671c822d&hm=c7513f1a6eb15ded2bb77e7467297a5012556cfc3185de7a7af7e731ff99e5e2&');
+    src: url(/fonts/IBM_Plex_Mono/IBMPlexMono-Bold.ttf);
   }
 }

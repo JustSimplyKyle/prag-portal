@@ -17,13 +17,13 @@ use crate::{
 use dioxus::prelude::*;
 use rust_lib::api::shared_resources::{collection::use_collections_radio, entry::STORAGE};
 
-pub static NOTE: Asset = manganis::asset!("./public/note_stack_add.svg");
-pub static CROP_FREE: Asset = manganis::asset!("./public/crop_free.svg");
-pub static FILTER_LIST: Asset = manganis::asset!("./public/filter_list.svg");
-pub static SEARCH: Asset = manganis::asset!("./public/search.svg");
-pub static ARROW_DOWN: Asset = manganis::asset!("./public/arrow_drop_down.svg");
-pub static BOOKMARK: Asset = manganis::asset!("./public/bookmark.svg");
-pub static BOOKMARK_ADD: Asset = manganis::asset!("./public/bookmark_add.svg");
+pub static NOTE: Asset = manganis::asset!("/public/note_stack_add.svg");
+pub static CROP_FREE: Asset = manganis::asset!("/public/crop_free.svg");
+pub static FILTER_LIST: Asset = manganis::asset!("/public/filter_list.svg");
+pub static SEARCH: Asset = manganis::asset!("/public/search.svg");
+pub static ARROW_DOWN: Asset = manganis::asset!("/public/arrow_drop_down.svg");
+pub static BOOKMARK: Asset = manganis::asset!("/public/bookmark.svg");
+pub static BOOKMARK_ADD: Asset = manganis::asset!("/public/bookmark_add.svg");
 
 #[component]
 fn TopBar() -> Element {

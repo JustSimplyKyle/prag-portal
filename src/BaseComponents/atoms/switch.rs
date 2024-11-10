@@ -9,7 +9,7 @@ pub fn Switch(
 ) -> Element {
     rsx! {
         button {
-            class: tw_merge!("group w-[80px] p-[10px] rounded-[10px] flex justify-start items-center bg-background", class),
+            class: tw_merge!("group w-[80px] p-[10px] rounded-[10px] flex justify-start items-center bg-background ease-quick", class),
             "aria-selected": clicked(),
             onclick: move |_| {
                 clicked.toggle();

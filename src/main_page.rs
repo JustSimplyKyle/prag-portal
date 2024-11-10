@@ -27,13 +27,13 @@ use crate::{
 
 // pub const COLLECTION_PIC: ImageAsset =
 //     manganis::mg!(image("./public/pic1.png").format(ImageType::Avif).preload());
-pub const BLOCK: Asset = manganis::asset!("./public/block.svg");
-pub const EXPAND_CONTENT: Asset = manganis::asset!("./public/expand_content.svg");
-pub const ICON: Asset = manganis::asset!("./public/icon.svg");
-pub const LIGHTNING: Asset = manganis::asset!("./public/lightning.svg");
-pub const IMG: ImageAsset = manganis::asset!("./public/project.png").image();
-pub const STAR: Asset = manganis::asset!("./public/award_star.svg");
-pub const ARROW_LEFT: Asset = manganis::asset!("./public/keyboard_arrow_left.svg");
+pub const BLOCK: Asset = manganis::asset!("/public/block.svg");
+pub const EXPAND_CONTENT: Asset = manganis::asset!("/public/expand_content.svg");
+pub const ICON: Asset = manganis::asset!("/public/icon.svg");
+pub const LIGHTNING: Asset = manganis::asset!("/public/lightning.svg");
+pub const IMG: ImageAsset = manganis::asset!("/public/project.png").image();
+pub const STAR: Asset = manganis::asset!("/public/award_star.svg");
+pub const ARROW_LEFT: Asset = manganis::asset!("/public/keyboard_arrow_left.svg");
 
 pub static START: Component = |()| {
     rsx! { svg { height: "31", xmlns: "http://www.w3.org/2000/svg", width: "31", fill: "none", "viewBox": "0 0 31 31", mask { "maskUnits": "userSpaceOnUse", y: "0", width: "31", style: "mask-type:alpha", height: "31", x: "0", id: "mask0_3548_4928", rect { height: "30", fill: "#D9D9D9", x: "0.5", y: "0.5", width: "30", } } g { mask: "url(#mask0_3548_4928)", path { d: "M10 21.7488V9.25117C10 8.86102 10.126 8.55491 10.3781 8.33282C10.6302 8.11094 10.9236 8 11.2582 8C11.3703 8 11.4832 8.01457 11.5967 8.04372C11.7106 8.07286 11.8231 8.12211 11.9344 8.19146L21.5602 14.4776C21.7452 14.598 21.8906 14.7512 21.9964 14.9371C22.1019 15.1228 22.1546 15.3122 22.1546 15.5051C22.1546 15.6981 22.1019 15.8874 21.9964 16.0731C21.8906 16.259 21.7452 16.4088 21.5602 16.5224L11.934 22.8127C11.8228 22.882 11.7088 22.9306 11.592 22.9585C11.4752 22.9862 11.3619 23 11.2521 23C10.9162 23 10.6235 22.8891 10.374 22.6672C10.1247 22.4451 10 22.139 10 21.7488Z", fill: "white", } } } }

@@ -1,6 +1,6 @@
-pub const ADD: Asset = manganis::asset!("./public/add.svg");
-pub const HALLWAY: Asset = manganis::asset!("./public/hallway.svg");
-pub const PHOTO_LIBRARY: Asset = manganis::asset!("./public/photo_library.svg");
+pub const ADD: Asset = manganis::asset!("/public/add.svg");
+pub const HALLWAY: Asset = manganis::asset!("/public/hallway.svg");
+pub const PHOTO_LIBRARY: Asset = manganis::asset!("/public/photo_library.svg");
 
 use std::path::PathBuf;
 

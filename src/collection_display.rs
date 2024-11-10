@@ -24,20 +24,20 @@ use crate::{
     },
 };
 
-pub static DISPLAY_BACKGROUND: ImageAsset = asset!("./public/cool_image.png").image();
+pub static DISPLAY_BACKGROUND: ImageAsset = asset!("/public/cool_image.png").image();
 
-pub static GAME_CONTROLLER: Asset = asset!("./public/stadia_controller.svg");
-pub static UNARCHIVE: Asset = asset!("./public/unarchive.svg");
-pub static CUBE: Asset = asset!("./public/deployed_code.svg");
-pub static GLOBAL_ASIA: Asset = asset!("./public/globe_asia.svg");
-pub static CIRCLE_JOIN: Asset = asset!("./public/join.svg");
-pub static MOTION_MODE: Asset = asset!("./public/motion_mode.svg");
-pub static DELETE: Asset = asset!("./public/delete.svg");
-pub static UNDO: Asset = asset!("./public/undo.svg");
-pub static HORIZ: Asset = asset!("./public/more_horiz.svg");
-pub static BRIGHT_LEFT_ARROW: Asset = asset!("./public/bright_left_arrow.svg");
-pub static MODRINTH: Asset = asset!("./public/modrinth.svg");
-pub static CURSEFORGE: Asset = asset!("./public/curseforge.svg");
+pub static GAME_CONTROLLER: Asset = asset!("/public/stadia_controller.svg");
+pub static UNARCHIVE: Asset = asset!("/public/unarchive.svg");
+pub static CUBE: Asset = asset!("/public/deployed_code.svg");
+pub static GLOBAL_ASIA: Asset = asset!("/public/globe_asia.svg");
+pub static CIRCLE_JOIN: Asset = asset!("/public/join.svg");
+pub static MOTION_MODE: Asset = asset!("/public/motion_mode.svg");
+pub static DELETE: Asset = asset!("/public/delete.svg");
+pub static UNDO: Asset = asset!("/public/undo.svg");
+pub static HORIZ: Asset = asset!("/public/more_horiz.svg");
+pub static BRIGHT_LEFT_ARROW: Asset = asset!("/public/bright_left_arrow.svg");
+pub static MODRINTH: Asset = asset!("/public/modrinth.svg");
+pub static CURSEFORGE: Asset = asset!("/public/curseforge.svg");
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, EnumIter)]
 pub(crate) enum CollectionDisplayTopSelection {
@@ -156,7 +156,7 @@ fn Footer(
                         ],
                         Alignment::Left,
                     ).css("gap-[5px] align-center"),
-                    ContentType::svg(asset!("public/arrow_drop_down_40.svg")).css("svg-[40px]").align_right(),
+                    ContentType::svg(asset!("/public/arrow_drop_down_40.svg")).css("svg-[40px]").align_right(),
                 ],
             }
             SearchBar {
@@ -273,7 +273,7 @@ fn Content(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                     class: "rounded-r-[30px] grid grid-flow-row justify-center items-stretch bg-deep-background pt-[25px] pb-[25px] gap-[15px]",
                     div {
                         class: "self-start justify-self-center inline-flex items-center justify-center w-[35px]",
-                        {ContentType::svg(asset!("./public/big_forge.svg"))}
+                        {ContentType::svg(asset!("/public/big_forge.svg"))}
                     }
                     div {
                         class: "self-end [writing-mode:vertical-rl] rotate-180 inline-flex items-center w-20 text-3xl text-hint font-english italic font-bold uppercase trim",

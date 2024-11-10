@@ -69,7 +69,7 @@ fn Header() -> Element {
 
 #[component]
 fn PicturePicker(cover_img: Signal<PathBuf>, background_img: Signal<PathBuf>) -> Element {
-    let button  = "inline-flex items-center justify-center bg-background min-w-full max-w-full h-full p-[10px] rounded-[20px]";
+    let button  = "inline-flex items-center justify-center bg-background min-w-full max-w-full p-[10px] rounded-[20px]";
     rsx! {
         div {
             class: "flex flex-col gap-[20px]",
@@ -77,21 +77,24 @@ fn PicturePicker(cover_img: Signal<PathBuf>, background_img: Signal<PathBuf>) ->
                 title: "封面與背景圖片"
             }
             div {
-                class: "flex gap-[20px]",
+                class: "flex gap-[20px] justify-center",
                 div {
-                    class: "flex gap-[5px] grow",
+                    class: "flex gap-[5px]",
                     div {
-                        class: "grow border-[2px] border-surface min-w-[140px] size-full aspect-square rounded-[20px]",
+                        class: "grow border-[2px] border-surface size-[140px] aspect-square rounded-[20px]",
                         background: "url(\'{cover_img.read().to_string_lossy()}\') lightgray 50% / cover no-repeat"
                     }
                     div {
-                        class: "flex flex-col grow w-full gap-[5px]",
+                        class: "flex flex-col gap-[5px] justify-center",
+                        width: "95px",
                         div {
                             class: button,
+                            height: "64.5px",
                             UPLOAD_FILE {}
                         }
                         div {
                             class: button,
+                            height: "64.5px",
                             CLOSE_CROSS {
                                 class: "[&_*]:fill-red"
                             }
@@ -99,20 +102,24 @@ fn PicturePicker(cover_img: Signal<PathBuf>, background_img: Signal<PathBuf>) ->
                     }
                 }
                 div {
-                    class: "flex gap-[5px] grow",
+                    class: "flex gap-[5px]",
                     div {
-                        class: "border-[2px] border-surface grow min-h-[140px] h-full rounded-[20px]",
+                        class: "border-[2px] border-surface h-[140px] rounded-[20px]",
+                        width: "280px",
                         background: "url(\'{background_img.read().to_string_lossy()}\') lightgray 50% / cover no-repeat",
                         aspect_ratio: "2/1",
                     }
                     div {
-                        class: "flex flex-col grow w-full gap-[5px]",
+                        class: "flex flex-col gap-[5px]",
+                        width: "95px",
                         div {
                             class: button,
+                            height: "64.5px",
                             UPLOAD_FILE {}
                         }
                         div {
                             class: button,
+                            height: "64.5px",
                             CLOSE_CROSS {
                                 class: "[&_*]:fill-red"
                             }
@@ -247,7 +254,7 @@ pub fn BuildCollection(active: Signal<bool>) -> Element {
             div {
                 class: "flex min-w-[700px] w-full",
                 Center {
-                    percentage_center_bias: 80.,
+                    percentage_center_bias: 50.,
                     class: "flex flex-col border-2 border-surface rounded-[20px]",
                     box_shadow: "10px 10px 30px 0px rgba(0, 0, 0, 0.25)",
                     Header {}

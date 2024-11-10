@@ -674,7 +674,7 @@ input {
 
   font-weight: 400;
 
-  src: url(fonts/Geo-Regular.ttf);
+  src: url(/fonts/Geo-Regular.ttf);
 }
 
 @font-face {
@@ -684,7 +684,7 @@ input {
 
   font-weight: 500;
 
-  src: url(fonts/GenSenRounded-M.ttc);
+  src: url(/fonts/GenSenRounded-M.ttc);
 }
 
 @font-face {
@@ -694,7 +694,7 @@ input {
 
   font-weight: 700;
 
-  src: url(fonts/GenSenRounded-B.ttc);
+  src: url(/fonts/GenSenRounded-B.ttc);
 }
 
 @font-face {
@@ -704,7 +704,7 @@ input {
 
   font-weight: 800;
 
-  src: url(fonts/GenSenRounded-H.ttc);
+  src: url(/fonts/GenSenRounded-H.ttc);
 }
 
 @font-face {
@@ -714,7 +714,7 @@ input {
 
   font-weight: 400;
 
-  src: url(fonts/IBM_Plex_Mono/IBMPlexMono-Regular.ttf);
+  src: url(/fonts/IBM_Plex_Mono/IBMPlexMono-Regular.ttf);
 }
 
 @font-face {
@@ -724,7 +724,7 @@ input {
 
   font-weight: 500;
 
-  src: url(fonts/IBM_Plex_Mono/IBMPlexMono-Medium.ttf);
+  src: url(/fonts/IBM_Plex_Mono/IBMPlexMono-Medium.ttf);
 }
 
 @font-face {
@@ -734,7 +734,7 @@ input {
 
   font-weight: 700;
 
-  src: url(fonts/IBM_Plex_Mono/IBMPlexMono-Bold.ttf);
+  src: url(/fonts/IBM_Plex_Mono/IBMPlexMono-Bold.ttf);
 }
 
 *, ::before, ::after {
@@ -1086,6 +1086,21 @@ input {
   background-color: var(--fallback-bc,oklch(var(--bc)/0.2));
 }
 
+.radio {
+  flex-shrink: 0;
+  --chkbg: var(--bc);
+  height: 1.5rem;
+  width: 1.5rem;
+  cursor: pointer;
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  border-radius: 9999px;
+  border-width: 1px;
+  border-color: var(--fallback-bc,oklch(var(--bc)/var(--tw-border-opacity)));
+  --tw-border-opacity: 0.2;
+}
+
 .steps {
   display: inline-grid;
   grid-auto-flow: column;
@@ -1359,6 +1374,32 @@ input {
   50% {
     background-position-x: -115%;
   }
+}
+
+.radio:focus {
+  box-shadow: none;
+}
+
+.radio:focus-visible {
+  outline-style: solid;
+  outline-width: 2px;
+  outline-offset: 2px;
+  outline-color: var(--fallback-bc,oklch(var(--bc)/1));
+}
+
+.radio:checked,
+  .radio[aria-checked="true"] {
+  --tw-bg-opacity: 1;
+  background-color: var(--fallback-bc,oklch(var(--bc)/var(--tw-bg-opacity)));
+  background-image: none;
+  animation: radiomark var(--animation-input, 0.2s) ease-out;
+  box-shadow: 0 0 0 4px var(--fallback-b1,oklch(var(--b1)/1)) inset,
+      0 0 0 4px var(--fallback-b1,oklch(var(--b1)/1)) inset;
+}
+
+.radio:disabled {
+  cursor: not-allowed;
+  opacity: 0.2;
 }
 
 @keyframes radiomark {
@@ -1886,6 +1927,11 @@ input {
   height: 100px;
 }
 
+.size-\[140px\] {
+  width: 140px;
+  height: 140px;
+}
+
 .size-\[20px\] {
   width: 20px;
   height: 20px;
@@ -1911,11 +1957,6 @@ input {
   height: 80px;
 }
 
-.size-full {
-  width: 100%;
-  height: 100%;
-}
-
 .h-10 {
   height: 2.5rem;
 }
@@ -1930,6 +1971,10 @@ input {
 
 .h-\[100px\] {
   height: 100px;
+}
+
+.h-\[140px\] {
+  height: 140px;
 }
 
 .h-\[30px\] {
@@ -2008,10 +2053,6 @@ input {
 
 .max-h-screen {
   max-height: 100vh;
-}
-
-.min-h-\[140px\] {
-  min-height: 140px;
 }
 
 .min-h-\[163px\] {
@@ -2121,10 +2162,6 @@ input {
 
 .min-w-\[100px\] {
   min-width: 100px;
-}
-
-.min-w-\[140px\] {
-  min-width: 140px;
 }
 
 .min-w-\[150px\] {

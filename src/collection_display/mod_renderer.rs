@@ -29,9 +29,8 @@ pub fn GridRow<const T: usize>(
     #[props(default)] class: String,
     #[props(extends = div, extends = GlobalAttributes)] attributes: Vec<Attribute>,
 ) -> Element {
-    if T < 3 {
-        let err = RenderError::Aborted(CapturedError::from_display("T should be greater than 2"));
-        return Err(err);
+    const {
+        assert!(T > 2, "items should have length that is larger than 2");
     }
     let class = tw_merge!("flex items-center gap-[20px]", class);
     rsx! {

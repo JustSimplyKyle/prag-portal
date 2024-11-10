@@ -10,7 +10,7 @@ edition = "2021"
 
 rust_lib = { path = "./era-connect/app/rust/" }
 
-dioxus = { features = ["desktop"], git = "https://github.com/DioxusLabs/dioxus" }
+dioxus = { features = ["desktop"], version = "0.6.0-alpha.4" }
 dioxus-logger = { git = "https://github.com/DogeDark/dioxus-logger" }
 tokio = { version = "1.37.0", features = ["time", "rt"] }
 tailwind_fuse = { version = "0.3.1", features = ["variant"] }
