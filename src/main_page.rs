@@ -93,8 +93,7 @@ pub fn CollectionBlock(
     #[props(default)] z_index: String,
     #[props(default)] extended_class: String,
 ) -> Element {
-    let radio = collection_id().use_collection_radio();
-    let mut write_radio = collection_id().use_collection_radio();
+    let mut radio = collection_id().use_collection_radio();
     let picture_path = radio.read().picture_path().to_string_lossy().to_string();
     let (mut onmounted, status, style) = use_text_scroller();
     let class = tw_merge!("size-[280px] max-w-[280px] min-w-[280px]", extended_class);
@@ -149,15 +148,11 @@ pub fn CollectionBlock(
                             },
                             onclick: move |x| async move {
                                 x.stop_propagation();
-                                let mut collection = radio.read_owned();
-                                let binding = async move {
+                                radio.with_async_mut(|mut collection| async move {
                                     collection.launch_game(log).await?;
-                                    write_radio.replace(collection)?;
-                                    Ok(())
-                                };
-                                if let Err(err) = binding.await {
-                                    error_handler.set(Err(err));
-                                }
+                                    Ok(collection)
+                                }).await.context("async write collection error")?;
+                                Ok(())
                             },
                             START {}
                         }

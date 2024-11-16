@@ -27,3 +27,4 @@ snafu = "0.8.4"
 reqwest = "0.12.5"
 pulldown-cmark = "0.12.1"
 dioxus-radio = { git = "https://github.com/JustSimplyKyle/dioxus-radio" }
+ammonia = "4.0.0"

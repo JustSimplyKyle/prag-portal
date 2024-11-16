@@ -5,7 +5,6 @@ pub const PHOTO_LIBRARY: Asset = manganis::asset!("/public/photo_library.svg");
 use std::path::PathBuf;
 
 use dioxus::prelude::*;
-use dioxus_logger::tracing::{info, warn};
 use rust_lib::api::shared_resources::collection::CollectionId;
 use tailwind_fuse::tw_merge;
 
@@ -15,6 +14,7 @@ use crate::{
     use_error_handler,
     BaseComponents::{
         atoms::button::{Button, Roundness},
+        molecules::file_input::FileInput,
         string_placements::{Alignment, ContentType, Contents},
     },
     ThrowResource, COLLECTION_PICS,
@@ -129,7 +129,7 @@ fn ModifyPicture(collection_id: ReadOnlySignal<CollectionId>) -> Element {
             .map(|x| *x.0)
     });
 
-    let mut filename: Signal<Option<String>> = use_signal(|| None);
+    let filename: Signal<Option<String>> = use_signal(|| None);
 
     use_effect(move || {
         let mut binding = || {
@@ -258,21 +258,11 @@ fn ModifyPicture(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                                 }
                             }).align_left(),
                             ContentType::custom(rsx!{
-                                label {
+                                FileInput {
                                     class: "relative w-10 h-10 p-2.5 bg-zinc-900 rounded-full flex items-center justify-center",
-                                    role: "button",
-                                    input {
-                                        r#type: "file",
-                                        class: "hidden",
-                                        accept: ".png,.jpg,.avif,.heif",
-                                        multiple: false,
-                                        onchange: move |evt| {
-                                            if let Some(files) = evt.files() {
-                                                filename.set(files.files().first().cloned());
-                                            }
-                                        },
-                                    }
+                                    filename,
                                     {ContentType::svg(ADD).css("svg-[20px]")}
+
                                 }
                             }).align_right()
                         ]

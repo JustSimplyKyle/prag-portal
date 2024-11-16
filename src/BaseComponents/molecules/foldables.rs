@@ -1,5 +1,3 @@
-use std::time::Duration;
-
 use dioxus::prelude::*;
 
 use crate::{use_mounted, use_scroll_size, use_visible_size};

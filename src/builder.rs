@@ -2,7 +2,6 @@ pub mod component;
 
 use std::path::PathBuf;
 
-use dioxus_logger::tracing::info;
 use rust_lib::api::{
     backend_exclusive::{errors::ManifestProcessingError, vanilla::version::VersionMetadata},
     shared_resources::{

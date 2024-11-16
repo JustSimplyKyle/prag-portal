@@ -17,14 +17,14 @@ use collection_edit::CollectionEditContainer;
 use dioxus::desktop::tao::dpi::PhysicalSize;
 use dioxus::desktop::WindowBuilder;
 use dioxus::html::input_data::MouseButton;
-use dioxus_logger::tracing::{info, Level};
+use dioxus_logger::tracing::{self, error, info, Level};
 use dioxus_radio::hooks::use_init_radio_station;
 use manganis::ImageAsset;
 use pages::Pages;
 use rand::seq::IteratorRandom;
 use scrollable::Scrollable;
 use snafu::ErrorCompat;
-use std::{collections::BTreeMap, path::PathBuf, time::Duration};
+use std::{collections::BTreeMap, future::Future, path::PathBuf, time::Duration};
 use svgs::{CREATE_COLLECTION, CURSEFORGE_OUTLINE, GRASS, MODRINTH_OUTLINE};
 use tailwind_fuse::*;
 use BaseComponents::{
@@ -307,8 +307,25 @@ impl<P, K: Into<anyhow::Error> + Send + Sync + 'static, T: FnMut() -> Result<P, 
     }
 }
 
+pub trait AsyncThrowResource<T> {
+    async fn throw(self);
+}
+
+impl<P, K: Into<anyhow::Error> + Send + Sync + 'static, T: Future<Output = Result<P, K>>>
+    AsyncThrowResource<T> for T
+{
+    async fn throw(self) {
+        if let Err(x) = self.await {
+            use std::error::Error;
+            let boxed_error: Box<dyn Error + Send + Sync> = Box::from(x.into());
+            let leaked_error: &'static (dyn Error + Send + Sync) = Box::leak(boxed_error);
+            ScopeId::APP.throw_error(leaked_error);
+        }
+    }
+}
+
 #[must_use]
-pub fn use_error_handler() -> Signal<Result<(), anyhow::Error>> {
+pub fn use_error_handler() -> SyncSignal<Result<(), anyhow::Error>> {
     use_context()
 }
 
@@ -413,7 +430,7 @@ fn t_create_collection() -> Result<(), RenderError> {
     let mut radio = id.use_collection_radio();
     spawn(async move {
         info!("Adding mods...");
-        radio
+        if let Err(err) = radio
             .with_async_mut(move |mut collection| async move {
                 collection
                     .add_multiple_modrinth_mod(
@@ -430,13 +447,14 @@ fn t_create_collection() -> Result<(), RenderError> {
                         vec![],
                         None,
                     )
-                    .await
-                    .unwrap();
-                collection.download_mods().await.unwrap();
-                collection
+                    .await?;
+                collection.download_mods().await?;
+                Ok(collection)
             })
-            .await;
-        // error_handler.set(binding().await);
+            .await
+        {
+            error_handler.set(Err(err.into()));
+        }
         info!("Finished downloading mods");
     });
 
@@ -445,8 +463,8 @@ fn t_create_collection() -> Result<(), RenderError> {
 
 #[component]
 fn Layout() -> Element {
-    let error_handler: Signal<Result<(), anyhow::Error>> =
-        use_context_provider(|| Signal::new(Ok(())));
+    let error_handler: SyncSignal<Result<(), anyhow::Error>> =
+        use_context_provider(|| Signal::new_maybe_sync(Ok(())));
 
     // t_create_collection()?;
 

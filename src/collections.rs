@@ -15,7 +15,7 @@ use crate::{
     },
 };
 use dioxus::prelude::*;
-use rust_lib::api::shared_resources::{collection::use_collections_radio, entry::STORAGE};
+use rust_lib::api::shared_resources::collection::use_collections_radio;
 
 pub static NOTE: Asset = manganis::asset!("/public/note_stack_add.svg");
 pub static CROP_FREE: Asset = manganis::asset!("/public/crop_free.svg");
@@ -180,7 +180,7 @@ pub fn Collections() -> Element {
                 for (collection_id, i) in keys_iter {
                     CollectionBlock {
                         fat: false,
-                        collection_id: collection_id.clone(),
+                        collection_id: *collection_id,
                         z_index: "{i}",
                         extended_class: "rounded-[20px] overflow-y-visible",
                     }

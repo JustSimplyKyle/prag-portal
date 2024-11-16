@@ -1,10 +1,7 @@
 use std::path::PathBuf;
 
 use dioxus::prelude::*;
-use rust_lib::api::{
-    backend_exclusive::{errors::ManifestProcessingError, vanilla::version::VersionMetadata},
-    shared_resources::collection::AdvancedOptions,
-};
+use rust_lib::api::backend_exclusive::vanilla::version::{VersionMetadata, VersionType};
 
 use crate::{
     get_random_collection_picture,
@@ -17,10 +14,10 @@ use crate::{
             center::Center,
             switch::{self, FloatingSwitch},
         },
-        molecules::foldables::Foldable,
+        molecules::{file_input::FileInput, foldables::Foldable},
         organisms::modal::Modal,
     },
-    ErrorFormatted, ToRenderError,
+    ToRenderError,
 };
 #[component]
 fn Title(title: String) -> Element {
@@ -70,6 +67,18 @@ fn Header() -> Element {
 #[component]
 fn PicturePicker(cover_img: Signal<PathBuf>, background_img: Signal<PathBuf>) -> Element {
     let button  = "inline-flex items-center justify-center bg-background min-w-full max-w-full p-[10px] rounded-[20px]";
+    let cover_img_filename = use_signal(|| None);
+    let background_img_filename = use_signal(|| None);
+    use_effect(move || {
+        if let Some(name) = cover_img_filename() {
+            cover_img.set(PathBuf::from(name));
+        }
+    });
+    use_effect(move || {
+        if let Some(name) = background_img_filename() {
+            background_img.set(PathBuf::from(name));
+        }
+    });
     rsx! {
         div {
             class: "flex flex-col gap-[20px]",
@@ -87,7 +96,8 @@ fn PicturePicker(cover_img: Signal<PathBuf>, background_img: Signal<PathBuf>) ->
                     div {
                         class: "flex flex-col gap-[5px] justify-center",
                         width: "95px",
-                        div {
+                        FileInput {
+                            filename: cover_img_filename,
                             class: button,
                             height: "64.5px",
                             UPLOAD_FILE {}
@@ -112,7 +122,8 @@ fn PicturePicker(cover_img: Signal<PathBuf>, background_img: Signal<PathBuf>) ->
                     div {
                         class: "flex flex-col gap-[5px]",
                         width: "95px",
-                        div {
+                        FileInput {
+                            filename: background_img_filename,
                             class: button,
                             height: "64.5px",
                             UPLOAD_FILE {}
@@ -162,42 +173,109 @@ fn SetupName(mut title: Signal<Option<String>>) -> Element {
 }
 
 #[component]
-pub fn GameVersion(
-    selected_version: Resource<Result<VersionMetadata, ManifestProcessingError>>,
-) -> Element {
-    let binding = selected_version.read();
-    let current_version = match &*binding {
-        Some(Ok(x)) => x,
-        Some(Err(err)) => {
-            return Err(err.to_formatted().to_render_error());
-        }
-        None => {
-            return VNode::empty();
-        }
-    };
+pub fn GameVersion(selected_version: Signal<Option<VersionMetadata>>) -> Element {
+    let latest_version = use_resource(VersionMetadata::latest_release);
+    let binding = latest_version.read();
+    let latest_version = binding
+        .as_ref()
+        .map(|x| x.as_ref())
+        .transpose()
+        .map_err(ToRenderError::to_render_error)?;
+
+    let mut snapshot_status = use_signal(|| false);
+    let mut selecetor_visibility = use_signal(|| false);
+
+    let game_versions = use_resource(move || async move {
+        VersionMetadata::get_version_manifest()
+            .await
+            .map(|x| x.versions)
+    });
+    let read = game_versions.read();
+
+    let all_game_versions = read
+        .as_ref()
+        .map(|x| x.as_deref())
+        .transpose()
+        .map_err(ToRenderError::to_render_error)?
+        .into_iter()
+        .flat_map(|x| x.iter())
+        .cloned();
+
+    let release_game_version = read
+        .as_ref()
+        .map(|x| x.as_deref())
+        .transpose()
+        .map_err(ToRenderError::to_render_error)?
+        .into_iter()
+        .flat_map(|x| x.iter().filter(|x| x.version_type == VersionType::Release))
+        .cloned();
 
     rsx! {
         div {
-            class: "flex flex-col gap-[20px]",
+            class: "flex flex-col gap-[20px] z-50",
             Title {
                 title: "遊戲版本"
             }
             div {
                 class: "flex gap-[5px] h-[60px]",
                 div {
-                    class: "pl-[20px] pr-[15px] bg-background w-full grow grid grid-flow-col justify-stretch items-center rounded-[20px]",
+                    class: "pl-[20px] pr-[15px] bg-background w-full grow grid grid-flow-col justify-stretch items-center rounded-[20px] relative",
+                    onclick: move |_| {
+                        selecetor_visibility.toggle();
+                    },
                     div {
                         class: "justify-self-start grow trim text-[18px] font-english",
-                        {current_version.id.clone()}
+                        if let Some(version) = &*selected_version.read() {
+                            {version.id.clone()}
+                        } else {
+                            if let Some(v) = latest_version {
+                                {v.id.clone()}
+                            }
+                        }
                     }
                     ARROW_DOWN {
                         class: "justify-self-end"
                     }
+                    div {
+                        aria_hidden: !selecetor_visibility(),
+                        onclick: move |x| {
+                            x.stop_propagation();
+                        },
+                        class: "absolute inset-x-0 top-full flex flex-col bg-background rounded-[20px] p-[20px] gap-[10px] h-fit max-h-[300px] mt-[10px] overflow-y-scroll aria-hidden:opacity-0 aria-hidden:hidden",
+                        transition: "all 0.5s allow-discrete",
+                        if snapshot_status() {
+                            for y in all_game_versions {
+                                div {
+                                    class: "text-english",
+                                    onclick: move |_| {
+                                        selected_version.set(Some(y.clone()));
+                                        selecetor_visibility.set(false);
+                                    },
+                                    {y.id.clone()}
+                                }
+                            }
+                        } else {
+                            for y in release_game_version {
+                                div {
+                                    class: "text-english",
+                                    onclick: move |_| {
+                                        selected_version.set(Some(y.clone()));
+                                        selecetor_visibility.set(false);
+                                    },
+                                    {y.id.clone()}
+                                }
+                            }
+                        }
+                    }
                 }
                 div {
                     class: "bg-background min-w-[220px] max-w-[220px] grid grid-flow-col justify-stretch items-center gap-[10px] pl-[20px] pr-[15px] rounded-[20px]",
-                    div {
-                        class: "justify-self-start grow w-full font-display text-[18px] font-normal text-secondary",
+                    button {
+                        "data-selected": snapshot_status(),
+                        class: "justify-self-start grow w-full font-display text-[18px] font-normal text-hint data-[selected=true]:text-white transition-all",
+                        onclick: move |_| {
+                            snapshot_status.toggle();
+                        },
                         "顯示快照版本"
                     }
                     CLOSE_CROSS {
@@ -245,8 +323,7 @@ pub fn BuildCollection(active: Signal<bool>) -> Element {
     let title = use_signal(|| None);
     let cover_img = use_signal(get_random_collection_picture);
     let background_img = use_signal(get_random_collection_picture);
-
-    let selected_version = use_resource(VersionMetadata::latest_release);
+    let selected_version = use_signal(|| None);
 
     rsx! {
         Modal {

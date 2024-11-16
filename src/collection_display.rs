@@ -119,15 +119,16 @@ fn Footer(
 
     let launch_game = move || {
         spawn(async move {
-            radio
+            if let Err(err) = radio
                 .with_async_mut(move |mut collection| async move {
-                    if let Err(err) = collection.launch_game(logs).await {
-                        error!("collection throwed {err:?}");
-                    }
-                    collection
+                    collection.launch_game(logs).await?;
+                    Ok(collection)
                 })
                 .await
-                .unwrap();
+            {
+                error!("collection throwed {err:?}");
+                error_handler.set(Err(err.into()));
+            }
         })
     };
 

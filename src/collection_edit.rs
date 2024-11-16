@@ -3,10 +3,7 @@ pub mod sidebar;
 
 use dioxus::prelude::*;
 use personalization::Personalization;
-use rust_lib::api::shared_resources::{
-    collection::{use_collections_radio, CollectionId},
-    entry::STORAGE,
-};
+use rust_lib::api::shared_resources::collection::{use_collections_radio, CollectionId};
 use sidebar::EditSidebar;
 use strum::{EnumIter, IntoEnumIterator};
 
@@ -58,10 +55,7 @@ impl_optional_state_switcher!(Pages);
 pub fn CollectionEditContainer() -> Element {
     let radio = use_collections_radio();
     let read = radio.read();
-    let collection_ids = read
-        .0
-        .keys()
-        .map(|x| (x.clone(), Pages::collection_edit(x.clone())));
+    let collection_ids = read.0.keys().map(|x| (*x, Pages::collection_edit(*x)));
     rsx! {
         for (collection_id , page) in collection_ids {
             div {

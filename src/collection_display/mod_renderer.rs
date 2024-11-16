@@ -2,8 +2,8 @@ mod details;
 
 use std::ops::Deref;
 
-use dioxus::{prelude::*, CapturedError};
-use dioxus_logger::tracing::{info, warn};
+use dioxus::prelude::*;
+use dioxus_logger::tracing::info;
 use rust_lib::api::{
     backend_exclusive::mod_management::mods::{ModMetadata, Platform},
     shared_resources::collection::CollectionId,
