@@ -12,19 +12,18 @@ pub mod side_bar;
 pub mod svgs;
 pub mod text_scroller;
 
-use builder::collection_builder;
 use collection_edit::CollectionEditContainer;
 use dioxus::desktop::tao::dpi::PhysicalSize;
 use dioxus::desktop::WindowBuilder;
 use dioxus::html::input_data::MouseButton;
-use dioxus_logger::tracing::{self, error, info, Level};
+use dioxus_logger::tracing::Level;
 use dioxus_radio::hooks::use_init_radio_station;
 use manganis::ImageAsset;
 use pages::Pages;
 use rand::seq::IteratorRandom;
 use scrollable::Scrollable;
 use snafu::ErrorCompat;
-use std::{collections::BTreeMap, future::Future, path::PathBuf, time::Duration};
+use std::{collections::BTreeMap, path::PathBuf, time::Duration};
 use svgs::{CREATE_COLLECTION, CURSEFORGE_OUTLINE, GRASS, MODRINTH_OUTLINE};
 use tailwind_fuse::*;
 use BaseComponents::{
@@ -166,7 +165,7 @@ impl History {
 }
 
 use rust_lib::api::shared_resources::collection::{
-    use_collections_radio, Collection, CollectionId, CollectionRadioChannel,
+    self, use_collections_radio, Collection, CollectionId, CollectionRadioChannel,
 };
 
 fn main() {
@@ -178,18 +177,7 @@ fn main() {
             .with_title("Prag Portal")
             .with_inner_size(PhysicalSize::new(1600, 920)),
     );
-    LaunchBuilder::desktop().with_cfg(cfg).launch(|| {
-        use rust_lib::api::shared_resources::collection::Collections as C;
-        use_init_radio_station::<C, CollectionRadioChannel>(|| {
-            C(Collection::scan()
-                .unwrap()
-                .into_iter()
-                .flatten()
-                .map(|x| (x.get_collection_id(), x))
-                .collect())
-        });
-        App()
-    });
+    LaunchBuilder::desktop().with_cfg(cfg).launch(App);
 }
 
 // #[cfg(debug_assertions)]
@@ -231,35 +219,43 @@ fn TailwindSetup() -> Element {
 fn App() -> Element {
     let error_active = use_signal(|| true);
     rsx! {
-        TailwindSetup {}
+        TailwindSetup {
+
+
+        }
         div {
             class: "[&_*]:transform-gpu bg-deep-background h-screen w-screen font-display leading-normal",
             ErrorBoundary {
-                handle_error: move |error| { rsx! {
-                    Modal {
-                        active: error_active,
-                        div {
-                            class: "flex",
+                handle_error: move |error| {
+                    rsx! {
+                        Modal {
+                            active: error_active,
                             div {
-                                flex_basis: "10%",
-                            }
-                            div { class: "w-full bg-background overflow-x-scroll flex flex-col items-center space-y-3",
-                                flex_basis: "80%",
-                                div { class: "text-red text-3xl font-black",
-                                    "Hmm, something went wrong. Please copy the following error to the developer."
+                                class: "flex",
+                                div {
+                                    flex_basis: "10%",
                                 }
-                                pre {
-                                    class: "max-w-full overflow-x-scroll font-[13px] font-bold",
-                                    "{error:#?}"
+                                div {
+                                    class: "w-full bg-background overflow-x-scroll flex flex-col items-center space-y-3",
+                                    flex_basis: "80%",
+                                    div {
+                                        class: "text-red text-3xl font-black",
+                                        "Hmm, something went wrong. Please copy the following error to the developer."
+                                    }
+                                    pre {
+                                        class: "max-w-full overflow-x-scroll font-[13px] font-bold",
+                                        "{error:#?}"
+                                    }
                                 }
-                            }
-                            div {
-                                flex_basis: "10%",
+                                div {
+                                    flex_basis: "10%",
+                                }
                             }
                         }
                     }
-                } },
+                },
                 Layout {
+
 
                 }
             }
@@ -299,23 +295,6 @@ impl<P, K: Into<anyhow::Error> + Send + Sync + 'static, T: FnMut() -> Result<P, 
 {
     fn throw(&mut self) {
         if let Err(x) = self() {
-            use std::error::Error;
-            let boxed_error: Box<dyn Error + Send + Sync> = Box::from(x.into());
-            let leaked_error: &'static (dyn Error + Send + Sync) = Box::leak(boxed_error);
-            ScopeId::APP.throw_error(leaked_error);
-        }
-    }
-}
-
-pub trait AsyncThrowResource<T> {
-    async fn throw(self);
-}
-
-impl<P, K: Into<anyhow::Error> + Send + Sync + 'static, T: Future<Output = Result<P, K>>>
-    AsyncThrowResource<T> for T
-{
-    async fn throw(self) {
-        if let Err(x) = self.await {
             use std::error::Error;
             let boxed_error: Box<dyn Error + Send + Sync> = Box::from(x.into());
             let leaked_error: &'static (dyn Error + Send + Sync) = Box::leak(boxed_error);
@@ -412,61 +391,69 @@ impl<T: std::fmt::Debug + ErrorCompat + 'static + snafu::Error> ErrorFormatted f
     }
 }
 
-fn t_create_collection() -> Result<(), RenderError> {
-    let mut error_handler = use_error_handler();
-    let collections_radio = use_collections_radio();
+// fn t_create_collection() -> Result<(), RenderError> {
+//     let mut error_handler = use_error_handler();
+//     let collections_radio = use_collections_radio();
 
-    let err = use_resource(move || collection_builder(None, "1.20.1", collections_radio));
+//     let err = use_resource(move || collection_builder(None, "1.20.1", collections_radio));
 
-    let read = err.read();
-    let Some(id) = read
-        .as_ref()
-        .map(|x| x.as_ref().cloned())
-        .transpose()
-        .map_err(|x| x.to_formatted().to_render_error())?
-    else {
-        return Ok(());
-    };
-    let mut radio = id.use_collection_radio();
-    spawn(async move {
-        info!("Adding mods...");
-        if let Err(err) = radio
-            .with_async_mut(move |mut collection| async move {
-                collection
-                    .add_multiple_modrinth_mod(
-                        vec![
-                            "fabric-api",
-                            "sodium",
-                            "modmenu",
-                            "ferrite-core",
-                            "lazydfu",
-                            "create-fabric",
-                            "iris",
-                            "indium",
-                        ],
-                        vec![],
-                        None,
-                    )
-                    .await?;
-                collection.download_mods().await?;
-                Ok(collection)
-            })
-            .await
-        {
-            error_handler.set(Err(err.into()));
-        }
-        info!("Finished downloading mods");
-    });
+//     let read = err.read();
+//     let Some(id) = read
+//         .as_ref()
+//         .map(|x| x.as_ref().cloned())
+//         .transpose()
+//         .map_err(|x| x.to_formatted().to_render_error())?
+//     else {
+//         return Ok(());
+//     };
+//     let mut radio = id.use_collection_radio();
+//     spawn(async move {
+//         info!("Adding mods...");
+//         if let Err(err) = radio
+//             .with_async_mut(move |mut collection| async move {
+//                 collection
+//                     .add_multiple_modrinth_mod(
+//                         vec![
+//                             "fabric-api",
+//                             "sodium",
+//                             "modmenu",
+//                             "ferrite-core",
+//                             "lazydfu",
+//                             "create-fabric",
+//                             "iris",
+//                             "indium",
+//                         ],
+//                         vec![],
+//                         None,
+//                     )
+//                     .await?;
+//                 collection.download_mods().await?;
+//                 Ok(collection)
+//             })
+//             .await
+//         {
+//             error_handler.set(Err(err.into()));
+//         }
+//         info!("Finished downloading mods");
+//     });
 
-    Ok(())
-}
+//     Ok(())
+// }
 
 #[component]
 fn Layout() -> Element {
     let error_handler: SyncSignal<Result<(), anyhow::Error>> =
         use_context_provider(|| Signal::new_maybe_sync(Ok(())));
+    let collections = Collection::scan()?;
 
-    // t_create_collection()?;
+    use_init_radio_station::<collection::Collections, CollectionRadioChannel>(move || {
+        let collections = collections
+            .into_iter()
+            .flatten()
+            .map(|x| (x.get_collection_id(), x))
+            .collect();
+        collection::Collections(collections)
+    });
 
     let keys = use_keys();
 
@@ -560,17 +547,16 @@ fn Layout() -> Element {
 }
 
 #[must_use]
-pub fn use_keys() -> ReadOnlySignal<Vec<CollectionId>> {
-    ReadOnlySignal::new(Signal::new(
-        use_collections_radio().read().0.keys().cloned().collect(),
-    ))
+pub fn use_keys() -> Memo<Vec<CollectionId>> {
+    let radio = use_collections_radio();
+    use_memo(move || radio.read().0.keys().copied().collect())
 }
 
 #[component]
 fn CollectionContainer() -> Element {
     let should_render_ids = use_keys()()
         .into_iter()
-        .filter(|x| Pages::collection_display(x.clone()).should_render());
+        .filter(|x| Pages::collection_display(*x).should_render());
     rsx! {
         for collection_id in should_render_ids {
             div {
@@ -578,7 +564,7 @@ fn CollectionContainer() -> Element {
                 key: "page {collection_id}",
                 id: Pages::collection_display(collection_id).slide_in_id(),
                 SingleCollectionContainer {
-                    id: collection_id.clone(),
+                    id: collection_id,
                 }
             }
         }
@@ -591,7 +577,7 @@ fn SingleCollectionContainer(id: CollectionId) -> Element {
         div {
             class: "bg-deep-background min-h-screen rounded-xl min-w-full",
             CollectionDisplay {
-                collection_id: id
+                collection_id: id,
             }
         }
     }
@@ -614,86 +600,40 @@ fn LayoutContainer(children: Element, #[props(default)] extended_class: String) 
 #[component]
 fn Explore() -> Element {
     let state = use_signal(|| State::Left);
-    let enabled = use_signal(|| false);
-    let enabled2 = use_signal(|| false);
     rsx! {
         FloatingSwitch {
             lhs_width: 80.,
             lhs: rsx! {
                 CURSEFORGE_OUTLINE {
-                    class: "transition-all fill-background w-[40px] group-data-[selected=Right]:w-[30px] group-data-[selected=Right]:fill-secondary-surface"
+                    class: "transition-all fill-background w-[40px] group-data-[selected=Right]:w-[30px] group-data-[selected=Right]:fill-secondary-surface",
                 }
             },
             lhs_css: "px-[20px] py-[10px]",
             rhs_width: 80.,
             rhs: rsx! {
                 MODRINTH_OUTLINE {
-                    class: "transition-all fill-background w-[35px] group-data-[selected=Left]:w-[30px] group-data-[selected=Left]:fill-secondary-surface"
+                    class: "transition-all fill-background w-[35px] group-data-[selected=Left]:w-[30px] group-data-[selected=Left]:fill-secondary-surface",
                 }
             },
             rhs_css: "px-[20px] py-[10px]",
             floater: "bg-orange group-data-[selected=Right]:bg-green",
             class: "h-[80px]",
-            state
+            state,
         }
         FloatingSwitch {
             lhs_width: 80.,
             lhs: GRASS(()),
             lhs_css: "px-[20px] py-[15px]",
             rhs_width: 120.,
-            rhs: rsx! { CREATE_COLLECTION {} },
+            rhs: rsx! {
+                CREATE_COLLECTION { }
+            },
             rhs_css: "px-[20px] py-[15px]",
             floater: "bg-secondary-surface",
-            state
+            state,
         }
         div {
             class: "flex flex-col bg-background",
-            // Foldable {
-            //     enabled,
-            //     title: rsx! {
-            //         div {
-            //             class: "size-[100px]",
-            //         }
-            //     },
-            //     div {
-            //         class: "flex flex-col gap-[20px]",
-            //         div {
-            //             class: "text-[80px] bg-deep-background",
-            //             "ABCDEFG"
-            //         }
-            //         div {
-            //             class: "text-[80px] bg-deep-background",
-            //             "HIJKLMNOP"
-            //         }
-            //         div {
-            //             class: "text-[80px] bg-deep-background",
-            //             "QRSTUV"
-            //         }
-            //     }
-            // }
-            // Foldable {
-            //     enabled: enabled2,
-            //     title: rsx! {
-            //         div {
-            //             class: "size-[100px]",
-            //         }
-            //     },
-            //     div {
-            //         class: "flex flex-col gap-[20px]",
-            //         div {
-            //             class: "text-[80px] bg-deep-background",
-            //             "ABCDEFG"
-            //         }
-            //         div {
-            //             class: "text-[80px] bg-deep-background",
-            //             "HIJKLMNOP"
-            //         }
-            //         div {
-            //             class: "text-[80px] bg-deep-background",
-            //             "QRSTUV"
-            //         }
-            //     }
-            // }
         }
     }
 }

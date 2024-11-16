@@ -46,48 +46,48 @@ body {
     font-family: 'GenSenRounded TW';
     font-style: normal;
     font-weight: 400;
-    src: url(/fonts/Geo-Regular.ttf);
+    src: url(/assets/fonts/Geo-Regular.ttf);
   }
 
   @font-face {
     font-family: 'GenSenRounded TW';
     font-style: normal;
     font-weight: 500;
-    src: url(/fonts/GenSenRounded-M.ttc);
+    src: url(/assets/fonts/GenSenRounded-M.ttc);
   }
 
   @font-face {
     font-family: 'GenSenRounded TW';
     font-style: normal;
     font-weight: 700;
-    src: url(/fonts/GenSenRounded-B.ttc);
+    src: url(/assets/fonts/GenSenRounded-B.ttc);
   }
 
   @font-face {
     font-family: 'GenSenRounded TW';
     font-style: normal;
     font-weight: 800;
-    src: url(/fonts/GenSenRounded-H.ttc);
+    src: url(/assets/fonts/GenSenRounded-H.ttc);
   }
 
   @font-face {
     font-family: 'IBM Plex Mono';
     font-style: normal;
     font-weight: 400;
-    src: url(/fonts/IBM_Plex_Mono/IBMPlexMono-Regular.ttf);
+    src: url(/assets/fonts/IBM_Plex_Mono/IBMPlexMono-Regular.ttf);
   }
 
   @font-face {
     font-family: 'IBM Plex Mono';
     font-style: normal;
     font-weight: 500;
-    src: url(/fonts/IBM_Plex_Mono/IBMPlexMono-Medium.ttf);
+    src: url(/assets/fonts/IBM_Plex_Mono/IBMPlexMono-Medium.ttf);
   }
 
   @font-face {
     font-family: 'IBM Plex Mono';
     font-style: normal;
     font-weight: 700;
-    src: url(/fonts/IBM_Plex_Mono/IBMPlexMono-Bold.ttf);
+    src: url(/assets/fonts/IBM_Plex_Mono/IBMPlexMono-Bold.ttf);
   }
 }

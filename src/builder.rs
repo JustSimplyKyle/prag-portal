@@ -37,15 +37,9 @@ pub enum CollectionBuilderError {
 /// - An error occurs while downloading the mods.
 pub async fn collection_builder(
     picture_path: impl Into<Option<PathBuf>> + Send,
-    version_id: impl Into<String> + Send,
+    version: VersionMetadata,
     collections_radio: CollectionsRadio,
 ) -> Result<CollectionId, CollectionBuilderError> {
-    let version_id = version_id.into();
-    let version = VersionMetadata::from_id(&version_id)
-        .await
-        .context(VersionIdParsingSnafu { id: &version_id })?
-        .context(InvalidVersionIdSnafu { id: &version_id })?;
-
     let id = entry::create_collection(
         "新的收藏",
         picture_path

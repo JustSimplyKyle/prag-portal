@@ -20,7 +20,7 @@ pub fn EditSidebar(collection_id: ReadOnlySignal<CollectionId>) -> Element {
         div {
             class: "flex flex-col min-w-[400px] max-w-[400px] gap-[20px]",
             EditSidebarInfographic {
-                collection_id
+                collection_id,
             }
             div {
                 class: "flex flex-col",
@@ -33,7 +33,7 @@ pub fn EditSidebar(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                     string_placements: vec![
                         ContentType::text("風格化").align_left(),
                         ContentType::svg(ARROW_RIGHT).css("svg-[30px]").align_right(),
-                    ]
+                    ],
                 }
                 Button {
                     roundness: Roundness::None,
@@ -44,7 +44,7 @@ pub fn EditSidebar(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                     string_placements: vec![
                         ContentType::text("收藏紀錄").align_left(),
                         ContentType::svg(ARROW_RIGHT).css("svg-[30px]").align_right(),
-                    ]
+                    ],
                 }
                 Button {
                     roundness: Roundness::None,
@@ -55,7 +55,7 @@ pub fn EditSidebar(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                     string_placements: vec![
                         ContentType::text("分享&匯出").align_left(),
                         ContentType::svg(ARROW_RIGHT).css("svg-[30px]").align_right(),
-                    ]
+                    ],
                 }
                 Button {
                     roundness: Roundness::None,
@@ -66,7 +66,7 @@ pub fn EditSidebar(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                     string_placements: vec![
                         ContentType::text("進階選項").align_left(),
                         ContentType::svg(ARROW_RIGHT).css("svg-[30px]").align_right(),
-                    ]
+                    ],
                 }
             }
             div {
@@ -80,7 +80,7 @@ pub fn EditSidebar(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                     string_placements: vec![
                         ContentType::svg(UNDO).css("svg-[35px]").align_center(),
                         ContentType::text("返回頁面").align_center(),
-                    ]
+                    ],
                 }
                 Button {
                     roundness: Roundness::Pill,
@@ -88,7 +88,7 @@ pub fn EditSidebar(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                     string_placements: vec![
                         ContentType::svg(ARROW_LEFT).align_center(),
                         ContentType::text("返回頁面").align_center(),
-                    ]
+                    ],
                 }
             }
         }
@@ -110,7 +110,10 @@ fn EditSidebarInfographic(collection_id: ReadOnlySignal<CollectionId>) -> Elemen
                     DISPLAY_BACKGROUND,
                 ),
                 {
-                    ContentType::image(radio.read().picture_path().to_string_lossy().to_string()).css("w-[100px] h-[100px] bg-cover rounded-t-[50px] rounded-bl-[15px] rounded-br-[50px] p-[5px]")
+                    ContentType::image(radio.read().picture_path().to_string_lossy().to_string())
+                        .css(
+                            "w-[100px] h-[100px] bg-cover rounded-t-[50px] rounded-bl-[15px] rounded-br-[50px] p-[5px]",
+                        )
                 }
             }
             Button {
@@ -123,14 +126,16 @@ fn EditSidebarInfographic(collection_id: ReadOnlySignal<CollectionId>) -> Elemen
                                 ContentType::text(radio.read().display_name())
                                     .onmounted(onmounted)
                                     .style(style())
-                                    .css("text-3xl font-black w-full group-hover:group-aria-selected:animate-scroll-left overflow-x-clip text-nowrap"),
+                                    .css(
+                                        "text-3xl font-black w-full group-hover:group-aria-selected:animate-scroll-left overflow-x-clip text-nowrap",
+                                    ),
                                 ContentType::hint("由我建立•18 分鐘•不久前開啟")
                                     .css("font-medium text-[15px]"),
                             ],
                             Alignment::Left,
                         )
                         .css("flex flex-col gap-[15px]"),
-                ]
+                ],
             }
         }
     }

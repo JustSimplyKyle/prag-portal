@@ -85,7 +85,9 @@ pub fn Button(
             style,
             role: if clickable { "button" } else { "" },
             aria_selected: {
-                switcher.as_ref().map_or_else(|| focus_color_change && clickiness(), |x| x.compare())
+                switcher
+                    .as_ref()
+                    .map_or_else(|| focus_color_change && clickiness(), |x| x.compare())
             },
             onclick: move |_| {
                 if switcher.is_none() && focus_color_change {
@@ -113,7 +115,7 @@ pub fn Button(
                 match string_placements {
                     StringPlacements::Designed(s) => rsx! {
                         for x in s {
-                            { x }
+                            {x}
                         }
                     },
                     StringPlacements::Custom(x) => x,

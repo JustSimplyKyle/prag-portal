@@ -140,9 +140,7 @@ fn Footer(
                 extended_css_class: "bg-background",
                 fill_mode: FillMode::Fit,
                 clickable: false,
-                string_placements: vec![
-                    ContentType::svg(BRIGHT_LEFT_ARROW).css("svg-[40px]").align_center(),
-                ],
+                string_placements: vec![ContentType::svg(BRIGHT_LEFT_ARROW).css("svg-[40px]").align_center()],
             }
             Button {
                 roundness: Roundness::Squircle,
@@ -151,13 +149,17 @@ fn Footer(
                 clickable: false,
                 string_placements: vec![
                     Contents::new(
-                        vec![
-                            ContentType::text("模組").css("font-medium"),
-                            ContentType::text(format!("({})", len.unwrap_or_default())).css("text-hint font-english font-medium"),
-                        ],
-                        Alignment::Left,
-                    ).css("gap-[5px] align-center"),
-                    ContentType::svg(asset!("/public/arrow_drop_down_40.svg")).css("svg-[40px]").align_right(),
+                            vec![
+                                ContentType::text("模組").css("font-medium"),
+                                ContentType::text(format!("({})", len.unwrap_or_default()))
+                                    .css("text-hint font-english font-medium"),
+                            ],
+                            Alignment::Left,
+                        )
+                        .css("gap-[5px] align-center"),
+                    ContentType::svg(asset!("/public/arrow_drop_down_40.svg"))
+                        .css("svg-[40px]")
+                        .align_right(),
                 ],
             }
             SearchBar {
@@ -171,17 +173,13 @@ fn Footer(
                 onclick: move |()| {
                     Pages::collection_edit(collection_id()).switch_active_to_self();
                 },
-                string_placements: vec![
-                    ContentType::svg(HORIZ).align_center(),
-                ],
+                string_placements: vec![ContentType::svg(HORIZ).align_center()],
             }
             Button {
                 roundness: Roundness::Squircle,
                 extended_css_class: "bg-background",
                 fill_mode: FillMode::Fit,
-                string_placements: vec![
-                    ContentType::svg(STAR).css("svg-[40px]").align_center(),
-                ],
+                string_placements: vec![ContentType::svg(STAR).css("svg-[40px]").align_center()],
             }
             Button {
                 roundness: Roundness::Squircle,
@@ -190,9 +188,7 @@ fn Footer(
                 onclick: move |()| {
                     launch_game();
                 },
-                string_placements: vec![
-                    {ContentType::svg(GAME_CONTROLLER).align_center()}
-                ],
+                string_placements: vec![{ ContentType::svg(GAME_CONTROLLER).align_center() }],
             }
         }
     }
@@ -208,7 +204,7 @@ fn Content(collection_id: ReadOnlySignal<CollectionId>) -> Element {
             background_color: "#191919",
             background: format!(
                 "linear-gradient(145deg, rgba(25, 25, 25, 0.00) 18.18%, #191919 88.98%), url(\'{}\') lightgray 50% / cover no-repeat",
-                DISPLAY_BACKGROUND
+                DISPLAY_BACKGROUND,
             ),
             div {
                 class: "justify-self-start flex flex-col gap-[35px]",
@@ -233,12 +229,14 @@ fn Content(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                             clickable: false,
                             string_placements: vec![
                                 ContentType::svg(GAME_CONTROLLER).css("svg-[30px]").align_left(),
-                                ContentType::custom(rsx!(
-                                    div {
-                                        class: "font-english text-black font-bold leading-[1.2] capsize",
-                                        {loader.clone()}
-                                    }
-                                )).align_right(),
+                                ContentType::custom(
+                                        rsx!(
+                                            div { class :
+                                            "font-english text-black font-bold leading-[1.2] capsize", { loader
+                                            .clone() } }
+                                        ),
+                                    )
+                                    .align_right(),
                             ],
                         }
                     }
@@ -249,7 +247,7 @@ fn Content(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                         clickable: false,
                         string_placements: vec![
                             ContentType::svg(GAME_CONTROLLER).css("svg-[30px]").align_left(),
-                            ContentType::text("由我建立").css("text-black").align_right()
+                            ContentType::text("由我建立").css("text-black").align_right(),
                         ],
                     }
                     Button {
@@ -259,7 +257,7 @@ fn Content(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                         clickable: false,
                         string_placements: vec![
                             ContentType::svg(GAME_CONTROLLER).css("svg-[30px]").align_left(),
-                            ContentType::text("我的錦集").css("text-black").align_right()
+                            ContentType::text("我的錦集").css("text-black").align_right(),
                         ],
                     }
                 }
@@ -268,7 +266,7 @@ fn Content(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                 class: "max-xl:hidden justify-self-end flex h-fit",
                 img {
                     class: "rounded-l-[30px] shadow size-[280px] object-cover",
-                    src: radio.read().picture_path().to_string_lossy().to_string()
+                    src: radio.read().picture_path().to_string_lossy().to_string(),
                 }
                 div {
                     class: "rounded-r-[30px] grid grid-flow-row justify-center items-stretch bg-deep-background pt-[25px] pb-[25px] gap-[15px]",
@@ -301,27 +299,61 @@ pub fn CollectionDisplay(collection_id: ReadOnlySignal<CollectionId>) -> Element
         div {
             class: "mr-[20px] w-full h-full",
             ScrollableFootBar {
-                footer: rsx!(Footer { collection_id, search, default }),
-                main: rsx!(Content { collection_id, }),
-                bottom: rsx!(
+                footer: rsx! {
+                    Footer {
+                        collection_id,
+                        search,
+                        default,
+                    }
+                },
+                main: rsx! {
+                    Content {
+                        collection_id,
+                    }
+                },
+                bottom: rsx! {
                     div {
                         class: "relative overflow-y-scroll min-w-full max-w-full flex flex-col h-full",
                         match status().0 {
                             CollectionDisplayTopSelection::Mods => {
-                                rsx!(ModViewer { collection_id, default, search: search() })
-                            },
+                                rsx! {
+                                    ModViewer {
+                                        collection_id,
+                                        default,
+                                        search: search(),
+                                    }
+                                }
+                            }
                             CollectionDisplayTopSelection::World => {
-                                rsx!(ModViewer { collection_id, default, search: search() })
+                                rsx! {
+                                    ModViewer {
+                                        collection_id,
+                                        default,
+                                        search: search(),
+                                    }
+                                }
                             }
                             CollectionDisplayTopSelection::ResourcePack => {
-                                rsx!(ModViewer { collection_id, default, search: search() })
-                            },
+                                rsx! {
+                                    ModViewer {
+                                        collection_id,
+                                        default,
+                                        search: search(),
+                                    }
+                                }
+                            }
                             CollectionDisplayTopSelection::ShaderPacks => {
-                                rsx!(ModViewer { collection_id, default, search: search() })
-                            },
+                                rsx! {
+                                    ModViewer {
+                                        collection_id,
+                                        default,
+                                        search: search(),
+                                    }
+                                }
+                            }
                         }
                     }
-                ),
+                },
             }
         }
     }

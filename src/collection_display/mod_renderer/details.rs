@@ -25,14 +25,14 @@ fn PlatformSwitch(platform: Signal<switch::State>) -> Element {
             lhs_width: 80.,
             lhs: rsx! {
                 CURSEFORGE_OUTLINE {
-                    class: "transition-all fill-deep-background w-[30px] group-data-[selected=Right]:fill-orange"
+                    class: "transition-all fill-deep-background w-[30px] group-data-[selected=Right]:fill-orange",
                 }
             },
             lhs_css: "px-[20px] py-[10px]",
             rhs_width: 60.,
             rhs: rsx! {
                 MODRINTH_OUTLINE {
-                    class: "transition-all fill-deep-background w-[35px] group-data-[selected=Left]:w-[30px] group-data-[selected=Left]:fill-modrinth"
+                    class: "transition-all fill-deep-background w-[35px] group-data-[selected=Left]:w-[30px] group-data-[selected=Left]:fill-modrinth",
                 }
             },
             rhs_css: "px-[20px] py-[10px]",
@@ -49,11 +49,11 @@ fn Authors(mods: ReadOnlySignal<ModMetadata>) -> Element {
         div {
             class: "flex w-fit justify-start gap-[7px] items-center",
             div {
-                class: "bg-white size-[20px]"
+                class: "bg-white size-[20px]",
             }
             div {
                 class: "text-[15px] font-english font-medium text-hint trim",
-                {mods.read().authors.join(" ")},
+                {mods.read().authors.join(" ")}
             }
         }
     }
@@ -65,11 +65,11 @@ fn DownloadCount(mods: ReadOnlySignal<ModMetadata>) -> Element {
         div {
             class: "flex w-fit justify-start gap-[7px] items-center",
             div {
-                class: "bg-white size-[20px]"
+                class: "bg-white size-[20px]",
             }
             div {
                 class: "text-[15px] font-english font-medium text-hint trim",
-                {mods.read().get_formatted_download_count()},
+                {mods.read().get_formatted_download_count()}
             }
         }
     }
@@ -81,11 +81,11 @@ fn LastUpdated(mods: ReadOnlySignal<ModMetadata>) -> Element {
         div {
             class: "flex w-fit justify-start gap-[7px] items-center",
             div {
-                class: "bg-white size-[20px]"
+                class: "bg-white size-[20px]",
             }
             div {
                 class: "text-[15px] font-english font-medium text-hint trim",
-                {mods.read().last_updated.date_naive().format("%Y.%m.%d").to_string()},
+                {mods.read().last_updated.date_naive().format("%Y.%m.%d").to_string()}
             }
         }
     }
@@ -101,11 +101,11 @@ fn TotalSize(mods: ReadOnlySignal<ModMetadata>) -> Element {
         div {
             class: "flex w-fit justify-start gap-[7px] items-center",
             div {
-                class: "bg-white size-[20px]"
+                class: "bg-white size-[20px]",
             }
             div {
                 class: "text-[15px] font-english font-medium text-hint trim",
-                {size.unwrap_or_default()},
+                {size.unwrap_or_default()}
             }
         }
     }
@@ -128,11 +128,11 @@ fn SupportedSideDisplay(mods: ReadOnlySignal<ModMetadata>) -> Element {
         div {
             class: "flex w-fit justify-start gap-[7px] items-center",
             div {
-                class: "bg-white size-[20px]"
+                class: "bg-white size-[20px]",
             }
             div {
                 class: "text-[15px] font-english font-medium text-hint trim",
-                {side},
+                {side}
             }
         }
     }
@@ -193,7 +193,7 @@ fn InnerModDetails(
                 div {
                     class: "justify-self-end flex gap-[10px]",
                     PlatformSwitch {
-                        platform
+                        platform,
                     }
                     Switch {
                         class: "bg-deep-background",
@@ -221,7 +221,7 @@ fn InnerModDetails(
                 }
             }
             RenderTranslatedMarkdown {
-                html: description
+                html: description,
             }
         }
     }
@@ -245,7 +245,7 @@ pub fn ModDetails(
                         mods,
                         active,
                         clicked,
-                        collection_id
+                        collection_id,
                     }
                 }
             }

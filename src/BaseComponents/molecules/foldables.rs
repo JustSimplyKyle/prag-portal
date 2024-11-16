@@ -13,12 +13,7 @@ pub fn Foldable(mut enabled: Signal<bool>, title: Element, children: Element) ->
             "data-enabled": enabled(),
             class: "group flex flex-col h-fit overflow-y-clip ease-slow duration-200 transition-all [&_*]:transition-all",
             onmounted: move |e| container_mounted.set(Some(e.data())),
-            max_height: if enabled() {
-                "{container_size().unwrap_or_default().height}px"
-            } else {
-                "{title_size().unwrap_or_default().height}px"
-
-            },
+            max_height: if enabled() { "{container_size().unwrap_or_default().height}px" } else { "{title_size().unwrap_or_default().height}px" },
             div {
                 class: "container",
                 onmounted: move |e| mounted.set(Some(e.data())),

@@ -1,8 +1,5 @@
 use dioxus::prelude::*;
-use rust_lib::api::shared_resources::{
-    collection::{use_collections_radio, CollectionId},
-    entry::STORAGE,
-};
+use rust_lib::api::shared_resources::collection::{use_collections_radio, CollectionId};
 
 use crate::{
     text_scroller::use_text_scroller,
@@ -33,6 +30,8 @@ pub fn SideBar() -> Element {
                         class: "flex space-x-[-20px]",
                         for x in collection_preview {
                             div {
+
+
                                 Image {
                                     css: "z-50 w-10 h-10 object-cover shrink-0 inline-flex justify-center items-center rounded-full border-2 border-zinc-900 group-aria-expanded:hidden",
                                     {x.picture_path().to_string_lossy().to_string()}
@@ -40,9 +39,7 @@ pub fn SideBar() -> Element {
                             }
                         }
                     }
-                    {
-                        ContentType::svg(ARROW_RIGHT).css("svg-[25px] group-aria-expanded:hidden")
-                    }
+                    {ContentType::svg(ARROW_RIGHT).css("svg-[25px] group-aria-expanded:hidden")}
                 }
             }
             div {
@@ -76,7 +73,9 @@ pub fn SideBar() -> Element {
                             roundness: Roundness::Squircle,
                             string_placements: vec![
                                 ContentType::svg(HOME).align_left(),
-                                ContentType::text("首頁").css("text-black group-data-[main-page=false]/main:hidden").align_right(),
+                                ContentType::text("首頁")
+                                    .css("text-black group-data-[main-page=false]/main:hidden")
+                                    .align_right(),
                             ],
                             onmouseover: move |()| {
                                 main_page_hover.set(true);
@@ -95,7 +94,7 @@ pub fn SideBar() -> Element {
                                 group-aria-[selected=main-page]/main:bg-red  
                                 [&:not(:hover)]:group-hover/main:group-data-[collections=true]/main:left-[200px] 
                                 [&:not(:hover)]:group-hover/main:group-data-[explore=true]/main:left-[200px] 
-                            "
+                            ",
                         }
                         div {
                             class: "transition-all absolute z-0 flex left-[300px] gap-[5px] w-[300px]
@@ -110,7 +109,9 @@ pub fn SideBar() -> Element {
                                 roundness: Roundness::Squircle,
                                 string_placements: vec![
                                     ContentType::svg(EXPLORE).align_left(),
-                                    ContentType::text("探索").css("text-black group-data-[explore=false]/main:hidden").align_right(),
+                                    ContentType::text("探索")
+                                        .css("text-black group-data-[explore=false]/main:hidden")
+                                        .align_right(),
                                 ],
                                 onmouseover: move |()| {
                                     explore_hover.set(true);
@@ -129,7 +130,7 @@ pub fn SideBar() -> Element {
                                     group-aria-[selected=explore]/main:bg-light-blue 
                                     group-hover/main:group-aria-[selected=explore]/main:min-w-[300px] 
                                     group-hover/main:group-aria-[selected=explore]/main:max-w-[300px] 
-                                "
+                                ",
                             }
                             div {
                                 class: "grow shrink w-[100px]
@@ -140,7 +141,9 @@ pub fn SideBar() -> Element {
                             roundness: Roundness::Squircle,
                             string_placements: vec![
                                 ContentType::svg(SIDEBAR_COLLECTION).align_left(),
-                                ContentType::text("收藏庫").css("text-black group-data-[collections=false]/main:hidden").align_right(),
+                                ContentType::text("收藏庫")
+                                    .css("text-black group-data-[collections=false]/main:hidden")
+                                    .align_right(),
                             ],
                             onmouseover: move |()| {
                                 collections_hover.set(true);
@@ -160,7 +163,7 @@ pub fn SideBar() -> Element {
                                 hover:max-w-[300px] 
                                 [&:not(:hover)]:group-hover/main:group-data-[main-page=true]/main:-right-[400px] 
                                 [&:not(:hover)]:group-hover/main:group-data-[explore=true]/main:-right-[400px] 
-                            "
+                            ",
                         }
                     }
                 }
@@ -170,11 +173,11 @@ pub fn SideBar() -> Element {
                     Button {
                         roundness: Roundness::Squircle,
                         string_placements: folded_images,
-                        extended_css_class: "bg-background"
+                        extended_css_class: "bg-background",
                     }
                     for collection_id in binding.0.keys().cloned() {
                         SidebarCollectionBlock {
-                            collection_id
+                            collection_id,
                         }
                     }
                 }
@@ -205,7 +208,7 @@ pub fn SideBar() -> Element {
                                     prev.switch_active_to_self();
                                 }
                             }
-                        }
+                        },
                     }
                 }
             }
@@ -222,11 +225,14 @@ fn SidebarCollectionBlock(collection_id: ReadOnlySignal<CollectionId>) -> Elemen
     let img_block = rsx! {
         div {
             class: "relative transition-all container w-[50px] h-[50px] group-aria-expanded:w-20 group-aria-expanded:h-20 border-2 border-[#2E2E2E] rounded-[15px] group-aria-expanded:rounded-[5px]",
-            { ContentType::image(&picture_path)
-            .css("absolute inset-0 transition-all w-full h-full object-cover inline-flex items-center rounded-[15px] group-aria-expanded:rounded-[5px]")
+            {
+                ContentType::image(&picture_path)
+                    .css(
+                        "absolute inset-0 transition-all w-full h-full object-cover inline-flex items-center rounded-[15px] group-aria-expanded:rounded-[5px]",
+                    )
             }
             div {
-                class: "absolute inset-x-0 bottom-0 w-3 h-3 bg-[#CCE246] rounded-full"
+                class: "absolute inset-x-0 bottom-0 w-3 h-3 bg-[#CCE246] rounded-full",
             }
         }
     };
@@ -242,19 +248,26 @@ fn SidebarCollectionBlock(collection_id: ReadOnlySignal<CollectionId>) -> Elemen
                 string_placements: vec![
                     ContentType::custom(img_block).align_left(),
                     Contents::new(
-                        vec![
-                            ContentType::text(display_name).onmounted(element).style(style()).css("w-full group-hover:group-aria-selected:animate-scroll-left font-medium"),
-                            ContentType::svg(ARROW_RIGHT).css("min-w-0 z-0 svg-[30px]")
-                        ],
-                        Alignment::Right
-                    )
-                    .css("w-full items-center group-aria-busy:hidden text-nowrap text-ellipse overflow-x-clip"),
+                            vec![
+                                ContentType::text(display_name)
+                                    .onmounted(element)
+                                    .style(style())
+                                    .css(
+                                        "w-full group-hover:group-aria-selected:animate-scroll-left font-medium",
+                                    ),
+                                ContentType::svg(ARROW_RIGHT).css("min-w-0 z-0 svg-[30px]"),
+                            ],
+                            Alignment::Right,
+                        )
+                        .css(
+                            "w-full items-center group-aria-busy:hidden text-nowrap text-ellipse overflow-x-clip",
+                        ),
                 ],
                 switcher: Pages::collection_display(collection_id()),
                 focus_color_change: false,
                 // background_image: darken_sidebar_background(&picture_path),
                 background_size: "cover",
-                extended_css_class: "bg-background gap-[15px] p-[15px] object-cover transition-all delay-[25ms] group-aria-expanded:w-20 group-aria-expanded:min-h-20 group-aria-expanded:p-0"
+                extended_css_class: "bg-background gap-[15px] p-[15px] object-cover transition-all delay-[25ms] group-aria-expanded:w-20 group-aria-expanded:min-h-20 group-aria-expanded:p-0",
             }
         }
     }

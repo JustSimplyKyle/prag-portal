@@ -177,7 +177,7 @@ where
                     string_placements: Into::<StringPlacements>::into(selected.clone()),
                     switcher: selected,
                     focus_color_change: true,
-                    fill_mode: FillMode::Fit
+                    fill_mode: FillMode::Fit,
                 }
             }
         }

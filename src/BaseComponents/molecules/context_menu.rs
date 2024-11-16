@@ -28,7 +28,10 @@ pub fn ContextMenu(
     };
     rsx! {
         div {
-            class: tw_merge!("absolute border border-surface rounded-[15px] w-[210px] py-[10px] h-fit bg-background z-[1000000] overflow-visible", class),
+            class: tw_merge!(
+                "absolute border border-surface rounded-[15px] w-[210px] py-[10px] h-fit bg-background z-[1000000] overflow-visible",
+                class
+            ),
             style: "box-shadow: 10px 10px 30px 0px rgba(0, 0, 0, 0.25); {displacement}",
             {children}
         }

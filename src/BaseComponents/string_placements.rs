@@ -205,7 +205,7 @@ impl Content {
                         object {
                             id: "mysvg",
                             r#type: "image/svg+xml",
-                            data: x
+                            data: x,
                         }
                     }
                 }
@@ -228,7 +228,7 @@ impl Content {
                         style: self.style,
                         background_size,
                         background_position: "center",
-                        background_image: format!("url(\'{}\')", x.display())
+                        background_image: format!("url(\'{}\')", x.display()),
                     }
                 }
             }
@@ -242,7 +242,7 @@ impl Content {
                             }
                         },
                         class: self.css,
-                        { x }
+                        {x}
                     }
                 }
             }

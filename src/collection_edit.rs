@@ -64,7 +64,7 @@ pub fn CollectionEditContainer() -> Element {
                 if page.should_render() {
                     CollectionEdit {
                         key: "{page.slide_in_id()}",
-                        collection_id
+                        collection_id,
                     }
                 }
             }
@@ -89,7 +89,7 @@ fn CollectionEdit(collection_id: ReadOnlySignal<CollectionId>) -> Element {
             class: "flex w-full bg-deep-background group-edit min-h-screen gap-[20px] rounded-[5px] px-[20px] pb-[20px]",
             "data-prev": edit_state().1.map_or_else(String::new, |x| x.to_string()),
             EditSidebar {
-                collection_id
+                collection_id,
             }
             div {
                 class: "w-full min-h-screen relative *:overflow-scroll",
@@ -97,28 +97,28 @@ fn CollectionEdit(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                     class: "absolute inset-0 z-0 min-h-full min-w-full",
                     id: EditState::Personalization.scroller_id(),
                     Personalization {
-                        collection_id
+                        collection_id,
                     }
                 }
                 div {
                     class: "absolute inset-0 z-0 min-h-full min-w-full",
                     id: EditState::DataLog.scroller_id(),
                     DataLog {
-                        collection_id
+                        collection_id,
                     }
                 }
                 div {
                     class: "absolute inset-0 z-0 min-h-full min-w-full",
                     id: EditState::Export.scroller_id(),
                     Export {
-                        collection_id
+                        collection_id,
                     }
                 }
                 div {
                     class: "absolute inset-0 z-0 min-h-full min-w-full",
                     id: EditState::Advanced.scroller_id(),
                     Advanced {
-                        collection_id
+                        collection_id,
                     }
                 }
             }
@@ -137,7 +137,7 @@ fn EditTemplate(children: Element, title: Element) -> Element {
                     class: "flex flex-col bg-background pt-[30px] rounded-b-[30px]",
                     {title}
                     div {
-                        class: "bg-background py-[10px] rounded-t-[30px]"
+                        class: "bg-background py-[10px] rounded-t-[30px]",
                     }
                 }
             }
@@ -168,9 +168,9 @@ fn DataLog(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                             )
                             .css("flex flex-col gap-[20px]"),
                         ContentType::svg(GAME_CONTROLLER).css("svg-[70px]").align_right(),
-                    ]
+                    ],
                 }
-            }
+            },
         }
     }
 }
@@ -193,9 +193,9 @@ fn Export(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                             )
                             .css("flex flex-col gap-[20px]"),
                         ContentType::svg(GAME_CONTROLLER).css("svg-[70px]").align_right(),
-                    ]
+                    ],
                 }
-            }
+            },
         }
     }
 }
@@ -219,9 +219,9 @@ fn Advanced(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                             )
                             .css("flex flex-col gap-[20px]"),
                         ContentType::svg(GAME_CONTROLLER).css("svg-[70px]").align_right(),
-                    ]
+                    ],
                 }
-            }
+            },
         }
     }
 }
