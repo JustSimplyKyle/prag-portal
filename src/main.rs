@@ -18,7 +18,6 @@ use dioxus::desktop::WindowBuilder;
 use dioxus::html::input_data::MouseButton;
 use dioxus_logger::tracing::Level;
 use dioxus_radio::hooks::use_init_radio_station;
-use manganis::ImageAsset;
 use pages::Pages;
 use rand::seq::IteratorRandom;
 use scrollable::Scrollable;
@@ -39,11 +38,11 @@ use crate::download_progress::DownloadProgress;
 use crate::main_page::MainPage;
 use crate::side_bar::SideBar;
 
-const FIRST: ImageAsset = asset!("/public/first_collection_pic.png").image();
-const SECOND: ImageAsset = asset!("/public/second_collection_pic.png").image();
-const THIRD: ImageAsset = asset!("/public/third_collection_pic.png").image();
-const FORTH: ImageAsset = asset!("/public/forth_collection_pic.png").image();
-const FIFTH: ImageAsset = asset!("/public/fifth_collection_pic.png").image();
+const FIRST: Asset = asset!("/assets/first_collection_pic.png");
+const SECOND: Asset = asset!("/assets/second_collection_pic.png");
+const THIRD: Asset = asset!("/assets/third_collection_pic.png");
+const FORTH: Asset = asset!("/assets/forth_collection_pic.png");
+const FIFTH: Asset = asset!("/assets/fifth_collection_pic.png");
 
 pub const COLLECTION_PICS: GlobalSignal<BTreeMap<&str, PathBuf>> = GlobalSignal::new(|| {
     BTreeMap::from([
@@ -65,13 +64,13 @@ fn get_random_collection_picture() -> PathBuf {
         .clone()
 }
 
-pub const HOME: Asset = asset!("/public/home.svg");
-pub const EXPLORE: Asset = asset!("/public/explore.svg");
-pub const SIDEBAR_COLLECTION: Asset = asset!("/public/collections.svg");
-pub const ARROW_RIGHT: Asset = asset!("/public/keyboard_arrow_right.svg");
-pub const SIM_CARD: Asset = asset!("/public/sim_card_download.svg");
-pub const DRAG_INDICATOR: Asset = asset!("/public/drag_indicator.svg");
-pub const TAILWIND_STR: Asset = asset!("/public/tailwind.css");
+pub const HOME: Asset = asset!("/assets/home.svg");
+pub const EXPLORE: Asset = asset!("/assets/explore.svg");
+pub const SIDEBAR_COLLECTION: Asset = asset!("/assets/collections.svg");
+pub const ARROW_RIGHT: Asset = asset!("/assets/keyboard_arrow_right.svg");
+pub const SIM_CARD: Asset = asset!("/assets/sim_card_download.svg");
+pub const DRAG_INDICATOR: Asset = asset!("/assets/drag_indicator.svg");
+pub const TAILWIND_STR: Asset = asset!("/assets/tailwind.css");
 
 /// `(Pages)`: Current active page
 /// `Option<Pages>`: Previous page
@@ -165,7 +164,7 @@ impl History {
 }
 
 use rust_lib::api::shared_resources::collection::{
-    self, use_collections_radio, Collection, CollectionId, CollectionRadioChannel,
+    self, use_collections_radio, use_keys, Collection, CollectionId, CollectionRadioChannel,
 };
 
 fn main() {
@@ -276,13 +275,23 @@ impl IntoRenderError for anyhow::Error {
     }
 }
 
-pub trait ToRenderError {
-    fn to_render_error(&self) -> RenderError;
+pub trait ToCapturedError {
+    fn to_render_error(&self) -> CapturedError;
 }
 
-impl<T: std::fmt::Display> ToRenderError for T {
-    fn to_render_error(&self) -> RenderError {
-        RenderError::Aborted(CapturedError::from_display(self.to_string()))
+impl<T: std::fmt::Display + ?Sized> ToCapturedError for T {
+    fn to_render_error(&self) -> CapturedError {
+        CapturedError::from_display(self.to_string())
+    }
+}
+
+pub trait SnafuToCapturedError {
+    fn to_render_error(&self) -> CapturedError;
+}
+
+impl<T: ErrorFormatted> SnafuToCapturedError for T {
+    fn to_render_error(&self) -> CapturedError {
+        CapturedError::from_display(self.to_formatted())
     }
 }
 
@@ -444,9 +453,15 @@ impl<T: std::fmt::Debug + ErrorCompat + 'static + snafu::Error> ErrorFormatted f
 fn Layout() -> Element {
     let error_handler: SyncSignal<Result<(), anyhow::Error>> =
         use_context_provider(|| Signal::new_maybe_sync(Ok(())));
-    let collections = Collection::scan()?;
 
     use_init_radio_station::<collection::Collections, CollectionRadioChannel>(move || {
+        let collections = match Collection::scan() {
+            Ok(v) => v,
+            Err(err) => {
+                throw_error(err);
+                return collection::Collections::default();
+            }
+        };
         let collections = collections
             .into_iter()
             .flatten()
@@ -455,15 +470,18 @@ fn Layout() -> Element {
         collection::Collections(collections)
     });
 
-    let keys = use_keys();
+    let radio = use_collections_radio();
+
+    // let keys = use_keys();
 
     use_effect(move || {
+        let read = radio.read();
         let mut binding = || {
             let history = HISTORY.read();
             Pages::DownloadProgress.apply_slide_in();
             let pages_scroller = vec![Pages::MainPage, Pages::Explore, Pages::Collections];
             Pages::scroller_applyer(pages_scroller, |x| x == &history.active)?;
-            for collection_id in keys() {
+            for collection_id in read.0.keys().copied() {
                 Pages::collection_display(collection_id).apply_slide_in();
                 Pages::collection_edit(collection_id).apply_slide_in();
             }
@@ -546,17 +564,14 @@ fn Layout() -> Element {
     }
 }
 
-#[must_use]
-pub fn use_keys() -> Memo<Vec<CollectionId>> {
-    let radio = use_collections_radio();
-    use_memo(move || radio.read().0.keys().copied().collect())
-}
-
 #[component]
 fn CollectionContainer() -> Element {
-    let should_render_ids = use_keys()()
+    let keys = use_keys();
+
+    let should_render_ids = keys
         .into_iter()
-        .filter(|x| Pages::collection_display(*x).should_render());
+        .filter(|&x| Pages::collection_display(x).should_render());
+
     rsx! {
         for collection_id in should_render_ids {
             div {

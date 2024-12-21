@@ -15,15 +15,15 @@ use crate::{
     },
 };
 use dioxus::prelude::*;
-use rust_lib::api::shared_resources::collection::use_collections_radio;
+use rust_lib::api::shared_resources::collection::{use_collections_radio, use_keys};
 
-pub static NOTE: Asset = manganis::asset!("/public/note_stack_add.svg");
-pub static CROP_FREE: Asset = manganis::asset!("/public/crop_free.svg");
-pub static FILTER_LIST: Asset = manganis::asset!("/public/filter_list.svg");
-pub static SEARCH: Asset = manganis::asset!("/public/search.svg");
-pub static ARROW_DOWN: Asset = manganis::asset!("/public/arrow_drop_down.svg");
-pub static BOOKMARK: Asset = manganis::asset!("/public/bookmark.svg");
-pub static BOOKMARK_ADD: Asset = manganis::asset!("/public/bookmark_add.svg");
+pub static NOTE: Asset = manganis::asset!("/assets/note_stack_add.svg");
+pub static CROP_FREE: Asset = manganis::asset!("/assets/crop_free.svg");
+pub static FILTER_LIST: Asset = manganis::asset!("/assets/filter_list.svg");
+pub static SEARCH: Asset = manganis::asset!("/assets/search.svg");
+pub static ARROW_DOWN: Asset = manganis::asset!("/assets/arrow_drop_down.svg");
+pub static BOOKMARK: Asset = manganis::asset!("/assets/bookmark.svg");
+pub static BOOKMARK_ADD: Asset = manganis::asset!("/assets/bookmark_add.svg");
 
 #[component]
 fn TopBar() -> Element {
@@ -117,22 +117,25 @@ pub fn CollectionContext(#[props(default)] class: String) -> Element {
 pub fn Collections() -> Element {
     use crate::BaseComponents::atoms::switch::State;
 
-    let radio = use_collections_radio();
-    let read = radio.read();
-    let keys = read.0.keys();
-    let keys_iter = keys.clone().zip((0..keys.len()).rev());
+    // let radio = use_collections_radio();
+
+    // let read = radio.read();
+    // let keys = read.0.keys().copied();
+    let keys = use_keys().into_iter();
+    let len = keys.len();
+    let keys_iter = keys.zip((0..len).rev());
     let search = use_signal(String::new);
     let mut create_collection = use_signal(|| false);
     let state = use_signal(|| State::Left);
     use_effect(move || {
+        if matches!(state(), State::Left) {
+            create_collection.set(false);
+        }
         if matches!(state(), State::Right) {
             create_collection.set(true);
         }
     });
     rsx! {
-        BuildCollection {
-            active: create_collection
-        }
         div {
             class: "bg-deep-background flex z-10 flex-col gap-[10px]",
             div {
@@ -180,36 +183,15 @@ pub fn Collections() -> Element {
                 for (collection_id, i) in keys_iter {
                     CollectionBlock {
                         fat: false,
-                        collection_id: *collection_id,
+                        collection_id,
                         z_index: "{i}",
                         extended_class: "rounded-[20px] overflow-y-visible",
                     }
                 }
             }
         }
-        div {
-            Button {
-                roundness: Roundness::None,
-                onclick: move |()| {
-                    create_collection.set(true);
-                },
-                string_placements: vec![
-                    Contents::new(
-                            [
-                                ContentType::text("新增更多收藏").css("text-[35px]"),
-                                ContentType::hint(
-                                    "透過探索功能下載社群收藏或是由你開始建立",
-                                ),
-                            ],
-                            Alignment::Left,
-                        )
-                        .css("flex flex-col gap-[15px]"),
-                    ContentType::text("F").align_right(),
-                ],
-                extended_css_class: "z-0 rounded-[20px] px-[40px] py-[50px]",
-                size: Size::Fat,
-                clickable: false
-            }
+        BuildCollection {
+            active: create_collection,
         }
     }
 }

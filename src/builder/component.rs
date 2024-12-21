@@ -1,7 +1,14 @@
 use std::path::PathBuf;
 
 use dioxus::prelude::*;
-use rust_lib::api::backend_exclusive::vanilla::version::{VersionMetadata, VersionType};
+use dioxus_logger::tracing::info;
+use rust_lib::api::{
+    backend_exclusive::vanilla::version::{VersionMetadata, VersionType},
+    shared_resources::{
+        collection::{use_collections_radio, AdvancedOptions, ModLoader, ModLoaderType},
+        entry,
+    },
+};
 
 use crate::{
     get_random_collection_picture,
@@ -17,14 +24,16 @@ use crate::{
         molecules::{file_input::FileInput, foldables::Foldable},
         organisms::modal::Modal,
     },
-    ToRenderError,
+    ErrorFormatted, SnafuToCapturedError, ToCapturedError,
 };
 #[component]
 fn Title(title: String) -> Element {
-    rsx!(div {
-        class: "text-[20px] font-medium trim",
-        {title}
-    })
+    rsx!(
+        div {
+            class: "text-[20px] font-medium trim",
+            {title}
+        }
+    )
 }
 
 #[component]
@@ -37,28 +46,39 @@ fn Header() -> Element {
                 class: "justify-self-start flex items-center gap-[25px]",
                 div {
                     class: "inline-flex justify-center items-center size-[80px] bg-white rounded-[20px]",
-                    SHADOW_ADD {}
+                    SHADOW_ADD {
+
+
+                    }
                 }
                 div {
                     class: "flex flex-col gap-[15px] justify-center",
                     div {
                         class: "text-[30px] font-bold trim",
-                        "建立合集",
+                        "建立合集"
                     }
                     div {
                         class: "text-[15px] font-normal text-secondary-text trim",
-                        "從頭開始建立你的合集",
+                        "從頭開始建立你的合集"
                     }
                 }
             }
             FloatingSwitch {
                 class: "justify-self-end h-[60px] bg-deep-background",
                 lhs_width: 80.,
-                lhs: rsx! { CREATE_COLLECTION { size: svgs::Size::Medium } },
+                lhs: rsx! {
+                    CREATE_COLLECTION {
+                        size: svgs::Size::Medium,
+                    }
+                },
                 rhs_width: 60.,
-                rhs: rsx! { FOLDER_UPLOAD {} },
+                rhs: rsx! {
+                    FOLDER_UPLOAD {
+
+                    }
+                },
                 floater: "bg-secondary-surface",
-                state
+                state,
             }
         }
     }
@@ -83,7 +103,7 @@ fn PicturePicker(cover_img: Signal<PathBuf>, background_img: Signal<PathBuf>) ->
         div {
             class: "flex flex-col gap-[20px]",
             Title {
-                title: "封面與背景圖片"
+                title: "封面與背景圖片",
             }
             div {
                 class: "flex gap-[20px] justify-center",
@@ -91,7 +111,7 @@ fn PicturePicker(cover_img: Signal<PathBuf>, background_img: Signal<PathBuf>) ->
                     class: "flex gap-[5px]",
                     div {
                         class: "grow border-[2px] border-surface size-[140px] aspect-square rounded-[20px]",
-                        background: "url(\'{cover_img.read().to_string_lossy()}\') lightgray 50% / cover no-repeat"
+                        background: "url(\'{cover_img.read().to_string_lossy()}\') lightgray 50% / cover no-repeat",
                     }
                     div {
                         class: "flex flex-col gap-[5px] justify-center",
@@ -100,13 +120,16 @@ fn PicturePicker(cover_img: Signal<PathBuf>, background_img: Signal<PathBuf>) ->
                             filename: cover_img_filename,
                             class: button,
                             height: "64.5px",
-                            UPLOAD_FILE {}
+                            UPLOAD_FILE {
+
+
+                            }
                         }
                         div {
                             class: button,
                             height: "64.5px",
                             CLOSE_CROSS {
-                                class: "[&_*]:fill-red"
+                                class: "[&_*]:fill-red",
                             }
                         }
                     }
@@ -126,13 +149,16 @@ fn PicturePicker(cover_img: Signal<PathBuf>, background_img: Signal<PathBuf>) ->
                             filename: background_img_filename,
                             class: button,
                             height: "64.5px",
-                            UPLOAD_FILE {}
+                            UPLOAD_FILE {
+
+
+                            }
                         }
                         div {
                             class: button,
                             height: "64.5px",
                             CLOSE_CROSS {
-                                class: "[&_*]:fill-red"
+                                class: "[&_*]:fill-red",
                             }
                         }
                     }
@@ -148,7 +174,7 @@ fn SetupName(mut title: Signal<Option<String>>) -> Element {
         div {
             class: "flex flex-col gap-[20px]",
             Title {
-                title: "合集名稱"
+                title: "合集名稱",
             }
             div {
                 class: "flex gap-[5px]",
@@ -165,7 +191,9 @@ fn SetupName(mut title: Signal<Option<String>>) -> Element {
                     onclick: move |_| {
                         title.set(None);
                     },
-                    CLOSE_CROSS {}
+                    CLOSE_CROSS {
+
+                    }
                 }
             }
         }
@@ -180,7 +208,7 @@ pub fn GameVersion(selected_version: Signal<Option<VersionMetadata>>) -> Element
         .as_ref()
         .map(|x| x.as_ref())
         .transpose()
-        .map_err(ToRenderError::to_render_error)?;
+        .map_err(SnafuToCapturedError::to_render_error)?;
 
     let mut snapshot_status = use_signal(|| false);
     let mut selecetor_visibility = use_signal(|| false);
@@ -190,36 +218,58 @@ pub fn GameVersion(selected_version: Signal<Option<VersionMetadata>>) -> Element
             .await
             .map(|x| x.versions)
     });
+
+    let build_versions = |metadata: VersionMetadata| {
+        let aria_selected = selected_version.read().as_ref().map_or_else(
+            || Some(&metadata) == latest_version,
+            |x| x.id == metadata.id,
+        );
+
+        rsx! {
+            div {
+                onclick: move |_| {
+                    selected_version.set(Some(metadata.clone()));
+                    selecetor_visibility.set(false);
+                },
+                div {
+                    aria_selected,
+                    class: "font-display text-[20px] trim font-normal text-hint aria-selected:text-white",
+                    {metadata.id.clone()}
+                }
+            }
+        }
+    };
+
     let read = game_versions.read();
 
-    let all_game_versions = read
+    let game_versions = read
         .as_ref()
         .map(|x| x.as_deref())
         .transpose()
-        .map_err(ToRenderError::to_render_error)?
+        .map_err(SnafuToCapturedError::to_render_error)?;
+
+    let all_game_versions = game_versions
         .into_iter()
         .flat_map(|x| x.iter())
-        .cloned();
+        .cloned()
+        .map(build_versions);
 
-    let release_game_version = read
-        .as_ref()
-        .map(|x| x.as_deref())
-        .transpose()
-        .map_err(ToRenderError::to_render_error)?
+    let release_game_versions = game_versions
         .into_iter()
-        .flat_map(|x| x.iter().filter(|x| x.version_type == VersionType::Release))
-        .cloned();
+        .flat_map(|x| x.iter().filter(|x| x.is_release()))
+        .cloned()
+        .map(build_versions);
 
     rsx! {
         div {
             class: "flex flex-col gap-[20px] z-50",
             Title {
-                title: "遊戲版本"
+                title: "遊戲版本",
             }
             div {
-                class: "flex gap-[5px] h-[60px]",
+                class: "flex gap-[5px] h-[60px] z-50",
                 div {
-                    class: "pl-[20px] pr-[15px] bg-background w-full grow grid grid-flow-col justify-stretch items-center rounded-[20px] relative",
+                    class: "pl-[20px] pr-[15px] bg-background w-full grow grid grid-flow-col justify-stretch items-center rounded-[20px] relative z-50",
                     onclick: move |_| {
                         selecetor_visibility.toggle();
                     },
@@ -234,37 +284,19 @@ pub fn GameVersion(selected_version: Signal<Option<VersionMetadata>>) -> Element
                         }
                     }
                     ARROW_DOWN {
-                        class: "justify-self-end"
+                        class: "justify-self-end",
                     }
                     div {
                         aria_hidden: !selecetor_visibility(),
                         onclick: move |x| {
                             x.stop_propagation();
                         },
-                        class: "absolute inset-x-0 top-full flex flex-col bg-background rounded-[20px] p-[20px] gap-[10px] h-fit max-h-[300px] mt-[10px] overflow-y-scroll aria-hidden:opacity-0 aria-hidden:hidden",
+                        class: "absolute inset-x-0 top-full flex flex-col bg-background rounded-[20px] *:py-[15px] *:pl-[25px] *:pr-[20px] gap-[5px] h-fit max-h-[300px] mt-[10px] overflow-y-scroll aria-hidden:opacity-0 aria-hidden:hidden z-50 py-[15px]",
                         transition: "all 0.5s allow-discrete",
                         if snapshot_status() {
-                            for y in all_game_versions {
-                                div {
-                                    class: "text-english",
-                                    onclick: move |_| {
-                                        selected_version.set(Some(y.clone()));
-                                        selecetor_visibility.set(false);
-                                    },
-                                    {y.id.clone()}
-                                }
-                            }
+                            {all_game_versions}
                         } else {
-                            for y in release_game_version {
-                                div {
-                                    class: "text-english",
-                                    onclick: move |_| {
-                                        selected_version.set(Some(y.clone()));
-                                        selecetor_visibility.set(false);
-                                    },
-                                    {y.id.clone()}
-                                }
-                            }
+                            {release_game_versions}
                         }
                     }
                 }
@@ -287,9 +319,56 @@ pub fn GameVersion(selected_version: Signal<Option<VersionMetadata>>) -> Element
     }
 }
 
+const DEFAULT_MEMORY: usize = 8;
+
 #[component]
-pub fn AdvancedOption() -> Element {
+fn MemorySelector(memory_selected: Signal<usize>) -> Element {
+    let memory_selector = [1, 2, 4, 8, 16, 32];
+
+    rsx! {
+        div {
+            class: "mt-[35px] flex flex-col gap-[20px]",
+            Title {
+                title: "分配記憶體",
+            }
+            div {
+                class: "h-[60px] flex gap-[5px] *:bg-background *:rounded-[20px]",
+                div {
+                    class: "aspect-square p-[10px]",
+                    onclick: move |_| {
+                        memory_selected.set(DEFAULT_MEMORY);
+                    }
+                }
+                for i in memory_selector {
+                    div {
+                        class: "w-fit px-[20px] flex items-center aria-selected:bg-white [&_*]:pointer-events-none",
+                        aria_selected: memory_selected() == i,
+                        onclick: move |_| {
+                            memory_selected.set(i);
+                        },
+                        div {
+                            class: "flex items-end gap-[3px] font-english",
+                            div {
+                                class: "text-[20px] trim text-white aria-selected:text-black font-bold",
+                                aria_selected: memory_selected() == i,
+                                "{i}"
+                            }
+                            div {
+                                class: "text-[15px] text-hint trim font-normal",
+                                "GB"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[component]
+pub fn AdvancedOption(memory_selected: Signal<usize>) -> Element {
     let enabled = use_signal(|| false);
+
     rsx! {
         Foldable {
             enabled,
@@ -310,9 +389,46 @@ pub fn AdvancedOption() -> Element {
                     }
                 }
             },
-            div {
-                class: "h-[100px] w-[100px]",
-                "arst"
+            MemorySelector {
+                memory_selected,
+            }
+        }
+    }
+}
+
+#[component]
+pub fn Footer(canceled: Signal<bool>, finished: Signal<bool>) -> Element {
+    const BLOCK_CSS: &str = "grid grid-flow-col justify-stretch items-center gap-[10px] bg-deep-background h-full p-[15px] pr-[25px] rounded-[15px]";
+    rsx! {
+        div {
+            class: "bg-background h-[100px] p-[20px] flex justify-end items-center gap-[10px] z-0",
+            button {
+                class: "{BLOCK_CSS} w-[150px]",
+                onclick: move |_| {
+                    canceled.set(true);
+                },
+                div {
+                    class: "justify-self-start pointer-events-none",
+                    "C"
+                }
+                div {
+                    class: "justify-self-end trim text-[20px] pointer-events-none",
+                    "取消"
+                }
+            }
+            button {
+                class: "{BLOCK_CSS} w-[180px]",
+                onclick: move |_| {
+                    finished.set(true);
+                },
+                div {
+                    class: "justify-self-start pointer-events-none",
+                    "C"
+                }
+                div {
+                    class: "justify-self-end trim text-[20px] pointer-events-none",
+                    "完成"
+                }
             }
         }
     }
@@ -324,6 +440,61 @@ pub fn BuildCollection(active: Signal<bool>) -> Element {
     let cover_img = use_signal(get_random_collection_picture);
     let background_img = use_signal(get_random_collection_picture);
     let selected_version = use_signal(|| None);
+    let memory_selected = use_signal(|| DEFAULT_MEMORY);
+
+    let canceled = use_signal(|| false);
+    let finished = use_signal(|| false);
+
+    use_effect(move || {
+        if canceled() {
+            active.set(false);
+        }
+    });
+
+    let collections_radio = use_collections_radio();
+
+    use_effect(move || {
+        let finished = finished();
+        let version = selected_version();
+        let collections_radio = collections_radio;
+        spawn(async move {
+            if finished {
+                active.set(false);
+
+                let version = match version {
+                    Some(v) => v,
+                    None => match VersionMetadata::latest_release().await {
+                        Ok(v) => v,
+                        Err(err) => {
+                            throw_error(err);
+                            return;
+                        }
+                    },
+                };
+
+                if let Err(err) = entry::create_collection(
+                    title().unwrap_or_else(|| String::from("新的收藏")),
+                    cover_img(),
+                    version,
+                    ModLoader {
+                        mod_loader_type: ModLoaderType::Fabric,
+                        version: None,
+                    },
+                    AdvancedOptions {
+                        jvm_max_memory: Some(memory_selected()),
+                        java_arguments: String::new(),
+                    },
+                    collections_radio,
+                )
+                .await
+                {
+                    throw_error(err);
+                }
+                info!("Finished collection creation");
+                // active.set(false);
+            }
+        });
+    });
 
     rsx! {
         Modal {
@@ -332,20 +503,31 @@ pub fn BuildCollection(active: Signal<bool>) -> Element {
                 class: "flex min-w-[700px] w-full",
                 Center {
                     percentage_center_bias: 50.,
-                    class: "flex flex-col border-2 border-surface rounded-[20px]",
+                    class: "flex flex-col border-2 border-surface rounded-[20px] overflow-visible",
                     box_shadow: "10px 10px 30px 0px rgba(0, 0, 0, 0.25)",
-                    Header {}
+                    Header {
+
+
+                    }
                     div {
-                        class: "flex flex-col bg-deep-background p-[30px] gap-[35px]",
-                        SetupName { title }
+                        class: "flex flex-col bg-deep-background p-[30px] gap-[35px] z-50",
+                        SetupName {
+                            title,
+                        }
                         PicturePicker {
                             cover_img,
-                            background_img
+                            background_img,
                         }
                         GameVersion {
                             selected_version,
                         }
-                        AdvancedOption {}
+                        AdvancedOption {
+                            memory_selected
+                        }
+                    }
+                    Footer {
+                        canceled,
+                        finished,
                     }
                 }
             }

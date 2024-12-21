@@ -1,4 +1,5 @@
 use dioxus::prelude::*;
+use dioxus_logger::tracing::info;
 use document::eval;
 
 #[component]
@@ -19,6 +20,7 @@ pub fn Modal(active: Signal<bool>, children: Element) -> Element {
                 "
                 );
                 eval(&show).await?;
+                info!("Creating modal!");
             } else {
                 let close = format!(
                     "
@@ -29,6 +31,7 @@ pub fn Modal(active: Signal<bool>, children: Element) -> Element {
                 "
                 );
                 eval(&close).await?;
+                info!("Closing modal!");
             }
             Ok::<(), RenderError>(())
         }
@@ -37,10 +40,9 @@ pub fn Modal(active: Signal<bool>, children: Element) -> Element {
 
     rsx! {
         dialog {
-            class: "[&::backdrop]:!m-0 [&::backdrop]:!p-0 [&::backdrop]:!border-0 overflow-x-hidden overflow-y-hidden opacity-100 [@starting-style]:opacity-0 backdrop-opacity-100 [@starting-style]:backdrop-opacity-0 bg-deep-background/80 w-screen h-screen overflow-y-scroll {id1}",
-            autofocus: false,
+            class: "[&::backdrop]:!m-0 [&::backdrop]:!p-0 [&::backdrop]:!border-0 opacity-100 [@starting-style]:opacity-0 backdrop-opacity-100 [@starting-style]:backdrop-opacity-0 bg-deep-background/80 w-screen h-screen overflow-y-scroll {id1}",
             transition: "all 0.7s allow-discrete",
-            // id: id1,
+            // open: active(),
             {children}
         }
     }

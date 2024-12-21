@@ -1,6 +1,6 @@
-pub const ADD: Asset = manganis::asset!("/public/add.svg");
-pub const HALLWAY: Asset = manganis::asset!("/public/hallway.svg");
-pub const PHOTO_LIBRARY: Asset = manganis::asset!("/public/photo_library.svg");
+pub const ADD: Asset = manganis::asset!("/assets/add.svg");
+pub const HALLWAY: Asset = manganis::asset!("/assets/hallway.svg");
+pub const PHOTO_LIBRARY: Asset = manganis::asset!("/assets/photo_library.svg");
 
 use std::path::PathBuf;
 
@@ -88,11 +88,10 @@ pub fn CollectionNameEdit(
     let input = use_signal(|| None);
     let mut input = custom_input.unwrap_or(input);
     let mut error_handler = use_error_handler();
-    let radio = collection_id().use_collection_radio();
-    let mut write_radio = collection_id().use_collection_radio();
+    let mut radio = collection_id().use_collection_radio();
     use_effect(move || {
         if let Some(x) = input() {
-            let err = write_radio
+            let err = radio
                 .with_mut(|ele| {
                     ele.display_name = x;
                 })

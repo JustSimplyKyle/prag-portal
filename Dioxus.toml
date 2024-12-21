@@ -11,7 +11,7 @@ default_platform = "linux"
 out_dir = "dist"
 
 # assets file folder
-asset_dir = "public"
+asset_dir = "assets"
 
 [bundle]
 icon = [
@@ -29,16 +29,6 @@ reload_html = true
 
 # which files or dirs will be watcher monitoring
 watch_path = ["src", "public"]
-
-# include `assets` in web platform
-[web.resource]
-
-# CSS style file
-
-style = ["/tailwind.css"]
-
-# Javascript code file
-script = []
 
 [web.resource.dev]
 

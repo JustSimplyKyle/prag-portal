@@ -1934,11 +1934,6 @@ input {
   aspect-ratio: 1 / 1;
 }
 
-.size-\[100px\] {
-  width: 100px;
-  height: 100px;
-}
-
 .size-\[140px\] {
   width: 140px;
   height: 140px;
@@ -2572,10 +2567,6 @@ input {
   overflow-x: hidden;
 }
 
-.overflow-y-hidden {
-  overflow-y: hidden;
-}
-
 .overflow-x-clip {
   overflow-x: clip;
 }
@@ -2880,11 +2871,6 @@ input {
   padding-right: 30px;
 }
 
-.px-\[40px\] {
-  padding-left: 40px;
-  padding-right: 40px;
-}
-
 .px-\[50px\] {
   padding-left: 50px;
   padding-right: 50px;
@@ -2913,11 +2899,6 @@ input {
 .py-\[35px\] {
   padding-top: 35px;
   padding-bottom: 35px;
-}
-
-.py-\[50px\] {
-  padding-top: 50px;
-  padding-bottom: 50px;
 }
 
 .py-\[5px\] {
@@ -3338,6 +3319,14 @@ body {
 .\*\:py-\[15px\] > * {
   padding-top: 15px;
   padding-bottom: 15px;
+}
+
+.\*\:pl-\[25px\] > * {
+  padding-left: 25px;
+}
+
+.\*\:pr-\[20px\] > * {
+  padding-right: 20px;
 }
 
 .\*\:opacity-100 > * {

@@ -10,8 +10,7 @@ edition = "2021"
 
 rust_lib = { path = "./era-connect/app/rust/" }
 
-dioxus = { features = ["desktop"], version = "0.6.0-alpha.4" }
-dioxus-logger = { git = "https://github.com/DogeDark/dioxus-logger" }
+dioxus = { features = ["desktop"], version = "0.6.1" }
 tokio = { version = "1.37.0", features = ["time", "rt"] }
 tailwind_fuse = { version = "0.3.1", features = ["variant"] }
 anyhow = "1.0.82"
@@ -26,5 +25,18 @@ rand = "0.8.5"
 snafu = "0.8.4"
 reqwest = "0.12.5"
 pulldown-cmark = "0.12.1"
-dioxus-radio = { git = "https://github.com/JustSimplyKyle/dioxus-radio" }
 ammonia = "4.0.0"
+dioxus-radio = "0.3.0"
+dioxus-logger = "0.6.1"
+
+[profile]
+
+[profile.wasm-dev]
+inherits = "dev"
+opt-level = 1
+
+[profile.server-dev]
+inherits = "dev"
+
+[profile.android-dev]
+inherits = "dev"

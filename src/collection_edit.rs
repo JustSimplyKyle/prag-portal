@@ -55,7 +55,7 @@ impl_optional_state_switcher!(Pages);
 pub fn CollectionEditContainer() -> Element {
     let radio = use_collections_radio();
     let read = radio.read();
-    let collection_ids = read.0.keys().map(|x| (*x, Pages::collection_edit(*x)));
+    let collection_ids = read.0.keys().map(|&x| (x, Pages::collection_edit(x)));
     rsx! {
         for (collection_id , page) in collection_ids {
             div {
