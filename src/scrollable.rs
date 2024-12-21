@@ -1,4 +1,4 @@
-use dioxus::document::eval;
+use dioxus::{document::eval, CapturedError};
 
 pub trait Scrollable: Sized + ToString {
     const GROUP_SELECTOR: &'static str;
@@ -13,7 +13,7 @@ pub trait Scrollable: Sized + ToString {
     fn scroller_applyer(
         pages_scroller: Vec<Self>,
         filterer: impl Fn(&Self) -> bool,
-    ) -> anyhow::Result<()> {
+    ) -> Result<(), CapturedError> {
         let iter = pages_scroller
             .iter()
             .enumerate()
@@ -31,7 +31,7 @@ pub trait Scrollable: Sized + ToString {
     /// - The JavaScript evaluation fails (e.g., due to invalid JavaScript code).
     /// - There's an error in sending data to the JavaScript runtime.
     /// - Any other unexpected error occurs during the JavaScript execution or data transmission.    
-    fn apply_scroller_animation(&self, bottom: &[Self], top: &[Self]) -> Result<(), anyhow::Error> {
+    fn apply_scroller_animation(&self, bottom: &[Self], top: &[Self]) -> Result<(), CapturedError> {
         let target = self.to_string();
         let bottom = bottom.iter().map(ToString::to_string).collect::<Vec<_>>();
         let top = top.iter().map(ToString::to_string).collect::<Vec<_>>();
@@ -88,6 +88,6 @@ pub trait Scrollable: Sized + ToString {
             bottom,
             top,
         ])
-        .map_err(|x| anyhow::anyhow!("{x:#?}"))
+        .map_err(Into::into)
     }
 }

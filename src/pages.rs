@@ -17,6 +17,7 @@ pub enum Pages {
         id: CollectionId,
         state: CollectionPageState,
     },
+    OnHover,
 }
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Hash, derive_more::Display)]
@@ -54,6 +55,7 @@ impl ToString for Pages {
                 let hash = hasher.finish();
                 format!("collection-page-{state}-{hash}")
             }
+            Self::OnHover => "hover".into(),
         }
     }
 }

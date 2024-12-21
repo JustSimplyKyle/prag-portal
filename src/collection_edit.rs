@@ -76,12 +76,11 @@ pub fn CollectionEditContainer() -> Element {
 fn CollectionEdit(collection_id: ReadOnlySignal<CollectionId>) -> Element {
     let edit_state: Signal<Comparison<EditState>> =
         use_context_provider(|| Signal::new((EditState::Personalization, None)));
-    let mut error_handler = use_error_handler();
     use_effect(move || {
         let vec = EditState::iter().collect::<Vec<_>>();
         let error = EditState::scroller_applyer(vec, |x| &edit_state.read().0 == x);
         if let Err(err) = error {
-            error_handler.set(Err(err));
+            throw_error(err);
         }
     });
     rsx! {

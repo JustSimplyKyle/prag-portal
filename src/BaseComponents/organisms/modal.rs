@@ -2,6 +2,8 @@ use dioxus::prelude::*;
 use dioxus_logger::tracing::info;
 use document::eval;
 
+use crate::{pages::Pages, HISTORY};
+
 #[component]
 pub fn Modal(active: Signal<bool>, children: Element) -> Element {
     let id = format!("v{}", current_scope_id()?.0);
@@ -11,6 +13,7 @@ pub fn Modal(active: Signal<bool>, children: Element) -> Element {
         let active = active();
         async move {
             if active {
+                HISTORY.write().focus_with_history(Pages::OnHover);
                 let show = format!(
                     "
                     const d = document.querySelector('dialog.{id}');
@@ -22,6 +25,7 @@ pub fn Modal(active: Signal<bool>, children: Element) -> Element {
                 eval(&show).await?;
                 info!("Creating modal!");
             } else {
+                HISTORY.write().go_prev();
                 let close = format!(
                     "
                     const d = document.querySelector('dialog.{id}')

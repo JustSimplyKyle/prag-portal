@@ -16,7 +16,7 @@ use collection_edit::CollectionEditContainer;
 use dioxus::desktop::tao::dpi::PhysicalSize;
 use dioxus::desktop::WindowBuilder;
 use dioxus::html::input_data::MouseButton;
-use dioxus_logger::tracing::Level;
+use dioxus_logger::tracing::{info, Level};
 use dioxus_radio::hooks::use_init_radio_station;
 use pages::Pages;
 use rand::seq::IteratorRandom;
@@ -400,55 +400,6 @@ impl<T: std::fmt::Debug + ErrorCompat + 'static + snafu::Error> ErrorFormatted f
     }
 }
 
-// fn t_create_collection() -> Result<(), RenderError> {
-//     let mut error_handler = use_error_handler();
-//     let collections_radio = use_collections_radio();
-
-//     let err = use_resource(move || collection_builder(None, "1.20.1", collections_radio));
-
-//     let read = err.read();
-//     let Some(id) = read
-//         .as_ref()
-//         .map(|x| x.as_ref().cloned())
-//         .transpose()
-//         .map_err(|x| x.to_formatted().to_render_error())?
-//     else {
-//         return Ok(());
-//     };
-//     let mut radio = id.use_collection_radio();
-//     spawn(async move {
-//         info!("Adding mods...");
-//         if let Err(err) = radio
-//             .with_async_mut(move |mut collection| async move {
-//                 collection
-//                     .add_multiple_modrinth_mod(
-//                         vec![
-//                             "fabric-api",
-//                             "sodium",
-//                             "modmenu",
-//                             "ferrite-core",
-//                             "lazydfu",
-//                             "create-fabric",
-//                             "iris",
-//                             "indium",
-//                         ],
-//                         vec![],
-//                         None,
-//                     )
-//                     .await?;
-//                 collection.download_mods().await?;
-//                 Ok(collection)
-//             })
-//             .await
-//         {
-//             error_handler.set(Err(err.into()));
-//         }
-//         info!("Finished downloading mods");
-//     });
-
-//     Ok(())
-// }
-
 #[component]
 fn Layout() -> Element {
     let error_handler: SyncSignal<Result<(), anyhow::Error>> =
@@ -470,25 +421,20 @@ fn Layout() -> Element {
         collection::Collections(collections)
     });
 
-    let radio = use_collections_radio();
+    let keys = use_keys();
 
-    // let keys = use_keys();
-
+    // do animation updates
     use_effect(move || {
-        let read = radio.read();
-        let mut binding = || {
-            let history = HISTORY.read();
-            Pages::DownloadProgress.apply_slide_in();
-            let pages_scroller = vec![Pages::MainPage, Pages::Explore, Pages::Collections];
-            Pages::scroller_applyer(pages_scroller, |x| x == &history.active)?;
-            for collection_id in read.0.keys().copied() {
-                Pages::collection_display(collection_id).apply_slide_in();
-                Pages::collection_edit(collection_id).apply_slide_in();
-            }
-            Ok::<_, anyhow::Error>(())
-        };
-
-        binding.throw();
+        let history = HISTORY.read();
+        Pages::DownloadProgress.apply_slide_in();
+        let pages_scroller = vec![Pages::MainPage, Pages::Explore, Pages::Collections];
+        if let Err(err) = Pages::scroller_applyer(pages_scroller, |x| x == &history.active) {
+            throw_error(err);
+        }
+        for collection_id in keys.clone() {
+            Pages::collection_display(collection_id).apply_slide_in();
+            Pages::collection_edit(collection_id).apply_slide_in();
+        }
     });
 
     use_memo(move || {
