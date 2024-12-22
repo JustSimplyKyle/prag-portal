@@ -90,12 +90,13 @@ impl Pages {
 
     #[must_use]
     pub fn flyer_attributes(&self, history: ReadableRef<Signal<crate::History>>) -> Vec<Attribute> {
-        let is_slider = matches!(
-            history.active,
-            Self::CollectionPage { .. } | Self::DownloadProgress
-        );
+        let no_slideout = history.prev_peek() == Some(self)
+            && !matches!(
+                history.active,
+                Self::CollectionPage { .. } | Self::DownloadProgress
+            );
 
-        let is_edit = matches!(
+        let edit_case = matches!(
             history.prev_peek(),
             Some(Self::CollectionPage {
                 state: CollectionPageState::Edit,
@@ -109,40 +110,32 @@ impl Pages {
             }
         );
 
-        let left = {
-            if (history.prev_peek() == Some(self) && !is_slider) || is_edit {
-                "100dvw"
-            } else {
-                ""
-            }
+        let left = if no_slideout || edit_case {
+            "100dvw"
+        } else {
+            ""
         };
 
-        let z_index = {
-            if &history.active == self {
-                "100"
-            } else if history.prev_peek() == Some(self) {
-                "51"
-            } else {
-                "0"
-            }
+        let z_index = if &history.active == self {
+            "100"
+        } else if history.prev_peek() == Some(self) {
+            "51"
+        } else {
+            "0"
         };
 
-        let display = {
-            if &history.active == self || history.prev_peek() == Some(self) {
-                "block"
-            } else {
-                "none"
-            }
+        let display = if &history.active == self || history.prev_peek() == Some(self) {
+            "block"
+        } else {
+            "none"
         };
 
-        let animation = {
-            if &history.active == self {
-                "slideLeft 500ms var(--gentle-easing)"
-            } else if (history.prev_peek() == Some(self) && !is_slider) || is_edit {
-                "slideRight 500ms var(--gentle-easing)"
-            } else {
-                ""
-            }
+        let animation = if &history.active == self {
+            "slideLeft 500ms var(--gentle-easing)"
+        } else if no_slideout || edit_case {
+            "slideRight 500ms var(--gentle-easing)"
+        } else {
+            ""
         };
 
         let display = Attribute::new("display", display, Some("style"), false);
