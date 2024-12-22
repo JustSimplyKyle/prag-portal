@@ -201,6 +201,34 @@ fn SetupName(mut title: Signal<Option<String>>) -> Element {
 }
 
 #[component]
+fn DropDown(default_ele: Element, children: Element, selector_visibility: Signal<bool>) -> Element {
+    rsx! {
+        div {
+            class: "pl-[20px] pr-[15px] bg-background w-full grow grid grid-flow-col justify-stretch items-center rounded-[20px] relative z-50",
+            onclick: move |_| {
+                selector_visibility.toggle();
+            },
+            div {
+                class: "justify-self-start grow trim text-[18px] font-english",
+                {default_ele}
+            }
+            ARROW_DOWN {
+                class: "justify-self-end",
+            }
+            div {
+                aria_hidden: !selector_visibility(),
+                onclick: move |x| {
+                    x.stop_propagation();
+                },
+                class: "absolute inset-x-0 top-full flex flex-col bg-background rounded-[20px] *:py-[15px] *:pl-[25px] *:pr-[20px] gap-[5px] h-fit max-h-[300px] mt-[10px] overflow-y-scroll aria-hidden:opacity-0 aria-hidden:hidden z-50 py-[15px]",
+                transition: "all 0.5s allow-discrete",
+                {children}
+            }
+        }
+    }
+}
+
+#[component]
 pub fn GameVersion(selected_version: Signal<Option<VersionMetadata>>) -> Element {
     let latest_version = use_resource(VersionMetadata::latest_release);
     let binding = latest_version.read();
@@ -211,7 +239,7 @@ pub fn GameVersion(selected_version: Signal<Option<VersionMetadata>>) -> Element
         .map_err(SnafuToCapturedError::to_render_error)?;
 
     let mut snapshot_status = use_signal(|| false);
-    let mut selecetor_visibility = use_signal(|| false);
+    let mut selector_visibility = use_signal(|| false);
 
     let game_versions = use_resource(move || async move {
         VersionMetadata::get_version_manifest()
@@ -229,7 +257,7 @@ pub fn GameVersion(selected_version: Signal<Option<VersionMetadata>>) -> Element
             div {
                 onclick: move |_| {
                     selected_version.set(Some(metadata.clone()));
-                    selecetor_visibility.set(false);
+                    selector_visibility.set(false);
                 },
                 div {
                     aria_selected,
@@ -268,13 +296,8 @@ pub fn GameVersion(selected_version: Signal<Option<VersionMetadata>>) -> Element
             }
             div {
                 class: "flex gap-[5px] h-[60px] z-50",
-                div {
-                    class: "pl-[20px] pr-[15px] bg-background w-full grow grid grid-flow-col justify-stretch items-center rounded-[20px] relative z-50",
-                    onclick: move |_| {
-                        selecetor_visibility.toggle();
-                    },
-                    div {
-                        class: "justify-self-start grow trim text-[18px] font-english",
+                DropDown {
+                    default_ele: rsx! {
                         if let Some(version) = &*selected_version.read() {
                             {version.id.clone()}
                         } else {
@@ -282,22 +305,12 @@ pub fn GameVersion(selected_version: Signal<Option<VersionMetadata>>) -> Element
                                 {v.id.clone()}
                             }
                         }
-                    }
-                    ARROW_DOWN {
-                        class: "justify-self-end",
-                    }
-                    div {
-                        aria_hidden: !selecetor_visibility(),
-                        onclick: move |x| {
-                            x.stop_propagation();
-                        },
-                        class: "absolute inset-x-0 top-full flex flex-col bg-background rounded-[20px] *:py-[15px] *:pl-[25px] *:pr-[20px] gap-[5px] h-fit max-h-[300px] mt-[10px] overflow-y-scroll aria-hidden:opacity-0 aria-hidden:hidden z-50 py-[15px]",
-                        transition: "all 0.5s allow-discrete",
-                        if snapshot_status() {
-                            {all_game_versions}
-                        } else {
-                            {release_game_versions}
-                        }
+                    },
+                    selector_visibility,
+                    if snapshot_status() {
+                        {all_game_versions}
+                    } else {
+                        {release_game_versions}
                     }
                 }
                 div {
@@ -397,6 +410,51 @@ pub fn AdvancedOption(memory_selected: Signal<usize>) -> Element {
 }
 
 #[component]
+pub fn ModLoaderSelector(modloader_selected: Signal<Option<ModLoader>>) -> Element {
+    let mut selector_visibility = use_signal(|| false);
+    let mut selected_modloader_type = use_signal(|| None);
+    let modloaders = [
+        ModLoaderType::NeoForge,
+        ModLoaderType::Forge,
+        ModLoaderType::Fabric,
+        ModLoaderType::Quilt,
+    ];
+
+    let aria_selector =
+        |x| selected_modloader_type().map_or_else(|| modloaders[0] == x, |v| v == x);
+
+    rsx! {
+
+        div {
+            class: "flex flex-col gap-[20px] z-40",
+            Title {
+                title: "模組載入器",
+            }
+            div {
+                class: "flex gap-[5px] h-[60px] z-40",
+                DropDown {
+                    default_ele: rsx! {
+                        {modloaders[0].to_string()}
+                    },
+                    selector_visibility,
+                    for loader in modloaders {
+                        div {
+                            onclick: move |_| {
+                                selected_modloader_type.set(Some(loader));
+                                selector_visibility.set(false);
+                            },
+                            aria_selected: aria_selector(loader),
+                            class: "font-display text-[20px] trim font-normal text-hint aria-selected:text-white",
+                            "{loader}"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[component]
 pub fn Footer(canceled: Signal<bool>, finished: Signal<bool>) -> Element {
     const BLOCK_CSS: &str = "grid grid-flow-col justify-stretch items-center gap-[10px] bg-deep-background h-full p-[15px] pr-[25px] rounded-[15px]";
     rsx! {
@@ -440,6 +498,7 @@ pub fn BuildCollection(active: Signal<bool>) -> Element {
     let cover_img = use_signal(get_random_collection_picture);
     let background_img = use_signal(get_random_collection_picture);
     let selected_version = use_signal(|| None);
+    let modloader_selected = use_signal(|| None);
     let memory_selected = use_signal(|| DEFAULT_MEMORY);
 
     let canceled = use_signal(|| false);
@@ -518,11 +577,23 @@ pub fn BuildCollection(active: Signal<bool>) -> Element {
                             cover_img,
                             background_img,
                         }
-                        GameVersion {
-                            selected_version,
+                        div {
+                            class: "z-50 container",
+                            GameVersion {
+                                selected_version,
+                            }
                         }
-                        AdvancedOption {
-                            memory_selected
+                        div {
+                            class: "z-30 container",
+                            ModLoaderSelector {
+                                modloader_selected
+                            }
+                        }
+                        div {
+                            class: "z-20 container",
+                            AdvancedOption {
+                                memory_selected
+                            }
                         }
                     }
                     Footer {
