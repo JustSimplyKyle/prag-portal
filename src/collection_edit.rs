@@ -3,7 +3,7 @@ pub mod sidebar;
 
 use dioxus::prelude::*;
 use personalization::Personalization;
-use rust_lib::api::shared_resources::collection::{use_collections_radio, CollectionId};
+use rust_lib::api::shared_resources::collection::{use_collections_radio, use_keys, CollectionId};
 use sidebar::EditSidebar;
 use strum::{EnumIter, IntoEnumIterator};
 
@@ -18,6 +18,7 @@ use crate::{
         molecules::switcher::Comparison,
         string_placements::{Alignment, ContentType, Contents},
     },
+    HISTORY,
 };
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, EnumIter)]
@@ -53,17 +54,14 @@ impl_optional_state_switcher!(Pages);
 
 #[component]
 pub fn CollectionEditContainer() -> Element {
-    let radio = use_collections_radio();
-    let read = radio.read();
-    let collection_ids = read.0.keys().map(|&x| (x, Pages::collection_edit(x)));
+    let keys = use_keys();
     rsx! {
-        for (collection_id , page) in collection_ids {
+        for collection_id in keys {
             div {
                 class: "absolute inset-0 z-0 min-w-full min-h-full",
-                id: page.slide_in_id(),
-                if page.should_render() {
+                ..Pages::collection_edit(collection_id).flyer_attributes(HISTORY.read()),
+                if Pages::collection_edit(collection_id).should_render() {
                     CollectionEdit {
-                        key: "{page.slide_in_id()}",
                         collection_id,
                     }
                 }

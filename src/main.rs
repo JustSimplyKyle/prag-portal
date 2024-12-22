@@ -16,6 +16,7 @@ use collection_edit::CollectionEditContainer;
 use dioxus::desktop::tao::dpi::PhysicalSize;
 use dioxus::desktop::WindowBuilder;
 use dioxus::html::input_data::MouseButton;
+use dioxus_elements::ol::start;
 use dioxus_logger::tracing::{warn, Level};
 use dioxus_radio::hooks::use_init_radio_station;
 use pages::Pages;
@@ -412,19 +413,12 @@ fn Layout() -> Element {
         collection::Collections(collections)
     });
 
-    let keys = use_keys();
-
     // do animation updates
     use_effect(move || {
         let history = HISTORY.read();
-        Pages::DownloadProgress.apply_slide_in();
         let pages_scroller = vec![Pages::MainPage, Pages::Explore, Pages::Collections];
         if let Err(err) = Pages::scroller_applyer(pages_scroller, |x| x == &history.active) {
             throw_error(err);
-        }
-        for collection_id in keys.clone() {
-            Pages::collection_display(collection_id).apply_slide_in();
-            Pages::collection_edit(collection_id).apply_slide_in();
         }
     });
 
@@ -436,6 +430,7 @@ fn Layout() -> Element {
     })()?;
 
     let history = HISTORY.read();
+
     rsx! {
         div {
             class: "max-w-screen max-h-screen overflow-clip group-pages flex",
@@ -483,7 +478,7 @@ fn Layout() -> Element {
                 }
                 div {
                     class: "absolute inset-0 z-0 min-h-full min-w-full",
-                    id: Pages::DownloadProgress.slide_in_id(),
+                    ..Pages::DownloadProgress.flyer_attributes(history),
                     LayoutContainer {
                         DownloadProgress {
 
@@ -512,9 +507,8 @@ fn CollectionContainer() -> Element {
     rsx! {
         for collection_id in should_render_ids {
             div {
-                class: "absolute inset-0 z-0 min-h-full min-w-full",
-                key: "page {collection_id}",
-                id: Pages::collection_display(collection_id).slide_in_id(),
+                class: "absolute min-h-full min-w-full",
+                ..Pages::collection_display(collection_id).flyer_attributes(HISTORY.read()),
                 SingleCollectionContainer {
                     id: collection_id,
                 }

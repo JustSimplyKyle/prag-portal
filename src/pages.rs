@@ -66,11 +66,6 @@ impl Scrollable for Pages {
 
 impl Pages {
     #[must_use]
-    pub fn slide_in_id(&self) -> String {
-        format!("flyinout-{}", self.to_string())
-    }
-
-    #[must_use]
     pub const fn collection_display(id: CollectionId) -> Self {
         Self::CollectionPage {
             id,
@@ -93,96 +88,68 @@ impl Pages {
         })
     }
 
-    /// Applies slide-in animations to HTML elements based on data attributes.
-    ///
-    /// This function dynamically applies CSS animations to elements within a webpage
-    /// using Tailwind CSS-defined animations. It targets elements with a specific class ('.group')
-    /// and adjusts their styles according to their data attributes.
-    ///
-    /// ## Attributes
-    /// The function expects HTML elements to have certain attributes and structure:
-    /// * Top level element should have the class `group`.
-    /// * Each `group` element should contain at least one child element with an `id` that is acquired by `self.slide_in_id()`
-    ///
-    /// ## Data Attributes
-    /// * `data-prev`: This attribute specifies whether the element was the previous element in a
-    ///   sequence. If `true`, the `slideRight` animation is applied.
-    /// * `data-selected`: This attribute indicates if the element is the currently selected one.
-    ///   If `true`, the `slideLeft` animation is applied.
-    ///
-    /// ## Usage
-    /// To use this function, ensure that your HTML elements are set up correctly with the
-    /// required `id` and data attributes. Additionally, for most use cases involving animations or transitions,
-    /// it's essential to manage the positioning context correctly:
-    ///
-    /// - The parent container should have a **relative** positioning to serve as the positioning context for its children.
-    /// - Child elements, which are the targets of the animations, should be styled with **absolute** positioning to overlay
-    ///   within the relative container seamlessly.
-    ///
-    /// It is crucial to call this function at the start of each component's lifecycle to properly initialize
-    /// the animations.
-    ///
-    /// Here is an example element setup:
-    ///
-    /// ```rust
-    /// fn Component() {
-    ///     Pages::DownloadProgress.apply_slide_in();
-    ///     rsx! {
-    ///         div {
-    ///             "data-selected": selected.to_string(),
-    ///             "data-prev": prev.map_or_else(String::new, |x| x.to_string()),
-    ///             div { class: "w-full min-h-screen relative",
-    ///                 div { class: "absolute inset-0 z-0 min-h-full min-w-full", id: Pages::DownloadProgress.slide_in_id(), LayoutContainer { DownloadProgress {} } }
-    ///             }
-    ///         }
-    ///     }
-    /// }
-    /// ```
-    pub fn apply_slide_in(self) {
-        let function = r"
-            function applyStyles(dataValue) {
-                const groups = document.querySelectorAll('.group-pages');            
-                groups.forEach(group => {
-                    const prev = group.getAttribute('data-prev') === dataValue;
-                    const selected = group.getAttribute('data-selected') === dataValue;
-                    const target = group.querySelector('#flyinout-' + dataValue);
+    #[must_use]
+    pub fn flyer_attributes(&self, history: ReadableRef<Signal<crate::History>>) -> Vec<Attribute> {
+        let is_slider = matches!(
+            history.active,
+            Self::CollectionPage { .. } | Self::DownloadProgress
+        );
 
-                    // Reset styles first
-                    target.style.insetInlineStart = '';
-                    target.style.zIndex = '0';
-                    target.style.display = 'none';
-                    target.style.animation = '';
-
-                    if (selected) {
-                        target.style.zIndex = '100';
-                        target.style.display = 'block';                        
-                        target.style.animation = 'slideLeft 500ms var(--gentle-easing)';
-                    }
-
-                    const isSlider = group.getAttribute('data-selected').includes('collection-page') || group.getAttribute('data-selected').includes('download-progress');
-                    if (prev) {
-                        if (!isSlider) {
-                            target.style.insetInlineStart = '100dvw';
-                            target.style.zIndex = '51';
-                            target.style.display = 'block';                        
-                            target.style.animation = 'slideRight 500ms var(--gentle-easing)';
-                        } else {
-                            target.style.zIndex = '51';
-                            target.style.display = 'block';                        
-                        }
-                    }
-                });
+        let is_edit = matches!(
+            history.prev_peek(),
+            Some(Self::CollectionPage {
+                state: CollectionPageState::Edit,
+                ..
+            })
+        ) && matches!(
+            self,
+            Self::CollectionPage {
+                state: CollectionPageState::Edit,
+                ..
             }
-        ";
-        if let Err(x) = eval(&format!(
-            " {function}
-              applyStyles(\"{}\");
-            ",
-            self.to_string()
-        ))
-        .send(())
-        {
-            warn!("Javascript Error: {x}");
-        }
+        );
+
+        let left = {
+            if (history.prev_peek() == Some(self) && !is_slider) || is_edit {
+                "100dvw"
+            } else {
+                ""
+            }
+        };
+
+        let z_index = {
+            if &history.active == self {
+                "100"
+            } else if history.prev_peek() == Some(self) {
+                "51"
+            } else {
+                "0"
+            }
+        };
+
+        let display = {
+            if &history.active == self || history.prev_peek() == Some(self) {
+                "block"
+            } else {
+                "none"
+            }
+        };
+
+        let animation = {
+            if &history.active == self {
+                "slideLeft 500ms var(--gentle-easing)"
+            } else if (history.prev_peek() == Some(self) && !is_slider) || is_edit {
+                "slideRight 500ms var(--gentle-easing)"
+            } else {
+                ""
+            }
+        };
+
+        let display = Attribute::new("display", display, Some("style"), false);
+        let animation = Attribute::new("animation", animation, Some("style"), false);
+        let z_index = Attribute::new("z-index", z_index, Some("style"), false);
+        let left = Attribute::new("left", left, Some("style"), false);
+
+        vec![display, animation, z_index, left]
     }
 }
