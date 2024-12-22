@@ -97,13 +97,12 @@ pub fn SideBar() -> Element {
                             ",
                         }
                         div {
-                            class: "transition-all absolute z-0 flex left-[300px] gap-[5px] w-[300px]
+                            class: "transition-all absolute z-0 flex left-[300px] w-[300px]
                                 [&:not(:hover)]:group-hover/main:group-data-[main-page=true]/main:left-[600px] 
                                 [&:not(:hover)]:group-hover/main:group-data-[collections=true]/main:left-0 
                             ",
                             div {
-                                class: "transition-all grow shrink w-[100px]
-                                ",
+                                class: "transition-all grow shrink w-[100px]",
                             }
                             Button {
                                 roundness: Roundness::Squircle,
@@ -133,8 +132,7 @@ pub fn SideBar() -> Element {
                                 ",
                             }
                             div {
-                                class: "grow shrink w-[100px]
-                                ",
+                                class: "grow shrink w-[100px]",
                             }
                         }
                         Button {

@@ -158,12 +158,19 @@ impl Pages {
                         target.style.display = 'block';                        
                         target.style.animation = 'slideLeft 500ms var(--gentle-easing)';
                     }
+
+                    const isSlider = group.getAttribute('data-selected').includes('collection-page') || group.getAttribute('data-selected').includes('download-progress');
                     if (prev) {
-                        target.style.insetInlineStart = '100dvw';
-                        target.style.zIndex = '51';
-                        target.style.display = 'block';                        
-                        target.style.animation = 'slideRight 500ms var(--gentle-easing)';
-                    } 
+                        if (!isSlider) {
+                            target.style.insetInlineStart = '100dvw';
+                            target.style.zIndex = '51';
+                            target.style.display = 'block';                        
+                            target.style.animation = 'slideRight 500ms var(--gentle-easing)';
+                        } else {
+                            target.style.zIndex = '51';
+                            target.style.display = 'block';                        
+                        }
+                    }
                 });
             }
         ";
