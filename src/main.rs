@@ -16,13 +16,13 @@ use collection_edit::CollectionEditContainer;
 use dioxus::desktop::tao::dpi::PhysicalSize;
 use dioxus::desktop::WindowBuilder;
 use dioxus::html::input_data::MouseButton;
-use dioxus_logger::tracing::{info, Level};
+use dioxus_logger::tracing::{warn, Level};
 use dioxus_radio::hooks::use_init_radio_station;
 use pages::Pages;
 use rand::seq::IteratorRandom;
 use scrollable::Scrollable;
 use snafu::ErrorCompat;
-use std::{collections::BTreeMap, path::PathBuf, time::Duration};
+use std::{collections::BTreeMap, ops::Deref, path::PathBuf, time::Duration};
 use svgs::{CREATE_COLLECTION, CURSEFORGE_OUTLINE, GRASS, MODRINTH_OUTLINE};
 use tailwind_fuse::*;
 use BaseComponents::{
@@ -217,6 +217,34 @@ fn TailwindSetup() -> Element {
 #[component]
 fn App() -> Element {
     let error_active = use_signal(|| true);
+    let handle_error = move |error: ErrorContext| {
+        rsx! {
+            Modal {
+                active: error_active,
+                div {
+                    class: "flex",
+                    div {
+                        flex_basis: "10%",
+                    }
+                    div {
+                        class: "w-full bg-background overflow-x-scroll flex flex-col items-center space-y-3",
+                        flex_basis: "80%",
+                        div {
+                            class: "text-red text-3xl font-black",
+                            "Hmm, something went wrong. Please copy the following error to the developer."
+                        }
+                        pre {
+                            class: "max-w-full overflow-x-scroll font-[13px] font-bold",
+                            "{error:#?}"
+                        }
+                    }
+                    div {
+                        flex_basis: "10%",
+                    }
+                }
+            }
+        }
+    };
     rsx! {
         TailwindSetup {
 
@@ -225,34 +253,7 @@ fn App() -> Element {
         div {
             class: "[&_*]:transform-gpu bg-deep-background h-screen w-screen font-display leading-normal",
             ErrorBoundary {
-                handle_error: move |error| {
-                    rsx! {
-                        Modal {
-                            active: error_active,
-                            div {
-                                class: "flex",
-                                div {
-                                    flex_basis: "10%",
-                                }
-                                div {
-                                    class: "w-full bg-background overflow-x-scroll flex flex-col items-center space-y-3",
-                                    flex_basis: "80%",
-                                    div {
-                                        class: "text-red text-3xl font-black",
-                                        "Hmm, something went wrong. Please copy the following error to the developer."
-                                    }
-                                    pre {
-                                        class: "max-w-full overflow-x-scroll font-[13px] font-bold",
-                                        "{error:#?}"
-                                    }
-                                }
-                                div {
-                                    flex_basis: "10%",
-                                }
-                            }
-                        }
-                    }
-                },
+                handle_error ,
                 Layout {
 
 
@@ -275,23 +276,13 @@ impl IntoRenderError for anyhow::Error {
     }
 }
 
-pub trait ToCapturedError {
-    fn to_render_error(&self) -> CapturedError;
-}
-
-impl<T: std::fmt::Display + ?Sized> ToCapturedError for T {
-    fn to_render_error(&self) -> CapturedError {
-        CapturedError::from_display(self.to_string())
-    }
-}
-
 pub trait SnafuToCapturedError {
     fn to_render_error(&self) -> CapturedError;
 }
 
-impl<T: ErrorFormatted> SnafuToCapturedError for T {
+impl<T: snafu::Error + ?Sized> SnafuToCapturedError for T {
     fn to_render_error(&self) -> CapturedError {
-        CapturedError::from_display(self.to_formatted())
+        CapturedError::from_display(format!("{self:#?}"))
     }
 }
 

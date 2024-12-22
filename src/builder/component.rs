@@ -5,7 +5,7 @@ use dioxus_logger::tracing::info;
 use rust_lib::api::{
     backend_exclusive::vanilla::version::{VersionMetadata, VersionType},
     shared_resources::{
-        collection::{use_collections_radio, AdvancedOptions, ModLoader, ModLoaderType},
+        collection::{use_collections_radio, AdvancedOptions, Memory, ModLoader, ModLoaderType},
         entry,
     },
 };
@@ -24,7 +24,7 @@ use crate::{
         molecules::{file_input::FileInput, foldables::Foldable},
         organisms::modal::Modal,
     },
-    ErrorFormatted, SnafuToCapturedError, ToCapturedError,
+    ErrorFormatted, SnafuToCapturedError,
 };
 #[component]
 fn Title(title: String) -> Element {
@@ -481,7 +481,7 @@ pub fn BuildCollection(active: Signal<bool>) -> Element {
                         version: None,
                     },
                     AdvancedOptions {
-                        jvm_max_memory: Some(memory_selected()),
+                        jvm_max_memory: Some(Memory::Gigabytes(memory_selected())),
                         java_arguments: String::new(),
                     },
                     collections_radio,

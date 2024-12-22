@@ -137,7 +137,7 @@ pub fn Collections() -> Element {
     });
     rsx! {
         div {
-            class: "bg-deep-background flex z-10 flex-col gap-[10px]",
+            class: "bg-deep-background flex z-10 flex-col gap-[10px] h-screen",
             div {
                 class: "flex gap-[5px]",
                 div {
@@ -176,7 +176,7 @@ pub fn Collections() -> Element {
 
             }
             div {
-                class: "justify-center bg-background p-[30px] rounded-[30px] grid grid-flow-row gap-[20px] overflow-y-visible",
+                class: "justify-center bg-background p-[30px] rounded-[30px] grid grid-flow-row gap-[20px] overflow-y-visible h-full",
                 grid_auto_rows: "280px",
                 grid_auto_columns: "280px",
                 grid_template_columns: "repeat(auto-fill,280px)",
