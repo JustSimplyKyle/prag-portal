@@ -2223,10 +2223,6 @@ input {
   min-width: 700px;
 }
 
-.min-w-\[96\.66666px\] {
-  min-width: 96.66666px;
-}
-
 .min-w-fit {
   min-width: -moz-fit-content;
   min-width: fit-content;
@@ -2258,10 +2254,6 @@ input {
 
 .max-w-\[400px\] {
   max-width: 400px;
-}
-
-.max-w-\[96\.66666px\] {
-  max-width: 96.66666px;
 }
 
 .max-w-fit {

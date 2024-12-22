@@ -151,7 +151,7 @@ pub fn SideBar() -> Element {
                             },
                             switcher: Pages::Collections,
                             extended_css_class: "z-10 bg-background text-black absolute -right-[300px] transition-all [&_*]:transition-all
-                                min-w-[96.66666px] max-w-[96.66666px]
+                                min-w-[100px] max-w-[100px]
 
                                 hover:bg-green
                                 [&:not(:hover)]:justify-center

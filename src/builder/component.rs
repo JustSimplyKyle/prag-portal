@@ -434,7 +434,7 @@ pub fn ModLoaderSelector(modloader_selected: Signal<Option<ModLoader>>) -> Eleme
                 class: "flex gap-[5px] h-[60px] z-40",
                 DropDown {
                     default_ele: rsx! {
-                        {modloaders[0].to_string()}
+                        {selected_modloader_type().unwrap_or_else(|| modloaders[0]).to_string()}
                     },
                     selector_visibility,
                     for loader in modloaders {
