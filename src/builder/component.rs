@@ -24,7 +24,7 @@ use crate::{
         molecules::{file_input::FileInput, foldables::Foldable},
         organisms::modal::Modal,
     },
-    ErrorFormatted, SnafuToCapturedError,
+    SnafuToCapturedError,
 };
 #[component]
 fn Title(title: String) -> Element {

@@ -16,14 +16,13 @@ use collection_edit::CollectionEditContainer;
 use dioxus::desktop::tao::dpi::PhysicalSize;
 use dioxus::desktop::WindowBuilder;
 use dioxus::html::input_data::MouseButton;
-use dioxus_elements::ol::start;
-use dioxus_logger::tracing::{warn, Level};
+use dioxus_logger::tracing::Level;
 use dioxus_radio::hooks::use_init_radio_station;
 use pages::Pages;
 use rand::seq::IteratorRandom;
 use scrollable::Scrollable;
 use snafu::ErrorCompat;
-use std::{collections::BTreeMap, ops::Deref, path::PathBuf, time::Duration};
+use std::{collections::BTreeMap, path::PathBuf, time::Duration};
 use svgs::{CREATE_COLLECTION, CURSEFORGE_OUTLINE, GRASS, MODRINTH_OUTLINE};
 use tailwind_fuse::*;
 use BaseComponents::{
@@ -165,7 +164,7 @@ impl History {
 }
 
 use rust_lib::api::shared_resources::collection::{
-    self, use_collections_radio, use_keys, Collection, CollectionId, CollectionRadioChannel,
+    self, use_keys, Collection, CollectionId, CollectionRadioChannel,
 };
 
 fn main() {
