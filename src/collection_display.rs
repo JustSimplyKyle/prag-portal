@@ -1,13 +1,16 @@
 pub mod mod_renderer;
 
-use dioxus::prelude::*;
+use dioxus::{prelude::*, CapturedError};
 use dioxus_logger::tracing::{debug, error, info, trace, warn, Level};
 use mod_renderer::ModViewer;
 use notify::Watcher;
 use rust_lib::api::{
-    backend_exclusive::vanilla::launcher::LoggerEvent, shared_resources::collection::CollectionId,
+    backend_exclusive::vanilla::launcher::LoggerEvent,
+    shared_resources::collection::{CollectionError, CollectionId, ScreenShot},
 };
 use strum::EnumIter;
+use tokio::{fs, io::BufReader};
+use tokio_stream::StreamExt;
 
 use crate::{
     impl_context_switcher,
@@ -85,6 +88,7 @@ fn Footer(
     collection_id: ReadOnlySignal<CollectionId>,
     status: Signal<CollectionDisplayTopSelection>,
     search: Signal<String>,
+    screenshots: Resource<Result<Vec<ScreenShot>, CollectionError>>,
     default: String,
 ) -> Element {
     let mut radio = collection_id().use_collection_radio();
@@ -94,12 +98,9 @@ fn Footer(
         .mod_controller()
         .map(|x| x.manager.mods.iter().filter(|x| x.enabled).count());
 
-    let mut screenshots_resource =
-        use_resource(move || async move { radio.read().get_screenshots().await });
-
     let mut error_handler = use_error_handler();
 
-    let screenshots_len = match &*screenshots_resource.read() {
+    let screenshots_len = match &*screenshots.read() {
         Some(Ok(x)) => x.len(),
         Some(Err(err)) => Err(err.to_render_error())?,
         None => 0,
@@ -109,7 +110,14 @@ fn Footer(
     use_effect(move || {
         let logs = logs.read();
         let level = *logs.level();
-        let output = format!("[{}] {}", logs.thread(), logs.message().unwrap_or_default());
+
+        let msg = logs.message().unwrap_or_default();
+
+        if msg.contains("screenshot") {
+            screenshots.restart();
+        }
+
+        let output = format!("[{}] {msg}", logs.thread());
 
         drop(logs);
 
@@ -150,7 +158,7 @@ fn Footer(
                     status.set(s);
                     selector_visibility.set(false);
 
-                    screenshots_resource.restart();
+                    screenshots.restart();
                 },
                 div {
                     aria_selected: status() == s,
@@ -188,7 +196,7 @@ fn Footer(
                 base: base(status(), false),
                 onclick: move |()| {
 
-                    screenshots_resource.restart();
+                    screenshots.restart();
                 },
                 selector_visibility,
                 {base(CollectionDisplayTopSelection::Mods, true)}
@@ -334,17 +342,16 @@ fn Content(collection_id: ReadOnlySignal<CollectionId>) -> Element {
 #[component]
 fn Screenshots(
     collection_id: ReadOnlySignal<CollectionId>,
+    screenshots: Resource<Result<Vec<ScreenShot>, CollectionError>>,
     search: ReadOnlySignal<String>,
 ) -> Element {
-    let radio = collection_id().use_collection_radio();
-
-    let screenshots = use_resource(move || async move { radio.read().get_screenshots().await });
     let read = screenshots.read();
     let screenshots = match &*read {
         Some(Ok(x)) => x,
         Some(Err(err)) => Err(err.to_render_error())?,
         None => &vec![],
     };
+
     rsx! {
         div {
             class: "rounded-[30px] bg-background px-[30px] pb-[30px] flex flex-col gap-[20px] text-[18px] text-white",
@@ -388,18 +395,27 @@ fn Screenshots(
                             class: "flex gap-[5px] items-center p-[20px] text-secondary font-english text-[15px] font-medium",
                             height: "50px",
                             div {
-                                div {
-                                    class: "trim",
-                                    {screenshot.get_creation_date()?.format("%Y.%m.%d").to_string()}
-                                }
+                                class: "trim",
+                                {screenshot.get_creation_date()?.format("%Y.%m.%d").to_string()}
                             }
                             div {
                                 "/"
                             }
                             div {
-                                div {
-                                    class: "trim",
-                                    "{screenshot.get_size()?.to_megabytes():.2} MB"
+                                class: "trim",
+                                "{screenshot.get_size()?.to_megabytes():.2} MB"
+                            }
+                            div {
+                                "/"
+                            }
+                            div {
+                                class: "trim",
+                                {
+                                    if let Some((x,y)) = image::image_dimensions(&screenshot.path).ok() {
+                                        format!("{x}x{y}")
+                                    } else {
+                                        String::new()
+                                    }
                                 }
                             }
                         }
@@ -417,6 +433,11 @@ pub fn CollectionDisplay(collection_id: ReadOnlySignal<CollectionId>) -> Element
 
     let default = CopyValue::new(String::from("搜尋合集中的內容"));
     let search = use_signal(|| default.cloned());
+
+    let radio = collection_id().use_collection_radio();
+
+    let screenshots = use_resource(move || async move { radio.read().get_screenshots().await });
+
     rsx! {
         div {
             class: "mr-[20px] w-full h-full",
@@ -426,6 +447,7 @@ pub fn CollectionDisplay(collection_id: ReadOnlySignal<CollectionId>) -> Element
                         collection_id,
                         status,
                         search,
+                        screenshots,
                         default,
                     }
                 },
@@ -478,6 +500,7 @@ pub fn CollectionDisplay(collection_id: ReadOnlySignal<CollectionId>) -> Element
                                 rsx! {
                                     Screenshots {
                                         collection_id,
+                                        screenshots,
                                         search: search()
                                     }
                                 }

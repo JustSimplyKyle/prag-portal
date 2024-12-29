@@ -29,8 +29,7 @@ ammonia = "4.0.0"
 dioxus-radio = "0.3.0"
 dioxus-logger = "0.6.1"
 notify = "7.0.0"
-
-[profile]
+image = "0.25.5"
 
 [profile.wasm-dev]
 inherits = "dev"
