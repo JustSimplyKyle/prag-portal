@@ -1906,6 +1906,11 @@ input {
   margin-right: 1.25rem;
 }
 
+.my-\[10px\] {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
 .mb-0 {
   margin-bottom: 0px;
 }
@@ -1998,6 +2003,10 @@ input {
 
 .h-\[140px\] {
   height: 140px;
+}
+
+.h-\[200px\] {
+  height: 200px;
 }
 
 .h-\[30px\] {
@@ -2144,6 +2153,10 @@ input {
 
 .w-\[35px\] {
   width: 35px;
+}
+
+.w-\[390px\] {
+  width: 390px;
 }
 
 .w-\[40px\] {
@@ -2411,6 +2424,10 @@ input {
   align-content: space-evenly;
 }
 
+.items-start {
+  align-items: flex-start;
+}
+
 .items-end {
   align-items: flex-end;
 }
@@ -2557,6 +2574,10 @@ input {
 
 .justify-self-stretch {
   justify-self: stretch;
+}
+
+.overflow-hidden {
+  overflow: hidden;
 }
 
 .overflow-clip {
@@ -2934,10 +2955,6 @@ input {
   padding-left: 20px;
 }
 
-.pl-\[25px\] {
-  padding-left: 25px;
-}
-
 .pr-\[15px\] {
   padding-right: 15px;
 }
@@ -3044,6 +3061,11 @@ input {
 .text-red {
   --tw-text-opacity: 1;
   color: rgb(201 43 69 / var(--tw-text-opacity));
+}
+
+.text-secondary {
+  --tw-text-opacity: 1;
+  color: rgb(125 125 125 / var(--tw-text-opacity));
 }
 
 .text-secondary-surface {

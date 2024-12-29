@@ -5,23 +5,20 @@ use dioxus_logger::tracing::info;
 use rust_lib::api::{
     backend_exclusive::vanilla::version::{VersionMetadata, VersionType},
     shared_resources::{
-        collection::{use_collections_radio, AdvancedOptions, Memory, ModLoader, ModLoaderType},
+        collection::{use_collections_radio, AdvancedOptions, ModLoader, ModLoaderType, Size},
         entry,
     },
 };
 
 use crate::{
     get_random_collection_picture,
-    svgs::{
-        self, ARROW_DOWN, CLOSE_CROSS, CREATE_COLLECTION, FOLDER_UPLOAD, LINE, SHADOW_ADD,
-        UPLOAD_FILE,
-    },
+    svgs::{self, CLOSE_CROSS, CREATE_COLLECTION, FOLDER_UPLOAD, LINE, SHADOW_ADD, UPLOAD_FILE},
     BaseComponents::{
         atoms::{
             center::Center,
             switch::{self, FloatingSwitch},
         },
-        molecules::{file_input::FileInput, foldables::Foldable},
+        molecules::{context_menu::DropDown, file_input::FileInput, foldables::Foldable},
         organisms::modal::Modal,
     },
     SnafuToCapturedError,
@@ -201,34 +198,6 @@ fn SetupName(mut title: Signal<Option<String>>) -> Element {
 }
 
 #[component]
-fn DropDown(default_ele: Element, children: Element, selector_visibility: Signal<bool>) -> Element {
-    rsx! {
-        div {
-            class: "pl-[20px] pr-[15px] bg-background w-full grow grid grid-flow-col justify-stretch items-center rounded-[20px] relative z-50",
-            onclick: move |_| {
-                selector_visibility.toggle();
-            },
-            div {
-                class: "justify-self-start grow trim text-[18px] font-english",
-                {default_ele}
-            }
-            ARROW_DOWN {
-                class: "justify-self-end",
-            }
-            div {
-                aria_hidden: !selector_visibility(),
-                onclick: move |x| {
-                    x.stop_propagation();
-                },
-                class: "absolute inset-x-0 top-full flex flex-col bg-background rounded-[20px] *:py-[15px] *:pl-[25px] *:pr-[20px] gap-[5px] h-fit max-h-[300px] mt-[10px] overflow-y-scroll aria-hidden:opacity-0 aria-hidden:hidden z-50 py-[15px]",
-                transition: "all 0.5s allow-discrete",
-                {children}
-            }
-        }
-    }
-}
-
-#[component]
 pub fn GameVersion(selected_version: Signal<Option<VersionMetadata>>) -> Element {
     let latest_version = use_resource(VersionMetadata::latest_release);
     let binding = latest_version.read();
@@ -297,7 +266,7 @@ pub fn GameVersion(selected_version: Signal<Option<VersionMetadata>>) -> Element
             div {
                 class: "flex gap-[5px] h-[60px] z-50",
                 DropDown {
-                    default_ele: rsx! {
+                    base: rsx! {
                         if let Some(version) = &*selected_version.read() {
                             {version.id.clone()}
                         } else {
@@ -433,7 +402,7 @@ pub fn ModLoaderSelector(modloader_selected: Signal<Option<ModLoader>>) -> Eleme
             div {
                 class: "flex gap-[5px] h-[60px] z-40",
                 DropDown {
-                    default_ele: rsx! {
+                    base: rsx! {
                         {selected_modloader_type().unwrap_or_else(|| modloaders[0]).to_string()}
                     },
                     selector_visibility,
@@ -540,7 +509,7 @@ pub fn BuildCollection(active: Signal<bool>) -> Element {
                         version: None,
                     },
                     AdvancedOptions {
-                        jvm_max_memory: Some(Memory::Gigabytes(memory_selected())),
+                        jvm_max_memory: Some(Size::Gigabytes(memory_selected())),
                         java_arguments: String::new(),
                     },
                     collections_radio,

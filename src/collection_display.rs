@@ -3,6 +3,7 @@ pub mod mod_renderer;
 use dioxus::prelude::*;
 use dioxus_logger::tracing::{debug, error, info, trace, warn, Level};
 use mod_renderer::ModViewer;
+use notify::Watcher;
 use rust_lib::api::{
     backend_exclusive::vanilla::launcher::LoggerEvent, shared_resources::collection::CollectionId,
 };
@@ -16,11 +17,13 @@ use crate::{
     BaseComponents::{
         atoms::button::{Button, FillMode, Roundness},
         molecules::{
+            context_menu::{self, ContextMenu, DropDown, Menu},
             search_bar::SearchBar,
             switcher::{Comparison, StateSwitcher},
         },
         string_placements::{Alignment, ContentType, Contents},
     },
+    SnafuToCapturedError,
 };
 
 pub static DISPLAY_BACKGROUND: Asset = asset!("/assets/cool_image.png");
@@ -44,6 +47,7 @@ pub(crate) enum CollectionDisplayTopSelection {
     World,
     ResourcePack,
     ShaderPacks,
+    ScreenShots,
 }
 
 impl_context_switcher!(CollectionDisplayTopSelection);
@@ -79,16 +83,28 @@ pub fn ScrollableFootBar(main: Element, footer: Element, bottom: Element) -> Ele
 #[component]
 fn Footer(
     collection_id: ReadOnlySignal<CollectionId>,
+    status: Signal<CollectionDisplayTopSelection>,
     search: Signal<String>,
     default: String,
 ) -> Element {
     let mut radio = collection_id().use_collection_radio();
-    info!("footer rerun");
-    let len = radio
+
+    let mods_len = radio
         .read()
         .mod_controller()
         .map(|x| x.manager.mods.iter().filter(|x| x.enabled).count());
+
+    let mut screenshots_resource =
+        use_resource(move || async move { radio.read().get_screenshots().await });
+
     let mut error_handler = use_error_handler();
+
+    let screenshots_len = match &*screenshots_resource.read() {
+        Some(Ok(x)) => x.len(),
+        Some(Err(err)) => Err(err.to_render_error())?,
+        None => 0,
+    };
+
     let logs = use_signal_sync(LoggerEvent::default);
     use_effect(move || {
         let logs = logs.read();
@@ -115,20 +131,46 @@ fn Footer(
             }
         }
     });
+    let mut selector_visibility = use_signal(|| false);
 
-    let launch_game = move || {
-        spawn(async move {
-            if let Err(err) = radio
-                .with_async_mut(move |mut collection| async move {
-                    collection.launch_game(logs).await?;
-                    Ok(collection)
-                })
-                .await
-            {
-                error!("collection throwed {err:?}");
-                error_handler.set(Err(err.into()));
+    let base = |s, focus_right: bool| {
+        use CollectionDisplayTopSelection as S;
+        let len = match s {
+            S::Mods => mods_len.unwrap_or_default(),
+            S::World => 0,
+            S::ResourcePack => 0,
+            S::ShaderPacks => 0,
+            S::ScreenShots => screenshots_len,
+        };
+
+        rsx! {
+            div {
+                class: "gap-[5px] grid grid-flow-col items-center text-hint font-medium text-[20px]",
+                onclick: move |_| {
+                    status.set(s);
+                    selector_visibility.set(false);
+
+                    screenshots_resource.restart();
+                },
+                div {
+                    aria_selected: status() == s,
+                    class: "aria-selected:text-white justify-self-start",
+                    match s {
+                        S::Mods => "模組",
+                        S::World => "地圖",
+                        S::ResourcePack => "資源包",
+                        S::ShaderPacks => "光影包",
+                        S::ScreenShots => "螢幕捷圖"
+                    }
+                }
+                div {
+                    aria_selected: status() == s,
+                    class: "aria-selected:text-white font-english text-secondary-surface",
+                    class: if focus_right { "justify-self-end" } else { "justify-self-start" },
+                    "({len})"
+                }
             }
-        })
+        }
     };
 
     rsx! {
@@ -141,25 +183,18 @@ fn Footer(
                 clickable: false,
                 string_placements: vec![ContentType::svg(BRIGHT_LEFT_ARROW).css("svg-[40px]").align_center()],
             }
-            Button {
-                roundness: Roundness::Squircle,
-                extended_css_class: "bg-background pl-[25px] pr-[20px] min-w-[280px] max-w-[280px]",
-                fill_mode: FillMode::Fit,
-                clickable: false,
-                string_placements: vec![
-                    Contents::new(
-                            vec![
-                                ContentType::text("模組").css("font-medium"),
-                                ContentType::text(format!("({})", len.unwrap_or_default()))
-                                    .css("text-hint font-english font-medium"),
-                            ],
-                            Alignment::Left,
-                        )
-                        .css("gap-[5px] align-center"),
-                    ContentType::svg(asset!("/assets/arrow_drop_down_40.svg"))
-                        .css("svg-[40px]")
-                        .align_right(),
-                ],
+            DropDown {
+                class: "min-w-[280px]",
+                base: base(status(), false),
+                onclick: move |()| {
+
+                    screenshots_resource.restart();
+                },
+                selector_visibility,
+                {base(CollectionDisplayTopSelection::Mods, true)}
+                {base(CollectionDisplayTopSelection::ScreenShots, true)}
+                {base(CollectionDisplayTopSelection::World, true)}
+                {base(CollectionDisplayTopSelection::ResourcePack, true)}
             }
             SearchBar {
                 search,
@@ -184,8 +219,17 @@ fn Footer(
                 roundness: Roundness::Squircle,
                 extended_css_class: "bg-white min-w-[150px]",
                 fill_mode: FillMode::Fit,
-                onclick: move |()| {
-                    launch_game();
+                onclick: move |()| async move {
+                    if let Err(err) = radio
+                        .with_async_mut(move |mut collection| async move {
+                            collection.launch_game(logs).await?;
+                            Ok(collection)
+                        })
+                        .await
+                    {
+                        error!("collection throwed {err:?}");
+                        error_handler.set(Err(err.into()));
+                    }
                 },
                 string_placements: vec![{ ContentType::svg(GAME_CONTROLLER).align_center() }],
             }
@@ -231,7 +275,7 @@ fn Content(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                                 ContentType::custom(
                                         rsx!(
                                             div { class :
-                                            "font-english text-black font-bold leading-[1.2] capsize", { loader
+                                            "font-english text-black font-bold trim", { loader
                                             .clone() } }
                                         ),
                                     )
@@ -288,9 +332,88 @@ fn Content(collection_id: ReadOnlySignal<CollectionId>) -> Element {
 }
 
 #[component]
+fn Screenshots(
+    collection_id: ReadOnlySignal<CollectionId>,
+    search: ReadOnlySignal<String>,
+) -> Element {
+    let radio = collection_id().use_collection_radio();
+
+    let screenshots = use_resource(move || async move { radio.read().get_screenshots().await });
+    let read = screenshots.read();
+    let screenshots = match &*read {
+        Some(Ok(x)) => x,
+        Some(Err(err)) => Err(err.to_render_error())?,
+        None => &vec![],
+    };
+    rsx! {
+        div {
+            class: "rounded-[30px] bg-background px-[30px] pb-[30px] flex flex-col gap-[20px] text-[18px] text-white",
+            div {
+                class: "grid grid-flow-col items-center justify-stretch gap-[10px] px-[20px] my-[10px] h-[70px]",
+                div {
+                    class: "justify-self-start flex items-center gap-[5px] grow w-full font-medium",
+                    div {
+                        class: "w-[100px]",
+                        "檔案名稱",
+                    }
+                    div {
+                        class: "w-full grow text-hint font-display",
+                        "(拍攝日期/檔案大小/圖片大小)"
+                    }
+                }
+                div {
+                    class: "justify-self-end flex w-[180px] items-center self-stretch gap-[5px]",
+                    "依照日期排序"
+                    crate::svgs::ARROW_DOWN {}
+                }
+            }
+            div {
+                class: "grid grid-flow-row gap-[5px]",
+                grid_auto_rows: "310px",
+                grid_auto_columns: "390px",
+                grid_template_columns: "repeat(auto-fill,390px)",
+                for screenshot in screenshots {
+                    div {
+                        class: "flex flex-col items-start bg-deep-background rounded-[30px]",
+                        div {
+                            class: "text-white flex justify-start items-center p-[20px] text-[18px] font-english font-bold",
+                            height: "60px",
+                            div {
+                                class: "trim",
+                                "{screenshot.path.file_name().unwrap_or_default().to_string_lossy()}"
+                            }
+                        }
+                        {ContentType::image(&screenshot.path).css("w-[390px] h-[200px] object-cover overflow-hidden")}
+                        div {
+                            class: "flex gap-[5px] items-center p-[20px] text-secondary font-english text-[15px] font-medium",
+                            height: "50px",
+                            div {
+                                div {
+                                    class: "trim",
+                                    {screenshot.get_creation_date()?.format("%Y.%m.%d").to_string()}
+                                }
+                            }
+                            div {
+                                "/"
+                            }
+                            div {
+                                div {
+                                    class: "trim",
+                                    "{screenshot.get_size()?.to_megabytes():.2} MB"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[component]
 pub fn CollectionDisplay(collection_id: ReadOnlySignal<CollectionId>) -> Element {
-    let status: Signal<Comparison<CollectionDisplayTopSelection>> =
-        use_signal(|| (CollectionDisplayTopSelection::Mods, None));
+    let status: Signal<CollectionDisplayTopSelection> =
+        use_signal(|| CollectionDisplayTopSelection::Mods);
 
     let default = CopyValue::new(String::from("搜尋合集中的內容"));
     let search = use_signal(|| default.cloned());
@@ -301,6 +424,7 @@ pub fn CollectionDisplay(collection_id: ReadOnlySignal<CollectionId>) -> Element
                 footer: rsx! {
                     Footer {
                         collection_id,
+                        status,
                         search,
                         default,
                     }
@@ -313,7 +437,7 @@ pub fn CollectionDisplay(collection_id: ReadOnlySignal<CollectionId>) -> Element
                 bottom: rsx! {
                     div {
                         class: "relative overflow-y-scroll min-w-full max-w-full flex flex-col h-full",
-                        match status().0 {
+                        match status() {
                             CollectionDisplayTopSelection::Mods => {
                                 rsx! {
                                     ModViewer {
@@ -347,6 +471,14 @@ pub fn CollectionDisplay(collection_id: ReadOnlySignal<CollectionId>) -> Element
                                         collection_id,
                                         default,
                                         search: search(),
+                                    }
+                                }
+                            }
+                            CollectionDisplayTopSelection::ScreenShots => {
+                                rsx! {
+                                    Screenshots {
+                                        collection_id,
+                                        search: search()
                                     }
                                 }
                             }
