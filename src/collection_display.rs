@@ -352,6 +352,9 @@ fn Screenshots(
         None => &vec![],
     };
 
+    let block_height = "310px";
+    let block_width = "390px";
+
     rsx! {
         div {
             class: "rounded-[30px] bg-background px-[30px] pb-[30px] flex flex-col gap-[20px] text-[18px] text-white",
@@ -376,9 +379,9 @@ fn Screenshots(
             }
             div {
                 class: "grid grid-flow-row gap-[5px]",
-                grid_auto_rows: "310px",
-                grid_auto_columns: "390px",
-                grid_template_columns: "repeat(auto-fill,390px)",
+                grid_auto_rows: "{block_height}",
+                grid_auto_columns: "{block_width}",
+                grid_template_columns: "repeat(auto-fill,{block_width})",
                 for screenshot in screenshots {
                     div {
                         class: "flex flex-col items-start bg-deep-background rounded-[30px]",
@@ -390,7 +393,12 @@ fn Screenshots(
                                 "{screenshot.path.file_name().unwrap_or_default().to_string_lossy()}"
                             }
                         }
-                        {ContentType::image(&screenshot.path).css("w-[390px] h-[200px] object-cover overflow-hidden")}
+                        img {
+                            src: "{screenshot.path.to_string_lossy()}",
+                            width: block_width,
+                            height: block_height,
+                            object_fit: "cover"
+                        }
                         div {
                             class: "flex gap-[5px] items-center p-[20px] text-secondary font-english text-[15px] font-medium",
                             height: "50px",
@@ -411,11 +419,7 @@ fn Screenshots(
                             div {
                                 class: "trim",
                                 {
-                                    if let Some((x,y)) = image::image_dimensions(&screenshot.path).ok() {
-                                        format!("{x}x{y}")
-                                    } else {
-                                        String::new()
-                                    }
+                                    image::image_dimensions(&screenshot.path).map(|(x,y)| format!("{x}x{y}")).unwrap_or_default()
                                 }
                             }
                         }
