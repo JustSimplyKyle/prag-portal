@@ -80,6 +80,9 @@ module.exports = {
       'quick': 'var(--quick-easing)',
     },
     extend: {
+      borderRadius: {
+        DEFAULT: '30px',
+      },
       transitionTimingFunction: {
         'bounce': 'theme(animationTiming.bounce)',
         'gentle': 'theme(animationTiming.gentle)',

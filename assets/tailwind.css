@@ -1901,11 +1901,6 @@ input {
   grid-column: span 2 / span 2;
 }
 
-.mx-5 {
-  margin-left: 1.25rem;
-  margin-right: 1.25rem;
-}
-
 .my-\[10px\] {
   margin-top: 10px;
   margin-bottom: 10px;
@@ -2005,10 +2000,6 @@ input {
   height: 140px;
 }
 
-.h-\[200px\] {
-  height: 200px;
-}
-
 .h-\[30px\] {
   height: 30px;
 }
@@ -2077,10 +2068,6 @@ input {
 
 .max-h-\[450px\] {
   max-height: 450px;
-}
-
-.max-h-\[451px\] {
-  max-height: 451px;
 }
 
 .max-h-full {
@@ -2153,10 +2140,6 @@ input {
 
 .w-\[35px\] {
   width: 35px;
-}
-
-.w-\[390px\] {
-  width: 390px;
 }
 
 .w-\[40px\] {
@@ -2302,6 +2285,14 @@ input {
   flex-grow: 0;
 }
 
+.basis-0 {
+  flex-basis: 0px;
+}
+
+.basis-1\/3 {
+  flex-basis: 33.333333%;
+}
+
 .origin-top {
   transform-origin: top;
 }
@@ -2313,6 +2304,10 @@ input {
 
 .scale-y-0 {
   --tw-scale-y: 0;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+
+.transform {
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 
@@ -2408,6 +2403,10 @@ input {
   grid-auto-flow: column;
 }
 
+.flex-row-reverse {
+  flex-direction: row-reverse;
+}
+
 .flex-col {
   flex-direction: column;
 }
@@ -2462,6 +2461,10 @@ input {
 
 .gap-\[10px\] {
   gap: 10px;
+}
+
+.gap-\[12px\] {
+  gap: 12px;
 }
 
 .gap-\[15px\] {
@@ -2592,6 +2595,10 @@ input {
   overflow: scroll;
 }
 
+.overflow-y-auto {
+  overflow-y: auto;
+}
+
 .overflow-x-hidden {
   overflow-x: hidden;
 }
@@ -2625,7 +2632,7 @@ input {
 }
 
 .rounded {
-  border-radius: 0.25rem;
+  border-radius: 30px;
 }
 
 .rounded-\[10px\] {
@@ -2660,6 +2667,11 @@ input {
   border-radius: 0.75rem;
 }
 
+.rounded-b {
+  border-bottom-right-radius: 30px;
+  border-bottom-left-radius: 30px;
+}
+
 .rounded-b-3xl {
   border-bottom-right-radius: 1.5rem;
   border-bottom-left-radius: 1.5rem;
@@ -2678,6 +2690,11 @@ input {
 .rounded-r-\[30px\] {
   border-top-right-radius: 30px;
   border-bottom-right-radius: 30px;
+}
+
+.rounded-t {
+  border-top-left-radius: 30px;
+  border-top-right-radius: 30px;
 }
 
 .rounded-t-3xl {
@@ -2715,6 +2732,10 @@ input {
   border-width: 2px;
 }
 
+.border-b {
+  border-bottom-width: 1px;
+}
+
 .border-b-\[3px\] {
   border-bottom-width: 3px;
 }
@@ -2722,6 +2743,11 @@ input {
 .border-\[\#2E2E2E\] {
   --tw-border-opacity: 1;
   border-color: rgb(46 46 46 / var(--tw-border-opacity));
+}
+
+.border-secondary-surface {
+  --tw-border-opacity: 1;
+  border-color: rgb(47 47 47 / var(--tw-border-opacity));
 }
 
 .border-surface {
@@ -2983,6 +3009,10 @@ input {
   padding-top: 1.25rem;
 }
 
+.pt-\[20px\] {
+  padding-top: 20px;
+}
+
 .pt-\[22px\] {
   padding-top: 22px;
 }
@@ -3046,6 +3076,11 @@ input {
 .text-black {
   --tw-text-opacity: 1;
   color: rgb(35 46 61 / var(--tw-text-opacity));
+}
+
+.text-green {
+  --tw-text-opacity: 1;
+  color: rgb(205 227 71 / var(--tw-text-opacity));
 }
 
 .text-hint {
@@ -3128,6 +3163,10 @@ input {
   transition-duration: 150ms;
 }
 
+.delay-200 {
+  transition-delay: 200ms;
+}
+
 .delay-\[25ms\] {
   transition-delay: 25ms;
 }
@@ -3197,6 +3236,11 @@ input {
   font-size: 3.75rem;
   --line-height-offset: calc((((var(--line-height-scale) * var(--font-size-px)) - calc(1 * var(--font-size-px))) / 2) / var(--font-size-px));
   line-height: 1;
+}
+
+.text-\[12px\] {
+  --font-size-px: 12;
+  font-size: 12px;
 }
 
 .text-\[13px\] {
@@ -3446,10 +3490,6 @@ body {
   padding: 0px;
 }
 
-.group\/active[aria-selected="true"] .group-aria-selected\/active\:hidden {
-  display: none;
-}
-
 .group[aria-selected="true"] .group-aria-selected\:flex-auto {
   flex: 1 1 auto;
 }
@@ -3498,10 +3538,6 @@ body {
 
 .group\/main:hover[aria-selected=explore] .group-hover\/main\:group-aria-\[selected\=explore\]\/main\:max-w-\[300px\] {
   max-width: 300px;
-}
-
-.group[aria-busy=false] .group\/active[aria-selected="true"] .group-aria-\[busy\=false\]\:group-aria-selected\/active\:block {
-  display: block;
 }
 
 .data-\[selected\=true\]\:text-white[data-selected=true] {
@@ -3720,8 +3756,12 @@ body {
   transition-duration: 150ms;
 }
 
-.\[\&_\*\]\:duration-150 * {
-  transition-duration: 150ms;
+.\[\&_\*\]\:delay-200 * {
+  transition-delay: 200ms;
+}
+
+.\[\&_\*\]\:duration-300 * {
+  transition-duration: 300ms;
 }
 
 .\[\&_\*\]\:ease-slow * {
