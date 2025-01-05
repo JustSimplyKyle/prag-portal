@@ -18,8 +18,8 @@ pub trait StateSwitcher {
     fn hashed_value(&self) -> u64;
 }
 
-impl<'a, 'b> PartialEq<dyn StateSwitcher + 'b> for dyn StateSwitcher + 'a {
-    fn eq(&self, other: &(dyn StateSwitcher + 'b)) -> bool {
+impl<'a> PartialEq<dyn StateSwitcher + 'a> for dyn StateSwitcher {
+    fn eq(&self, other: &(dyn StateSwitcher + 'a)) -> bool {
         self.hashed_value() == other.hashed_value()
     }
 }

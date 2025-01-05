@@ -1,8 +1,6 @@
 use std::hash::{DefaultHasher, Hash, Hasher};
 
 use dioxus::prelude::*;
-use dioxus_logger::tracing::warn;
-use document::eval;
 use rust_lib::api::shared_resources::collection::CollectionId;
 
 use crate::{scrollable::Scrollable, BaseComponents::molecules::switcher::StateSwitcher, HISTORY};
@@ -19,6 +17,8 @@ pub enum Pages {
     },
     OnHover,
 }
+
+impl Scrollable for Pages {}
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Hash, derive_more::Display)]
 pub enum CollectionPageState {
@@ -58,10 +58,6 @@ impl ToString for Pages {
             Self::OnHover => "hover".into(),
         }
     }
-}
-
-impl Scrollable for Pages {
-    const GROUP_SELECTOR: &'static str = "group-pages";
 }
 
 impl Pages {

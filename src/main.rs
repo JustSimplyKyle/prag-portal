@@ -20,9 +20,14 @@ use dioxus_logger::tracing::Level;
 use dioxus_radio::hooks::use_init_radio_station;
 use pages::Pages;
 use rand::seq::IteratorRandom;
+
 use scrollable::Scrollable;
 use snafu::ErrorCompat;
-use std::{collections::BTreeMap, path::PathBuf, time::Duration};
+use std::{
+    collections::{BTreeMap, HashMap},
+    path::PathBuf,
+    time::Duration,
+};
 use svgs::{CREATE_COLLECTION, CURSEFORGE_OUTLINE, GRASS, MODRINTH_OUTLINE};
 use tailwind_fuse::*;
 use BaseComponents::{
@@ -412,15 +417,6 @@ fn Layout() -> Element {
         collection::Collections(collections)
     });
 
-    // do animation updates
-    use_effect(move || {
-        let history = HISTORY.read();
-        let pages_scroller = vec![Pages::MainPage, Pages::Explore, Pages::Collections];
-        if let Err(err) = Pages::scroller_applyer(pages_scroller, |x| x == &history.active) {
-            throw_error(err);
-        }
-    });
-
     use_memo(move || {
         if let Err(x) = error_handler.read().as_ref() {
             return Err(x.to_render_error());
@@ -428,11 +424,19 @@ fn Layout() -> Element {
         Ok(())
     })()?;
 
+    let pages_scroller = vec![Pages::MainPage, Pages::Explore, Pages::Collections];
+
+    let transforms = Pages::get_order(
+        pages_scroller,
+        |x| x == &HISTORY.read().active,
+        Some(&HISTORY.read().history),
+    )?;
+
     let history = HISTORY.read();
 
     rsx! {
         div {
-            class: "max-w-screen max-h-screen overflow-clip group-pages flex",
+            class: "max-w-screen max-h-screen overflow-clip flex",
             "data-selected": history.active.to_string(),
             "data-prev": history.prev_peek().map_or_else(String::new, ToString::to_string),
             onmousedown: move |x| {
@@ -449,10 +453,10 @@ fn Layout() -> Element {
 
             }
             div {
-                class: "bg-deep-background w-screen h-screen relative *:overflow-scroll",
+                class: "bg-deep-background w-screen h-screen relative transition-all ease-gentle duration-500 *:transition-all *:ease-gentle *:duration-500",
                 div {
                     class: "absolute inset-0 z-0 min-h-full",
-                    id: Pages::MainPage.scroller_id(),
+                    transform: "translateY({transforms[&Pages::MainPage]})",
                     LayoutContainer {
                         MainPage {
 
@@ -461,7 +465,7 @@ fn Layout() -> Element {
                 }
                 div {
                     class: "absolute inset-0 z-0 min-h-full",
-                    id: Pages::Explore.scroller_id(),
+                    transform: "translateY({transforms[&Pages::Explore]})",
                     LayoutContainer {
                         Explore {
 
@@ -470,7 +474,7 @@ fn Layout() -> Element {
                 }
                 div {
                     class: "absolute inset-0 z-0 min-h-full",
-                    id: Pages::Collections.scroller_id(),
+                    transform: "translateY({transforms[&Pages::Collections]})",
                     Collections {
 
                     }

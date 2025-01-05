@@ -83,7 +83,7 @@ pub fn SideBar() -> Element {
         } else if onmiddle() {
             format!("{}px", 300.0 - 1.0 * (base + 5.0))
         } else {
-            "300px".to_string()
+            "300px".to_owned()
         }
     });
 

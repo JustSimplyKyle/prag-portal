@@ -44,9 +44,7 @@ impl std::fmt::Display for EditState {
     }
 }
 
-impl Scrollable for EditState {
-    const GROUP_SELECTOR: &'static str = "group-edit";
-}
+impl Scrollable for EditState {}
 
 impl_context_switcher!(EditState);
 
@@ -74,13 +72,11 @@ pub fn CollectionEditContainer() -> Element {
 fn CollectionEdit(collection_id: ReadOnlySignal<CollectionId>) -> Element {
     let edit_state: Signal<Comparison<EditState>> =
         use_context_provider(|| Signal::new((EditState::Personalization, None)));
-    use_effect(move || {
-        let vec = EditState::iter().collect::<Vec<_>>();
-        let error = EditState::scroller_applyer(vec, |x| &edit_state.read().0 == x);
-        if let Err(err) = error {
-            throw_error(err);
-        }
-    });
+
+    let states = EditState::iter().collect::<Vec<_>>();
+
+    let transforms = EditState::get_order(states.clone(), |x| x == &edit_state.read().0, None)?;
+
     rsx! {
         div {
             class: "flex w-full bg-deep-background group-edit min-h-screen gap-[20px] rounded-[5px] px-[20px] pb-[20px]",
@@ -89,33 +85,33 @@ fn CollectionEdit(collection_id: ReadOnlySignal<CollectionId>) -> Element {
                 collection_id,
             }
             div {
-                class: "w-full min-h-screen relative *:overflow-scroll",
-                div {
-                    class: "absolute inset-0 z-0 min-h-full min-w-full",
-                    id: EditState::Personalization.scroller_id(),
-                    Personalization {
-                        collection_id,
-                    }
-                }
-                div {
-                    class: "absolute inset-0 z-0 min-h-full min-w-full",
-                    id: EditState::DataLog.scroller_id(),
-                    DataLog {
-                        collection_id,
-                    }
-                }
-                div {
-                    class: "absolute inset-0 z-0 min-h-full min-w-full",
-                    id: EditState::Export.scroller_id(),
-                    Export {
-                        collection_id,
-                    }
-                }
-                div {
-                    class: "absolute inset-0 z-0 min-h-full min-w-full",
-                    id: EditState::Advanced.scroller_id(),
-                    Advanced {
-                        collection_id,
+                class: "w-full min-h-screen relative *:overflow-scroll transition-all ease-gentle duration-500 *:transition-all *:ease-gentle *:duration-500",
+                for id in states {
+                    div {
+                        class: "absolute inset-0 z-0 min-h-full min-w-full",
+                        transform: "translateY({transforms[&id]})",
+                        match id {
+                            EditState::Personalization => {
+                                rsx!(Personalization {
+                                    collection_id,
+                                })
+                            },
+                            EditState::DataLog => {
+                                rsx!(DataLog {
+                                    collection_id,
+                                })
+                            },
+                            EditState::Export => {
+                                rsx!(Export {
+                                    collection_id,
+                                })
+                            },
+                            EditState::Advanced => {
+                                rsx!(Advanced {
+                                    collection_id
+                                })
+                            }
+                        }
                     }
                 }
             }

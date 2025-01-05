@@ -73,7 +73,7 @@ pub fn Button(
         fill_mode,
     }
     .with_class(if focus_color_change {
-        "aria-selected:bg-white aria-selected:text-black"
+        "aria-selected:bg-white aria-selected:text-black aria-selected:[&_*]:text-black"
     } else {
         ""
     });
